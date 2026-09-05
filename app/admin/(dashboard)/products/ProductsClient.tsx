@@ -53,6 +53,10 @@ interface Product {
     images: string;
     isTrending: boolean;
     brandId: string;
+    packaging?: string | null;
+    itemsPerPackage?: string | null;
+    minOrder?: number | null;
+    hidePrice?: boolean;
     brand: {
         id: string;
         name: string;
@@ -138,7 +142,7 @@ export default function ProductsClient({
 
     const handleSocialShare = (platform: 'facebook' | 'whatsapp', product: Product) => {
         const url = `${window.location.origin}/products/${product.slug}`;
-        const text = `Check out ${product.name} at Zad Land!`;
+        const text = `Check out ${product.name} at Hawa Distribution!`;
 
         // Warn the user about localhost sharing limitations
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -431,7 +435,7 @@ export default function ProductsClient({
             const rows = products.map((p) => [
                 `"${(p.mainCategory?.name || '').replace(/"/g, '""')}"`,
                 `"${(p.category?.name || 'General').replace(/"/g, '""')}"`,
-                `"${(p.brand?.name || 'Zad Land').replace(/"/g, '""')}"`,
+                `"${(p.brand?.name || 'Hawa Distribution').replace(/"/g, '""')}"`,
                 `"${(p.nameAr || '').replace(/"/g, '""')}"`,
                 `"${(p.nameEn || p.name || '').replace(/"/g, '""')}"`,
                 `"${(p.descriptionAr || '').replace(/"/g, '""')}"`,
@@ -454,7 +458,7 @@ export default function ProductsClient({
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.setAttribute("href", url);
-            link.setAttribute("download", `zad_land_products_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `hawa_products_${new Date().toISOString().split('T')[0]}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -477,7 +481,7 @@ export default function ProductsClient({
             const data = products.map((p) => ({
                 "Main Category": p.mainCategory?.name || '',
                 "Sub Category": p.category?.name || 'General',
-                "Brand Name": p.brand?.name || 'Zad Land',
+                "Brand Name": p.brand?.name || 'Hawa Distribution',
                 "Name ar": p.nameAr || '',
                 "Name en": p.nameEn || p.name || '',
                 "description ar": p.descriptionAr || '',
@@ -578,12 +582,12 @@ export default function ProductsClient({
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="h-2.5 w-2.5 rounded-full bg-[#B8860B]" />
-                                <span className="text-xs font-bold uppercase tracking-wider text-[#B8860B] dark:text-[#E5B54A]">
+                                <span className="h-2.5 w-2.5 rounded-full bg-[#8A6305]" />
+                                <span className="text-xs font-bold uppercase tracking-wider text-[#8A6305] dark:text-[#8A6305]">
                                     {isArabic ? 'إدارة كتالوج المنتجات والمخزون' : 'Food Wholesale Product Inventory'}
                                 </span>
                             </div>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#072835] dark:text-white tracking-tight">
+                            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B192C] dark:text-white tracking-tight">
                                 {t('admin.products')}
                             </h1>
                             <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-gray-400">
@@ -596,7 +600,7 @@ export default function ProductsClient({
                             <div className="relative">
                                 <button
                                     onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-                                    className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 hover:border-[#B8860B] text-[#072835] dark:text-white h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-2xs cursor-pointer"
+                                    className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 hover:border-[#8A6305] text-[#0B192C] dark:text-white h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-2xs cursor-pointer"
                                 >
                                     <MdFileUpload className="text-[18px]" />
                                     {t('admin.exportData')}
@@ -626,7 +630,7 @@ export default function ProductsClient({
                                 )}
                             </div>
 
-                            <label className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 hover:border-[#B8860B] text-[#072835] dark:text-white h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-2xs cursor-pointer">
+                            <label className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 hover:border-[#8A6305] text-[#0B192C] dark:text-white h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-2xs cursor-pointer">
                                 <MdFileDownload className="text-[18px]" />
                                 {t('admin.importData')}
                                 <input
@@ -643,7 +647,7 @@ export default function ProductsClient({
                                         setSelectedProduct(null);
                                         setIsAddModalOpen(true);
                                     }}
-                                    className="h-11 px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-[#072835] hover:bg-[#0c4054] dark:bg-[#B8860B] dark:hover:bg-[#9a7009] text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
+                                    className="h-11 px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
                                 >
                                     <MdAdd className="text-xl" />
                                     <span>{t('admin.addNewProduct')}</span>
@@ -945,16 +949,17 @@ export default function ProductsClient({
                                                             <span className="font-bold text-text-main dark:text-white text-xs sm:text-sm line-clamp-1">
                                                                 {product.nameAr && product.nameEn ? `${product.nameAr} (${product.nameEn})` : (product.nameAr || product.nameEn || product.name)}
                                                             </span>
-                                                            <div className="flex items-center gap-2 text-[10px] sm:text-xs text-text-sub dark:text-gray-500">
+                                                            <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:text-xs text-text-sub dark:text-gray-500">
                                                                 <span>{t('admin.sku')}: {product.sku || 'N/A'}</span>
                                                                 {product.options && <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">{product.options}</span>}
+                                                                {product.packaging && <span className="bg-[#FAF6EC] dark:bg-zinc-800 text-[#0B192C] dark:text-[#8A6305] border border-[#8A6305]/20 px-1.5 py-0.5 rounded text-[10px] font-bold">📦 {product.packaging}</span>}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="p-3 sm:p-5">
                                                     <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 text-text-main dark:bg-gray-800 dark:text-white whitespace-nowrap">
-                                                        {product.brand?.name || 'Zad Land'}
+                                                        {product.brand?.name || 'Hawa Distribution'}
                                                     </span>
                                                 </td>
                                                 <td className="p-3 sm:p-5">
@@ -963,7 +968,14 @@ export default function ProductsClient({
                                                     </span>
                                                 </td>
                                                 <td className="p-3 sm:p-5 text-xs sm:text-sm font-bold text-text-main dark:text-white">
-                                                    {product.discountPrice ? (
+                                                    {product.hidePrice ? (
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <span className="inline-flex items-center text-[10px] font-bold text-[#8A6305] bg-amber-50 dark:bg-amber-950/40 border border-[#8A6305]/30 px-2 py-0.5 rounded whitespace-nowrap">
+                                                                {language === 'ar' ? 'السعر عند الطلب' : 'On Inquiry'}
+                                                            </span>
+                                                            <span className="text-[10px] text-gray-400 line-through">${product.price.toFixed(2)}</span>
+                                                        </div>
+                                                    ) : product.discountPrice ? (
                                                         <div className="flex flex-col">
                                                             <span className="text-primary">${product.discountPrice.toFixed(2)}</span>
                                                             <span className="text-[10px] text-text-sub line-through decoration-red-400/50">${product.price.toFixed(2)}</span>

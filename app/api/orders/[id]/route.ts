@@ -25,7 +25,13 @@ export async function GET(
             );
         }
 
-        return NextResponse.json(order);
+        const settings = await prisma.settings.findUnique({
+            where: { id: "site-settings" },
+            select: { whatsappNumber: true }
+        });
+        const whatsappNumber = settings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+963900000000";
+
+        return NextResponse.json({ ...order, whatsappNumber });
     } catch (error) {
         console.error("Fetch order error:", error);
         return NextResponse.json(

@@ -2,28 +2,28 @@ import { getCatalogBrands } from "@/lib/catalog";
 import BrandsClient from "./BrandsClient";
 
 export const metadata = {
-    title: "العلامات التجارية والشركات العالمية | Global Partner Brands - Zad Land",
-    description: "استكشف قائمة العلامات التجارية والشركات العالمية الموزعة حصرياً وبأسعار الجملة عبر شركة زاد لاند (أمريكانا، تات، دي سيكو، سانتي، علي كافيه، وغيرها).",
+    title: "وكالاتنا والعلامات التجارية المعتمدة | Partner Brands - Hawa Distribution",
+    description: "استكشف قائمة الوكالات والعلامات التجارية الموزعة حصرياً وبأسعار الجملة عبر شركة هوا للتوزيع والتجارة (زوان، الريف، حليبنا، صن بل، سيلفر فيش، بوفالو، روكافيرا، المغربي).",
     alternates: {
         canonical: "/brands",
     },
     openGraph: {
-        title: "العلامات التجارية المعتمدة | Zad Land",
-        description: "استكشف العلامات التجارية والشركات العالمية الموزعة عبر شركة زاد لاند لتجارة المواد الغذائية.",
+        title: "وكالاتنا والعلامات التجارية المعتمدة | Hawa Distribution - هوا للتوزيع",
+        description: "استكشف الوكالات والعلامات التجارية المعتمدة لدى شركة هوا للتوزيع والتجارة.",
         url: "/brands",
         images: [
             {
                 url: "/og-image.jpg",
                 width: 1200,
                 height: 630,
-                alt: "Zad Land Partner Brands",
+                alt: "Hawa Distribution Partner Brands",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
-        title: "العلامات التجارية المعتمدة | Zad Land",
-        description: "استكشف العلامات التجارية والشركات العالمية الموزعة عبر شركة زاد لاند لتجارة المواد الغذائية.",
+        title: "وكالاتنا والعلامات التجارية المعتمدة | Hawa Distribution - هوا للتوزيع",
+        description: "استكشف الوكالات والعلامات التجارية المعتمدة لدى شركة هوا للتوزيع والتجارة.",
         images: ["/og-image.jpg"],
     },
 };

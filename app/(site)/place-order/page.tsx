@@ -9,18 +9,39 @@ import ShippingForm from '@/app/components/PlaceOrderComponents/ShippingForm';
 import OrderSummary from '@/app/components/PlaceOrderComponents/OrderSummary';
 import { validatePromoCode } from '@/lib/admin-actions';
 
+import { useLanguage } from '@/app/context/LanguageContext';
+import { useCustomer } from '@/app/context/CustomerContext';
+import { generateWhatsAppOrderMessage, buildWhatsAppUrl } from '@/lib/whatsapp-utils';
+
 const PlaceOrderPage = () => {
     const { items, subtotal, clearCart } = useCart();
+    const { customer } = useCustomer();
+    const { t, language } = useLanguage();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        phone: '',
-        streetAddress: '',
-        city: ''
+        shopName: customer?.shopName || '',
+        ownerName: customer?.ownerName || '',
+        phone: customer?.phone || '',
+        streetAddress: customer?.address || '',
+        city: customer?.city || '',
+        notes: customer?.notes || ''
     });
+
+    useEffect(() => {
+        if (customer) {
+            setFormData(prev => ({
+                ...prev,
+                shopName: prev.shopName || customer.shopName || '',
+                ownerName: prev.ownerName || customer.ownerName || '',
+                phone: prev.phone || customer.phone || '',
+                streetAddress: prev.streetAddress || customer.address || '',
+                city: prev.city || customer.city || '',
+                notes: prev.notes || customer.notes || '',
+            }));
+        }
+    }, [customer]);
 
     const [promoDetails, setPromoDetails] = useState<{ id: string, percentage: number } | null>(null);
     const [discountAmount, setDiscountAmount] = useState(0);
@@ -44,7 +65,7 @@ const PlaceOrderPage = () => {
         }
     }, [items, router, loading, isSuccess]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         
         // Prevent non-numeric input for phone
@@ -79,14 +100,14 @@ const PlaceOrderPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.firstName || !formData.lastName || !formData.phone || !formData.streetAddress || !formData.city) {
-            toast.error("Please fill in all required fields");
+        if (!formData.shopName.trim() || !formData.ownerName.trim() || !formData.phone.trim() || !formData.streetAddress.trim() || !formData.city.trim()) {
+            toast.error(language === 'ar' ? "يرجى تعبئة جميع الحقول المطلوبة (اسم المحل، الاسم، الهاتف، المحافظة، العنوان)" : "Please fill in all required fields");
             return;
         }
 
         // Validate Syrian Phone Number
         if (!validateSyrianPhone(formData.phone)) {
-            toast.error("Please enter a valid Syrian mobile number (e.g. 09xxxxxxxx)");
+            toast.error(language === 'ar' ? "يرجى إدخال رقم موبايل سوري صالح (09xxxxxxxx)" : "Please enter a valid Syrian mobile number (09xxxxxxxx)");
             return;
         }
 
@@ -96,11 +117,13 @@ const PlaceOrderPage = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    phone: formData.phone,
-                    streetAddress: formData.streetAddress,
-                    city: formData.city,
+                    shopName: formData.shopName.trim(),
+                    ownerName: formData.ownerName.trim(),
+                    phone: formData.phone.trim(),
+                    streetAddress: formData.streetAddress.trim(),
+                    city: formData.city.trim(),
+                    notes: formData.notes.trim() || null,
+                    customerId: customer?.id || null,
                     totalAmount: parseFloat(total.toFixed(2)),
                     promoCodeId: promoDetails?.id,
                     discount: parseFloat(discountAmount.toFixed(2)),
@@ -115,17 +138,51 @@ const PlaceOrderPage = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                toast.success("Order placed successfully!");
+                toast.success(language === 'ar' ? "تم تسجيل الطلب بنجاح! جاري التوجيه إلى واتساب..." : "Order placed successfully! Redirecting to WhatsApp...");
                 setIsSuccess(true);
+
+                // Prepare WhatsApp message
+                const waMessage = generateWhatsAppOrderMessage({
+                    id: data.id,
+                    shopName: formData.shopName,
+                    Name: formData.ownerName,
+                    phone: formData.phone,
+                    city: formData.city,
+                    streetAddress: formData.streetAddress,
+                    notes: formData.notes,
+                    totalAmount: total,
+                    items: items.map(item => ({
+                        quantity: item.quantity,
+                        price: item.price,
+                        options: item.selectedOption || null,
+                        product: {
+                            name: item.name,
+                            nameAr: item.name,
+                            packaging: item.packaging || 'طرد',
+                            itemsPerPackage: item.itemsPerPackage || null,
+                        }
+                    }))
+                });
+
+                const targetNumber = data.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000';
+                const whatsappUrl = buildWhatsAppUrl(targetNumber, waMessage);
+
+                // Open WhatsApp
+                try {
+                    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+                } catch (err) {
+                    console.error("Popup blocker prevented opening WhatsApp:", err);
+                }
+
                 clearCart();
                 router.push(`/complete-order?id=${data.id}`);
             } else {
                 const error = await response.json();
-                toast.error(error.message || "Failed to place order");
+                toast.error(error.message || (language === 'ar' ? "فشل في تسجيل الطلب" : "Failed to place order"));
             }
         } catch (error) {
             console.error("Order error:", error);
-            toast.error("An error occurred. Please try again.");
+            toast.error(language === 'ar' ? "حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى" : "An error occurred. Please try again.");
         } finally {
             setLoading(false);
         }

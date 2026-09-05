@@ -19,11 +19,11 @@ export default function ScrollReveal({
     delay = 0,
     duration = 0.5,
     direction = 'up',
-    distance = 30,
+    distance = 20,
     once = true,
 }: ScrollRevealProps) {
     const ref = useRef<HTMLDivElement>(null);
-    const [isVisible, setIsVisible] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
         const el = ref.current;
@@ -43,7 +43,7 @@ export default function ScrollReveal({
                     setIsVisible(false);
                 }
             },
-            { rootMargin: '50px' }
+            { rootMargin: '200px' }
         );
 
         observer.observe(el);

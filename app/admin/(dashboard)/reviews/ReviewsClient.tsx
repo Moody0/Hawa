@@ -150,7 +150,7 @@ export default function ReviewsClient() {
                                     <MdSearch className="text-slate-400 text-[20px]" />
                                 </span>
                                 <input
-                                    className={`block w-full ${dir === 'rtl' ? 'pe-10 ps-3' : 'ps-10 pe-3'} py-2.5 border border-slate-200/80 dark:border-white/10 rounded-xl bg-slate-50 dark:bg-gray-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:ring-1 focus:ring-[#072835] focus:border-[#072835] transition-all outline-none`}
+                                    className={`block w-full ${dir === 'rtl' ? 'pe-10 ps-3' : 'ps-10 pe-3'} py-2.5 border border-slate-200/80 dark:border-white/10 rounded-xl bg-slate-50 dark:bg-gray-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:ring-1 focus:ring-[#0B192C] focus:border-[#0B192C] transition-all outline-none`}
                                     placeholder={t('admin.searchPlaceholder') || "Search..."}
                                     type="text"
                                     value={searchQuery}
@@ -160,7 +160,7 @@ export default function ReviewsClient() {
                             
                             <div className="relative w-full sm:w-48">
                                 <select
-                                    className={`appearance-none w-full ${dir === 'rtl' ? 'pe-3 ps-10' : 'ps-3 pe-10'} py-2.5 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white focus:ring-1 focus:ring-[#072835] focus:border-[#072835] cursor-pointer outline-none`}
+                                    className={`appearance-none w-full ${dir === 'rtl' ? 'pe-3 ps-10' : 'ps-3 pe-10'} py-2.5 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0B192C] focus:border-[#0B192C] cursor-pointer outline-none`}
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
@@ -177,7 +177,7 @@ export default function ReviewsClient() {
                         <div className="overflow-x-auto">
                             {isLoading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#072835] border-t-transparent" />
+                                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0B192C] border-t-transparent" />
                                 </div>
                             ) : filteredReviews.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-center text-slate-400">

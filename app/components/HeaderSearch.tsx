@@ -16,39 +16,39 @@ interface HeaderSearchProps {
     locale?: 'en' | 'ar';
 }
 
-const foodSuggestionsAr = ['معكرونة دي سيكو', 'صوصات أميركان غاردن', 'تونة ريو ماري', 'حليب وبدائل ألبان', 'مفرزات كابتن فيشر', 'قهوة علي كافيه'];
-const foodSuggestionsEn = ['De Cecco Pasta', 'American Garden Sauces', 'Rio Mare Tuna', 'Nada Dairy Milk', 'Captain Fisher Frozen', 'Ali Cafe Coffee'];
+const foodSuggestionsAr = ['منتجات زوان', 'سمن وزيوت الريف', 'حليبنا بودرة وقهوة', 'تونة صن بل', 'تونة سيلفر فيش', 'شاي وسردين المغربي', 'منظفات بوفالو', 'صابون روكافيرا'];
+const foodSuggestionsEn = ['Zwan Products', 'Al-Reef Ghee & Oils', 'Haleebna Milk & Coffee', 'Sunbell Tuna', 'Silver Fish Tuna', 'Al-Maghrabi Sardines & Tea', 'Buffalo Detergents', 'Rocavera Soap'];
 
 const quickCategoriesAr = [
-    { id: '1', name: 'باستا ومواد غذائية', slug: 'pasta-and-foodstuffs' },
-    { id: '2', name: 'صوصات وتتبيلات', slug: 'sauces-condiments' },
-    { id: '3', name: 'مفرزات ولحوم', slug: 'frozen-foods' },
-    { id: '4', name: 'معلبات وتونة', slug: 'canned-goods' }
+    { id: '1', name: 'معلبات ولحوم زوان', slug: 'canned-goods' },
+    { id: '2', name: 'سمن وزيوت الريف', slug: 'ghee-and-oils' },
+    { id: '3', name: 'تونة وأسماك معلبة', slug: 'tuna-and-seafood' },
+    { id: '4', name: 'منظفات وعناية منزلية', slug: 'detergents-cleaning' }
 ];
 
 const quickCategoriesEn = [
-    { id: '1', name: 'Pasta & Foodstuffs', slug: 'pasta-and-foodstuffs' },
-    { id: '2', name: 'Sauces & Condiments', slug: 'sauces-condiments' },
-    { id: '3', name: 'Frozen Foods & Seafood', slug: 'frozen-foods' },
-    { id: '4', name: 'Canned Goods & Tuna', slug: 'canned-goods' }
+    { id: '1', name: 'Zwan Canned Meats', slug: 'canned-goods' },
+    { id: '2', name: 'Al-Reef Ghee & Oils', slug: 'ghee-and-oils' },
+    { id: '3', name: 'Tuna & Canned Seafood', slug: 'tuna-and-seafood' },
+    { id: '4', name: 'Detergents & Cleaning', slug: 'detergents-cleaning' }
 ];
 
 const dynamicItemsAr = [
-    "معكرونة دي سيكو إيطالية...",
-    "صوصات وتوابل أميركان غاردن...",
-    "تونة ريو ماري وزيوت طعام...",
-    "مفرزات ومأكولات بحرية فاخرة...",
-    "أرز وحبوب وبقوليات بالجملة...",
-    "قهوة وشاي ومشروبات..."
+    "منتجات زوان ولحوم معلبة...",
+    "سمن وزيوت الريف...",
+    "حليبنا بودرة وزبدة بقرية...",
+    "تونة صن بل وسيلفر فيش...",
+    "سردين وشاي المغربي...",
+    "منظفات بوفالو وصابون روكافيرا..."
 ];
 
 const dynamicItemsEn = [
-    "De Cecco Italian Pasta...",
-    "American Garden Sauces & Dressings...",
-    "Rio Mare Tuna & Olive Oils...",
-    "Frozen Seafood & Gourmet Items...",
-    "Wholesale Rice, Grains & Foodstuffs...",
-    "Coffee, Tea & Beverages..."
+    "Zwan Canned Meats & Luncheon...",
+    "Al-Reef Ghee & Vegetable Oils...",
+    "Haleebna Milk Powder & Coffee...",
+    "Sunbell & Silver Fish Tuna...",
+    "Al-Maghrabi Sardines & Tea...",
+    "Buffalo & Rocavera Cleaning..."
 ];
 
 const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false, locale }: HeaderSearchProps) => {
@@ -209,7 +209,7 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                         onFocus={() => {
                             if (query.trim().length > 0) setShowResults(true);
                         }}
-                        className="w-full bg-[#EDEDED] dark:bg-white/5 border border-transparent rounded-full text-[15px] font-medium text-[#1a1a1a] dark:text-white placeholder-[#888] dark:placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-[#B8860B] focus:ring-2 focus:ring-[#B8860B]/15 focus:placeholder-gray-400 transition-all h-12 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
+                        className="w-full bg-[#EDEDED] dark:bg-white/5 border border-transparent rounded-full text-[15px] font-medium text-[#1a1a1a] dark:text-white placeholder-[#888] dark:placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/15 focus:placeholder-gray-400 transition-all h-12 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
                         style={{
                             padding: isArabic ? '0 16px 0 80px' : '0 80px 0 16px',
                             direction: dir,
@@ -228,7 +228,7 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                         <button
                             type="button"
                             onClick={handleReset}
-                            className="absolute flex items-center justify-center text-xs font-bold text-[#555] dark:text-gray-300 hover:text-[#B8860B] dark:hover:text-[#E5B54A] transition-colors"
+                            className="absolute flex items-center justify-center text-xs font-bold text-[#555] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors"
                             style={{
                                 [isArabic ? 'left' : 'right']: '48px',
                             }}
@@ -241,7 +241,7 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                     {/* Search Icon */}
                     <button 
                         type="submit"
-                        className="absolute flex items-center justify-center text-[22px] text-[#555] dark:text-gray-300 hover:text-[#B8860B] dark:hover:text-[#E5B54A] transition-colors min-w-[36px] min-h-[36px]"
+                        className="absolute flex items-center justify-center text-[22px] text-[#555] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors min-w-[36px] min-h-[36px]"
                         style={{
                             [isArabic ? 'left' : 'right']: '12px',
                         }}
@@ -361,7 +361,7 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                                             </div>
                                             
                                             <span className="text-[10px] text-[#888] dark:text-gray-400 uppercase tracking-[0.1em] mb-1.5 font-medium line-clamp-1">
-                                                {product.brand?.name || 'ZAD LAND'}
+                                                {product.brand?.name || 'HAWA'}
                                             </span>
                                             
                                             <h4 dir="ltr" className="text-[13px] font-medium text-[#333] dark:text-gray-200 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors leading-tight mb-1.5 line-clamp-2 px-2 font-sans tracking-normal">

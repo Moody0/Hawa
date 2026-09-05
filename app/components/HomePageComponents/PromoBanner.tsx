@@ -16,18 +16,18 @@ const PromoBanner = ({ settings, dir = 'rtl' }: PromoBannerProps) => {
 
     return (
         <section className="container-custom">
-            <div className="relative w-full rounded-2xl overflow-hidden py-5 md:py-0 md:h-[140px] flex items-center px-5 sm:px-8 md:px-12 bg-[#FAF6EC] dark:bg-[#1A1A14] border border-[#B8860B]/30 shadow-xs">
+            <div className="relative w-full rounded-2xl overflow-hidden py-5 md:py-0 md:h-[140px] flex items-center px-5 sm:px-8 md:px-12 bg-[#FAF6EC] dark:bg-[#1A1A14] border border-[#8A6305]/30 shadow-xs">
                 {/* Content Container: Text on top, Button below on mobile; side-by-side on desktop */}
                 <div className={`w-full flex flex-col md:flex-row items-center justify-between gap-4 z-10 ${isArabic ? 'md:flex-row' : 'md:flex-row'}`}>
                     {/* 1. Text Content (First on mobile) */}
                     <div className={`flex flex-col text-center md:text-start flex-grow ${isArabic ? 'md:text-right' : 'md:text-left'}`}>
                         <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                            <span className="w-2 h-2 rounded-full bg-[#B8860B]"></span>
-                            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#876004] dark:text-[#E5B54A]">
+                            <span className="w-2 h-2 rounded-full bg-[#8A6305]"></span>
+                            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#8A6305] dark:text-[#8A6305]">
                                 {isArabic ? 'عروض التوريد والكميات' : 'Commercial Volume Supply'}
                             </span>
                         </div>
-                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-[#072835] dark:text-white leading-snug">
+                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-[#0B192C] dark:text-white leading-snug">
                             {isArabic ? 'توريد مباشر بأسعار الجملة المعتمدة' : 'Direct Supply from Certified Global Food Importers'}
                         </h2>
                     </div>

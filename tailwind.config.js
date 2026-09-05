@@ -8,23 +8,41 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#B8860B',
+        primary: {
+          DEFAULT: '#8A6305',
+          hover: '#735204',
+          light: '#FAF4E8',
+          dark: '#E5B54A',
+        },
+        gold: {
+          DEFAULT: '#8A6305',
+          hover: '#735204',
+          light: '#FAF4E8',
+          dark: '#E5B54A',
+        },
+        heading: '#0B192C',
+        body: '#0F172A',
+        muted: '#475569',
         background: {
           light: '#ffffff',
-          dark: '#1A1A14',
+          dark: '#0B192C',
         },
         surface: {
           light: '#ffffff',
-          dark: '#2A2A1E',
+          dark: '#132035',
         },
         text: {
           main: {
-            light: '#1A1A14',
-            dark: '#F5F0E0',
+            light: '#0B192C',
+            dark: '#F8FAFC',
+          },
+          body: {
+            light: '#0F172A',
+            dark: '#E2E8F0',
           },
           muted: {
-            light: '#7A7A60',
-            dark: '#C4B89A',
+            light: '#475569',
+            dark: '#94A3B8',
           },
         },
       },

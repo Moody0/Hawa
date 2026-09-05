@@ -45,9 +45,9 @@ const CountdownOffer = () => {
 
     return (
         <section className="container-custom">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#072835] via-[#093344] to-[#072835] border border-[#B8860B]/30 p-5 sm:p-7 lg:p-8 shadow-sm">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0B192C] via-[#0F172A] to-[#0B192C] border border-[#8A6305]/30 p-5 sm:p-7 lg:p-8 shadow-sm">
                 {/* Ambient Background Glow */}
-                <div className="absolute top-0 end-0 w-80 h-80 bg-[#B8860B]/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+                <div className="absolute top-0 end-0 w-80 h-80 bg-[#8A6305]/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
                 <div className="absolute bottom-0 start-0 w-60 h-60 bg-[#2E7D32]/10 rounded-full blur-3xl pointer-events-none -ml-16 -mb-16" />
 
                 <div className={`relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 ${dir === 'rtl' ? 'lg:flex-row' : 'lg:flex-row'}`}>
@@ -73,10 +73,10 @@ const CountdownOffer = () => {
                     <div className="flex flex-col sm:flex-row items-center gap-4 lg:gap-5 shrink-0 self-stretch lg:self-auto justify-between lg:justify-end">
                         
                         {/* Compact Integrated Countdown */}
-                        <div className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 bg-black/35 backdrop-blur-md border border-[#B8860B]/25 rounded-2xl px-4 py-2.5">
+                        <div className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 bg-black/35 backdrop-blur-md border border-[#8A6305]/25 rounded-2xl px-4 py-2.5">
                             {/* Days */}
                             <div className="flex flex-col items-center min-w-[38px] sm:min-w-[42px]">
-                                <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#E5B54A] tabular-nums leading-tight">
+                                <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#8A6305] tabular-nums leading-tight">
                                     {formatNumber(timeLeft.days)}
                                 </span>
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">
@@ -84,11 +84,11 @@ const CountdownOffer = () => {
                                 </span>
                             </div>
 
-                            <span className="text-[#B8860B] font-extrabold text-xs -mt-2.5">:</span>
+                            <span className="text-[#8A6305] font-extrabold text-xs -mt-2.5">:</span>
 
                             {/* Hours */}
                             <div className="flex flex-col items-center min-w-[38px] sm:min-w-[42px]">
-                                <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#E5B54A] tabular-nums leading-tight">
+                                <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#8A6305] tabular-nums leading-tight">
                                     {formatNumber(timeLeft.hours)}
                                 </span>
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">
@@ -96,11 +96,11 @@ const CountdownOffer = () => {
                                 </span>
                             </div>
 
-                            <span className="text-[#B8860B] font-extrabold text-xs -mt-2.5">:</span>
+                            <span className="text-[#8A6305] font-extrabold text-xs -mt-2.5">:</span>
 
                             {/* Minutes */}
                             <div className="flex flex-col items-center min-w-[38px] sm:min-w-[42px]">
-                                <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#E5B54A] tabular-nums leading-tight">
+                                <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#8A6305] tabular-nums leading-tight">
                                     {formatNumber(timeLeft.minutes)}
                                 </span>
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">
@@ -108,11 +108,11 @@ const CountdownOffer = () => {
                                 </span>
                             </div>
 
-                            <span className="text-[#B8860B] font-extrabold text-xs -mt-2.5">:</span>
+                            <span className="text-[#8A6305] font-extrabold text-xs -mt-2.5">:</span>
 
                             {/* Seconds */}
                             <div className="flex flex-col items-center min-w-[38px] sm:min-w-[42px]">
-                                <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#E5B54A] tabular-nums leading-tight">
+                                <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#8A6305] tabular-nums leading-tight">
                                     {formatNumber(timeLeft.seconds)}
                                 </span>
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">
@@ -124,7 +124,7 @@ const CountdownOffer = () => {
                         {/* Primary CTA Button */}
                         <Link
                             href="/products"
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full bg-[#B8860B] hover:bg-[#9E7309] text-white font-bold text-xs sm:text-sm md:text-base transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md whitespace-nowrap group cursor-pointer"
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full bg-[#8A6305] hover:bg-[#725204] text-white font-bold text-xs sm:text-sm md:text-base transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md whitespace-nowrap group cursor-pointer"
                         >
                             <span>{isArabic ? 'استكشف عروض التوريد' : 'Explore Bulk Deals'}</span>
                             <MdChevronRight className={`text-lg transition-transform group-hover:translate-x-0.5 ${isArabic ? 'rotate-180 group-hover:-translate-x-0.5' : ''}`} />

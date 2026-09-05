@@ -111,7 +111,7 @@ export default function PromoCodesClient({ promoCodes }: { promoCodes: PromoCode
                             {canManage && (
                                 <button
                                     onClick={handleAdd}
-                                    className="w-full md:w-auto bg-[#072835] hover:bg-[#0c4054] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-xs flex items-center justify-center gap-2"
+                                    className="w-full md:w-auto bg-[#0B192C] hover:bg-[#1e293b] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-xs flex items-center justify-center gap-2"
                                 >
                                     <MdAdd className="text-[20px]" />
                                     {t('admin.addPromoCode')}

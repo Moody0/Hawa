@@ -37,10 +37,10 @@ export default function ProductShareButtons({
         }
     };
 
-    const productUrl = typeof window !== 'undefined' ? `${window.location.origin}/products/${productSlug}` : `https://zadland.com/products/${productSlug}`;
+    const productUrl = typeof window !== 'undefined' ? `${window.location.origin}/products/${productSlug}` : `https://hawatrading.com/products/${productSlug}`;
     const shareMessage = isArabic
-        ? `شاهد ${productName} على زاد لاند - أسعار الجملة المعتمدة:\n${productUrl}`
-        : `Check out ${productName} on Zad Land Wholesale:\n${productUrl}`;
+        ? `شاهد ${productName} لدى شركة هوا للتوزيع والتجارة - أسعار الجملة المعتمدة:\n${productUrl}`
+        : `Check out ${productName} on Hawa Distribution Wholesale:\n${productUrl}`;
 
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
@@ -48,7 +48,7 @@ export default function ProductShareButtons({
 
     return (
         <div className="flex items-center justify-start mt-6 pt-6 border-t border-gray-200 dark:border-white/10 gap-2.5">
-            <span className="text-xs font-bold tracking-widest uppercase text-gray-500 dark:text-gray-400 mr-1">
+            <span className="text-xs font-bold tracking-widest uppercase text-[#475569] dark:text-gray-400 mr-1">
                 {isArabic ? 'مشاركة المنتج:' : 'Share Product:'}
             </span>
 
@@ -92,7 +92,7 @@ export default function ProductShareButtons({
             <button
                 type="button"
                 onClick={handleCopy}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300 hover:bg-[#B8860B] hover:text-white dark:hover:bg-[#B8860B] dark:hover:text-white transition-all shadow-2xs cursor-pointer"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300 hover:bg-[#8A6305] hover:text-white dark:hover:bg-[#8A6305] dark:hover:text-white transition-all shadow-2xs cursor-pointer"
                 title={isArabic ? 'نسخ الرابط' : 'Copy link'}
                 aria-label="Copy Link"
             >

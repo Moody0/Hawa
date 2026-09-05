@@ -78,6 +78,9 @@ const ResilientImageInner = ({
 
     const isPostImg = typeof safeSrc === 'string' && safeSrc.includes('i.postimg.cc');
 
+    const isPriority = Boolean(imgProps.priority);
+    const { loading, priority, ...restImgProps } = imgProps;
+
     return (
         <span className="relative block h-full w-full overflow-hidden">
             {/* Background Skeleton Shimmer */}
@@ -93,11 +96,12 @@ const ResilientImageInner = ({
             )}
 
             <Image
-                {...imgProps}
+                {...restImgProps}
+                priority={isPriority}
+                {...(isPriority ? {} : { loading: loading || "lazy" })}
                 alt={alt || ""}
                 src={safeSrc}
                 fill
-                loading={imgProps.loading || "lazy"}
                 decoding={imgProps.decoding || "async"}
                 unoptimized={imgProps.unoptimized ?? (typeof safeSrc === 'string' && (safeSrc.startsWith('/api/image-proxy') || isPostImg))}
                 sizes={imgProps.sizes || "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}

@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import ProductsClient from "./ProductsClient";
-import { getCatalogInitialData } from "@/lib/catalog";
+import { getCatalogInitialData, getCatalogBrands } from "@/lib/catalog";
 import { findCategoryByIdentifier } from "@/lib/category-utils";
 
 import { Metadata } from "next";
@@ -9,28 +9,28 @@ import { Metadata } from "next";
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
 export const metadata: Metadata = {
-    title: "كتالوج المنتجات وعروض الجملة | Products Catalog - Zad Land",
-    description: "تصفح كافة منتجات المواد الغذائية، المعلبات، اللحوم، الباستا، الحلويات، والمشروبات بأسعار الجملة المعتمدة لدى شركة زاد لاند.",
+    title: "كتالوج المنتجات وعروض الوكالات | Products Catalog - Hawa Distribution",
+    description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة من مواد غذائية ومنظفات بأسعار الجملة لدى شركة هوا للتوزيع والتجارة.",
     alternates: {
         canonical: "/products",
     },
     openGraph: {
-        title: "كتالوج المنتجات وعروض الجملة | Zad Land",
-        description: "تصفح كافة منتجات المواد الغذائية والاستهلاكية بأسعار الجملة المعتمدة لدى شركة زاد لاند.",
+        title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - هوا للتوزيع",
+        description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة هوا للتوزيع والتجارة.",
         url: "/products",
         images: [
             {
                 url: "/og-image.jpg",
                 width: 1200,
                 height: 630,
-                alt: "Zad Land Product Catalog",
+                alt: "Hawa Distribution Product Catalog",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
-        title: "كتالوج المنتجات وعروض الجملة | Zad Land",
-        description: "تصفح كافة منتجات المواد الغذائية والاستهلاكية بأسعار الجملة المعتمدة لدى شركة زاد لاند.",
+        title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - هوا للتوزيع",
+        description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة هوا للتوزيع والتجارة.",
         images: ["/og-image.jpg"],
     },
 };
@@ -48,13 +48,17 @@ export default async function ProductsPage({
         redirect(resolvedCategory ? `/categories/${resolvedCategory.slug}` : "/products");
     }
 
-    const { categories, products, totalProducts } = await getCatalogInitialData();
+    const [{ categories, products, totalProducts }, brands] = await Promise.all([
+        getCatalogInitialData(),
+        getCatalogBrands(),
+    ]);
 
     return (
         <Suspense fallback={<CatalogLoadingFallback />}>
             <ProductsClient
                 key="all-products"
                 initialCategories={categories}
+                initialBrands={brands}
                 initialProducts={products}
                 initialTotal={totalProducts}
                 activeCategory={null}

@@ -16,10 +16,10 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
     const params = await props.params;
     const department = await getDepartment(params.slug);
 
-    if (!department) return { title: "Department Not Found | Zad Land" };
+    if (!department) return { title: "القسم غير موجود | Hawa Distribution" };
 
-    const title = `${department.name} | Zad Land - زاد لاند`;
-    const description = department.description || `تصفح منتجات قسم ${department.name} بأسعار الجملة المعتمدة لدى شركة زاد لاند لتجارة وتوزيع المواد الغذائية.`;
+    const title = `${department.name} | Hawa Distribution - هوا للتوزيع`;
+    const description = department.description || `تصفح منتجات قسم ${department.name} بأسعار الجملة المعتمدة لدى شركة هوا للتوزيع والتجارة.`;
     const image = department.image || '/og-image.jpg';
 
     return {

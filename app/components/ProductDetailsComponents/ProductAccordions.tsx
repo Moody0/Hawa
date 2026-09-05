@@ -11,21 +11,21 @@ const AccordionItem = ({ title, content, isOpen, onClick, isRTL }: { title: stri
                 onClick={onClick}
                 className="w-full flex items-center py-4 focus:outline-none group"
             >
-                <span className={`text-[15px] text-[rgb(46,46,46)] font-bold group-hover:text-black transition-colors ${isRTL ? 'ml-auto' : 'mr-auto'} order-2`}>
+                <span className={`text-[15px] text-[#0B192C] dark:text-white font-bold group-hover:text-[#8A6305] transition-colors ${isRTL ? 'ml-auto' : 'mr-auto'} order-2`}>
                     {title}
                 </span>
                 <span className="order-1">
                     {isOpen ? (
-                        <MdRemove className="text-[25px] text-[rgb(46,46,46)]" />
+                        <MdRemove className="text-[25px] text-[#0B192C] dark:text-gray-300" />
                     ) : (
-                        <MdAdd className="text-[22px] text-[rgb(46,46,46)]" />
+                        <MdAdd className="text-[22px] text-[#0B192C] dark:text-gray-300" />
                     )}
                 </span>
             </button>
             <div
                 className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[1000px] pb-6 opacity-100' : 'max-h-0 opacity-0'}`}
             >
-                <div className="text-[15px] text-black dark:text-gray-400 leading-relaxed px-1">
+                <div className="text-[15px] text-[#475569] dark:text-gray-400 leading-relaxed px-1">
                     {content}
                 </div>
             </div>
@@ -57,7 +57,7 @@ const ProductAccordions = ({ description, descriptionAr, descriptionEn, options 
         <div className="flex flex-col w-full mt-1 md:border-t border-[#D5D5D5] dark:border-white/5">
             <AccordionItem
                 title={isRTL ? 'تفاصيل ومواصفات المنتج' : 'Product Details & Specs'}
-                content={<div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line leading-relaxed">{activeDescription || (isRTL ? 'منتج غذائي أصلي عالي الجودة من شركة زاد لاند' : 'Authentic high quality product from Zad Land')}</div>}
+                content={<div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line leading-relaxed">{activeDescription || (isRTL ? 'منتج أصلي عالي الجودة من شركة هوا للتوزيع والتجارة' : 'Authentic high quality product from Hawa Distribution & Trading')}</div>}
                 isOpen={openIndex === 0}
                 onClick={() => toggleAccordion(0)}
                 isRTL={isRTL}
@@ -65,7 +65,7 @@ const ProductAccordions = ({ description, descriptionAr, descriptionEn, options 
             {options && (
                 <AccordionItem
                     title={isRTL ? 'الأحجام والخيارات المتوفرة' : 'Available Sizes & Options'}
-                    content={<p className="font-semibold text-zinc-800 dark:text-zinc-200">{options}</p>}
+                    content={<p className="font-semibold text-[#0B192C] dark:text-zinc-200">{options}</p>}
                     isOpen={openIndex === 1}
                     onClick={() => toggleAccordion(1)}
                     isRTL={isRTL}

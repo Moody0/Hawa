@@ -6,28 +6,28 @@ import { Metadata } from "next";
 export const revalidate = 3600; // Revalidate every hour
 
 export const metadata: Metadata = {
-    title: "الشحن والتوصيل وسياسة التوريد | Shipping & Delivery Terms - Zad Land",
-    description: "تعرف على شروط الشحن والتوريد المباشر لكافة المحافظات والمناطق وسياسة الاستلام المعتمدة لدى شركة زاد لاند لتجارة وتوزيع المواد الغذائية.",
+    title: "الشحن والتوصيل وسياسة التوريد | Shipping & Delivery Terms - Hawa Distribution",
+    description: "تعرف على شروط الشحن والتوريد المباشر لكافة المحافظات والمناطق وسياسة الاستلام المعتمدة لدى شركة هوا للتوزيع والتجارة.",
     alternates: {
         canonical: "/shipping-returns",
     },
     openGraph: {
-        title: "الشحن والتوصيل وسياسة التوريد | Zad Land",
-        description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة زاد لاند.",
+        title: "الشحن والتوصيل وسياسة التوريد | Hawa Distribution - هوا للتوزيع",
+        description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة هوا للتوزيع والتجارة.",
         url: "/shipping-returns",
         images: [
             {
                 url: "/og-image.jpg",
                 width: 1200,
                 height: 630,
-                alt: "Zad Land Shipping & Returns",
+                alt: "Hawa Distribution Shipping & Delivery",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
-        title: "الشحن والتوصيل وسياسة التوريد | Zad Land",
-        description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة زاد لاند.",
+        title: "الشحن والتوصيل وسياسة التوريد | Hawa Distribution - هوا للتوزيع",
+        description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة هوا للتوزيع والتجارة.",
         images: ["/og-image.jpg"],
     },
 };

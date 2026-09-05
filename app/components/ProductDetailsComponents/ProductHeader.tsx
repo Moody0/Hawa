@@ -39,7 +39,7 @@ const ProductHeader = ({ name, nameAr, nameEn, brandName, categoryName, averageR
         <div className="mb-3">
             {/* Title */}
             <h1 
-                className={`text-zinc-900 dark:text-white text-2xl sm:text-3xl font-extrabold leading-tight mb-3 tracking-tight ${language === 'ar' ? 'text-right' : 'text-left'}`}
+                className={`text-[#0B192C] dark:text-white text-2xl sm:text-3xl font-extrabold leading-tight mb-3 tracking-tight ${language === 'ar' ? 'text-right' : 'text-left'}`}
             >
                 {displayName}
             </h1>
@@ -51,10 +51,10 @@ const ProductHeader = ({ name, nameAr, nameEn, brandName, categoryName, averageR
                     document.getElementById('product-reviews')?.scrollIntoView({ behavior: 'smooth' });
                 }}
             >
-                <div className="flex text-[#B8860B] text-sm gap-0.5">
+                <div className="flex text-[#8A6305] text-sm gap-0.5">
                     {renderStars()}
                 </div>
-                <span className="text-xs text-gray-500 font-medium group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
+                <span className="text-xs text-[#475569] font-medium group-hover:text-[#0B192C] dark:group-hover:text-white transition-colors">
                     {language === 'ar' ? `(${totalReviews} تقييم)` : `(${totalReviews} Reviews)`}
                 </span>
             </div>
@@ -62,14 +62,14 @@ const ProductHeader = ({ name, nameAr, nameEn, brandName, categoryName, averageR
             {/* Brand and Category Badges */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs font-semibold">
                 {brandName && (
-                    <div className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-full text-zinc-900 dark:text-gray-200 w-fit">
-                        <span className="text-gray-400 font-normal">{language === 'ar' ? 'البراند:' : 'Brand:'}</span>
+                    <div className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-full text-[#0B192C] dark:text-gray-200 w-fit">
+                        <span className="text-[#475569] font-normal">{language === 'ar' ? 'البراند:' : 'Brand:'}</span>
                         <span>{brandName}</span>
                     </div>
                 )}
                 {categoryName && (
-                    <div className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-full text-zinc-900 dark:text-gray-200 w-fit">
-                        <span className="text-gray-400 font-normal">{language === 'ar' ? 'القسم:' : 'Category:'}</span>
+                    <div className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-full text-[#0B192C] dark:text-gray-200 w-fit">
+                        <span className="text-[#475569] font-normal">{language === 'ar' ? 'القسم:' : 'Category:'}</span>
                         <span>{categoryName}</span>
                     </div>
                 )}

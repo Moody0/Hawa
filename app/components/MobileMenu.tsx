@@ -92,6 +92,9 @@ const MobileMenu = ({
         } else {
             document.body.style.overflow = 'unset';
         }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
     }, [isMobileMenuOpen]);
 
     const activeMainCat = navData.find((mc) => mc.slug === activeMainCatSlug);
@@ -115,35 +118,92 @@ const MobileMenu = ({
                     <div className={`absolute inset-0 transition-transform duration-300 ease-in-out ${activeMainCatSlug ? '-translate-x-full' : 'translate-x-0'}`}>
                         <div className="flex flex-col h-full overflow-y-auto px-2 pt-4">
 
+                            {/* Commercial Account Mobile CTA */}
+                            <div className="p-3 mb-2">
+                                <Link
+                                    href="/account"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="w-full py-3 px-4 rounded-xl bg-[#0B192C] hover:bg-[#0F172A] text-white flex items-center justify-center gap-2 font-black text-sm shadow-md transition-colors"
+                                >
+                                    <span className="text-[#8A6305]">👤</span>
+                                    <span>{language === 'ar' ? 'حساب تجاري (بوابة التجار)' : 'Merchant Portal (Login/Register)'}</span>
+                                </Link>
+                            </div>
+
+                            {/* Core Navigation Links */}
+                            <div className="flex flex-col border-b border-gray-100 dark:border-white/10 pb-2 mb-2">
+                                <Link
+                                    href="/"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"
+                                >
+                                    {language === 'ar' ? 'الرئيسية' : 'Home'}
+                                </Link>
+                                <Link
+                                    href="/about-us"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"
+                                >
+                                    {language === 'ar' ? 'من نحن' : 'About Us'}
+                                </Link>
+                                <Link
+                                    href="/brands"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"
+                                >
+                                    {language === 'ar' ? 'وكالاتنا' : 'Our Agencies'}
+                                </Link>
+                                <Link
+                                    href="/products"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"
+                                >
+                                    {language === 'ar' ? 'المنتجات' : 'Products'}
+                                </Link>
+                                <Link
+                                    href="/services"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"
+                                >
+                                    {language === 'ar' ? 'خدمات التوزيع' : 'Distribution Services'}
+                                </Link>
+                                <Link
+                                    href="/blog"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"
+                                >
+                                    {language === 'ar' ? 'المدونة' : 'Blog'}
+                                </Link>
+                                <Link
+                                    href="/contact"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"
+                                >
+                                    {language === 'ar' ? 'تواصل معنا' : 'Contact Us'}
+                                </Link>
+                            </div>
+
+                            {/* Dynamic Main Categories Header */}
+                            {navData.length > 0 && (
+                                <div className="px-4 pt-2 pb-1 text-xs font-black uppercase tracking-wider text-[#8A6305] dark:text-[#8A6305]">
+                                    {language === 'ar' ? 'أقسام المنتجات' : 'Product Departments'}
+                                </div>
+                            )}
+
                             {/* Dynamic Main Categories */}
                             {navData.map((mc) => (
                                 <div key={mc.id} className="border-b border-gray-50/50 dark:border-white/5">
                                     <button
                                         onClick={() => setActiveMainCatSlug(mc.slug)}
-                                        className="w-full flex items-center justify-between py-4 px-4"
+                                        className="w-full flex items-center justify-between py-3 px-4"
                                     >
-                                        <span className="text-[16px] font-semibold text-[rgb(46,46,46)] dark:text-white">
+                                        <span className="text-[15px] font-semibold text-[#0B192C] dark:text-gray-200">
                                             {language === 'ar' ? mc.name : (mc.name || mc.name)}
                                         </span>
                                         <MdKeyboardArrowRight className="text-2xl text-[rgb(46,46,46)] dark:text-white rtl:rotate-180" />
                                     </button>
                                 </div>
                             ))}
-
-
-
-                            {/* About Us */}
-                            <div className="border-b border-gray-50/50 dark:border-white/5">
-                                <Link
-                                    href="/about-us"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center justify-between py-4 px-4 group"
-                                >
-                                    <span className="text-[16px] font-semibold text-[rgb(46,46,46)] dark:text-white">
-                                        {language === 'ar' ? 'عن الشركة' : 'About Us'}
-                                    </span>
-                                </Link>
-                            </div>
 
                             {/* Social Footer */}
                             <div className="p-8 flex items-center justify-start gap-6 mt-auto">
@@ -176,7 +236,7 @@ const MobileMenu = ({
                                     <Link
                                         href={`/department/${activeMainCat.slug}`}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className="text-[13px] font-semibold text-[#1C1C1C] dark:text-white underline"
+                                        className="text-[13px] font-semibold text-[#0B192C] dark:text-white hover:text-[#8A6305] underline"
                                     >
                                         {language === 'ar' ? 'عرض الكل' : 'View All'}
                                     </Link>
@@ -188,15 +248,15 @@ const MobileMenu = ({
 
                                         {/* Brands Section */}
                                         {activeMainCat.brands.length > 0 && (
-                                            <div className="border-b border-gray-100/60 dark:border-white/5">
+                                             <div className="border-b border-gray-100/60 dark:border-white/5">
                                                 <button
                                                     onClick={() => setExpandedSection(expandedSection === 'brands' ? null : 'brands')}
                                                     className="w-full flex items-center justify-between py-4 px-4 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors"
                                                 >
-                                                    <span className="text-[15px] font-bold text-[#1C1C1C] dark:text-white uppercase tracking-wider">
+                                                    <span className="text-[15px] font-bold text-[#0B192C] dark:text-white uppercase tracking-wider">
                                                         {language === 'ar' ? 'الماركات' : 'Brands'}
                                                     </span>
-                                                    <MdAdd className={`text-2xl text-[rgb(46,46,46)] dark:text-white transition-transform duration-300 ${expandedSection === 'brands' ? 'rotate-45 text-black dark:text-white' : ''}`} />
+                                                    <MdAdd className={`text-2xl text-[#475569] dark:text-white transition-transform duration-300 ${expandedSection === 'brands' ? 'rotate-45 text-[#0B192C] dark:text-white' : ''}`} />
                                                 </button>
                                                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedSection === 'brands' ? 'max-h-[500px] border-t border-gray-100/50 dark:border-white/5 bg-gray-50/45 dark:bg-white/5' : 'max-h-0'}`}>
                                                     <div className="py-2 px-6 flex flex-col gap-1">
@@ -205,7 +265,7 @@ const MobileMenu = ({
                                                                 key={brand.id}
                                                                 href={`/brands/${brand.slug}`}
                                                                 onClick={() => setIsMobileMenuOpen(false)}
-                                                                className="flex items-center py-3 text-[15px] font-medium text-[rgb(46,46,46)] dark:text-gray-300 hover:text-black dark:hover:text-white border-b border-gray-100/50 dark:border-white/5 last:border-b-0 transition-colors"
+                                                                className="flex items-center py-3 text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-white border-b border-gray-100/50 dark:border-white/5 last:border-b-0 transition-colors"
                                                             >
                                                                 {brand.name}
                                                             </Link>
@@ -222,10 +282,10 @@ const MobileMenu = ({
                                                     onClick={() => setExpandedSection(expandedSection === 'categories' ? null : 'categories')}
                                                     className="w-full flex items-center justify-between py-4 px-4 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors"
                                                 >
-                                                    <span className="text-[15px] font-bold text-[#1C1C1C] dark:text-white uppercase tracking-wider">
+                                                    <span className="text-[15px] font-bold text-[#0B192C] dark:text-white uppercase tracking-wider">
                                                         {language === 'ar' ? 'الأقسام' : 'Categories'}
                                                     </span>
-                                                    <MdAdd className={`text-2xl text-[rgb(46,46,46)] dark:text-white transition-transform duration-300 ${expandedSection === 'categories' ? 'rotate-45 text-black dark:text-white' : ''}`} />
+                                                    <MdAdd className={`text-2xl text-[#475569] dark:text-white transition-transform duration-300 ${expandedSection === 'categories' ? 'rotate-45 text-[#0B192C] dark:text-white' : ''}`} />
                                                 </button>
                                                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedSection === 'categories' ? 'max-h-[500px] border-t border-gray-100/50 dark:border-white/5 bg-gray-50/45 dark:bg-white/5' : 'max-h-0'}`}>
                                                     <div className="py-2 px-6 flex flex-col gap-1">
@@ -234,7 +294,7 @@ const MobileMenu = ({
                                                                 key={cat.id}
                                                                 href={`/categories/${cat.slug}`}
                                                                 onClick={() => setIsMobileMenuOpen(false)}
-                                                                className="flex items-center py-3 text-[15px] font-medium text-[rgb(46,46,46)] dark:text-gray-300 hover:text-black dark:hover:text-white border-b border-gray-100/50 dark:border-white/5 last:border-b-0 transition-colors"
+                                                                className="flex items-center py-3 text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-white border-b border-gray-100/50 dark:border-white/5 last:border-b-0 transition-colors"
                                                             >
                                                                 {cat.name}
                                                             </Link>

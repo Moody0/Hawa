@@ -1,10 +1,12 @@
 "use client";
 
 import AdminHeader from "../../components/AdminHeader";
-import { MdPendingActions, MdLocalShipping, MdTaskAlt, MdPayments, MdExpandMore, MdVisibility, MdDelete, MdSync, MdChevronLeft, MdChevronRight, MdArrowUpward, MdArrowDownward } from "react-icons/md";
+import { MdPendingActions, MdLocalShipping, MdTaskAlt, MdPayments, MdExpandMore, MdVisibility, MdDelete, MdSync, MdChevronLeft, MdChevronRight, MdArrowUpward, MdArrowDownward, MdStore } from "react-icons/md";
+import { FaWhatsapp } from "react-icons/fa";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import Link from "next/link";
 import { updateOrderStatus, deleteOrder } from "../../../../lib/admin-actions";
+import { cleanWhatsAppNumber } from "../../../../lib/whatsapp-utils";
 import { useState, useRef, useEffect } from "react";
 import OrderDetailsModal from "./OrderDetailsModal";
 import { OrderStatus } from "@prisma/client";
@@ -12,13 +14,16 @@ import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { formatPackaging } from "@/lib/packaging";
 
 interface Order {
     id: string;
+    shopName?: string | null;
     Name: string;
     phone: string;
     streetAddress: string;
     city: string;
+    notes?: string | null;
     totalAmount: number;
     status: string;
     createdAt: string;
@@ -30,6 +35,8 @@ interface Order {
         product: {
             name: string;
             images: string;
+            packaging?: string | null;
+            itemsPerPackage?: string | number | null;
         } | null;
     }[];
 }
@@ -39,7 +46,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
     const router = useRouter();
     const canManage = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canManageOrders;
     const canDelete = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canDeleteOrders;
-    const { t, dir } = useLanguage();
+    const { t, dir, language } = useLanguage();
 
     const { openSidebar } = useAdminSidebar();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -84,7 +91,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
             comparison = Number(a.totalAmount) - Number(b.totalAmount);
         } else if (key === 'createdAt') {
             comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        } else if (key === 'id' || key === 'Name' || key === 'status') {
+        } else if (key === 'id' || key === 'Name' || key === 'shopName' || key === 'status') {
             const valA = String(a[key as keyof Order] || '').toLowerCase();
             const valB = String(b[key as keyof Order] || '').toLowerCase();
             comparison = valA.localeCompare(valB);
@@ -204,7 +211,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                         <div className="bg-white dark:bg-[#0f172a] p-3.5 sm:p-5 lg:p-6 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs transition-all hover:shadow-md flex flex-col justify-between">
                             <div className="flex justify-between items-center gap-1 mb-2 sm:mb-4">
                                 <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">{t('admin.totalRevenue')}</p>
-                                <div className="p-1.5 sm:p-2.5 bg-[#072835]/10 dark:bg-[#E5B54A]/10 text-[#072835] dark:text-[#E5B54A] rounded-lg sm:rounded-xl shrink-0">
+                                <div className="p-1.5 sm:p-2.5 bg-[#0B192C]/10 dark:bg-[#8A6305]/10 text-[#0B192C] dark:text-[#8A6305] rounded-lg sm:rounded-xl shrink-0">
                                     <MdPayments className="text-lg sm:text-2xl" />
                                 </div>
                             </div>
@@ -225,7 +232,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                         onClick={() => setFilter("ALL")}
                                         className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
                                             filter === "ALL" 
-                                                ? "bg-[#072835] text-white shadow-2xs" 
+                                                ? "bg-[#0B192C] text-white shadow-2xs" 
                                                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                                         }`}
                                     >
@@ -296,8 +303,17 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                                 <div className="flex items-center">
                                                     {t('admin.orderId')}
                                                     <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'id' && sortConfig.direction === 'asc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
-                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'id' && sortConfig.direction === 'desc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
+                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'id' && sortConfig.direction === 'asc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'id' && sortConfig.direction === 'desc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                    </span>
+                                                </div>
+                                            </th>
+                                            <th className="p-4 text-[11px] font-extrabold uppercase tracking-widest text-slate-700 dark:text-slate-200 cursor-pointer select-none group" onClick={() => handleSort('shopName')}>
+                                                <div className="flex items-center">
+                                                    {t('admin.shopName')}
+                                                    <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
+                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'shopName' && sortConfig.direction === 'asc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'shopName' && sortConfig.direction === 'desc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
                                                     </span>
                                                 </div>
                                             </th>
@@ -305,8 +321,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                                 <div className="flex items-center">
                                                     {t('admin.customerName')}
                                                     <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'Name' && sortConfig.direction === 'asc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
-                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'Name' && sortConfig.direction === 'desc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
+                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'Name' && sortConfig.direction === 'asc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'Name' && sortConfig.direction === 'desc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
                                                     </span>
                                                 </div>
                                             </th>
@@ -314,8 +330,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                                 <div className="flex items-center">
                                                     {t('admin.date')}
                                                     <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'createdAt' && sortConfig.direction === 'asc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
-                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'createdAt' && sortConfig.direction === 'desc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
+                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'createdAt' && sortConfig.direction === 'asc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'createdAt' && sortConfig.direction === 'desc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
                                                     </span>
                                                 </div>
                                             </th>
@@ -323,8 +339,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                                 <div className="flex items-center">
                                                     {t('admin.totalAmount')}
                                                     <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'totalAmount' && sortConfig.direction === 'asc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
-                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'totalAmount' && sortConfig.direction === 'desc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
+                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'totalAmount' && sortConfig.direction === 'asc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'totalAmount' && sortConfig.direction === 'desc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
                                                     </span>
                                                 </div>
                                             </th>
@@ -333,8 +349,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                                 <div className="flex items-center">
                                                     {t('admin.orderStatus')}
                                                     <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'status' && sortConfig.direction === 'asc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
-                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'status' && sortConfig.direction === 'desc' ? 'text-[#072835] dark:text-[#E5B54A]' : 'text-slate-300'}`} />
+                                                        <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'status' && sortConfig.direction === 'asc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                        <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'status' && sortConfig.direction === 'desc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
                                                     </span>
                                                 </div>
                                             </th>
@@ -348,15 +364,36 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                                 <tr key={order.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02]/50 transition-colors">
                                                     <td className="p-4 text-sm font-bold text-text-main dark:text-white">#{order.id.slice(-6).toUpperCase()}</td>
                                                     <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 shrink-0">
+                                                                <MdStore className="text-base" />
+                                                            </span>
+                                                            <span className="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px]" title={order.shopName || undefined}>
+                                                                {order.shopName || '—'}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
                                                         <div className="flex flex-col gap-0.5">
                                                             <span className="text-sm font-medium text-text-main dark:text-white">{order.Name}</span>
+                                                            <span className="text-xs text-text-sub dark:text-gray-400 font-mono" dir="ltr">{order.phone}</span>
                                                         </div>
                                                     </td>
                                                     <td className="p-4 text-sm text-text-sub dark:text-gray-400">{new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                                                    <td className="p-4 text-sm font-bold text-text-main dark:text-white">${Number(order.totalAmount).toFixed(2)}</td>
                                                     <td className="p-4">
-                                                        <span className="text-xs font-medium text-text-sub bg-background-light dark:bg-gray-800 px-2.5 py-1 rounded-lg border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] max-w-[150px] truncate block">
-                                                            {order.items.map(i => i.product?.name).join(', ') || t('admin.unknown')}
+                                                        {Number(order.totalAmount) > 0 ? (
+                                                            <span className="text-sm font-bold text-text-main dark:text-white">
+                                                                ${Number(order.totalAmount).toFixed(2)}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40">
+                                                                {t('admin.priceOnInquiry')}
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="text-xs font-medium text-text-sub bg-background-light dark:bg-gray-800 px-2.5 py-1 rounded-lg border border-black/[0.04] dark:border-white/[0.04] max-w-[160px] truncate block" title={order.items.map(i => `${i.product?.name || t('admin.unknown')} (${i.quantity} ${formatPackaging(i.product?.packaging, language, { short: true })})`).join(', ')}>
+                                                            {order.items.map(i => `${i.product?.name || t('admin.unknown')} (${i.quantity} ${formatPackaging(i.product?.packaging, language, { short: true })})`).join(', ') || t('admin.unknown')}
                                                         </span>
                                                     </td>
                                                     <td className="p-4">
@@ -402,6 +439,17 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                                     </td>
                                                     <td className={`p-4 ${dir === 'rtl' ? 'text-start' : 'text-end'}`}>
                                                         <div className={`flex items-center gap-2 ${dir === 'rtl' ? 'justify-start' : 'justify-end'}`}>
+                                                            {order.phone && (
+                                                                <a
+                                                                    href={`https://wa.me/${cleanWhatsAppNumber(order.phone)}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition-colors"
+                                                                    title={`${t('admin.contactWhatsApp')} (${order.phone})`}
+                                                                >
+                                                                    <FaWhatsapp className="text-[18px]" />
+                                                                </a>
+                                                            )}
                                                             <button
                                                                 onClick={() => handleViewDetails(order)}
                                                                 className="text-primary hover:text-primary-hover text-xs font-bold transition-colors"
@@ -429,7 +477,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                         })}
                                         {filteredOrders.length === 0 && (
                                             <tr>
-                                                <td colSpan={7} className="p-12 text-center text-text-sub italic">
+                                                <td colSpan={8} className="p-12 text-center text-text-sub italic">
                                                     {t('admin.noOrdersFound')}
                                                 </td>
                                             </tr>

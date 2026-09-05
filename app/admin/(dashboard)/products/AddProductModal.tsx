@@ -46,6 +46,10 @@ interface Product {
     sku: string | null;
     images: string;
     brandId: string;
+    packaging?: string | null;
+    itemsPerPackage?: string | null;
+    minOrder?: number | null;
+    hidePrice?: boolean;
 }
 
 interface AddProductModalProps {
@@ -77,6 +81,10 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
         options: "",
         sku: "",
         images: "", // Comma separated links
+        packaging: "طرد",
+        itemsPerPackage: "",
+        minOrder: "1",
+        hidePrice: false,
     });
 
     const [imageLink, setImageLink] = useState("");
@@ -135,6 +143,10 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                 options: product.options || "",
                 sku: product.sku || "",
                 images: product.images,
+                packaging: product.packaging || "طرد",
+                itemsPerPackage: product.itemsPerPackage || "",
+                minOrder: (product.minOrder || 1).toString(),
+                hidePrice: Boolean(product.hidePrice),
             });
         } else if (isOpen) {
             setFormData({
@@ -154,6 +166,10 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                 options: "",
                 sku: "",
                 images: "",
+                packaging: "طرد",
+                itemsPerPackage: "",
+                minOrder: "1",
+                hidePrice: false,
             });
         }
     }, [product, isOpen, brands, categories, mainCategories]);
@@ -193,6 +209,10 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                 stock: parseInt(formData.stock) || 0,
                 options: formData.options || null,
                 mainCategoryId: formData.mainCategoryId || null,
+                packaging: formData.packaging || "طرد",
+                itemsPerPackage: formData.itemsPerPackage || null,
+                minOrder: parseInt(formData.minOrder) || 1,
+                hidePrice: formData.hidePrice,
             };
 
             const result = product
@@ -297,16 +317,16 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={isUploadingImage}
-                                    className="px-4 h-12 rounded-xl bg-[#072835] hover:bg-[#0c4054] text-white font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                                    className="px-4 h-12 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] text-white font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shrink-0"
                                 >
                                     {isUploadingImage ? (
                                         <>
-                                            <MdSync className="text-lg animate-spin text-[#E5B54A]" />
+                                            <MdSync className="text-lg animate-spin text-[#8A6305]" />
                                             <span>{language === 'ar' ? 'جاري الرفع...' : 'Uploading...'}</span>
                                         </>
                                     ) : (
                                         <>
-                                            <MdCloudUpload className="text-lg text-[#E5B54A]" />
+                                            <MdCloudUpload className="text-lg text-[#8A6305]" />
                                             <span>{language === 'ar' ? 'رفع صور من الجهاز' : 'Upload from PC'}</span>
                                         </>
                                     )}
@@ -567,6 +587,85 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                 </div>
                             )}
                         </div>
+
+                        {/* B2B Wholesale Specifications & Price Policy */}
+                        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 p-6 rounded-2xl bg-[#FAF6EC] dark:bg-zinc-800/80 border border-[#8A6305]/25">
+                            <div className="md:col-span-3 flex items-center justify-between border-b border-[#8A6305]/20 pb-3">
+                                <div>
+                                    <h4 className="text-sm font-extrabold text-[#0B192C] dark:text-[#8A6305]">
+                                        {language === 'ar' ? '📦 بيانات الجملة والتعبئة وسياسة التسعير' : '📦 Wholesale Packaging & Pricing Policy'}
+                                    </h4>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        {language === 'ar' ? 'حدد مواصفات الطرد أو الكرتونة وإمكانية إخفاء السعر ليكون السعر عند الطلب' : 'Define package specifications and whether to hide fixed price for agency quotes'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Packaging Type */}
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400">
+                                    {language === 'ar' ? 'نوع التعبئة (Packaging)' : 'Packaging Type'}
+                                </label>
+                                <input
+                                    className="w-full h-12 rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-gray-900 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all px-4 text-sm font-medium dark:text-white outline-none"
+                                    placeholder={language === 'ar' ? 'طرد / كرتونة / صندوق' : 'Package / Carton / Box'}
+                                    type="text"
+                                    value={formData.packaging}
+                                    onChange={(e) => setFormData({ ...formData, packaging: e.target.value })}
+                                />
+                            </div>
+
+                            {/* Items Per Package */}
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400">
+                                    {language === 'ar' ? 'محتوى العبوة / الطرد' : 'Items Per Package'}
+                                </label>
+                                <input
+                                    className="w-full h-12 rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-gray-900 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all px-4 text-sm font-medium dark:text-white outline-none"
+                                    placeholder={language === 'ar' ? 'مثال: 6 قناني × 1 لتر أو 12 علبة' : 'e.g. 6 bottles x 1L or 12 cans'}
+                                    type="text"
+                                    value={formData.itemsPerPackage}
+                                    onChange={(e) => setFormData({ ...formData, itemsPerPackage: e.target.value })}
+                                />
+                            </div>
+
+                            {/* Minimum Order */}
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400">
+                                    {language === 'ar' ? 'الحد الأدنى للطلب (بالطرود)' : 'Min. Order (Packages)'}
+                                </label>
+                                <input
+                                    className="w-full h-12 rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-gray-900 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all px-4 text-sm font-medium dark:text-white outline-none"
+                                    placeholder="1"
+                                    type="number"
+                                    min="1"
+                                    value={formData.minOrder}
+                                    onChange={(e) => setFormData({ ...formData, minOrder: e.target.value })}
+                                />
+                            </div>
+
+                            {/* Hide Price Toggle */}
+                            <div className="md:col-span-3 pt-2">
+                                <label className="relative flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-gray-900 border border-[#8A6305]/30 cursor-pointer select-none hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.hidePrice}
+                                        onChange={(e) => setFormData({ ...formData, hidePrice: e.target.checked })}
+                                        className="mt-1 h-5 w-5 rounded border-gray-300 text-[#0B192C] focus:ring-[#8A6305] cursor-pointer"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-bold text-[#0B192C] dark:text-white">
+                                            {language === 'ar' ? 'السعر عند الطلب (إخفاء السعر الرقمي في المتجر)' : 'Hide Price (Show "Price on Inquiry / Set by Agency")'}
+                                        </span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            {language === 'ar' 
+                                                ? 'عند تفعيل هذا الخيار، سيظهر للمحلات "السعر يحدد حسب الوكالة" بدلاً من الرقم، مع بقاء زر الإضافة للطلب عبر واتساب نشطاً.'
+                                                : 'When enabled, store visitors see "Price on Inquiry" instead of numbers, while still being able to order wholesale via WhatsApp.'}
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </form>
 
@@ -582,7 +681,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                     <button
                         onClick={handleSubmit}
                         disabled={isLoading}
-                        className="bg-[#072835] hover:bg-[#0c4054] dark:bg-[#B8860B] dark:hover:bg-[#9a7009] disabled:opacity-50 text-white h-12 px-8 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm transform active:scale-[0.98] cursor-pointer"
+                        className="bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] disabled:opacity-50 text-white h-12 px-8 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm transform active:scale-[0.98] cursor-pointer"
                     >
                         {isLoading ? (
                             <MdSync className="animate-spin text-[20px]" />

@@ -148,7 +148,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                         onClick={() => setActiveTab("content")}
                         className={`flex items-center gap-2 py-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer ${
                             activeTab === "content"
-                                ? "border-[#072835] text-[#072835] dark:border-[#E5B54A] dark:text-[#E5B54A]"
+                                ? "border-[#0B192C] text-[#0B192C] dark:border-[#8A6305] dark:text-[#8A6305]"
                                 : "border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                         }`}
                     >
@@ -160,7 +160,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                         onClick={() => setActiveTab("media")}
                         className={`flex items-center gap-2 py-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer ${
                             activeTab === "media"
-                                ? "border-[#072835] text-[#072835] dark:border-[#E5B54A] dark:text-[#E5B54A]"
+                                ? "border-[#0B192C] text-[#0B192C] dark:border-[#8A6305] dark:text-[#8A6305]"
                                 : "border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                         }`}
                     >
@@ -191,7 +191,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         placeholder="e.g. Wholesale Global Food Brands"
-                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
 
@@ -204,7 +204,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={subtitle}
                                         onChange={(e) => setSubtitle(e.target.value)}
                                         placeholder="Brief descriptive highlight..."
-                                        className="w-full resize-none rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full resize-none rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
 
@@ -217,7 +217,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={badge}
                                         onChange={(e) => setBadge(e.target.value)}
                                         placeholder="e.g. Certified Wholesale"
-                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
 
@@ -230,7 +230,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={buttonText}
                                         onChange={(e) => setButtonText(e.target.value)}
                                         placeholder="e.g. Explore Products"
-                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
                             </div>
@@ -253,7 +253,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={titleAr}
                                         onChange={(e) => setTitleAr(e.target.value)}
                                         placeholder="مثال: توزيع بضائع من كبرى الشركات العالمية"
-                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
 
@@ -266,7 +266,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={subtitleAr}
                                         onChange={(e) => setSubtitleAr(e.target.value)}
                                         placeholder="نبذة وصفية تسويقية..."
-                                        className="w-full resize-none rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full resize-none rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
 
@@ -279,7 +279,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={badgeAr}
                                         onChange={(e) => setBadgeAr(e.target.value)}
                                         placeholder="مثال: توزيع جملة معتمد"
-                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
 
@@ -292,7 +292,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={buttonTextAr}
                                         onChange={(e) => setButtonTextAr(e.target.value)}
                                         placeholder="مثال: تصفح المنتجات"
-                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
                             </div>
@@ -319,7 +319,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         value={link}
                                         onChange={(e) => setLink(e.target.value)}
                                         placeholder="e.g. /products or /department/beverages"
-                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 transition-all"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
                                 </div>
 
@@ -329,7 +329,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                             type="checkbox"
                                             checked={isActive}
                                             onChange={(e) => setIsActive(e.target.checked)}
-                                            className="size-4 rounded border-gray-300 text-[#072835] focus:ring-[#072835]"
+                                            className="size-4 rounded border-gray-300 text-[#0B192C] focus:ring-[#0B192C]"
                                         />
                                         <div>
                                             <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
@@ -378,9 +378,9 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-[#072835] hover:bg-[#0c4054] text-white px-5 py-2.5 font-bold text-xs transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                                className="flex items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] text-white px-5 py-2.5 font-bold text-xs transition-all shadow-xs cursor-pointer disabled:opacity-50"
                             >
-                                {isSubmitting && <MdSync className="animate-spin text-base text-[#E5B54A]" />}
+                                {isSubmitting && <MdSync className="animate-spin text-base text-[#8A6305]" />}
                                 {banner ? (isArabic ? "تحديث البنر" : "Update Banner") : (isArabic ? "إنشاء البنر" : "Create Banner")}
                             </button>
                         </div>

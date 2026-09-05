@@ -39,14 +39,14 @@ const FooterInfoBar = async () => {
                                 key={index}
                                 className="flex items-center gap-3 md:gap-4 p-2 rounded-xl"
                             >
-                                <div className="flex-shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black flex items-center justify-center">
+                                <div className="flex-shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-full bg-[#0B192C] dark:bg-white text-white dark:text-black flex items-center justify-center">
                                     <Icon className="text-base md:text-lg" />
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <span className="text-xs md:text-sm font-extrabold text-zinc-900 dark:text-white leading-tight truncate">
+                                    <span className="text-xs md:text-sm font-extrabold text-[#0B192C] dark:text-white leading-tight truncate">
                                         {item.title}
                                     </span>
-                                    <span className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                                    <span className="text-[10px] md:text-xs font-medium text-[#475569] dark:text-gray-400 truncate">
                                         {item.subtitle}
                                     </span>
                                 </div>

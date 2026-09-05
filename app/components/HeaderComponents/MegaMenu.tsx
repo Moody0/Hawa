@@ -99,7 +99,7 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
             {/* Quick View Icon */}
             <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                className="absolute z-20 top-3 left-3 w-8 h-8 bg-white text-black hover:bg-[#B8860B] hover:text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 border border-gray-100"
+                className="absolute z-20 top-3 left-3 w-8 h-8 bg-white text-black hover:bg-[#8A6305] hover:text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 border border-gray-100"
                 aria-label="Quick View"
             >
                 <MdSearch size={18} />
@@ -134,7 +134,7 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
                 <div className="absolute inset-x-2 bottom-3 z-20 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                     <button
                         onClick={handleAddToCart}
-                        className="w-full bg-[#072835] hover:bg-[#2E7D32] text-white h-[36px] rounded-full text-[12px] font-bold transition-all duration-300 flex items-center justify-center cursor-pointer"
+                        className="w-full bg-[#0B192C] hover:bg-[#8A6305] text-white h-[36px] rounded-full text-[12px] font-bold transition-all duration-300 flex items-center justify-center cursor-pointer"
                     >
                         {language === "ar" ? "اضافة للعربة" : "Add to Cart"}
                     </button>
@@ -145,13 +145,13 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
             <div className={`flex flex-col p-2.5 pt-2 ${dir === "rtl" ? "text-right" : "text-left"}`}>
                 {/* Brand */}
                 {product.brand && (
-                    <p className="text-[rgba(7,40,53,0.6)] dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1 truncate">
+                    <p className="text-[#475569] dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1 truncate">
                         {product.brand.name}
                     </p>
                 )}
                 {/* Title */}
                 <h3
-                    className={`text-[rgb(7,40,53)] dark:text-white text-[12px] font-semibold leading-tight mb-1 line-clamp-2 ${dir === "rtl" ? "text-right" : "text-left"}`}
+                    className={`text-[#0B192C] dark:text-white text-[12px] font-semibold leading-tight mb-1 line-clamp-2 ${dir === "rtl" ? "text-right" : "text-left"}`}
                 >
                     <Link href={`/products/${product.slug}`} onClick={onClose}>
                         {displayName}
@@ -161,15 +161,15 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
                 <div className="flex items-center gap-1.5 mt-auto">
                     {product.discountPrice ? (
                         <>
-                            <span className="text-[13px] font-bold text-[rgb(7,40,53)] dark:text-white">
+                            <span className="text-[13px] font-bold text-[#0B192C] dark:text-white">
                                 {formatPrice(product.discountPrice)}
                             </span>
-                            <span className="text-[11px] text-gray-400 line-through font-normal">
+                            <span className="text-[11px] text-[#475569] line-through font-normal">
                                 {formatPrice(product.price)}
                             </span>
                         </>
                     ) : (
-                        <span className="text-[13px] font-bold text-[rgb(7,40,53)] dark:text-white">
+                        <span className="text-[13px] font-bold text-[#0B192C] dark:text-white">
                             {formatPrice(product.price)}
                         </span>
                     )}
@@ -200,7 +200,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                     >
                         {/* Column 1: Brands */}
                         <div>
-                            <h3 className="text-[15px] font-medium text-[rgb(46,46,46)] dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-white/10">
+                            <h3 className="text-[15px] font-bold text-[#0B192C] dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-white/10">
                                 {language === "ar" ? "الماركات" : "Brands"}
                             </h3>
                             <ul className="flex flex-col gap-2">
@@ -209,95 +209,95 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                         if (!name.includes('-')) return name.trim();
                                         const parts = name.split('-').map(s => s.trim());
                                         if (parts.length >= 2) {
-                                            const arabicPart = parts.find(p => /[\u0600-\u06FF]/.test(p));
-                                            const englishPart = parts.find(p => !/[\u0600-\u06FF]/.test(p));
-                                            if (language === 'ar' && arabicPart) return arabicPart;
-                                            if (language !== 'ar' && englishPart) return englishPart;
-                                        }
-                                        return name;
-                                    };
+                                             const arabicPart = parts.find(p => /[\u0600-\u06FF]/.test(p));
+                                             const englishPart = parts.find(p => !/[\u0600-\u06FF]/.test(p));
+                                             if (language === 'ar' && arabicPart) return arabicPart;
+                                             if (language !== 'ar' && englishPart) return englishPart;
+                                         }
+                                         return name;
+                                     };
 
-                                    return (
-                                        <li key={brand.id}>
-                                            <Link 
-                                                href={`/brands/${brand.slug}`} 
-                                                onClick={onClose}
-                                                className="text-[15px] font-medium text-[rgb(46,46,46)] dark:text-gray-300 hover:text-[#072835] dark:hover:text-[#E5B54A] leading-relaxed inline hover-underline-animated"
-                                            >
-                                                {formatBrandName(brand.name)}
-                                            </Link>
-                                        </li>
-                                    );
-                                }) : (
-                                    <li className="text-[15px] font-medium text-[rgb(46,46,46)]/50 dark:text-gray-500">
-                                        {language === "ar" ? "لا توجد ماركات" : "No brands yet"}
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
+                                     return (
+                                         <li key={brand.id}>
+                                             <Link 
+                                                 href={`/brands/${brand.slug}`} 
+                                                 onClick={onClose}
+                                                 className="text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] leading-relaxed inline hover-underline-animated"
+                                             >
+                                                 {formatBrandName(brand.name)}
+                                             </Link>
+                                         </li>
+                                     );
+                                 }) : (
+                                     <li className="text-[15px] font-medium text-[#475569]/50 dark:text-gray-500">
+                                         {language === "ar" ? "لا توجد ماركات" : "No brands yet"}
+                                     </li>
+                                 )}
+                             </ul>
+                         </div>
 
-                        {/* Column 2: Categories */}
-                        <div>
-                            <h3 className="text-[15px] font-medium text-[rgb(46,46,46)] dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-white/10">
-                                {language === "ar" ? "الأقسام" : "Categories"}
-                            </h3>
-                            <ul className="flex flex-col gap-2">
-                                {data.categories.length > 0 ? data.categories.map((cat) => (
-                                    <li key={cat.id}>
-                                        <Link 
-                                            href={`/department/${data.slug}?category=${cat.slug}`} 
-                                            onClick={onClose}
-                                            className="text-[15px] font-medium text-[rgb(46,46,46)] dark:text-gray-300 hover:text-black dark:hover:text-white leading-relaxed inline hover-underline-animated"
-                                        >
-                                            {cat.name}
-                                        </Link>
-                                    </li>
-                                )) : (
-                                    <li className="text-[15px] font-medium text-[rgb(46,46,46)]/50 dark:text-gray-500">
-                                        {language === "ar" ? "لا توجد أقسام" : "No categories yet"}
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
+                         {/* Column 2: Categories */}
+                         <div>
+                             <h3 className="text-[15px] font-bold text-[#0B192C] dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-white/10">
+                                 {language === "ar" ? "الأقسام" : "Categories"}
+                             </h3>
+                             <ul className="flex flex-col gap-2">
+                                 {data.categories.length > 0 ? data.categories.map((cat) => (
+                                     <li key={cat.id}>
+                                         <Link 
+                                             href={`/department/${data.slug}?category=${cat.slug}`} 
+                                             onClick={onClose}
+                                             className="text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] leading-relaxed inline hover-underline-animated"
+                                         >
+                                             {cat.name}
+                                         </Link>
+                                     </li>
+                                 )) : (
+                                     <li className="text-[15px] font-medium text-[#475569]/50 dark:text-gray-500">
+                                         {language === "ar" ? "لا توجد أقسام" : "No categories yet"}
+                                     </li>
+                                 )}
+                             </ul>
+                         </div>
 
-                        {/* Column 3: Top Products */}
-                        <div>
-                            <h3 className="text-[15px] font-medium text-[rgb(46,46,46)] dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-white/10">
-                                {language === "ar" ? "المنتجات" : "Products"}
-                            </h3>
-                            <ul className="flex flex-col gap-2">
-                                {data.topProducts.length > 0 ? data.topProducts.map((product) => (
-                                    <li key={product.id}>
-                                        <Link 
-                                            href={`/products/${product.slug}`} 
-                                            onClick={onClose}
-                                            className="text-[15px] font-medium text-[rgb(46,46,46)] dark:text-gray-300 hover:text-black dark:hover:text-white leading-relaxed line-clamp-1 inline hover-underline-animated"
-                                        >
-                                            {product.name}
-                                        </Link>
-                                    </li>
-                                )) : (
-                                    <li className="text-[15px] font-medium text-[rgb(46,46,46)]/50 dark:text-gray-500">
-                                        {language === "ar" ? "لا توجد منتجات" : "No products yet"}
-                                    </li>
-                                )}
-                                {data.topProducts.length > 0 && (
-                                    <li className="mt-2">
-                                        <Link 
-                                            href={`/department/${data.slug}`} 
-                                            onClick={onClose}
-                                            className="text-[15px] font-medium text-[rgb(46,46,46)] dark:text-white inline hover-underline-animated"
-                                        >
-                                            {language === "ar" ? "عرض كل المنتجات ←" : "View All →"}
-                                        </Link>
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
+                         {/* Column 3: Top Products */}
+                         <div>
+                             <h3 className="text-[15px] font-bold text-[#0B192C] dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-white/10">
+                                 {language === "ar" ? "المنتجات" : "Products"}
+                             </h3>
+                             <ul className="flex flex-col gap-2">
+                                 {data.topProducts.length > 0 ? data.topProducts.map((product) => (
+                                     <li key={product.id}>
+                                         <Link 
+                                             href={`/products/${product.slug}`} 
+                                             onClick={onClose}
+                                             className="text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] leading-relaxed line-clamp-1 inline hover-underline-animated"
+                                         >
+                                             {product.name}
+                                         </Link>
+                                     </li>
+                                 )) : (
+                                     <li className="text-[15px] font-medium text-[#475569]/50 dark:text-gray-500">
+                                         {language === "ar" ? "لا توجد منتجات" : "No products yet"}
+                                     </li>
+                                 )}
+                                 {data.topProducts.length > 0 && (
+                                     <li className="mt-2">
+                                         <Link 
+                                             href={`/department/${data.slug}`} 
+                                             onClick={onClose}
+                                             className="text-[15px] font-bold text-[#0B192C] dark:text-white hover:text-[#8A6305] inline hover-underline-animated"
+                                         >
+                                             {language === "ar" ? "عرض كل المنتجات ←" : "View All →"}
+                                         </Link>
+                                     </li>
+                                 )}
+                             </ul>
+                         </div>
 
                         {/* Column 4: Best Sellers — mini product cards */}
                         <div>
-                            <h3 className="text-[15px] font-medium text-[rgb(46,46,46)] dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-white/10">
+                            <h3 className="text-[15px] font-bold text-[#0B192C] dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 dark:border-white/10">
                                 {language === "ar" ? "الأكثر مبيعاً" : "Best Sellers"}
                             </h3>
                             {visibleTrending.length > 0 ? (
@@ -311,7 +311,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-[15px] font-medium text-[rgb(46,46,46)]/50 dark:text-gray-500">
+                                <p className="text-[15px] font-medium text-[#475569]/50 dark:text-gray-500">
                                     {language === "ar" ? "لا توجد منتجات رائجة" : "No trending products"}
                                 </p>
                             )}

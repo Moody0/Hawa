@@ -50,7 +50,7 @@ function TextField({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15"
+                className="w-full rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15"
             />
         </div>
     );
@@ -74,7 +74,7 @@ function TextAreaField({
                 rows={rows}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-full resize-none rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15"
+                className="w-full resize-none rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15"
             />
         </div>
     );
@@ -97,7 +97,7 @@ function SelectField({
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15 cursor-pointer"
+                className="w-full rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 cursor-pointer"
             >
                 <option value="">{label}</option>
                 {options.map((option) => (
@@ -237,7 +237,7 @@ export default function FooterContentSection({
                             label={t('admin.linkUrl') || 'Profile URL'}
                             value={footerContent.footerInstagramUrl}
                             onChange={(value) => onFieldChange('footerInstagramUrl', value)}
-                            placeholder="https://instagram.com/zadland"
+                            placeholder="https://instagram.com/hawadistribution"
                         />
                     </div>
                     <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
@@ -249,19 +249,37 @@ export default function FooterContentSection({
                             label={t('admin.linkUrl') || 'Page URL'}
                             value={footerContent.footerFacebookUrl}
                             onChange={(value) => onFieldChange('footerFacebookUrl', value)}
-                            placeholder="https://facebook.com/zadland"
+                            placeholder="https://facebook.com/hawadistribution"
                         />
                     </div>
                     <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
                         <div className="mb-2.5 flex items-center gap-2 text-slate-800 dark:text-white">
                             <FaWhatsapp className="text-lg text-emerald-600" />
-                            <span className="text-xs font-bold uppercase">WhatsApp</span>
+                            <span className="text-xs font-bold uppercase">WhatsApp Link</span>
                         </div>
                         <TextField
                             label={t('admin.linkUrl') || 'WhatsApp URL'}
                             value={footerContent.footerWhatsappUrl}
                             onChange={(value) => onFieldChange('footerWhatsappUrl', value)}
                             placeholder="https://wa.me/9639..."
+                        />
+                    </div>
+                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-emerald-50/30 dark:bg-emerald-950/20 p-4 md:col-span-3">
+                        <div className="mb-2.5 flex items-center gap-2 text-slate-800 dark:text-white">
+                            <FaWhatsapp className="text-xl text-emerald-600" />
+                            <span className="text-xs font-bold uppercase">{t('admin.wholesaleWhatsAppNumber') || 'Wholesale WhatsApp Order Receiving Number'}</span>
+                        </div>
+                        <TextField
+                            label={t('admin.wholesaleWhatsAppNumberDesc') || 'Orders placed on the website will be directed to this WhatsApp number.'}
+                            value={footerContent.whatsappNumber || ''}
+                            onChange={(value) => {
+                                onFieldChange('whatsappNumber', value);
+                                if (!footerContent.footerWhatsappUrl || footerContent.footerWhatsappUrl === '#' || footerContent.footerWhatsappUrl.startsWith('https://wa.me/')) {
+                                    const cleaned = value.replace(/[^0-9]/g, '');
+                                    onFieldChange('footerWhatsappUrl', `https://wa.me/${cleaned}`);
+                                }
+                            }}
+                            placeholder="+963900000000"
                         />
                     </div>
                 </div>

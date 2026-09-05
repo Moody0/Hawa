@@ -88,27 +88,27 @@ const Footer = async ({ t, language }: FooterProps) => {
     const renderNavLink = (label: string, href: string) => {
         if (isExternalUrl(href)) {
             return (
-                <a className="hover:text-[#E5B54A] transition-colors" href={href} target="_blank" rel="noopener noreferrer">
+                <a className="hover:text-[#8A6305] transition-colors" href={href} target="_blank" rel="noopener noreferrer">
                     {label}
                 </a>
             );
         }
 
         return (
-            <Link className="hover:text-[#E5B54A] transition-colors" href={href}>
+            <Link className="hover:text-[#8A6305] transition-colors" href={href}>
                 {label}
             </Link>
         );
     };
 
     return (
-        <footer className="bg-[#072835] text-white border-t-2 border-[#B8860B]/40 pt-14 pb-8">
+        <footer className="bg-[#0B192C] text-white border-t-2 border-[#8A6305]/40 pt-14 pb-8">
             <div className="container-custom">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
                     {/* Brand Column */}
                     <div className="lg:col-span-2 flex flex-col gap-4">
                         <Link href="/" className="inline-block mb-1 group">
-                            <h4 className="text-2xl font-extrabold text-[#E5B54A] tracking-tight group-hover:text-white transition-colors">
+                            <h4 className="text-2xl font-extrabold text-[#8A6305] tracking-tight group-hover:text-white transition-colors">
                                 {brandTitle}
                             </h4>
                         </Link>
@@ -121,7 +121,7 @@ const Footer = async ({ t, language }: FooterProps) => {
                                 return (
                                     <a
                                         key={social.label}
-                                        className="w-9 h-9 rounded-full bg-white/10 text-white hover:bg-[#B8860B] hover:text-white transition-all flex items-center justify-center text-sm border border-white/10 hover:border-[#B8860B]"
+                                        className="w-9 h-9 rounded-full bg-white/10 text-white hover:bg-[#8A6305] hover:text-white transition-all flex items-center justify-center text-sm border border-white/10 hover:border-[#8A6305]"
                                         href={social.href}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -136,19 +136,19 @@ const Footer = async ({ t, language }: FooterProps) => {
 
                     {/* Shop Links */}
                     <div className="flex flex-col gap-4">
-                        <h5 className="font-bold text-sm text-[#E5B54A] uppercase tracking-wider">{shopTitle}</h5>
+                        <h5 className="font-bold text-sm text-[#8A6305] uppercase tracking-wider">{shopTitle}</h5>
                         <ul className="flex flex-col gap-2.5 text-xs sm:text-sm font-medium text-gray-300">
                             {footerCategories.length > 0 ? (
                                 footerCategories.map((category) => (
                                     <li key={category.id}>
-                                        <Link className="hover:text-[#E5B54A] transition-colors" href={`/categories/${category.slug}`}>
-                                            {category.name}
+                                        <Link className="hover:text-[#8A6305] transition-colors" href={`/categories/${category.slug}`}>
+                                            {language === 'ar' ? category.name : (category.description || category.name)}
                                         </Link>
                                     </li>
                                 ))
                             ) : (
                                 <li>
-                                    <Link className="hover:text-[#E5B54A] transition-colors" href="/products">
+                                    <Link className="hover:text-[#8A6305] transition-colors" href="/products">
                                         {t('products.allProducts')}
                                     </Link>
                                 </li>
@@ -158,7 +158,7 @@ const Footer = async ({ t, language }: FooterProps) => {
 
                     {/* Support Links */}
                     <div className="flex flex-col gap-4">
-                        <h5 className="font-bold text-sm text-[#E5B54A] uppercase tracking-wider">{supportTitle}</h5>
+                        <h5 className="font-bold text-sm text-[#8A6305] uppercase tracking-wider">{supportTitle}</h5>
                         <ul className="flex flex-col gap-2.5 text-xs sm:text-sm font-medium text-gray-300">
                             {supportLinks.map((link) => (
                                 <li key={`${link.label}-${link.url}`}>
@@ -170,7 +170,7 @@ const Footer = async ({ t, language }: FooterProps) => {
 
                     {/* Company Links */}
                     <div className="flex flex-col gap-4">
-                        <h5 className="font-bold text-sm text-[#E5B54A] uppercase tracking-wider">{companyTitle}</h5>
+                        <h5 className="font-bold text-sm text-[#8A6305] uppercase tracking-wider">{companyTitle}</h5>
                         <ul className="flex flex-col gap-2.5 text-xs sm:text-sm font-medium text-gray-300">
                             {companyLinks.map((link) => (
                                 <li key={`${link.label}-${link.url}`}>

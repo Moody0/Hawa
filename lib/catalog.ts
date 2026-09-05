@@ -70,6 +70,21 @@ const catalogBrandSelect = {
     image: true,
     group: true,
     isFeatured: true,
+    _count: {
+        select: {
+            products: true,
+        },
+    },
+    products: {
+        where: {
+            NOT: [
+                { images: '/placeholder.svg' },
+                { images: '' }
+            ]
+        },
+        take: 1,
+        select: { images: true }
+    },
     mainCategory: {
         select: {
             id: true,
@@ -83,7 +98,7 @@ const catalogBrandSelect = {
 export const getCatalogBrands = cache(
     unstable_cache(
         async () => {
-            return prisma.brand.findMany({
+            const brands = await prisma.brand.findMany({
                 where: { isActive: true },
                 orderBy: [
                     { isFeatured: "desc" },
@@ -91,8 +106,15 @@ export const getCatalogBrands = cache(
                 ],
                 select: catalogBrandSelect,
             });
+            return brands.map(b => {
+                const prodImg = (b as any).products?.[0]?.images ? (b as any).products[0].images.split(',')[0].trim() : null;
+                return {
+                    ...b,
+                    image: b.image && b.image !== '/placeholder.svg' ? b.image : (prodImg || '/logo.png')
+                };
+            });
         },
-        ["catalog-brands"],
+        ["catalog-brands-v2"],
         { tags: ["catalog", "brands"], revalidate: 3600 }
     )
 );
@@ -148,6 +170,7 @@ export const getFooterCategories = cache(async (preferredIds: string[] = []) => 
                 id: true,
                 name: true,
                 slug: true,
+                description: true,
             },
         });
 
@@ -173,6 +196,7 @@ export const getFooterCategories = cache(async (preferredIds: string[] = []) => 
             id: true,
             name: true,
             slug: true,
+            description: true,
         },
     });
 });
@@ -216,6 +240,16 @@ export const getCatalogMainCategories = cache(
                     slug: true,
                     description: true,
                     image: true,
+                    _count: {
+                        select: {
+                            products: {
+                                where: {
+                                    stock: { gt: 0 },
+                                    brand: { isActive: true },
+                                },
+                            },
+                        },
+                    },
                 },
             });
 
@@ -226,9 +260,10 @@ export const getCatalogMainCategories = cache(
                 slug: mc.slug,
                 description: mc.description,
                 image: mc.image,
+                _count: mc._count,
             }));
         },
-        ["catalog-main-categories"],
+        ["catalog-main-categories-v3"],
         { tags: ["catalog", "main-categories"], revalidate: 3600 }
     )
 );
@@ -318,6 +353,9 @@ export const getCatalogInitialData = cache(
                         categoryId: product.categoryId,
                         mainCategoryId: product.mainCategoryId,
                         stock: product.stock,
+                        packaging: product.packaging,
+                        itemsPerPackage: product.itemsPerPackage,
+                        minOrder: product.minOrder,
                         isTrending: product.isTrending,
                         category: product.category ? {
                             id: product.category.id,

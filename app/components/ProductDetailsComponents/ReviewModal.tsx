@@ -130,7 +130,7 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-full text-[#475569] hover:text-[#0B192C] hover:bg-gray-100 transition-colors"
                     >
                         <MdClose className="text-lg" />
                     </button>
@@ -143,12 +143,12 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                             {/* Product */}
                             <div className="flex items-center gap-3">
                                 <img src={productImage} alt={productName} className="w-12 h-12 object-cover rounded-[8px] bg-gray-50 shrink-0" />
-                                <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 leading-snug">{productName}</h3>
+                                <h3 className="font-semibold text-[#0B192C] text-sm line-clamp-2 leading-snug">{productName}</h3>
                             </div>
 
                             {/* Rating */}
                             <div className="flex flex-col items-center py-4 gap-2">
-                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('products.reviewModal.rating')}</span>
+                                <span className="text-xs font-medium text-[#475569] uppercase tracking-wider">{t('products.reviewModal.rating')}</span>
                                 <div
                                     className="flex items-center gap-2"
                                     onMouseLeave={() => setHoveredRating(0)}
@@ -162,7 +162,7 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                                             className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
                                         >
                                             {star <= (hoveredRating || rating)
-                                                ? <MdStar className="text-[32px] text-gray-900 transition-colors" />
+                                                ? <MdStar className="text-[32px] text-[#8A6305] transition-colors" />
                                                 : <MdStarOutline className="text-[32px] text-gray-300 transition-colors" />
                                             }
                                         </button>
@@ -172,19 +172,19 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
 
                             {/* Feedback */}
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-gray-900 uppercase tracking-wider">{t('products.reviewModal.feedback')}</label>
+                                <label className="text-xs font-semibold text-[#0B192C] uppercase tracking-wider">{t('products.reviewModal.feedback')}</label>
                                 <textarea
                                     value={feedback}
                                     onChange={(e) => setFeedback(e.target.value)}
                                     placeholder={t('products.reviewModal.feedbackPlaceholder')}
                                     rows={3}
-                                    className="w-full resize-none rounded-[10px] border border-gray-200 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors placeholder:text-gray-300"
+                                    className="w-full resize-none rounded-[10px] border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#8A6305] transition-colors placeholder:text-gray-300"
                                 />
                             </div>
 
                             {/* Image Upload */}
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-gray-900 uppercase tracking-wider">{t('products.reviewModal.uploadImage')}</label>
+                                <label className="text-xs font-semibold text-[#0B192C] uppercase tracking-wider">{t('products.reviewModal.uploadImage')}</label>
 
                                 {imagePreview ? (
                                     <div className="relative w-full h-36 rounded-[10px] overflow-hidden group border border-gray-100">
@@ -192,7 +192,7 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => fileInputRef.current?.click()}
-                                                className="bg-white text-gray-900 px-4 py-2 rounded-[10px] font-medium text-xs"
+                                                className="bg-white text-[#0B192C] px-4 py-2 rounded-[10px] font-medium text-xs"
                                             >
                                                 {t('products.reviewModal.changeImage')}
                                             </button>
@@ -202,7 +202,7 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-full h-28 rounded-[10px] border border-dashed border-gray-200 flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:text-gray-500 hover:border-gray-300 transition-colors"
+                                        className="w-full h-28 rounded-[10px] border border-dashed border-gray-200 flex flex-col items-center justify-center gap-1.5 text-[#475569] hover:text-[#0B192C] hover:border-gray-300 transition-colors"
                                     >
                                         <MdCloudUpload className="text-2xl" />
                                         <span className="text-xs font-medium">{t('products.reviewModal.uploadImage')}</span>
@@ -219,7 +219,7 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
 
                             <button
                                 onClick={() => setStep(2)}
-                                className="w-full rounded-[10px] bg-gray-900 py-3.5 text-sm font-semibold text-white hover:bg-gray-800 transition-colors mt-1"
+                                className="w-full rounded-[10px] bg-[#0B192C] py-3.5 text-sm font-semibold text-white hover:bg-[#0F172A] transition-colors mt-1"
                             >
                                 {t('products.reviewModal.next')}
                             </button>
@@ -230,7 +230,7 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                     {step === 2 && (
                         <div className="flex flex-col gap-5">
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                                <label className="text-xs font-semibold text-[#0B192C] uppercase tracking-wider">
                                     {t('products.reviewModal.name')} <span className="text-gray-400">*</span>
                                 </label>
                                 <input
@@ -238,19 +238,19 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     placeholder={t('products.reviewModal.namePlaceholder')}
-                                    className="w-full rounded-[10px] border border-gray-200 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors placeholder:text-gray-300"
+                                    className="w-full rounded-[10px] border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#8A6305] transition-colors placeholder:text-gray-300"
                                     required
                                 />
                             </div>
 
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-gray-900 uppercase tracking-wider">{t('products.reviewModal.email')}</label>
+                                <label className="text-xs font-semibold text-[#0B192C] uppercase tracking-wider">{t('products.reviewModal.email')}</label>
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder={t('products.reviewModal.emailPlaceholder')}
-                                    className="w-full rounded-[10px] border border-gray-200 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors placeholder:text-gray-300"
+                                    className="w-full rounded-[10px] border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#8A6305] transition-colors placeholder:text-gray-300"
                                 />
                             </div>
 
@@ -258,11 +258,11 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-[10px]">
                                 <img src={productImage} alt="" className="w-10 h-10 rounded-[6px] object-cover bg-white shrink-0" />
                                 <div className="flex flex-col gap-0.5 min-w-0">
-                                    <span className="text-xs text-gray-500 truncate">{productName}</span>
+                                    <span className="text-xs text-[#475569] truncate">{productName}</span>
                                     <div className="flex items-center gap-px">
                                         {[1, 2, 3, 4, 5].map(s => (
                                             s <= rating
-                                                ? <MdStar key={s} className="text-xs text-gray-900" />
+                                                ? <MdStar key={s} className="text-xs text-[#8A6305]" />
                                                 : <MdStarOutline key={s} className="text-xs text-gray-300" />
                                         ))}
                                     </div>
@@ -272,14 +272,14 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                             <div className="flex gap-3 mt-1">
                                 <button
                                     onClick={() => setStep(1)}
-                                    className="w-1/3 rounded-[10px] border border-gray-200 py-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 transition-colors"
+                                    className="w-1/3 rounded-[10px] border border-gray-200 py-3.5 text-sm font-semibold text-[#0B192C] hover:bg-gray-50 transition-colors"
                                 >
                                     {t('products.reviewModal.back')}
                                 </button>
                                 <button
                                     onClick={handleSubmit}
                                     disabled={isSubmitting || !name.trim()}
-                                    className="w-2/3 rounded-[10px] bg-gray-900 py-3.5 text-sm font-semibold text-white hover:bg-gray-800 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+                                    className="w-2/3 rounded-[10px] bg-[#0B192C] py-3.5 text-sm font-semibold text-white hover:bg-[#0F172A] transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? (
                                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

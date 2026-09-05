@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MdWarning } from "react-icons/md";
+import Link from "next/link";
+import { MdWarning, MdStorefront } from "react-icons/md";
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { updateAdminCredentials } from "../../../../lib/admin-actions";
@@ -21,7 +22,7 @@ export default function SettingsClient({
 }: { 
     initialUser: AdminUser | null
 }) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { openSidebar } = useAdminSidebar();
     
     // Account Settings State
@@ -107,6 +108,29 @@ export default function SettingsClient({
 
             <div className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-8">
                 <div className="max-w-2xl mx-auto">
+                    {/* B2B Wholesale Statistics & Content Quick Link */}
+                    <div className="mb-6 p-5 rounded-2xl bg-[#FAF6EC] dark:bg-zinc-800/80 border border-[#8A6305]/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+                        <div className="flex items-center gap-3.5">
+                            <div className="p-3 rounded-xl bg-[#0B192C] text-[#8A6305] shadow-xs">
+                                <MdStorefront className="text-2xl" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-extrabold text-[#0B192C] dark:text-[#8A6305]">
+                                    {language === 'ar' ? 'إحصائيات الشركة وإعدادات المتجر' : 'Store Settings & Wholesale Metrics'}
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                    {language === 'ar' ? 'تعديل أرقام التوصيل، الوكالات، سعر الصرف ومحتوى المتجر' : 'Configure delivery metrics, agencies count, exchange rate, and site content'}
+                                </p>
+                            </div>
+                        </div>
+                        <Link
+                            href="/admin/site-content"
+                            className="px-4 py-2.5 bg-[#0B192C] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all text-center shrink-0 shadow-xs active:scale-95"
+                        >
+                            {language === 'ar' ? 'إدارة الإحصائيات والمحتوى' : 'Manage Metrics'}
+                        </Link>
+                    </div>
+
                     <div className="bg-surface-light dark:bg-surface-dark rounded-2xl border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] p-8">
                         <div className="mb-8">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-text-main dark:text-white mb-2">
@@ -194,7 +218,7 @@ export default function SettingsClient({
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="flex-1 bg-[#072835] hover:bg-[#0c4054] text-white py-3 rounded-xl font-bold transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 bg-[#0B192C] hover:bg-[#1e293b] text-white py-3 rounded-xl font-bold transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? (
                                         <span className="flex items-center justify-center gap-2">

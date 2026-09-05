@@ -14,6 +14,7 @@ import ScrollReveal from '../ScrollReveal';
 import { getI18n } from '@/lib/i18n';
 
 import HeroCarousel from './HeroCarousel';
+import AgenciesSlider from './AgenciesSlider';
 
 interface Banner {
     id: string;
@@ -98,30 +99,16 @@ const Main = async ({
     const { dir, language } = await getI18n();
 
     return (
-        <main className="w-full flex flex-col gap-y-[40px] md:gap-y-[80px] pb-12">
-            {/* Group Hero Carousel and Brands Rail close to each other */}
-            <div className="flex flex-col gap-y-0">
-                {/* 1. Hero Carousel Section */}
-                <HeroCarousel banners={banners} />
+        <main className="w-full flex flex-col gap-y-6 md:gap-y-10 pb-12">
+            {/* 1. Hero Carousel */}
+            <HeroCarousel banners={banners} />
 
-                {/* 2. Brands Rail (Dynamic from Database) */}
-                <BrandsRail brands={railBrands} />
-            </div>
-
-            {/* 3. First Ad - Placed above CategoryHighlightCards */}
-            <PromoBanner settings={settings} dir={dir} language={language} />
-
-            {/* 4. Main Categories (Dynamic 4 highlight cards from Database) */}
+            {/* 2. Authorized Commercial Agencies Slider (Clean, high-density trade marks) */}
             <ScrollReveal>
-                <CategoryHighlightCards cards={highlightCards} language={language} />
+                <AgenciesSlider brands={railBrands} />
             </ScrollReveal>
 
-            {/* 5. Countdown Offer Section - Placed directly below CategoryHighlightCards */}
-            <ScrollReveal>
-                <CountdownOffer />
-            </ScrollReveal>
-
-            {/* 6. الجديد والمحبوب (New Arrivals & Best Sellers) */}
+            {/* 4. Best Sellers & New Arrivals (Product Rails with Carton Specs) */}
             <ScrollReveal>
                 <FeaturedCollection
                     newArrivals={featuredNewArrivals}
@@ -130,17 +117,17 @@ const Main = async ({
                 />
             </ScrollReveal>
 
-            {/* Featured Categories Grid (Top Categories. Best Sellers) */}
+            {/* 5. Key Wholesale Categories */}
             <ScrollReveal>
                 <FeaturedCategoriesGrid categories={featuredCategories} language={language} dir={dir} />
             </ScrollReveal>
 
-            {/* 7. Trending This Week - Horizontal Product Cards */}
+            {/* 6. Fast-Moving Weekly Demand */}
             <ScrollReveal>
                 <TrendingWeekly products={trendingWeekly} />
             </ScrollReveal>
 
-            {/* 8. Testimonials Masonry (Dynamic Reviews from Database) */}
+            {/* 7. Merchant Endorsements & Store Reviews */}
             <ScrollReveal>
                 <TestimonialsMasonry reviews={reviews} products={featuredBestSellers} />
             </ScrollReveal>

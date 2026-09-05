@@ -46,10 +46,10 @@ const ProductsBreadcrumbs = ({
     const mainCategoryName = getMainCategoryName();
 
     return (
-        <nav className="relative z-20 flex items-center flex-wrap gap-y-2 text-[11px] md:text-[12px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6" aria-label="Breadcrumb">
+        <nav className="relative z-20 flex items-center flex-wrap gap-y-2 text-[11px] md:text-[12px] font-bold text-[#475569] dark:text-gray-400 uppercase tracking-wider mb-6" aria-label="Breadcrumb">
             <Link 
                 href="/" 
-                className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#072835] dark:text-white/80 hover:text-[#B8860B] dark:hover:text-[#E5B54A] cursor-pointer touch-manipulation transition-colors"
+                className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#0B192C] dark:text-white/80 hover:text-[#8A6305] dark:hover:text-[#8A6305] cursor-pointer touch-manipulation transition-colors"
             >
                 {isArabic ? 'الرئيسية' : 'Home'}
             </Link>
@@ -61,19 +61,19 @@ const ProductsBreadcrumbs = ({
                 <>
                     <Link 
                         href="/brands" 
-                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#072835] dark:text-white/80 hover:text-[#B8860B] dark:hover:text-[#E5B54A] cursor-pointer touch-manipulation transition-colors"
+                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#0B192C] dark:text-white/80 hover:text-[#8A6305] dark:hover:text-[#8A6305] cursor-pointer touch-manipulation transition-colors"
                     >
                         {isArabic ? 'العلامات التجارية' : 'Brands'}
                     </Link>
                     <span className="mx-2 md:mx-3 text-gray-300 dark:text-white/20 select-none">/</span>
                     <Link 
                         href={`/brands/${activeBrand.slug}`} 
-                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#072835] dark:text-white/80 hover:text-[#B8860B] dark:hover:text-[#E5B54A] cursor-pointer touch-manipulation transition-colors truncate max-w-[160px] md:max-w-none"
+                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#0B192C] dark:text-white/80 hover:text-[#8A6305] dark:hover:text-[#8A6305] cursor-pointer touch-manipulation transition-colors truncate max-w-[160px] md:max-w-none"
                     >
                         {activeBrand.name}
                     </Link>
                     <span className="mx-2 md:mx-3 text-gray-300 dark:text-white/20 select-none">/</span>
-                    <span className="text-[#B8860B] dark:text-[#E5B54A] truncate max-w-[200px] md:max-w-none">
+                    <span className="text-[#8A6305] dark:text-[#8A6305] truncate max-w-[200px] md:max-w-none">
                         {categoryName}
                     </span>
                 </>
@@ -81,12 +81,12 @@ const ProductsBreadcrumbs = ({
                 <>
                     <Link 
                         href="/brands" 
-                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#072835] dark:text-white/80 hover:text-[#B8860B] dark:hover:text-[#E5B54A] cursor-pointer touch-manipulation transition-colors"
+                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#0B192C] dark:text-white/80 hover:text-[#8A6305] dark:hover:text-[#8A6305] cursor-pointer touch-manipulation transition-colors"
                     >
                         {isArabic ? 'العلامات التجارية' : 'Brands'}
                     </Link>
                     <span className="mx-2 md:mx-3 text-gray-300 dark:text-white/20 select-none">/</span>
-                    <span className="text-[#B8860B] dark:text-[#E5B54A] truncate max-w-[200px] md:max-w-none">
+                    <span className="text-[#8A6305] dark:text-[#8A6305] truncate max-w-[200px] md:max-w-none">
                         {activeBrand.name}
                     </span>
                 </>
@@ -94,12 +94,12 @@ const ProductsBreadcrumbs = ({
                 <>
                     <Link 
                         href="/products" 
-                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#072835] dark:text-white/80 hover:text-[#B8860B] dark:hover:text-[#E5B54A] cursor-pointer touch-manipulation transition-colors"
+                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#0B192C] dark:text-white/80 hover:text-[#8A6305] dark:hover:text-[#8A6305] cursor-pointer touch-manipulation transition-colors"
                     >
                         {isArabic ? 'الأقسام الرئيسية' : 'Departments'}
                     </Link>
                     <span className="mx-2 md:mx-3 text-gray-300 dark:text-white/20 select-none">/</span>
-                    <span className="text-[#B8860B] dark:text-[#E5B54A] truncate max-w-[200px] md:max-w-none">
+                    <span className="text-[#8A6305] dark:text-[#8A6305] truncate max-w-[200px] md:max-w-none">
                         {mainCategoryName}
                     </span>
                 </>
@@ -107,17 +107,17 @@ const ProductsBreadcrumbs = ({
                 <>
                     <Link 
                         href="/products" 
-                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#072835] dark:text-white/80 hover:text-[#B8860B] dark:hover:text-[#E5B54A] cursor-pointer touch-manipulation transition-colors"
+                        className="inline-flex items-center py-1.5 px-1 -my-1.5 text-[#0B192C] dark:text-white/80 hover:text-[#8A6305] dark:hover:text-[#8A6305] cursor-pointer touch-manipulation transition-colors"
                     >
                         {isArabic ? 'جميع المنتجات' : 'All Products'}
                     </Link>
                     <span className="mx-2 md:mx-3 text-gray-300 dark:text-white/20 select-none">/</span>
-                    <span className="text-[#B8860B] dark:text-[#E5B54A] truncate max-w-[200px] md:max-w-none">
+                    <span className="text-[#8A6305] dark:text-[#8A6305] truncate max-w-[200px] md:max-w-none">
                         {categoryName}
                     </span>
                 </>
             ) : (
-                <span className="text-[#072835] dark:text-white font-bold truncate max-w-[150px] md:max-w-none">
+                <span className="text-[#0B192C] dark:text-white font-bold truncate max-w-[150px] md:max-w-none">
                     {isArabic ? 'جميع المنتجات' : 'All Products'}
                 </span>
             )}

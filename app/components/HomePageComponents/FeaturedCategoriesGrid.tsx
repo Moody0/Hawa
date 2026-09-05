@@ -26,7 +26,7 @@ interface FeaturedCategoriesGridProps {
 }
 
 const FeaturedCategoriesGrid = ({ categories, language = 'ar', dir = 'rtl' }: FeaturedCategoriesGridProps) => {
-    const isArabic = language === 'ar';
+    const isArabic = language === 'ar' || dir === 'rtl';
 
     if (!categories || categories.length === 0) {
         return null;
@@ -48,79 +48,69 @@ const FeaturedCategoriesGrid = ({ categories, language = 'ar', dir = 'rtl' }: Fe
     };
 
     return (
-        <section className="container-custom py-6 md:py-12">
+        <section className="container-custom py-2 md:py-4">
             {/* Section Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-8 gap-4 px-1">
+            <div className="flex items-end justify-between mb-6 md:mb-8 border-b border-slate-200 dark:border-white/10 pb-4">
                 <div>
-                    <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#B8860B] dark:text-[#E5B54A] block mb-1">
-                        {isArabic ? 'كتالوج التوريد والمنتجات المعتمدة' : 'Verified Wholesale Catalog'}
-                    </span>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#072835] dark:text-white leading-tight">
-                        {isArabic ? 'أهم الفئات والأكثر طلباً' : 'Top Categories & Best Sellers'}
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#475569] dark:text-slate-400">
+                            {isArabic ? 'كتالوج التوريد بالجملة' : 'Wholesale Product Lines'}
+                        </span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight">
+                        {isArabic ? 'الأقسام والتصنيفات الرئيسية' : 'Key Categories'}
                     </h2>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 mt-1 max-w-xl">
-                        {isArabic
-                            ? 'مستوردة وموزعة مباشرة من كبرى المصانع العالمية مع أفضل خصومات الجملة.'
-                            : 'Sourced directly from certified global food manufacturers with bulk wholesale pricing.'}
-                    </p>
                 </div>
 
                 <Link
                     href="/products"
-                    className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#072835] dark:text-[#E5B54A] hover:text-[#B8860B] transition-colors whitespace-nowrap self-start md:self-end"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#475569] dark:text-slate-300 hover:text-[#8A6305] transition-colors whitespace-nowrap"
                 >
-                    <span>{isArabic ? 'تصفح كافة الأقسام' : 'View All Categories'}</span>
-                    <MdChevronRight className={`text-lg transition-transform ${isArabic ? 'rotate-180' : ''}`} />
+                    <span>{isArabic ? 'عرض كل الأقسام' : 'All Categories'}</span>
+                    <span className={`text-sm ${isArabic ? 'rotate-180' : ''}`}>→</span>
                 </Link>
             </div>
 
-            {/* Symmetrical 5-Column Grid on Desktop, 2-Column on Mobile */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
+            {/* Symmetrical Grid: 2-Col Mobile, 3-Col Tablet, 6-Col Desktop */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
                 {categories.map((category) => {
                     const brandName = getBrandName(category);
                     const displayName = getDisplayName(category);
 
                     return (
-                        <div key={category.id}>
-                            <Link
-                                href={`/categories/${category.slug}`}
-                                className="group relative flex flex-col h-full bg-[#FAF9F5] dark:bg-[#1E1E16] rounded-2xl overflow-hidden border border-[#B8860B]/15 hover:border-[#B8860B]/50 transition-all duration-300 hover:shadow-md p-2.5 sm:p-3.5"
-                            >
-                                {/* Category Image Container (fills container with rounded border radius) */}
-                                <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 mb-2.5">
-                                    {category.image ? (
-                                        <ResilientImage
-                                            src={category.image}
-                                            alt={displayName}
-                                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 200px"
-                                            className="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-gray-100 dark:bg-zinc-800 rounded-lg" />
-                                    )}
-                                </div>
+                        <Link
+                            key={category.id}
+                            href={`/categories/${category.slug}`}
+                            className="group flex flex-col p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#8A6305] dark:hover:border-[#8A6305] bg-white dark:bg-[#132035] transition-all"
+                        >
+                            {/* Category Image - Direct single-layer container */}
+                            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800/40 mb-3 flex items-center justify-center">
+                                {category.image ? (
+                                    <ResilientImage
+                                        src={category.image}
+                                        alt={displayName}
+                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 200px"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        loading="lazy"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-slate-100 dark:bg-slate-800" />
+                                )}
+                            </div>
 
-                                {/* Content Details */}
-                                <div className="flex flex-col flex-1 justify-between text-center px-1 pb-1">
-                                    <div>
-                                        {brandName && (
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#B8860B] dark:text-[#E5B54A] block mb-0.5 truncate">
-                                                {brandName}
-                                            </span>
-                                        )}
-                                        <h3 className="text-xs sm:text-sm font-bold text-[#072835] dark:text-white leading-snug group-hover:text-[#B8860B] transition-colors line-clamp-2">
-                                            {displayName}
-                                        </h3>
-                                    </div>
-
-                                    <div className="mt-2 pt-2 border-t border-gray-200/50 dark:border-white/5 flex items-center justify-center gap-1 text-[11px] font-semibold text-[#2E7D32] dark:text-[#4ade80] opacity-90 group-hover:opacity-100">
-                                        <span>{isArabic ? 'تسوق القسم' : 'Shop Category'}</span>
-                                        <span className={`transition-transform duration-300 group-hover:translate-x-1 ${isArabic ? 'rotate-180 group-hover:-translate-x-1' : ''}`}>➔</span>
-                                    </div>
-                                </div>
-                            </Link>
-                        </div>
+                            {/* Details */}
+                            <div className="flex flex-col text-center">
+                                {brandName && (
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8A6305] dark:text-[#E5B54A] block mb-0.5 truncate">
+                                        {brandName}
+                                    </span>
+                                )}
+                                <h3 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white leading-snug group-hover:text-[#8A6305] transition-colors line-clamp-1">
+                                    {displayName}
+                                </h3>
+                            </div>
+                        </Link>
                     );
                 })}
             </div>

@@ -43,6 +43,25 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowSVG: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/brands',
+        destination: '/agencies',
+        permanent: true,
+      },
+      {
+        source: '/brands/:slug',
+        destination: '/agencies/:slug',
+        permanent: true,
+      },
+      {
+        source: '/department/:slug',
+        destination: '/departments/:slug',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withBundleAnalyzer({

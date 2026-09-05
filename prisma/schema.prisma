@@ -89,6 +89,10 @@ model Product {
   stock          Int           @default(0)
   options        String?
   categoryId     String
+  packaging      String?       @default("طرد")
+  itemsPerPackage String?
+  minOrder       Int           @default(1)
+  hidePrice      Boolean       @default(false)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   sku            String?
@@ -99,6 +103,7 @@ model Product {
   category       Category      @relation(fields: [categoryId], references: [id])
   mainCategory   MainCategory? @relation(fields: [mainCategoryId], references: [id])
   reviews        Review[]
+  wishlistItems  WishlistItem[]
 
   @@index([brandId])
   @@index([categoryId])
@@ -147,14 +152,19 @@ model Order {
   streetAddress String
   Name          String
   phone         String
+  shopName      String?
+  notes         String?
   discount      Decimal     @default(0) @db.Decimal(10, 2)
   promoCodeId   String?
   promoCode     PromoCode?  @relation(fields: [promoCodeId], references: [id])
+  customerId    String?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
   items         OrderItem[]
 
   @@index([status])
   @@index([createdAt])
   @@index([promoCodeId])
+  @@index([customerId])
 }
 
 model Banner {
@@ -239,10 +249,10 @@ model Settings {
   aboutHeroSubtitleAr       String?  @default("شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.")
   aboutHeroTitle            String?  @default("Our Story")
   aboutHeroTitleAr          String?  @default("قصتنا")
-  aboutNarrativeDesc1       String?  @default("At Zad Land, we bridge the gap between world-renowned international brands and local markets. We believe in providing retailers and businesses with seamless access to authentic, top-tier goods at competitive wholesale prices.")
-  aboutNarrativeDesc1Ar     String?  @default("في زاد لاند، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية العالمية والأسواق المحلية.")
-  aboutNarrativeDesc2       String?  @default("With rigorous quality control, modern logistics, and a commitment to reliability, Zad Land has established itself as the trusted partner for food and consumer goods distribution across all governorates.")
-  aboutNarrativeDesc2Ar     String?  @default("بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت زاد لاند مكانتها كشركة رائدة وموثوقة لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.")
+  aboutNarrativeDesc1       String?  @default("At Hawa Distribution, we bridge the gap between world-renowned international brands and local markets. We believe in providing retailers and businesses with seamless access to authentic, top-tier goods at competitive wholesale prices.")
+  aboutNarrativeDesc1Ar     String?  @default("في شركة هوا للتوزيع والتجارة، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية والأسواق المحلية.")
+  aboutNarrativeDesc2       String?  @default("With rigorous quality control, modern logistics, and a commitment to reliability, Hawa Distribution has established itself as the trusted partner for food and consumer goods distribution across all governorates.")
+  aboutNarrativeDesc2Ar     String?  @default("بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت شركة هوا مكانتها كشريك رائد وموثوق لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.")
   aboutNarrativeImage       String?  @default("https://lh3.googleusercontent.com/aida-public/AB6AXuC4yp4c_LJLNPwaV2ay8DZ6xRHD0UF1WqXU8eDtrdDoiVjtq9oNRc9Cn6cnbqsNwOLO-y-99jnkiLnCsGLs2rQqthU8TPqhAh2Msisbst1UyfyrILBR5fRO7KYu90u1FEoeRRjGceGVbB5vz2SJAtjzUrLLtA6BmR8VN5a5Seo4MraBJj7i4Gs4QPEZbURtSN-F7wbJsu4WNj3pEaWlye2SuJvokQhYXJ27gnAoabHg5_0_4DZY49qyKnQuMHHL9atOIILRIMD3FkeZ")
   aboutNarrativeQuote       String?  @default("Connecting you with the world's finest brands.")
   aboutNarrativeQuoteAr     String?  @default("جودة مضمونة وخدمة توزيع موثوقة.")
@@ -257,7 +267,7 @@ model Settings {
   aboutValue2Title          String?  @default("100% Authentic")
   aboutValue2TitleAr        String?  @default("أصلي 100٪")
   aboutValue3Desc           String?  @default("Temperature-controlled logistics fleet covering all distribution channels.")
-  aboutValue3DescAr         String?  @default("أسطول سيارات وشاحنات مجهزة لنقل وتوزيع البضائع والمفرزات بدقة وكفاءة.")
+  aboutValue3DescAr         String?  @default("أسطول سيارات وشاحنات مجهزة لنقل وتوزيع البضائع بدقة وكفاءة.")
   aboutValue3Title          String?  @default("Reliable Fleet")
   aboutValue3TitleAr        String?  @default("أسطول توزيع مجهز")
   aboutValuesDesc           String?  @default("We are committed to transparency, reliability, and excellence in food distribution.")
@@ -266,15 +276,16 @@ model Settings {
   aboutValuesTitleAr        String?  @default("قيمنا الجوهرية")
   aboutNarrativeFounded     String?  @default("Founded with Trust")
   aboutNarrativeFoundedAr   String?  @default("تأسست على الثقة")
-  footerBrandTitle          String?  @default("Zad Land")
-  footerBrandTitleAr        String?  @default("زاد لاند")
-  footerBrandDescription    String?  @default("Your trusted partner in wholesale food and consumer goods distribution from top international brands.")
-  footerBrandDescriptionAr  String?  @default("شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.")
-  footerCopyright           String?  @default("© 2026 Zad Land. All rights reserved.")
-  footerCopyrightAr         String?  @default("© 2026 زاد لاند. جميع الحقوق محفوظة.")
+  footerBrandTitle          String?  @default("Hawa Distribution")
+  footerBrandTitleAr        String?  @default("هوا للتوزيع والتجارة")
+  footerBrandDescription    String?  @default("Your trusted partner in wholesale food and consumer goods distribution from top brands.")
+  footerBrandDescriptionAr  String?  @default("شريككم الموثوق لتوزيع البضائع والمواد الغذائية والاستهلاكية من أفضل الشركات.")
+  footerCopyright           String?  @default("© 2026 Hawa Distribution & Trading. All rights reserved.")
+  footerCopyrightAr         String?  @default("© 2026 هوا للتوزيع والتجارة. جميع الحقوق محفوظة.")
   footerInstagramUrl        String?  @default("#")
   footerFacebookUrl         String?  @default("#")
   footerWhatsappUrl         String?  @default("#")
+  whatsappNumber            String?  @default("+963900000000")
   footerShopTitle           String?  @default("Shop")
   footerShopTitleAr         String?  @default("المتجر")
   footerSupportTitle        String?  @default("Support")
@@ -314,13 +325,19 @@ model Settings {
   middleBanner2SubtitleAr   String?  @default("اكتشف أفضل المنتجات من كبرى الشركات العالمية.")
   middleBanner2Title        String?  @default("Global Brands")
   middleBanner2TitleAr      String?  @default("شركات عالمية")
+  statDeliveries            String?  @default("+9000")
+  statBrands                String?  @default("+100")
+  statProducts              String?  @default("+500")
+  statClients               String?  @default("+300")
 }
 
 enum OrderStatus {
   PENDING
+  CONTACTED
   PROCESSING
   SHIPPED
   DELIVERED
+  COMPLETED
   CANCELLED
 }
 
@@ -349,4 +366,55 @@ model Review {
 
   @@index([productId])
   @@index([productId, isApproved])
+}
+
+model Customer {
+  id           String         @id @default(cuid())
+  shopName     String
+  ownerName    String
+  phone        String         @unique
+  city         String
+  address      String
+  password     String
+  notes        String?
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  orders       Order[]
+  wishlist     WishlistItem[]
+
+  @@index([phone])
+}
+
+model WishlistItem {
+  id         String    @id @default(cuid())
+  customerId String
+  productId  String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+
+  @@unique([customerId, productId])
+  @@index([customerId])
+  @@index([productId])
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  titleAr     String?
+  slug        String   @unique
+  excerpt     String?
+  excerptAr   String?
+  content     String   @db.Text
+  contentAr   String?  @db.Text
+  image       String?
+  category    String   @default("أخبار الشركة")
+  categoryAr  String?  @default("أخبار الشركة")
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, createdAt])
+  @@index([category])
 }

@@ -31,8 +31,8 @@ const CategoryHighlightCards = ({ cards = [], language = 'ar' }: CategoryHighlig
         <section className="container-custom">
             {/* Section Title */}
             <div className="flex justify-center mb-6 md:mb-8 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                <h2 className="text-xl md:text-2xl lg:text-[28px] font-bold text-[rgb(46,46,46)] dark:text-white tracking-tight">
-                    {language === 'ar' ? 'تسوق حسب الفئة' : 'Shop By Category'}
+                <h2 className="text-xl md:text-2xl lg:text-[28px] font-extrabold text-[#0B192C] dark:text-white tracking-tight">
+                    {language === 'ar' ? 'أقسام التوريد بالجملة' : 'Wholesale Supply Departments'}
                 </h2>
             </div>
 
@@ -47,8 +47,8 @@ const CategoryHighlightCards = ({ cards = [], language = 'ar' }: CategoryHighlig
                             className="flex-none w-[170px] sm:w-[190px] md:flex-1 min-w-0 snap-start"
                         >
                             <Link
-                                href={`/department/${card.slug}`}
-                                className="group relative flex flex-col h-full bg-[#FAF9F5] dark:bg-[#1E1E16] rounded-2xl overflow-hidden border border-[#B8860B]/15 hover:border-[#B8860B]/50 transition-all duration-300 hover:shadow-md p-2.5 sm:p-3.5"
+                                href={`/departments/${card.slug}`}
+                                className="group relative flex flex-col h-full bg-[#FAF9F5] dark:bg-[#1E1E16] rounded-2xl overflow-hidden border border-[#8A6305]/15 hover:border-[#8A6305]/50 transition-all duration-300 hover:shadow-md p-2.5 sm:p-3.5"
                             >
                                 {/* Image Container (Structured with inner rounded frame) */}
                                 <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-white/5 mb-2.5 flex items-center justify-center">
@@ -66,7 +66,7 @@ const CategoryHighlightCards = ({ cards = [], language = 'ar' }: CategoryHighlig
                                 <div className="flex flex-col flex-1 justify-between px-1 pb-1">
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="flex flex-col min-w-0">
-                                            <h3 className="text-[13px] sm:text-[14px] md:text-[16px] font-bold text-[#072835] dark:text-white leading-tight group-hover:text-[#B8860B] transition-colors truncate">
+                                            <h3 className="text-[13px] sm:text-[14px] md:text-[16px] font-bold text-[#0B192C] dark:text-white leading-tight group-hover:text-[#8A6305] transition-colors truncate">
                                                 {categoryName}
                                             </h3>
                                             <p className="text-[10px] md:text-xs text-[#2E7D32] dark:text-[#4ade80] font-semibold mt-0.5">
@@ -75,7 +75,7 @@ const CategoryHighlightCards = ({ cards = [], language = 'ar' }: CategoryHighlig
                                         </div>
 
                                         {/* Outline Icon */}
-                                        <div className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-zinc-800 border border-gray-200/80 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-300 transition-all duration-300 group-hover:border-[#B8860B] group-hover:bg-[#B8860B] group-hover:text-white shadow-2xs">
+                                        <div className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-zinc-800 border border-gray-200/80 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-300 transition-all duration-300 group-hover:border-[#8A6305] group-hover:bg-[#8A6305] group-hover:text-white shadow-2xs">
                                             <svg className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${language === 'ar' ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>

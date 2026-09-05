@@ -7,28 +7,28 @@ import { Metadata } from "next";
 export const revalidate = 3600; // Revalidate every hour
 
 export const metadata: Metadata = {
-    title: "فئات وأقسام المنتجات الغذائية | Food Categories - Zad Land",
-    description: "استعرض كافة فئات المواد الغذائية والاستهلاكية بالجملة: لحوم مجمدة، معلبات، صلصات، حبوب إفطار، قهوة، وشوكولا ومخبوزات معتمدة.",
+    title: "فئات وأقسام المنتجات والوكالات | Categories - Hawa Distribution",
+    description: "استعرض كافة فئات المنتجات الغذائية والاستهلاكية والمنظفات بالجملة: معلبات، سمن وزيت، بقوليات، عناية شخصية، ومنظفات ومطهرات معتمدة لدى شركة هوا للتوزيع والتجارة.",
     alternates: {
         canonical: "/categories",
     },
     openGraph: {
-        title: "فئات وأقسام المنتجات | Zad Land",
-        description: "استعرض كافة فئات المواد الغذائية والاستهلاكية بالجملة لدى شركة زاد لاند.",
+        title: "فئات وأقسام المنتجات | Hawa Distribution - هوا للتوزيع",
+        description: "استعرض كافة فئات المواد الغذائية والاستهلاكية والمنظفات بالجملة لدى شركة هوا للتوزيع والتجارة.",
         url: "/categories",
         images: [
             {
                 url: "/og-image.jpg",
                 width: 1200,
                 height: 630,
-                alt: "Zad Land Food Categories",
+                alt: "Hawa Distribution Categories",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
-        title: "فئات وأقسام المنتجات | Zad Land",
-        description: "استعرض كافة فئات المواد الغذائية والاستهلاكية بالجملة لدى شركة زاد لاند.",
+        title: "فئات وأقسام المنتجات | Hawa Distribution - هوا للتوزيع",
+        description: "استعرض كافة فئات المواد الغذائية والاستهلاكية والمنظفات بالجملة لدى شركة هوا للتوزيع والتجارة.",
         images: ["/og-image.jpg"],
     },
 };

@@ -2,13 +2,13 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Zad Land | زاد لاند لتجارة وتوزيع المواد الغذائية',
-        short_name: 'Zad Land',
-        description: 'شركة زاد لاند - منصة تجارة وتوزيع المواد الغذائية والمنتجات الاستهلاكية بالجملة من كبرى العلامات العالمية.',
+        name: 'Hawa Distribution & Trading | هوا للتوزيع والتجارة',
+        short_name: 'Hawa',
+        description: 'شركة هوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة.',
         start_url: '/',
         display: 'standalone',
-        background_color: '#FAF6EC',
-        theme_color: '#072835',
+        background_color: '#FFFFFF',
+        theme_color: '#0B192C',
         icons: [
             {
                 src: '/android-chrome-192x192.png',

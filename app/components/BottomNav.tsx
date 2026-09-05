@@ -8,7 +8,7 @@ import { MdHome, MdShoppingCart, MdCategory, MdFavoriteBorder, MdPerson } from '
 import { useCart } from '@/app/context/CartContext';
 
 const BottomNav = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const pathname = usePathname();
     const { totalItems } = useCart();
 
@@ -40,10 +40,10 @@ const BottomNav = () => {
             isActive: false,
         },
         {
-            href: '/about-us',
-            label: t('nav.account'),
+            href: '/account',
+            label: language === 'ar' ? 'حسابي' : 'Account',
             icon: MdPerson,
-            isActive: pathname === '/about-us',
+            isActive: pathname.startsWith('/account'),
         },
     ];
 

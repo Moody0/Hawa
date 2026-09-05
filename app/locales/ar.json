@@ -20,16 +20,20 @@
         "showMore": "المزيد",
         "showLess": "عرض أقل",
         "categories": "الاقسام",
-        "continueShopping": "متابعة التسوق"
+        "continueShopping": "متابعة التسوق",
+        "slogan": "كل منتجات وكالاتك… بطلب واحد",
+        "orderNow": "اطلب الآن",
+        "orderNowWhatsApp": "اطلب الآن عبر واتساب",
+        "browseProducts": "تصفح المنتجات"
     },
     "announcement": {
-        "freeShipping": "شحن مجاني للطلبات فوق 299 ريال"
+        "freeShipping": "توريد مباشر وشحن لكافة المحافظات بأفضل أسعار الجملة"
     },
     "header": {
-        "brandName": "زاد لاند"
+        "brandName": "هوا للتوزيع والتجارة"
     },
     "nav": {
-        "rubyBeauty": "زاد لاند",
+        "rubyBeauty": "هوا للتوزيع والتجارة",
         "makeup": "معلبات",
         "perfumes": "مشروبات",
         "accessories": "سناكات وحلويات",
@@ -40,11 +44,11 @@
         "account": "حسابي"
     },
     "footer": {
-        "brandDescription": "شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.",
+        "brandDescription": "شريككم الموثوق لتوزيع البضائع والمواد الغذائية والاستهلاكية من أفضل الشركات العالمية.",
         "shop": "المتجر",
         "skincare": "المواد الغذائية",
         "makeup": "المعلبات",
-        "fragrance": "المشروبات",
+        "fragrance": "المنظفات",
         "toolsAccessories": "سناكات وحلويات",
         "giftSets": "عروض الجملة",
         "support": "الدعم",
@@ -56,7 +60,7 @@
         "careers": "الوظائف",
         "sustainability": "الاستدامة",
         "press": "الصحافة",
-        "copyright": "© 2026 زاد لاند. جميع الحقوق محفوظة."
+        "copyright": "© 2026 شركة هوا للتوزيع والتجارة. جميع الحقوق محفوظة."
     },
     "home": {
         "trendingNow": "الرائج الآن",
@@ -69,7 +73,7 @@
         "shopByCategory": "تسوق حسب الفئة",
         "bestSellers": "الأكثر مبيعاً",
         "featuredCollection": "تشكيلة التوريد المتميزة",
-        "featuredCollectionSubtitle": "أفضل المواد الغذائية المستوردة، الأساسيات التموينية، وأحدث الإضافات للمتاجر والمطاعم.",
+        "featuredCollectionSubtitle": "المواد الغذائية والتموينية الأكثر طلباً",
         "featuredTabNewArrivals": "وصل حديثاً",
         "featuredTabBundles": "طرود الجملة",
         "featuredTabBestSellers": "الأكثر طلباً",
@@ -99,7 +103,7 @@
         "footerInfoNewsletter": "اشترك بنشرتنا البريدية",
         "footerInfoNewsletterDesc": "للحصول على أحدث العروض",
         "footerInfoInstagram": "تابعنا على انستقرام",
-        "footerInfoInstagramDesc": "@zadland",
+        "footerInfoInstagramDesc": "@hawadistribution",
         "footerInfoDiscount": "كود خصم جديد؟",
         "footerInfoDiscountDesc": "اشترك الآن",
         "footerInfoExclusive": "عروض حصرية",
@@ -107,7 +111,7 @@
     },
     "products": {
         "allProducts": "جميع المنتجات",
-        "catalogEyebrow": "كتالوج الجمال الحديث",
+        "catalogEyebrow": "كتالوج كبرى الوكالات التجارية",
         "allProductsDescription": "تصفح كل المجموعات من خلال كتالوج هادئ وسهل الاستخدام.",
         "browseCategories": "تصفح الفئات",
         "browseCategoriesHint": "انتقل مباشرة إلى المجموعة التي تريدها بلمسة واحدة.",
@@ -191,27 +195,33 @@
     },
     "checkout": {
         "placeOrder": "تأكيد الطلب",
-        "shippingInformation": "معلومات الشحن",
+        "shippingInformation": "معلومات المحل والتوصيل",
+        "shopName": "اسم المحل",
+        "shopNamePlaceholder": "مثال: سوبر ماركت الأمانة",
+        "ownerName": "اسم صاحب الطلب",
+        "ownerNamePlaceholder": "مثال: محمد أحمد",
         "firstName": "الاسم الأول",
         "lastName": "اسم العائلة",
         "fullName": "الاسم الكامل",
-        "phoneNumber": "رقم الهاتف",
-        "streetAddress": "العنوان التفصيلي",
+        "phoneNumber": "رقم الهاتف (واتساب)",
+        "streetAddress": "العنوان بالتفصيل",
         "address": "العنوان",
-        "city": "المدينة / المحافظة",
-        "notes": "ملاحظات (اختياري)",
-        "notesPlaceholder": "أي تعليمات خاصة للتوصيل...",
+        "city": "المحافظة / المنطقة",
+        "notes": "ملاحظات إضافية",
+        "notesPlaceholder": "أي ملاحظات أو تعليمات خاصة للتوصيل...",
         "orderItems": "عناصر الطلب",
-        "confirmOrder": "تأكيد الطلب",
+        "confirmOrder": "إرسال الطلب عبر واتساب",
+        "sendViaWhatsapp": "إرسال الطلب عبر واتساب",
+        "resendViaWhatsapp": "إعادة إرسال عبر واتساب",
         "processing": "جاري المعالجة...",
-        "deliveryInfo": "التوصيل يستغرق 3-5 أيام عمل.",
+        "deliveryInfo": "يتم تأكيد الطلب فوراً وتجهيزه عبر أسطول التوزيع.",
         "promoCode": "رمز الخصم",
         "discount": "الخصم",
         "paymentMethod": "طريقة الدفع",
         "cashOnDelivery": "الدفع عند الاستلام",
-        "secureCheckout": "دفع آمن مضمون",
+        "secureCheckout": "طلب جملة مباشر وموثوق",
         "needAssistance": "تحتاج مساعدة؟",
-        "speakWithExpert": "تحدث مع قسم مبيعات الجملة"
+        "speakWithExpert": "تحدث مع قسم مبيعات وتوزيع الجملة"
     },
     "orderComplete": {
         "thankYou": "شكراً لك!",
@@ -250,6 +260,19 @@
         "dashboard": "لوحة التحكم",
         "brands": "العلامات التجارية",
         "products": "المنتجات",
+        "customers": "العملاء والمحلات",
+        "blog": "المقالات والمدونة",
+        "reviews": "التقييمات",
+        "mainCategories": "التصنيفات الرئيسية",
+        "catalogManagement": "إدارة الكتالوج",
+        "salesAndCustomers": "المبيعات والعملاء",
+        "storeAndSystem": "المتجر والنظام",
+        "companyStats": "إحصائيات الشركة",
+        "companyStatsDesc": "الأرقام والإحصائيات المعروضة في واجهة المتجر لتعزيز ثقة المحلات والعملاء.",
+        "statDeliveries": "عمليات التوصيل الناجحة",
+        "statBrands": "الوكالات والعلامات التجارية",
+        "statProducts": "المنتجات المتاحة بالجملة",
+        "statClients": "العملاء ونقاط البيع النشطة",
         "searchProducts": "البحث في المنتجات...",
         "searchCategories": "البحث في الفئات...",
         "noResultsFound": "لم يتم العثور على نتائج",
@@ -340,7 +363,7 @@
             "rememberMe": "تذكرني",
             "signingIn": "جاري تسجيل الدخول...",
             "submitButton": "تسجيل الدخول إلى لوحة التحكم",
-            "footerCopyright": "© 2026 زاد لاند إنتربرايز",
+            "footerCopyright": "© 2026 شركة هوا للتوزيع والتجارة",
             "welcomeBack": "مرحباً بعودتك",
             "subtitle": "يرجى إدخال بياناتك لتسجيل الدخول."
         },
@@ -418,6 +441,13 @@
         "cancelled": "ملغي",
         "unknown": "غير معروف",
         "customerName": "اسم العميل",
+        "shopName": "اسم المحل / المتجر",
+        "orderNotes": "ملاحظات التوصيل",
+        "contactWhatsApp": "مراسلة عبر واتساب",
+        "wholesaleWhatsAppNumber": "رقم استلام طلبات الجملة على واتساب",
+        "wholesaleWhatsAppNumberDesc": "سيتم إرسال وتوجيه طلبات المتجر بالجملة إلى هذا الرقم مباشرة.",
+        "packagingUnit": "وحدة التعبئة",
+        "priceOnInquiry": "السعر عند الطلب",
         "totalAmount": "المبلغ الإجمالي",
         "orderStatus": "حالة الطلب",
         "details": "التفاصيل",
@@ -807,13 +837,13 @@
         "narrative": {
             "founded": "تأسست على الثقة",
             "title": "مهمتنا في التوزيع الموثوق",
-            "para1": "في زاد لاند، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية العالمية والأسواق المحلية. نسعى لتمكين التجار وأصحاب المحلات من الحصول على أفضل البضائع بأسعار جملة تنافسية وبأعلى معايير الجودة.",
-            "para2": "بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت زاد لاند مكانتها كشركة رائدة وموثوقة لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.",
+            "para1": "في شركة هوا للتوزيع والتجارة، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية والأسواق المحلية. نسعى لتمكين التجار وأصحاب المحلات من الحصول على أفضل البضائع بأسعار جملة تنافسية وبأعلى معايير الجودة.",
+            "para2": "بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت شركة هوا مكانتها كشريك رائد وموثوق لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.",
             "quote": "جودة مضمونة وخدمة توزيع موثوقة."
         },
         "values": {
             "title": "قيمنا الأساسية",
-            "description": "في زاد لاند، نبني شراكاتنا على الثقة والالتزام بالجودة وأفضل الأسعار.",
+            "description": "في شركة هوا، نبني شراكاتنا على الثقة والالتزام بالجودة وأفضل الأسعار.",
             "crueltyFree": {
                 "title": "أصلي 100%",
                 "description": "شراكات مباشرة مع كبرى الشركات المصنعة لضمان منتجات أصلية بأعلى جودة."

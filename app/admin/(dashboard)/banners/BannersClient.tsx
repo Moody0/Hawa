@@ -108,7 +108,7 @@ export default function BannersClient({ banners }: { banners: Banner[] }) {
                         {canManage && (
                             <button
                                 onClick={handleAdd}
-                                className="flex items-center gap-2 bg-[#072835] hover:bg-[#0c4054] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xs cursor-pointer"
+                                className="flex items-center gap-2 bg-[#0B192C] hover:bg-[#1e293b] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xs cursor-pointer"
                             >
                                 <MdAdd className="text-xl" />
                                 <span>{t('admin.addNewBanner')}</span>
@@ -136,7 +136,7 @@ export default function BannersClient({ banners }: { banners: Banner[] }) {
                                     <div className="flex flex-col gap-3">
                                         <div className="flex flex-wrap items-center gap-2">
                                             {banner.badge && (
-                                                <span className="bg-amber-50 text-[#B8860B] border border-amber-200 dark:bg-amber-950/40 dark:text-[#E5B54A] dark:border-amber-900 px-3 py-0.5 rounded-full text-[11px] font-bold">
+                                                <span className="bg-amber-50 text-[#8A6305] border border-amber-200 dark:bg-amber-950/40 dark:text-[#8A6305] dark:border-amber-900 px-3 py-0.5 rounded-full text-[11px] font-bold">
                                                     🇬🇧 {banner.badge}
                                                 </span>
                                             )}

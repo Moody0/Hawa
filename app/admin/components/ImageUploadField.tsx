@@ -100,7 +100,7 @@ export default function ImageUploadField({
                         onClick={() => setMode("file")}
                         className={`px-2.5 py-1 rounded-md font-semibold transition-all flex items-center gap-1 ${
                             mode === "file"
-                                ? "bg-white dark:bg-slate-700 text-[#072835] dark:text-[#E5B54A] shadow-xs"
+                                ? "bg-white dark:bg-slate-700 text-[#0B192C] dark:text-[#8A6305] shadow-xs"
                                 : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
                         }`}
                     >
@@ -112,7 +112,7 @@ export default function ImageUploadField({
                         onClick={() => setMode("url")}
                         className={`px-2.5 py-1 rounded-md font-semibold transition-all flex items-center gap-1 ${
                             mode === "url"
-                                ? "bg-white dark:bg-slate-700 text-[#072835] dark:text-[#E5B54A] shadow-xs"
+                                ? "bg-white dark:bg-slate-700 text-[#0B192C] dark:text-[#8A6305] shadow-xs"
                                 : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
                         }`}
                     >
@@ -147,7 +147,7 @@ export default function ImageUploadField({
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isUploading}
-                                className="text-xs font-bold text-[#072835] dark:text-[#E5B54A] hover:underline cursor-pointer disabled:opacity-50"
+                                className="text-xs font-bold text-[#0B192C] dark:text-[#8A6305] hover:underline cursor-pointer disabled:opacity-50"
                             >
                                 {isArabic ? "تغيير الصورة" : "Change Image"}
                             </button>
@@ -169,20 +169,20 @@ export default function ImageUploadField({
                     onClick={() => !isUploading && fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center cursor-pointer transition-all ${
                         isUploading
-                            ? "border-[#072835] bg-slate-50 dark:bg-slate-900/50 opacity-70 cursor-not-allowed"
-                            : "border-slate-300 dark:border-slate-700 hover:border-[#072835] hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
+                            ? "border-[#0B192C] bg-slate-50 dark:bg-slate-900/50 opacity-70 cursor-not-allowed"
+                            : "border-slate-300 dark:border-slate-700 hover:border-[#0B192C] hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
                     }`}
                 >
                     {isUploading ? (
                         <>
-                            <MdSync className="text-3xl text-[#072835] dark:text-[#E5B54A] animate-spin" />
+                            <MdSync className="text-3xl text-[#0B192C] dark:text-[#8A6305] animate-spin" />
                             <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
                                 {isArabic ? "جاري رفع الصورة..." : "Uploading image..."}
                             </p>
                         </>
                     ) : (
                         <>
-                            <div className="size-10 rounded-full bg-[#072835]/5 dark:bg-white/5 flex items-center justify-center text-[#072835] dark:text-[#E5B54A]">
+                            <div className="size-10 rounded-full bg-[#0B192C]/5 dark:bg-white/5 flex items-center justify-center text-[#0B192C] dark:text-[#8A6305]">
                                 <MdCloudUpload className="text-xl" />
                             </div>
                             <div>
@@ -203,7 +203,7 @@ export default function ImageUploadField({
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         placeholder={placeholder}
-                        className="w-full rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-[#072835] focus:ring-2 focus:ring-[#072835]/15"
+                        className="w-full rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15"
                     />
                 </div>
             )}

@@ -7,8 +7,10 @@ import ResilientImage from '@/app/components/ResilientImage';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCart } from '@/app/context/CartContext';
+import { useCustomer } from '@/app/context/CustomerContext';
+import { MdSearch, MdShoppingBag, MdAdd, MdRemove, MdFavorite, MdFavoriteBorder, MdVisibility } from 'react-icons/md';
+import { formatPackaging, formatPackageItems } from '@/lib/packaging';
 import toast from 'react-hot-toast';
-import { MdSearch, MdShoppingBag, MdAdd, MdRemove } from 'react-icons/md';
 
 const QuickViewModal = dynamic(() => import('./QuickViewModal'), { ssr: false });
 
@@ -26,6 +28,10 @@ export interface Product {
     images: string;
     categoryId?: string;
     stock?: number;
+    packaging?: string | null;
+    itemsPerPackage?: string | number | null;
+    minOrder?: number | null;
+    hidePrice?: boolean;
     options?: string | null;
     isTrending?: boolean;
     brand?: {
@@ -48,9 +54,11 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
     const { language, dir } = useLanguage();
     const { formatPrice } = useCurrency();
     const { items, addItem, updateQuantity, removeItem } = useCart();
+    const { isFavorite, toggleWishlist } = useCustomer();
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
     const [isSecondaryLoaded, setIsSecondaryLoaded] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const isFav = isFavorite(product.id);
 
     // Localized title & description
     const displayName = (language === 'ar' ? product.nameAr : product.nameEn) || product.name || product.nameAr || '';
@@ -89,6 +97,9 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
             quantity: 1,
             description: displayDesc || undefined,
             selectedOption: defaultOption,
+            packaging: formatPackaging(product.packaging, language),
+            itemsPerPackage: product.itemsPerPackage || null,
+            minOrder: product.minOrder || 1,
         });
         toast.success(language === 'ar' ? `تمت إضافة ${displayName} إلى السلة` : `Added ${displayName} to cart`);
     };
@@ -117,13 +128,14 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
         <>
             <div 
                 onMouseEnter={() => setIsHovered(true)}
-                className="group relative flex flex-col bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-100 dark:border-white/10 p-2.5 sm:p-4 w-full h-full"
+                onMouseLeave={() => setIsHovered(false)}
+                className="group relative flex flex-col bg-white dark:bg-zinc-900 rounded-xl overflow-hidden transition-all duration-300 hover:border-slate-400 dark:hover:border-white/30 border border-slate-200 dark:border-white/10 p-2.5 sm:p-3.5 w-full h-full"
             >
                 
-                {/* Badge matching Theme (#B8860B for trending, #2E7D32 for new arrival) */}
+                {/* Badge matching Theme (#8A6305 for trending, #16A34A for new arrival) */}
                 {showBadge && (product.isTrending || badge) && (
                     <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 pointer-events-none">
-                        <span className={`${product.isTrending ? 'bg-[#B8860B]' : 'bg-[#2E7D32]'} text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-xs`}>
+                        <span className={`${product.isTrending ? 'bg-[#8A6305]' : 'bg-[#16A34A]'} text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-xs`}>
                             {displayBadge}
                         </span>
                     </div>
@@ -136,34 +148,36 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                         e.stopPropagation();
                         setIsQuickViewOpen(true);
                     }}
-                    className="absolute z-20 top-3 left-3 sm:top-4 sm:left-4 w-7 h-7 sm:w-8 sm:h-8 bg-white/95 dark:bg-zinc-800/95 backdrop-blur-sm text-gray-700 dark:text-gray-200 rounded-full flex items-center justify-center opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#B8860B] hover:text-white dark:hover:bg-[#B8860B] dark:hover:text-white border border-gray-200/60 dark:border-white/10"
+                    className="absolute z-20 top-3 left-3 sm:top-4 sm:left-4 w-7 h-7 sm:w-8 sm:h-8 bg-white/95 dark:bg-zinc-800/95 backdrop-blur-sm text-gray-700 dark:text-gray-200 rounded-lg flex items-center justify-center opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#0B192C] hover:text-white dark:hover:bg-white dark:hover:text-slate-900 border border-slate-200 dark:border-white/10"
                     aria-label="Quick View"
                 >
-                    <MdSearch className="text-sm sm:text-base" />
+                    <MdVisibility className="text-sm sm:text-base" />
                 </button>
 
-                {/* Image Area (Square, fills container with rounded border radius) */}
-                <div className="relative w-full aspect-square overflow-hidden rounded-xl bg-gray-50/80 dark:bg-zinc-800/40">
-                    <Link href={`/products/${product.slug}`} className="absolute inset-0 block w-full h-full" aria-label={product.name}>
-                        {/* Primary Image Wrapper */}
-                        <div className={`absolute inset-0 transition-all duration-500 z-10 ${hasSecondaryImage && isSecondaryLoaded ? 'group-hover:opacity-0' : ''}`}>
+                {/* Main Product Image with Secondary Image Hover Effect */}
+                <div className="relative aspect-square w-full bg-white dark:bg-zinc-800/50 rounded-lg overflow-hidden">
+                    <Link href={`/products/${product.slug}`} className="relative w-full h-full block">
+                        {/* Primary Image */}
+                        <div className={`relative w-full h-full transition-all duration-300 ${isHovered && secondaryImage ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
                             <ResilientImage
-                                alt={product.name}
-                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 240px"
-                                className="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
                                 src={primaryImage}
+                                alt={product.name}
+                                fill
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                className="w-full h-full object-cover"
                                 loading="lazy"
                             />
                         </div>
-                        
-                        {/* Secondary Image Wrapper */}
-                        {hasSecondaryImage && isHovered && (
-                            <div className="absolute inset-0 transition-all duration-500 opacity-0 group-hover:opacity-100 z-0">
+
+                        {/* Secondary Hover Image */}
+                        {secondaryImage && (
+                            <div className={`absolute inset-0 transition-all duration-300 ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'}`}>
                                 <ResilientImage
-                                    alt={product.name}
-                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 240px"
-                                    className="w-full h-full object-cover rounded-xl transition-transform duration-500 scale-100 group-hover:scale-105"
                                     src={secondaryImage}
+                                    alt={`${product.name} - alternate view`}
+                                    fill
+                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                    className="w-full h-full object-cover"
                                     loading="lazy"
                                     onLoad={() => setIsSecondaryLoaded(true)}
                                 />
@@ -176,13 +190,13 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                 <div className={`flex flex-col flex-1 mt-2.5 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
                     
                     {/* Brand */}
-                    <span className="text-[9px] sm:text-xs font-bold uppercase tracking-widest text-[rgba(7,40,53,0.6)] dark:text-gray-400 mb-0.5 line-clamp-1">
-                        {product.brand?.name || 'Zad Land'}
+                    <span className="text-[9px] sm:text-xs font-bold uppercase tracking-widest text-[#475569] dark:text-gray-400 mb-0.5 line-clamp-1">
+                        {product.brand?.name || 'Hawa Distribution'}
                     </span>
 
                     {/* Title */}
                     <h3 
-                        className={`text-xs sm:text-sm font-semibold text-zinc-900 dark:text-white line-clamp-2 leading-snug mb-1 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+                        className={`text-xs sm:text-sm font-semibold text-[#0B192C] dark:text-white line-clamp-2 leading-snug mb-1 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
                     >
                         <Link href={`/products/${product.slug}`} className="hover:underline">
                             {displayName}
@@ -193,7 +207,7 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                     {parsedOptions.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-1.5">
                             {parsedOptions.slice(0, 3).map((opt, i) => (
-                                <span key={i} className="text-[9px] font-bold bg-[#FAF6EC] text-[#072835] border border-[#B8860B]/20 px-1.5 py-0.5 rounded">
+                                <span key={i} className="text-[9px] font-semibold bg-slate-100 dark:bg-slate-800 text-[#0F172A] dark:text-slate-200 border border-slate-200/60 dark:border-white/10 px-1.5 py-0.5 rounded">
                                     {opt}
                                 </span>
                             ))}
@@ -205,55 +219,76 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                         </div>
                     )}
 
-                    {/* Price and Packaging */}
-                    <div className="mt-auto flex items-baseline justify-between gap-1 text-zinc-900 dark:text-white">
-                        <div className="flex items-baseline gap-1.5 sm:gap-2">
-                            {product.discountPrice && Number(product.discountPrice) < Number(product.price) ? (
-                                <>
-                                    <span className="text-xs sm:text-base font-extrabold text-[#2E7D32] dark:text-[#4ade80]">{formatPrice(Number(product.discountPrice))}</span>
-                                    <span className="text-[10px] sm:text-xs text-gray-400 line-through font-normal">{formatPrice(Number(product.price))}</span>
-                                </>
-                            ) : (
-                                <span className="text-xs sm:text-base font-extrabold text-[#072835] dark:text-white">{formatPrice(Number(product.price))}</span>
-                            )}
-                        </div>
-                        {product.stock && product.stock > 0 ? (
-                            <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-gray-400 shrink-0">
-                                {product.stock} {language === 'ar' ? 'قطعة/طرد' : 'pcs/ctn'}
+                    {/* Packaging & Pieces */}
+                    <div className="flex items-center flex-wrap gap-1.5 my-1.5 text-[10px] sm:text-[11px]">
+                        <span className="inline-flex items-center gap-1 bg-slate-100 dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-200 px-2 py-0.5 rounded-md font-bold">
+                            <span>📦</span> {formatPackaging(product.packaging, language)}
+                        </span>
+                        {product.itemsPerPackage ? (
+                            <span className="text-[#475569] dark:text-gray-400 font-semibold">
+                                ({formatPackageItems(product.itemsPerPackage, language, { mode: 'badge' })})
                             </span>
                         ) : null}
                     </div>
 
+                    {/* Price and Minimum Order */}
+                    <div className="mt-auto pt-1 flex items-baseline justify-between gap-1 text-[#0B192C] dark:text-white">
+                        {!product.hidePrice && Number(product.price) > 0 ? (
+                            <div className="flex items-baseline gap-1.5 sm:gap-2">
+                                {product.discountPrice && Number(product.discountPrice) < Number(product.price) ? (
+                                    <>
+                                        <span className="text-xs sm:text-base font-extrabold text-[#2E7D32] dark:text-[#4ade80]">{formatPrice(Number(product.discountPrice))}</span>
+                                        <span className="text-[10px] sm:text-xs text-gray-400 line-through font-normal">{formatPrice(Number(product.price))}</span>
+                                    </>
+                                ) : (
+                                    <span className="text-xs sm:text-base font-extrabold text-[#0B192C] dark:text-white">{formatPrice(Number(product.price))}</span>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="flex items-center">
+                                <span className="inline-flex items-center text-[10px] sm:text-xs font-bold text-[#0F172A] dark:text-amber-300 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-white/10 px-2 py-0.5 rounded">
+                                    {language === 'ar' ? 'السعر يحدد حسب الوكالة' : 'Price on Inquiry'}
+                                </span>
+                            </div>
+                        )}
+                        <span className="text-[9px] sm:text-[10px] font-semibold text-[#475569] dark:text-gray-500 shrink-0">
+                            {language === 'ar' 
+                                ? `أدنى طلب: ${product.minOrder && product.minOrder > 1 ? product.minOrder + ' ' : ''}${formatPackaging(product.packaging, 'ar')}`
+                                : `Min: ${product.minOrder || 1} ${formatPackaging(product.packaging, 'en', { short: true })}`}
+                        </span>
+                    </div>
+
                     {/* Mobile-Optimized Touch Target Add to Cart / Quantity Controller */}
-                    <div className="mt-2.5 relative h-9 sm:h-10 w-full overflow-hidden rounded-xl">
+                    <div className="mt-2.5 relative h-9 sm:h-10 w-full overflow-hidden rounded-lg">
                         {quantityInCart === 0 ? (
                             <button
                                 onClick={handleInitialAdd}
-                                className="w-full h-full bg-[#2E7D32] hover:bg-[#256629] text-white rounded-xl font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 touch-manipulation select-none shadow-xs"
+                                className="w-full h-full bg-[#16A34A] hover:bg-[#15803d] text-white rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 touch-manipulation select-none shadow-xs cursor-pointer"
                             >
                                 <MdShoppingBag className="text-sm sm:text-base shrink-0 text-white" />
                                 <span className="truncate">{language === 'ar' ? 'إضافة للسلة' : 'Add to Cart'}</span>
                             </button>
                         ) : (
-                            <div className="w-full h-full bg-[#2E7D32] text-white rounded-xl font-bold text-xs flex items-center justify-between px-1.5 sm:px-2 transition-all duration-300 animate-scaleUp">
+                            <div className="w-full h-full bg-[#16A34A] text-white rounded-lg font-bold text-xs flex items-center justify-between px-1.5 sm:px-2 transition-all duration-300 animate-scaleUp">
                                 <button
                                     onClick={handleDecrease}
-                                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation"
+                                    className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation cursor-pointer"
                                     aria-label="Decrease quantity"
                                 >
-                                    <MdRemove className="text-sm sm:text-base" />
+                                    <MdRemove className="text-base" />
                                 </button>
                                 
-                                <span className="text-xs sm:text-sm font-extrabold tracking-wide px-1 select-none">
-                                    {quantityInCart}
+                                <span className="text-xs font-extrabold tracking-wide px-1 select-none flex items-center gap-1">
+                                    <span>{quantityInCart}</span>
+                                    <span className="text-[10px] font-semibold opacity-90">{formatPackaging(product.packaging, language, { short: true })}</span>
                                 </span>
 
                                 <button
                                     onClick={handleIncrease}
-                                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation"
+                                    className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation cursor-pointer"
                                     aria-label="Increase quantity"
                                 >
-                                    <MdAdd className="text-sm sm:text-base" />
+                                    <MdAdd className="text-base" />
                                 </button>
                             </div>
                         )}

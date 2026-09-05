@@ -169,12 +169,12 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="h-2.5 w-2.5 rounded-full bg-[#B8860B]" />
-                                <span className="text-xs font-bold uppercase tracking-wider text-[#B8860B] dark:text-[#E5B54A]">
+                                <span className="h-2.5 w-2.5 rounded-full bg-[#8A6305]" />
+                                <span className="text-xs font-bold uppercase tracking-wider text-[#8A6305] dark:text-[#8A6305]">
                                     {isArabic ? 'إدارة العلامات التجارية والشركاء' : 'Official Brands & Manufacturer Partners'}
                                 </span>
                             </div>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#072835] dark:text-white tracking-tight">
+                            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B192C] dark:text-white tracking-tight">
                                 {t("admin.brandManagement")}
                             </h1>
                             <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-gray-400">
@@ -192,14 +192,14 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                     value={searchQuery}
                                     onChange={(event) => setSearchQuery(event.target.value)}
                                     placeholder={isArabic ? 'بحث بالاسم أو القسم...' : 'Search brands...'}
-                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900 ps-9 pe-4 text-sm text-[#072835] dark:text-white outline-none focus:border-[#B8860B] focus:ring-2 focus:ring-[#B8860B]/20 shadow-2xs"
+                                    className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900 ps-9 pe-4 text-sm text-[#0B192C] dark:text-white outline-none focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/20 shadow-2xs"
                                 />
                             </div>
 
                             {canManage && (
                                 <button 
                                     onClick={handleAdd} 
-                                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#072835] hover:bg-[#0c4054] dark:bg-[#B8860B] dark:hover:bg-[#9a7009] px-5 text-sm font-bold text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
+                                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] px-5 text-sm font-bold text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
                                 >
                                     <MdAdd className="text-xl" />
                                     <span>{t("admin.addBrand")}</span>
@@ -214,8 +214,8 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                             onClick={() => setStatusFilter("ALL")}
                             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                                 statusFilter === "ALL"
-                                    ? "bg-[#072835] text-white dark:bg-white dark:text-[#072835] shadow-xs"
-                                    : "bg-white dark:bg-zinc-800 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-white/10 hover:border-[#B8860B]"
+                                    ? "bg-[#0B192C] text-white dark:bg-white dark:text-[#0B192C] shadow-xs"
+                                    : "bg-white dark:bg-zinc-800 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-white/10 hover:border-[#8A6305]"
                             }`}
                         >
                             <span>{isArabic ? 'كافة الماركات' : 'All Brands'}</span>
@@ -311,8 +311,8 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
 
                                         {/* Main Category Badge (Top Left) */}
                                         {brand.mainCategory?.name && (
-                                            <div className="absolute top-2.5 start-2.5 flex items-center gap-1 bg-[#072835]/85 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
-                                                <MdAccountTree className="text-xs text-[#B8860B]" />
+                                            <div className="absolute top-2.5 start-2.5 flex items-center gap-1 bg-[#0B192C]/85 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
+                                                <MdAccountTree className="text-xs text-[#8A6305]" />
                                                 <span>{brand.mainCategory.name}</span>
                                             </div>
                                         )}
@@ -347,11 +347,11 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                             {/* Name & Badges */}
                                             <div className="flex items-start justify-between gap-2 mb-1.5">
                                                 <div className="min-w-0">
-                                                    <h3 className="text-base sm:text-lg font-extrabold text-[#072835] dark:text-white truncate">
+                                                    <h3 className="text-base sm:text-lg font-extrabold text-[#0B192C] dark:text-white truncate">
                                                         {brand.name}
                                                     </h3>
                                                     {brand.description && (
-                                                        <p className="text-xs font-semibold text-[#B8860B] dark:text-[#E5B54A] truncate">
+                                                        <p className="text-xs font-semibold text-[#8A6305] dark:text-[#8A6305] truncate">
                                                             {brand.description}
                                                         </p>
                                                     )}
@@ -410,7 +410,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                 href={`/brands/${brand.slug}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#B8860B] transition-colors"
+                                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"
                                             >
                                                 <MdVisibility className="text-sm" />
                                                 <span>{isArabic ? 'معاينة المتجر' : 'Preview Store'}</span>
@@ -439,7 +439,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                     <button 
                                                         type="button"
                                                         onClick={() => handleEdit(brand)} 
-                                                        className="rounded-lg p-1.5 text-slate-600 dark:text-gray-300 hover:bg-[#B8860B]/10 hover:text-[#B8860B] transition-colors cursor-pointer" 
+                                                        className="rounded-lg p-1.5 text-slate-600 dark:text-gray-300 hover:bg-[#8A6305]/10 hover:text-[#8A6305] transition-colors cursor-pointer" 
                                                         title={isArabic ? 'تعديل' : 'Edit'}
                                                     >
                                                         <MdEdit className="text-lg" />
@@ -468,7 +468,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                     {filteredBrands.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 mt-6">
                             <MdStorefront className="text-5xl text-slate-300 dark:text-zinc-600 mb-2" />
-                            <h3 className="text-base font-bold text-[#072835] dark:text-white">
+                            <h3 className="text-base font-bold text-[#0B192C] dark:text-white">
                                 {isArabic ? 'لا توجد ماركات مطابقة للبحث' : 'No brands found'}
                             </h3>
                             <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">

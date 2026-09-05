@@ -57,7 +57,7 @@ export default function MainBrands({ brands }: MainBrandsProps) {
                                     <p className="text-sm font-bold text-text-main-light transition-colors group-hover-underline-animated dark:text-white truncate w-full text-center">
                                         {brand.name}
                                     </p>
-                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1">
+                                    <p className="text-xs font-medium text-[#475569] dark:text-gray-400 mt-1">
                                         {brand._count.products} {t("home.productsLabel") || "منتج"}
                                     </p>
                                 </div>
@@ -68,7 +68,7 @@ export default function MainBrands({ brands }: MainBrandsProps) {
 
                 {canScrollForward && (
                     <button
-                        className="hidden md:flex absolute ltr:right-[-20px] rtl:left-[-20px] top-[75px] md:top-[90px] -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white/95 text-text-main border border-gray-200 transition-all hover:bg-[#B8860B] hover:text-white hover:border-[#B8860B] dark:bg-surface-dark dark:border-white/10"
+                        className="hidden md:flex absolute ltr:right-[-20px] rtl:left-[-20px] top-[75px] md:top-[90px] -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white/95 text-text-main border border-gray-200 transition-all hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:bg-surface-dark dark:border-white/10"
                         aria-label="Next"
                         onClick={scrollForward}
                         type="button"
@@ -78,7 +78,7 @@ export default function MainBrands({ brands }: MainBrandsProps) {
                 )}
                 {canScrollBackward && (
                     <button
-                        className="hidden md:flex absolute ltr:left-[-20px] rtl:right-[-20px] top-[75px] md:top-[90px] -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white/95 text-text-main border border-gray-200 transition-all hover:bg-[#B8860B] hover:text-white hover:border-[#B8860B] dark:bg-surface-dark dark:border-white/10"
+                        className="hidden md:flex absolute ltr:left-[-20px] rtl:right-[-20px] top-[75px] md:top-[90px] -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white/95 text-text-main border border-gray-200 transition-all hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:bg-surface-dark dark:border-white/10"
                         aria-label="Previous"
                         onClick={scrollBackward}
                         type="button"

@@ -36,7 +36,7 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
                 <Link
                     href="/"
                     target="_blank"
-                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#072835] dark:text-[#E5B54A] hover:bg-[#FAF6EC] dark:hover:bg-white/5 rounded-xl border border-slate-200/80 dark:border-white/10 transition-all hover:border-[#B8860B]/40"
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#0B192C] dark:text-[#8A6305] hover:bg-[#FAF6EC] dark:hover:bg-white/5 rounded-xl border border-slate-200/80 dark:border-white/10 transition-all hover:border-[#8A6305]/40"
                     title={isArabic ? "زيارة المتجر المباشر" : "Visit Live Storefront"}
                 >
                     <MdOpenInNew className="text-[14px]" />
@@ -49,7 +49,7 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-white/10 transition-all"
                     title={language === 'en' ? 'Switch to Arabic' : 'Switch to English'}
                 >
-                    <MdLanguage className="text-[15px] text-[#B8860B]" />
+                    <MdLanguage className="text-[15px] text-[#8A6305]" />
                     <span>{language === 'en' ? 'العربية' : 'English'}</span>
                 </button>
             </div>

@@ -12,19 +12,34 @@
 @variant rtl (&:where([dir="rtl"], [dir="rtl"] *));
 
 @theme {
-  --color-primary: #B8860B;
-  --color-background-light: #ffffff;
-  --color-background-dark: #1A1A14;
-  --color-surface-light: #ffffff;
-  --color-surface-dark: #2A2A1E;
-  --color-text-main-light: #1A1A14;
-  --color-text-main-dark: #F5F0E0;
-  --color-text-muted-light: #7A7A60;
-  --color-text-muted-dark: #C4B89A;
+  --color-primary: #8A6305;
+  --color-primary-hover: #735204;
+  --color-primary-light: #FAF4E8;
+  --color-primary-dark: #E5B54A;
 
+  --color-gold: #8A6305;
+  --color-gold-hover: #735204;
+  --color-gold-light: #FAF4E8;
+  --color-gold-dark: #E5B54A;
+
+  --color-heading: #0B192C;
+  --color-body: #0F172A;
+  --color-muted: #475569;
+
+  --color-background-light: #ffffff;
+  --color-background-dark: #0B192C;
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #132035;
+  --color-text-main-light: #0B192C;
+  --color-text-main-dark: #F8FAFC;
+  --color-text-body-light: #0F172A;
+  --color-text-body-dark: #E2E8F0;
+  --color-text-muted-light: #475569;
+  --color-text-muted-dark: #94A3B8;
 
   /* Semantic Colors */
   --color-text-main: var(--text-main);
+  --color-text-body: var(--text-body);
   --color-text-sub: var(--text-sub);
 
   --font-display: var(--font-figtree), var(--font-noto-sans-arabic), sans-serif;
@@ -33,9 +48,6 @@
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-full: 9999px;
-
-  /* Custom Container Widths */
-  /* --max-width-container: 1400px; */
 
   /* Advanced Shadows */
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
@@ -48,6 +60,9 @@
   looks the same as it did with Tailwind CSS v3.
 */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
 
   *,
   ::after,
@@ -60,13 +75,17 @@
 
 @layer base {
   :root {
-    --text-main: #1A1A14;
-    --text-sub: #7A7A60;
+    --text-main: #0B192C;
+    --text-body: #0F172A;
+    --text-sub: #475569;
+    --primary: #8A6305;
+    --gold: #8A6305;
   }
 
   .dark {
-    --text-main: #F5F0E0;
-    --text-sub: #C4B89A;
+    --text-main: #F8FAFC;
+    --text-body: #E2E8F0;
+    --text-sub: #94A3B8;
   }
 }
 
@@ -121,7 +140,7 @@
   }
 
   .rtl .hover-underline-animated:hover,
-  [dir="rtl"] .hover-underline-animated:hover,
+  [dir="rtl"] .hover-underline-animated,
   .hover-underline-animated:dir(rtl):hover {
     background-position: 100% 100%;
   }
@@ -156,7 +175,10 @@
 
 @layer base {
   body {
-    @apply bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark transition-colors duration-200 tracking-[-0.01em];
+    @apply bg-background-light dark:bg-background-dark text-text-body-light dark:text-text-body-dark transition-colors duration-200 tracking-[-0.01em];
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-heading dark:text-text-main-dark;
   }
 }
 
@@ -228,7 +250,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8860B;
+  background: #8A6305;
 }
 
 /* Premium Curved Sliding Fill Hover Effect */
@@ -247,7 +269,7 @@
   left: -20%;
   width: 140%;
   height: 140%;
-  background-color: #B8860B;
+  background-color: #8A6305;
   border-radius: 50%;
   transform: translate(-105%, -50%);
   transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
@@ -256,7 +278,7 @@
 
 .btn-curved-fill:hover {
   color: #ffffff !important;
-  border-color: #B8860B !important;
+  border-color: #8A6305 !important;
 }
 
 .btn-curved-fill:hover::before {
@@ -296,11 +318,11 @@
 
 /* Dark Mode Compatibility */
 .dark .btn-curved-fill::before {
-  background-color: #B8860B !important;
+  background-color: #8A6305 !important;
 }
 .dark .btn-curved-fill:hover {
   color: #ffffff !important;
-  border-color: #B8860B !important;
+  border-color: #8A6305 !important;
 }
 
 .dark .btn-curved-fill:disabled {

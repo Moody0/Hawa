@@ -52,7 +52,7 @@ const CategoriesRail = ({ categories = [] }: CategoriesRailProps) => {
                                         href={`/products?category=${category.slug}`}
                                         className="flex flex-col items-center gap-2 w-[100px] md:w-[120px] flex-none snap-start group/card"
                                     >
-                                        <div className="w-[64px] h-[64px] md:w-[84px] md:h-[84px] rounded-full p-0.5 transition-all duration-300 border border-gray-200 dark:border-white/10 group-hover/card:border-[#B8860B] group-hover/card:ring-2 group-hover/card:ring-[#B8860B]/20 shrink-0">
+                                        <div className="w-[64px] h-[64px] md:w-[84px] md:h-[84px] rounded-full p-0.5 transition-all duration-300 border border-gray-200 dark:border-white/10 group-hover/card:border-[#8A6305] group-hover/card:ring-2 group-hover/card:ring-[#8A6305]/20 shrink-0">
                                             <div className="w-full h-full rounded-full overflow-hidden relative bg-gray-50 dark:bg-zinc-900">
                                                 <Image
                                                     src={category.image}
@@ -65,10 +65,10 @@ const CategoriesRail = ({ categories = [] }: CategoriesRailProps) => {
                                                 />
                                             </div>
                                         </div>
-                                        <h3 className="text-[15px] font-medium text-center text-gray-700 dark:text-gray-300 group-hover/card:text-[#B8860B] dark:group-hover/card:text-[#E5B54A] transition-colors duration-200 flex items-center gap-1">
+                                        <h3 className="text-[15px] font-medium text-center text-[#0B192C] dark:text-gray-300 group-hover/card:text-[#8A6305] dark:group-hover/card:text-[#8A6305] transition-colors duration-200 flex items-center gap-1">
                                             <span>{language === 'ar' ? category.nameAr : category.name}</span>
                                             <svg 
-                                                className={`w-3.5 h-3.5 opacity-0 -translate-x-1.5 group-hover/card:opacity-100 group-hover/card:translate-x-0 text-[#B8860B] transition-all duration-500 ease-out ${dir === 'rtl' ? 'rotate-180' : ''}`} 
+                                                className={`w-3.5 h-3.5 opacity-0 -translate-x-1.5 group-hover/card:opacity-100 group-hover/card:translate-x-0 text-[#8A6305] transition-all duration-500 ease-out ${dir === 'rtl' ? 'rotate-180' : ''}`} 
                                                 viewBox="0 0 20 20" 
                                                 fill="none" 
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -88,7 +88,7 @@ const CategoriesRail = ({ categories = [] }: CategoriesRailProps) => {
                     <button
                         onClick={handleLeftScroll}
                         disabled={isLeftDisabled}
-                        className="hidden md:flex !absolute top-1/2 -translate-y-1/2 -left-5 z-20 w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-zinc-900 dark:text-white hover:bg-[#B8860B] hover:text-white hover:border-[#B8860B] dark:hover:bg-[#B8860B] dark:hover:text-white items-center justify-center transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
+                        className="hidden md:flex !absolute top-1/2 -translate-y-1/2 -left-5 z-20 w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:hover:bg-[#8A6305] dark:hover:text-white items-center justify-center transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
                     >
                         <MdChevronLeft className="text-2xl" />
                     </button>
@@ -96,7 +96,7 @@ const CategoriesRail = ({ categories = [] }: CategoriesRailProps) => {
                     <button
                         onClick={handleRightScroll}
                         disabled={isRightDisabled}
-                        className="hidden md:flex !absolute top-1/2 -translate-y-1/2 -right-5 z-20 w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-zinc-900 dark:text-white hover:bg-[#B8860B] hover:text-white hover:border-[#B8860B] dark:hover:bg-[#B8860B] dark:hover:text-white items-center justify-center transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
+                        className="hidden md:flex !absolute top-1/2 -translate-y-1/2 -right-5 z-20 w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:hover:bg-[#8A6305] dark:hover:text-white items-center justify-center transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
                     >
                         <MdChevronRight className="text-2xl" />
                     </button>

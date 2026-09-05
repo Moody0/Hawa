@@ -65,8 +65,8 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
         return (
             <Link
                 key={brand.id || brand.slug}
-                href={`/brands/${brand.slug}`}
-                className={`group flex flex-col items-center justify-between bg-white dark:bg-[#1A1A14] border border-[#B8860B]/20 dark:border-white/10 hover:border-[#B8860B] hover:shadow-md hover:-translate-y-0.5 rounded-xl sm:rounded-2xl transition-all duration-300 ${
+                href={`/agencies/${brand.slug}`}
+                className={`group flex flex-col items-center justify-between bg-white dark:bg-[#1A1A14] border border-[#8A6305]/20 dark:border-white/10 hover:border-[#8A6305] hover:shadow-md hover:-translate-y-0.5 rounded-xl sm:rounded-2xl transition-all duration-300 ${
                     isCompact ? 'p-2 min-h-[92px] w-full snap-start' : 'p-2.5 sm:p-3 min-h-[105px] sm:min-h-[115px]'
                 }`}
             >
@@ -84,7 +84,7 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
                 </div>
 
                 {/* Brand Subtitle / Category Label */}
-                <span className="text-[10px] sm:text-[11px] md:text-[12px] font-bold text-slate-800 dark:text-gray-200 text-center line-clamp-1 group-hover:text-[#B8860B] dark:group-hover:text-[#E5B54A] transition-colors mt-1 leading-snug">
+                <span className="text-[10px] sm:text-[11px] md:text-[12px] font-bold text-[#0B192C] dark:text-gray-200 text-center line-clamp-1 group-hover:text-[#8A6305] dark:group-hover:text-[#8A6305] transition-colors mt-1 leading-snug">
                     {brandLabel}
                 </span>
             </Link>
@@ -97,11 +97,11 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
                 {/* Ornamental Section Header: ─────── 🌾 الشركات العالمية 🌾 ─────── */}
                 <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 mb-5 sm:mb-6 md:mb-7">
                     {/* Left Ornamental Line */}
-                    <div className="h-[1.5px] flex-1 max-w-[60px] sm:max-w-[120px] md:max-w-[200px] bg-gradient-to-r from-transparent via-[#C5A059]/40 to-[#B8860B] dark:to-[#E5B54A]" />
+                    <div className="h-[1.5px] flex-1 max-w-[60px] sm:max-w-[120px] md:max-w-[200px] bg-gradient-to-r from-transparent via-[#8A6305]/30 to-[#8A6305] dark:to-[#8A6305]" />
 
                     {/* Wheat / Olive Leaf Left */}
                     <svg
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-[#B8860B] dark:text-[#E5B54A] shrink-0"
+                        className="w-4 h-4 sm:w-5 sm:h-5 text-[#8A6305] dark:text-[#8A6305] shrink-0"
                         viewBox="0 0 24 24"
                         fill="currentColor"
                     >
@@ -112,13 +112,13 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
                     </svg>
 
                     {/* Section Title */}
-                    <h2 className="text-base sm:text-2xl md:text-[28px] font-extrabold text-[#072835] dark:text-white tracking-tight whitespace-nowrap px-1">
+                    <h2 className="text-base sm:text-2xl md:text-[28px] font-extrabold text-[#0B192C] dark:text-white tracking-tight whitespace-nowrap px-1">
                         {isArabic ? 'الشركات العالمية' : 'Global Partner Brands'}
                     </h2>
 
                     {/* Wheat / Olive Leaf Right */}
                     <svg
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-[#B8860B] dark:text-[#E5B54A] shrink-0 scale-x-[-1]"
+                        className="w-4 h-4 sm:w-5 sm:h-5 text-[#8A6305] dark:text-[#8A6305] shrink-0 scale-x-[-1]"
                         viewBox="0 0 24 24"
                         fill="currentColor"
                     >
@@ -129,7 +129,7 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
                     </svg>
 
                     {/* Right Ornamental Line */}
-                    <div className="h-[1.5px] flex-1 max-w-[60px] sm:max-w-[120px] md:max-w-[200px] bg-gradient-to-l from-transparent via-[#C5A059]/40 to-[#B8860B] dark:to-[#E5B54A]" />
+                    <div className="h-[1.5px] flex-1 max-w-[60px] sm:max-w-[120px] md:max-w-[200px] bg-gradient-to-l from-transparent via-[#8A6305]/30 to-[#8A6305] dark:to-[#8A6305]" />
                 </div>
 
                 {/* 1. Mobile Experience (< md): Compact 2-Row Horizontal Swipe (Zero Scroll Fatigue) */}
@@ -151,8 +151,8 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
                     {brands.length > 16 && (
                         <div className="mt-5 flex justify-center">
                             <Link
-                                href="/brands"
-                                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-[#072835] dark:text-[#E5B54A] hover:text-[#B8860B] bg-[#FAF6EC] dark:bg-white/5 border border-[#B8860B]/20 hover:border-[#B8860B]/50 transition-all duration-200 shadow-2xs hover:shadow-xs group"
+                                href="/agencies"
+                                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-[#0B192C] dark:text-[#8A6305] hover:text-[#8A6305] bg-[#FAF6EC] dark:bg-white/5 border border-[#8A6305]/20 hover:border-[#8A6305]/50 transition-all duration-200 shadow-2xs hover:shadow-xs group"
                             >
                                 <span>{isArabic ? `تصفح كافة الشركات والعلامات (${brands.length}+)` : `View All Partner Brands (${brands.length}+)`}</span>
                                 <MdChevronRight className={`text-base transition-transform group-hover:translate-x-0.5 ${isArabic ? 'rotate-180 group-hover:-translate-x-0.5' : ''}`} />

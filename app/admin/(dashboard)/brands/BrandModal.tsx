@@ -116,7 +116,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 px-6 py-5">
                     <div>
-                        <h2 className="text-lg font-bold text-[#072835] dark:text-white">
+                        <h2 className="text-lg font-bold text-[#0B192C] dark:text-white">
                             {brand ? (isArabic ? "تعديل العلامة التجارية" : "Edit Brand") : (isArabic ? "إضافة علامة تجارية جديدة" : "Add Brand")}
                         </h2>
                         <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">
@@ -144,7 +144,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                             value={formData.name}
                             onChange={(event) => setFormData({ ...formData, name: event.target.value })}
                             placeholder="e.g. Captain Fisher / De Cecco / Tat"
-                            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 px-4 py-2.5 text-sm text-[#072835] dark:text-white outline-none transition-all focus:border-[#B8860B] focus:ring-2 focus:ring-[#B8860B]/20"
+                            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 px-4 py-2.5 text-sm text-[#0B192C] dark:text-white outline-none transition-all focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/20"
                         />
                     </div>
 
@@ -156,7 +156,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                         <select
                             value={formData.mainCategoryId}
                             onChange={(event) => setFormData({ ...formData, mainCategoryId: event.target.value })}
-                            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 px-4 py-2.5 text-sm text-[#072835] dark:text-white outline-none transition-all focus:border-[#B8860B] focus:ring-2 focus:ring-[#B8860B]/20 cursor-pointer"
+                            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 px-4 py-2.5 text-sm text-[#0B192C] dark:text-white outline-none transition-all focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/20 cursor-pointer"
                         >
                             <option value="">{isArabic ? 'عام / غير محدد' : 'General / None'}</option>
                             {mainCategories.map((mc) => (
@@ -188,7 +188,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                                 className="size-4 rounded border-gray-300 text-[#2E7D32] focus:ring-[#2E7D32]"
                             />
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-[#072835] dark:text-white">
+                                <span className="text-xs font-bold text-[#0B192C] dark:text-white">
                                     {isArabic ? 'نشط' : 'Active'}
                                 </span>
                                 <span className="text-[10px] text-slate-500">
@@ -209,7 +209,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                                 className="size-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500"
                             />
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-[#072835] dark:text-white flex items-center gap-1">
+                                <span className="text-xs font-bold text-[#0B192C] dark:text-white flex items-center gap-1">
                                     <MdStar className="text-amber-500 text-sm" />
                                     <span>{isArabic ? 'شريك مميز' : 'Featured Partner'}</span>
                                 </span>
@@ -230,7 +230,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                             onChange={(event) => setFormData({ ...formData, description: event.target.value })}
                             rows={3}
                             placeholder={isArabic ? 'نبذة مختصرة عن الشركة والمنتجات...' : 'Brief summary of the brand...'}
-                            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 px-4 py-2.5 text-sm text-[#072835] dark:text-white outline-none transition-all focus:border-[#B8860B] focus:ring-2 focus:ring-[#B8860B]/20 resize-none"
+                            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 px-4 py-2.5 text-sm text-[#0B192C] dark:text-white outline-none transition-all focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/20 resize-none"
                         />
                     </div>
 
@@ -246,7 +246,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                         <button 
                             type="submit" 
                             disabled={isSubmitting} 
-                            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#072835] hover:bg-[#0c4054] dark:bg-[#B8860B] dark:hover:bg-[#9a7009] px-4 py-2.5 font-bold text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 text-sm cursor-pointer"
+                            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] px-4 py-2.5 font-bold text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 text-sm cursor-pointer"
                         >
                             {isSubmitting && <MdSync className="animate-spin text-base" />}
                             <span>{brand ? (isArabic ? 'حفظ التعديلات' : 'Save Changes') : (isArabic ? 'إضافة الماركة' : 'Create Brand')}</span>

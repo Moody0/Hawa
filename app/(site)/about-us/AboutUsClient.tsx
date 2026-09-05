@@ -91,7 +91,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
                 <div className="order-2 lg:order-1">
                     <div className="relative group">
                         <div className="absolute -inset-4 bg-primary/10 rounded-3xl transition-all group-hover:bg-primary/15 blur-2xl"></div>
-                        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-[#B8860B]/15 group-hover:scale-[1.02] transition-transform duration-500">
+                        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-[#8A6305]/15 group-hover:scale-[1.02] transition-transform duration-500">
                             <ResilientImage
                                 alt="Brand Narrative"
                                 className="w-full h-full object-cover rounded-3xl"

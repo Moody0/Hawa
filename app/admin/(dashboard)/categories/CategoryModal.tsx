@@ -95,7 +95,7 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
                 {/* Modal Header */}
                 <div className="px-6 py-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-bold text-[#072835] dark:text-white">
+                        <h2 className="text-lg font-bold text-[#0B192C] dark:text-white">
                             {category 
                                 ? (isArabic ? 'تعديل فئة المنتجات' : 'Edit Subcategory') 
                                 : (isArabic ? 'إضافة فئة منتجات جديدة' : 'Add New Subcategory')}
@@ -127,7 +127,7 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
                             onChange={(e) => setName(e.target.value)}
                             placeholder={isArabic ? 'مثال: سلطعون وقشريات مجمدة' : 'e.g. Pasta, Sauces, Dairy'}
                             required
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 text-[#072835] dark:text-white focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B] transition-all outline-none text-sm"
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 text-[#0B192C] dark:text-white focus:ring-2 focus:ring-[#8A6305]/20 focus:border-[#8A6305] transition-all outline-none text-sm"
                         />
                     </div>
 
@@ -140,7 +140,7 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
                             value={brandId}
                             onChange={(e) => setBrandId(e.target.value)}
                             required
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 text-[#072835] dark:text-white focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B] transition-all outline-none text-sm cursor-pointer"
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 text-[#0B192C] dark:text-white focus:ring-2 focus:ring-[#8A6305]/20 focus:border-[#8A6305] transition-all outline-none text-sm cursor-pointer"
                         >
                             <option value="">{isArabic ? 'اختر العلامة التجارية...' : 'Select a Brand...'}</option>
                             {brands.map((brand) => (
@@ -171,7 +171,7 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
                             className="size-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500 cursor-pointer"
                         />
                         <div className="flex flex-col">
-                            <span className="text-xs font-bold text-[#072835] dark:text-white flex items-center gap-1">
+                            <span className="text-xs font-bold text-[#0B192C] dark:text-white flex items-center gap-1">
                                 <MdStar className="text-amber-500 text-sm" />
                                 <span>{isArabic ? 'فئة مميزة في الصفحة الرئيسية' : 'Featured on Homepage'}</span>
                             </span>
@@ -191,7 +191,7 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="e.g. Crab Sticks & Frozen Seafood"
                             rows={3}
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 text-[#072835] dark:text-white focus:ring-2 focus:ring-[#B8860B]/20 focus:border-[#B8860B] transition-all outline-none resize-none text-sm"
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 text-[#0B192C] dark:text-white focus:ring-2 focus:ring-[#8A6305]/20 focus:border-[#8A6305] transition-all outline-none resize-none text-sm"
                         />
                     </div>
 
@@ -207,7 +207,7 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#072835] hover:bg-[#0c4054] dark:bg-[#B8860B] dark:hover:bg-[#9a7009] text-white font-bold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 text-sm cursor-pointer"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white font-bold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 text-sm cursor-pointer"
                         >
                             {isSubmitting && <MdSync className="animate-spin text-base" />}
                             <span>

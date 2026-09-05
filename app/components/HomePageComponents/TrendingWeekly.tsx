@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { MdChevronRight } from 'react-icons/md';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import ResilientImage from '@/app/components/ResilientImage';
@@ -43,7 +42,6 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
         return null;
     }
 
-    // On mobile show 5-6 products initially; on desktop show up to 9
     const initialCount = 6;
     const visibleProducts = showAll ? products : products.slice(0, initialCount);
 
@@ -57,106 +55,96 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
     };
 
     return (
-        <section className="container-custom">
+        <section className="container-custom py-2 md:py-4">
             {/* Header */}
-            <div 
-                className={`flex items-center justify-between mb-6 md:mb-8 px-1 gap-2 ${isArabic ? 'flex-row' : 'flex-row'}`}
-            >
+            <div className="flex items-end justify-between mb-6 md:mb-8 border-b border-slate-200 dark:border-white/10 pb-4">
                 <div>
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#B8860B] dark:text-[#E5B54A] block mb-1">
-                        {isArabic ? 'الأكثر طلباً هذا الأسبوع' : 'High Volume Demand'}
-                    </span>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#072835] dark:text-white leading-tight">
-                        {isArabic ? 'تريندات هذا الأسبوع' : 'Trending This Week'}
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#475569] dark:text-slate-400">
+                            {isArabic ? 'حركة توريد سريعة' : 'High Volume Demand'}
+                        </span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight">
+                        {isArabic ? 'المنتجات الأكثر طلباً هذا الأسبوع' : 'Fast-Moving Products'}
                     </h2>
                 </div>
 
                 <Link
                     href="/products"
-                    className="flex items-center gap-1 text-xs sm:text-sm font-bold text-[#072835] dark:text-[#E5B54A] hover:text-[#B8860B] transition-colors whitespace-nowrap"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#475569] dark:text-slate-300 hover:text-[#8A6305] transition-colors whitespace-nowrap"
                 >
-                    <span>{isArabic ? 'تسوق كل المنتجات' : 'View All'}</span>
-                    <MdChevronRight className={`text-lg transition-transform ${isArabic ? 'rotate-180' : ''}`} />
+                    <span>{isArabic ? 'كافة المنتجات' : 'View All'}</span>
+                    <span className={`text-sm ${isArabic ? 'rotate-180' : ''}`}>→</span>
                 </Link>
             </div>
 
             {/* Product Grid */}
-            <div className="relative">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                    <AnimatePresence initial={false}>
-                        {visibleProducts.map((product) => (
-                            <motion.div
-                                key={product.id}
-                                initial={{ opacity: 0, y: 15 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 10 }}
-                                transition={{ duration: 0.25 }}
-                                className="group flex items-center gap-3 sm:gap-4 bg-[#FAF9F5] dark:bg-[#1E1E16] border border-[#B8860B]/15 hover:border-[#B8860B]/50 rounded-2xl p-3 sm:p-4 h-[112px] transition-all duration-300 shadow-2xs hover:shadow-xs"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <AnimatePresence initial={false}>
+                    {visibleProducts.map((product) => (
+                        <motion.div
+                            key={product.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 6 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <Link
+                                href={`/products/${product.slug}`}
+                                className="group flex items-center gap-3.5 bg-white dark:bg-[#132035] border border-slate-200 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/30 rounded-xl p-3 transition-all h-full"
                             >
-                                {/* Product Image */}
-                                <Link
-                                    href={`/products/${product.slug}`}
-                                    className="w-[84px] h-[84px] shrink-0 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 p-1.5 border border-gray-100 dark:border-white/5 flex items-center justify-center"
-                                >
+                                {/* Product Image - Direct container */}
+                                <div className="w-[76px] h-[76px] shrink-0 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800/50 p-1 flex items-center justify-center">
                                     <ResilientImage
                                         src={getFirstImage(product.images)}
                                         alt={product.name}
-                                        sizes="84px"
-                                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                                        sizes="76px"
+                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                                         loading="lazy"
                                     />
-                                </Link>
+                                </div>
 
-                                {/* Product Info */}
+                                {/* Info */}
                                 <div className={`flex-1 min-w-0 ${isArabic ? 'text-right' : 'text-left'}`}>
-                                    {/* Brand */}
                                     {product.brand && (
-                                        <p className="text-[10px] sm:text-[11px] font-bold text-[#B8860B] dark:text-[#E5B54A] mb-0.5 truncate uppercase tracking-wider">
+                                        <span className="text-[10px] font-bold text-[#8A6305] dark:text-[#E5B54A] uppercase tracking-wider block truncate mb-0.5">
                                             {product.brand.name}
-                                        </p>
+                                        </span>
                                     )}
-                                    {/* Product Name */}
-                                    <h3 className="text-xs sm:text-sm font-bold text-[#072835] dark:text-white truncate leading-snug mb-1">
-                                        <Link
-                                            href={`/products/${product.slug}`}
-                                            className="hover:text-[#B8860B] transition-colors"
-                                        >
-                                            {isArabic ? (product.nameAr || product.name) : (product.nameEn || product.name)}
-                                        </Link>
+                                    <h3 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white truncate leading-snug group-hover:text-[#8A6305] transition-colors mb-1">
+                                        {isArabic ? (product.nameAr || product.name) : (product.nameEn || product.name)}
                                     </h3>
-                                    {/* Price */}
+                                    
                                     <div className="flex items-center gap-2">
                                         {product.discountPrice ? (
                                             <>
-                                                <span className="text-xs sm:text-sm md:text-base font-extrabold text-[#2E7D32] dark:text-[#4ade80]">
+                                                <span className="text-xs sm:text-sm font-black text-[#16A34A] dark:text-[#4ade80]">
                                                     {formatPrice(Number(product.discountPrice))}
                                                 </span>
-                                                <span className="text-[11px] text-gray-400 line-through">
+                                                <span className="text-[10px] text-slate-400 line-through">
                                                     {formatPrice(Number(product.price))}
                                                 </span>
                                             </>
-                                        ) : (
-                                            <span className="text-xs sm:text-sm md:text-base font-extrabold text-[#072835] dark:text-white">
+                                        ) : Number(product.price) > 0 ? (
+                                            <span className="text-xs sm:text-sm font-black text-[#0B192C] dark:text-white">
                                                 {formatPrice(Number(product.price))}
+                                            </span>
+                                        ) : (
+                                            <span className="text-[10px] font-bold text-[#8A6305] dark:text-[#E5B54A]">
+                                                {isArabic ? 'سعر الجملة عند الطلب' : 'Wholesale on Inquiry'}
                                             </span>
                                         )}
                                     </div>
                                 </div>
 
-                                {/* Arrow Button */}
-                                <Link
-                                    href={`/products/${product.slug}`}
-                                    aria-label={isArabic ? `عرض تفاصيل ${product.nameAr || product.name}` : `View details for ${product.nameEn || product.name}`}
-                                    className="shrink-0 w-8 h-8 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-600 dark:text-gray-300 transition-all group-hover:bg-[#B8860B] group-hover:border-[#B8860B] group-hover:text-white shadow-2xs"
-                                >
-                                    <svg className={`w-3.5 h-3.5 ${isArabic ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M7.5 3.75L13.75 10L7.5 16.25" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </Link>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </div>
+                                <div className="shrink-0 text-[#475569] group-hover:text-[#0B192C] dark:group-hover:text-white group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-all text-base">
+                                    <span className={isArabic ? 'rotate-180 inline-block' : 'inline-block'}>→</span>
+                                </div>
+                            </Link>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
 
             {/* Show More / Less Toggle Button */}
@@ -164,7 +152,7 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
                 <div className="flex justify-center mt-6">
                     <button
                         onClick={() => setShowAll(!showAll)}
-                        className="px-8 py-2.5 bg-[#072835] hover:bg-[#0c4054] text-white rounded-full font-bold text-xs sm:text-sm transition-all active:scale-95 shadow-xs cursor-pointer"
+                        className="px-6 py-2 bg-[#0B192C] hover:bg-[#132035] dark:bg-white dark:text-[#0B192C] text-white rounded-lg font-bold text-xs transition-all active:scale-95 cursor-pointer"
                     >
                         {showAll
                             ? (isArabic ? 'عرض أقل' : 'Show Less')

@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { CartProvider } from "./context/CartContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
+import { CustomerProvider } from "./context/CustomerContext";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
 import CartDrawer from "./components/CartDrawer";
@@ -21,8 +22,9 @@ export function Providers({
 }) {
     const content = (
         <LanguageProvider initialLanguage={initialLanguage}>
-            <CurrencyProvider initialExchangeRate={initialExchangeRate}>
-                <CartProvider>
+            <CustomerProvider>
+                <CurrencyProvider initialExchangeRate={initialExchangeRate}>
+                    <CartProvider>
                     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
                         {children}
                         <CartDrawer />
@@ -64,7 +66,8 @@ export function Providers({
                     </ThemeProvider>
                 </CartProvider>
             </CurrencyProvider>
-        </LanguageProvider>
+        </CustomerProvider>
+    </LanguageProvider>
     );
 
     if (session) {

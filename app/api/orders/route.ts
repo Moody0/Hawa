@@ -12,36 +12,53 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         const {
+            shopName,
+            ownerName,
             firstName,
             lastName,
             phone,
             streetAddress,
             city,
+            notes,
             totalAmount,
             promoCodeId,
             discount,
-            items
+            items,
+            customerId
         } = body;
 
-        // Basic validation
-        if (!firstName || !lastName || !phone || !streetAddress || !city || !items || items.length === 0) {
+        // Customer / Owner name fallback
+        const customerName = ownerName || (firstName ? `${firstName} ${lastName || ''}`.trim() : (shopName || 'عميل محترم'));
+
+        // Basic validation: phone, city, address, items, and at least shopName or customerName
+        if (!phone || !streetAddress || !city || !items || items.length === 0 || (!shopName && !customerName)) {
             return NextResponse.json(
-                { message: "Missing required fields" },
+                { message: "Missing required fields: please provide shop name, phone, city, and address" },
                 { status: 400 }
             );
         }
 
         // Create order with items in a transaction
         const order = await prisma.$transaction(async (tx) => {
+            let effectiveCustomerId = customerId || null;
+            if (!effectiveCustomerId) {
+                const cleanPhone = phone.replace(/[^0-9]/g, '');
+                const found = await tx.customer.findUnique({ where: { phone: cleanPhone } });
+                if (found) effectiveCustomerId = found.id;
+            }
+
             const newOrder = await tx.order.create({
                 data: {
-                    Name: `${firstName} ${lastName}`,
+                    shopName: shopName || null,
+                    Name: customerName,
                     phone,
                     streetAddress,
                     city,
+                    notes: notes || null,
                     totalAmount,
                     status: 'PENDING',
                     promoCodeId: promoCodeId || null,
+                    customerId: effectiveCustomerId,
                     discount: discount || 0,
                     items: {
                         create: items.map((item: OrderItemInput) => ({
@@ -53,7 +70,11 @@ export async function POST(request: Request) {
                     }
                 },
                 include: {
-                    items: true
+                    items: {
+                        include: {
+                            product: true
+                        }
+                    }
                 }
             });
 
@@ -71,7 +92,14 @@ export async function POST(request: Request) {
             return newOrder;
         });
 
-        return NextResponse.json(order, { status: 201 });
+        // Retrieve configured WhatsApp number
+        const settings = await prisma.settings.findUnique({
+            where: { id: "site-settings" },
+            select: { whatsappNumber: true }
+        });
+        const whatsappNumber = settings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+963900000000";
+
+        return NextResponse.json({ ...order, whatsappNumber }, { status: 201 });
     } catch (error) {
         console.error("Order creation error:", error);
         return NextResponse.json(

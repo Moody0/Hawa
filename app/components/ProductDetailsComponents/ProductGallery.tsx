@@ -164,10 +164,10 @@ const ProductGallery = ({ images, isTrending }: ProductGalleryProps) => {
                     height: auto;
                 }
                 .thumbs-swiper .swiper-slide-thumb-active .relative {
-                    border-color: #B8860B !important;
+                    border-color: #8A6305 !important;
                 }
                 .dark .thumbs-swiper .swiper-slide-thumb-active .relative {
-                    border-color: #B8860B !important;
+                    border-color: #8A6305 !important;
                 }
             `}</style>
         </div>

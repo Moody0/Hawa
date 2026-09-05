@@ -108,7 +108,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                                 setSelectedUser(null);
                                 setIsModalOpen(true);
                             }}
-                            className="bg-[#072835] hover:bg-[#0c4054] text-white h-12 px-6 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-xs transform hover:-translate-y-0.5 active:translate-y-0"
+                            className="bg-[#0B192C] hover:bg-[#1e293b] text-white h-12 px-6 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-xs transform hover:-translate-y-0.5 active:translate-y-0"
                         >
                             <MdPersonAdd className="text-[20px]" />
                             {t('admin.addNewUser')}

@@ -35,7 +35,7 @@ export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeade
 
     return (
         <div className="relative rounded-2xl bg-white dark:bg-[#0C1821] border border-slate-200/80 dark:border-white/10 p-5 sm:p-7 mb-6 shadow-xs overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#072835] via-[#B8860B] to-[#072835]" />
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#0B192C] via-[#8A6305] to-[#0B192C]" />
 
             <div className={`flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 relative z-10 ${dir === 'rtl' ? 'sm:text-right' : 'sm:text-left'} text-center`}>
                 {/* Brand Logo Plinth */}
@@ -52,13 +52,13 @@ export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeade
                 {/* Brand Details */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-center sm:justify-start flex-wrap gap-2 mb-1.5">
-                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        <span className="text-[11px] font-semibold text-[#475569] dark:text-slate-400">
                             {totalProducts} {isArabic ? 'منتج جملة متاح' : 'Wholesale Products'}
                         </span>
                     </div>
 
                     <div className="flex flex-wrap items-baseline justify-center sm:justify-start gap-x-3 gap-y-1 mb-2">
-                        <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#072835] dark:text-white tracking-tight">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#0B192C] dark:text-white tracking-tight">
                             {primaryName}
                         </h1>
                         {secondaryName && (
@@ -69,7 +69,7 @@ export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeade
                     </div>
 
                     {brand.description && (
-                        <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-300 max-w-2xl leading-relaxed">
+                        <p className="text-xs sm:text-sm text-[#475569] dark:text-gray-300 max-w-2xl leading-relaxed">
                             {brand.description}
                         </p>
                     )}

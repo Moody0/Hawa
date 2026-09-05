@@ -20,8 +20,8 @@ const CartItemsList = ({ items, cartCount, removeItem, updateQuantity }: CartIte
     return (
         <div className="lg:col-span-8 flex flex-col gap-8">
             <div className="flex flex-col gap-1 pb-4 border-b border-gray-200 dark:border-white/10">
-                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#072835] dark:text-white">{t('cart.yourCart')}</h1>
-                <p className="text-xs font-semibold text-gray-400">{cartCount} {t('orderComplete.items')}</p>
+                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#0B192C] dark:text-white">{t('cart.yourCart')}</h1>
+                <p className="text-xs font-semibold text-[#475569] dark:text-gray-400">{cartCount} {t('orderComplete.items')}</p>
             </div>
             <div className="flex flex-col border-y border-gray-200 dark:border-white/10 divide-y divide-gray-200 dark:divide-white/10">
                 {items.map(item => {
@@ -37,7 +37,7 @@ const CartItemsList = ({ items, cartCount, removeItem, updateQuantity }: CartIte
                 })}
             </div>
             <div className="mt-2">
-                <Link href="/products" className="relative inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-500 hover:text-[#B8860B] dark:hover:text-[#E5B54A] transition-colors">
+                <Link href="/products" className="relative inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#475569] hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors">
                     <MdArrowBack className={`text-base ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                     {t('cart.continueShopping')}
                 </Link>

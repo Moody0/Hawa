@@ -46,7 +46,7 @@ const AddToCartButton = ({ product, label, language, variant = 'desktop' }: AddT
         return (
             <button
                 onClick={handleQuickAdd}
-                className="lg:hidden absolute bottom-2 ltr:right-2 p-2 rtl:left-2 flex rounded-full bg-white/95 text-[#072835] hover:bg-[#2E7D32] hover:text-white transition-colors border border-gray-200"
+                className="lg:hidden absolute bottom-2 ltr:right-2 p-2 rtl:left-2 flex rounded-full bg-white/95 text-[#0B192C] hover:bg-[#2E7D32] hover:text-white transition-colors border border-gray-200"
                 aria-label={label}
             >
                 <MdAdd className="text-[18px]" />
@@ -57,7 +57,7 @@ const AddToCartButton = ({ product, label, language, variant = 'desktop' }: AddT
     return (
         <button
             onClick={handleQuickAdd}
-            className="hidden lg:flex absolute bottom-4 left-4 right-4 items-center justify-center gap-2 rounded-lg bg-white/95 py-3 text-sm font-bold text-[#072835] border border-gray-200/80 transition-all hover:bg-[#2E7D32] hover:text-white hover:border-[#2E7D32] opacity-0 translate-y-4 group-hover:translate-y-0 group-hover:opacity-100 dark:bg-[#1A1A14] dark:text-white dark:hover:bg-[#2E7D32]"
+            className="hidden lg:flex absolute bottom-4 left-4 right-4 items-center justify-center gap-2 rounded-lg bg-white/95 py-3 text-sm font-bold text-[#0B192C] border border-gray-200/80 transition-all hover:bg-[#2E7D32] hover:text-white hover:border-[#2E7D32] opacity-0 translate-y-4 group-hover:translate-y-0 group-hover:opacity-100 dark:bg-[#1A1A14] dark:text-white dark:hover:bg-[#2E7D32]"
         >
             <MdAddShoppingCart className="text-[18px]" />
             <span>{label}</span>

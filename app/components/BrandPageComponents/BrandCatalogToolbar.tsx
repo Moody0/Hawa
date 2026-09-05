@@ -63,7 +63,7 @@ export default function BrandCatalogToolbar({
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder={isArabic ? `ابحث في منتجات ${brandShortName}...` : `Search in ${brandShortName} items...`}
-                        className={`w-full h-10 bg-slate-50 dark:bg-zinc-900 border border-slate-200/90 dark:border-white/10 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#B8860B] focus:ring-1 focus:ring-[#B8860B] transition-all ${
+                        className={`w-full h-10 bg-slate-50 dark:bg-zinc-900 border border-slate-200/90 dark:border-white/10 rounded-xl text-xs sm:text-sm text-[#0B192C] dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#8A6305] focus:ring-1 focus:ring-[#8A6305] transition-all ${
                             isRtl ? "pr-9 pl-8" : "pl-9 pr-8"
                         }`}
                     />
@@ -81,7 +81,7 @@ export default function BrandCatalogToolbar({
 
                 {/* Right Controls: Result Count & Sort Dropdown */}
                 <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <span className="text-xs font-bold text-[#475569] dark:text-slate-400">
                         {totalResults} {isArabic ? "صنف متاح" : "items"}
                     </span>
 
@@ -101,8 +101,8 @@ export default function BrandCatalogToolbar({
                         onClick={() => onSelectCategory("all")}
                         className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                             activeCategoryId === "all"
-                                ? "bg-[#072835] dark:bg-[#B8860B] text-white shadow-xs"
-                                : "bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-[#072835] dark:hover:border-white/20"
+                                ? "bg-[#0B192C] dark:bg-[#8A6305] text-white shadow-xs"
+                                : "bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-[#0B192C] dark:hover:border-white/20"
                         }`}
                     >
                         <MdGridView className="text-sm" />
@@ -119,8 +119,8 @@ export default function BrandCatalogToolbar({
                                 onClick={() => onSelectCategory(cat.id)}
                                 className={`shrink-0 inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                     isSelected
-                                        ? "bg-[#072835] dark:bg-[#B8860B] text-white shadow-xs"
-                                        : "bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-[#072835] dark:hover:border-white/20"
+                                        ? "bg-[#0B192C] dark:bg-[#8A6305] text-white shadow-xs"
+                                        : "bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-[#0B192C] dark:hover:border-white/20"
                                 }`}
                             >
                                 <span>{catName}</span>

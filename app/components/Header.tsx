@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import React, { useRef, useState, useEffect } from 'react';
-import { MdOutlineShoppingBag, MdMenu, MdClose, MdKeyboardArrowDown } from 'react-icons/md';
+import { MdOutlineShoppingBag, MdMenu, MdClose, MdKeyboardArrowDown, MdPerson } from 'react-icons/md';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCart } from '@/app/context/CartContext';
 import HeaderSearch from './HeaderSearch';
@@ -30,6 +30,7 @@ interface HeaderProps {
 
 const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProps) => {
     const { language } = useLanguage();
+    const isArabic = language === 'ar';
     const { totalItems, openDrawer } = useCart();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -158,7 +159,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
     return (
         <>
             {/* Spacer to prevent layout shift when header collapses */}
-            <div className="w-full h-[148px] sm:h-[144px] lg:h-[158px]" aria-hidden="true" />
+            <div className="w-full h-[116px] sm:h-[120px] lg:h-[158px]" aria-hidden="true" />
 
             <header className="fixed top-0 left-0 z-50 w-full bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-white/10 transition-all duration-300">
                 {/* Disappearing Top Bar */}
@@ -187,15 +188,23 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                 </button>
 
                                 <div className={`transition-all duration-500 ease-in-out ${isScrolled ? 'ms-2' : 'ms-0'}`}>
-                                    <Link href="/" className="flex items-center group">
+                                    <Link href="/" className="flex items-center gap-3 group">
                                         <Image
                                             src="/logo.png"
-                                            alt="ZAD LAND - زاد لاند"
-                                            width={180}
-                                            height={65}
+                                            alt="Hawa Distribution & Trading - شركة هوا للتوزيع والتجارة"
+                                            width={64}
+                                            height={64}
                                             priority
-                                            className="h-[48px] xl:h-[54px] w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                                            className="h-[50px] xl:h-[56px] w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                                         />
+                                        <div className="flex flex-col text-start">
+                                            <span className="font-black text-[#0B192C] dark:text-white text-base xl:text-lg tracking-tight leading-tight">
+                                                {isArabic ? 'هـوا للتوزيع' : 'HAWA TRADING'}
+                                            </span>
+                                            <span className="text-[10px] font-extrabold text-[#8A6305] dark:text-[#8A6305] tracking-wider uppercase">
+                                                {isArabic ? 'توريد وتوزيع جملة' : 'Wholesale Distribution'}
+                                            </span>
+                                        </div>
                                     </Link>
                                 </div>
                             </div>
@@ -205,11 +214,19 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                 <HeaderSearch />
                             </div>
 
-                            {/* Right: Cart Button Drawer Trigger */}
-                            <div className="flex items-center gap-3 lg:gap-4 shrink-0">
+                            {/* Right: Commercial Account & Cart */}
+                            <div className="flex items-center gap-2.5 lg:gap-3 shrink-0">
+                                <Link
+                                    href="/account"
+                                    className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FAF6EC] hover:bg-[#0B192C] text-[#0B192C] hover:text-white dark:bg-white/10 dark:text-white dark:hover:bg-[#8A6305] border border-[#8A6305]/30 font-bold text-xs transition-all active:scale-95 shadow-xs"
+                                >
+                                    <MdPerson className="text-base text-[#8A6305]" />
+                                    <span>{isArabic ? 'حساب تجاري' : 'Merchant Portal'}</span>
+                                </Link>
+
                                 <button
                                     onClick={openDrawer}
-                                    className="w-10 h-10 xl:w-11 xl:h-11 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-xl text-zinc-900 dark:text-white hover:bg-[#072835] hover:text-white dark:hover:bg-white dark:hover:text-black transition-all relative"
+                                    className="w-10 h-10 xl:w-11 xl:h-11 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-xl text-zinc-900 dark:text-white hover:bg-[#0B192C] hover:text-white dark:hover:bg-white dark:hover:text-black transition-all relative"
                                     aria-label="Open Shopping Cart"
                                 >
                                     <MdOutlineShoppingBag />
@@ -229,33 +246,49 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                 <div className="flex items-center gap-3">
                                     <button
                                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                        className="p-1.5 text-zinc-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                                        className="w-11 h-11 flex items-center justify-center text-zinc-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                                         aria-label="Toggle Menu"
                                     >
                                         {isMobileMenuOpen ? (
-                                            <MdClose className="text-2xl" />
+                                             <MdClose className="text-2xl" />
                                         ) : (
                                             <MdMenu className="text-2xl" />
                                         )}
                                     </button>
-                                    <Link href="/" className="flex items-center group">
+                                    <Link href="/" className="flex items-center gap-2 group">
                                         <Image
                                             src="/logo.png"
-                                            alt="ZAD LAND - زاد لاند"
-                                            width={140}
-                                            height={50}
+                                            alt="Hawa Distribution & Trading - شركة هوا للتوزيع والتجارة"
+                                            width={48}
+                                            height={48}
                                             priority
-                                            className="h-[36px] sm:h-[40px] w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                                            className="h-[40px] sm:h-[44px] w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                                         />
+                                        <div className="flex flex-col text-start">
+                                            <span className="font-black text-[#0B192C] dark:text-white text-sm leading-tight">
+                                                {isArabic ? 'هـوا للتوزيع' : 'HAWA TRADING'}
+                                            </span>
+                                            <span className="text-[9px] font-extrabold text-[#8A6305] leading-none">
+                                                {isArabic ? 'توريد جملة' : 'Wholesale'}
+                                            </span>
+                                        </div>
                                     </Link>
                                 </div>
 
                                 <div className="flex items-center gap-2">
                                     <LanguageToggle />
                                     <CurrencyToggle />
+                                    <Link
+                                        href="/account"
+                                        className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-lg text-[#0B192C] dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                                        aria-label="Merchant Account"
+                                        title={isArabic ? 'حساب تجاري' : 'Merchant Portal'}
+                                    >
+                                        <MdPerson className="text-xl text-[#8A6305]" />
+                                    </Link>
                                     <button
                                         onClick={openDrawer}
-                                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-lg text-zinc-900 dark:text-white relative"
+                                        className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-lg text-zinc-900 dark:text-white relative"
                                         aria-label="Open Shopping Cart"
                                     >
                                         <MdOutlineShoppingBag />
@@ -295,38 +328,59 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                 >
                     <div className={`relative min-h-0 ${isNavVisible ? 'overflow-visible' : 'overflow-hidden'}`}>
                         <div className="container-custom relative flex items-center justify-center h-[48px]">
-                            {/* Primary Visible Departments */}
-                            <div className="flex items-center justify-center gap-5 xl:gap-8 flex-nowrap">
-                                {visibleNavItems.map((mc) => {
-                                    const displayName = language === 'ar' ? mc.name : (mc.nameEn || mc.name);
-                                    return (
-                                        <div
-                                            key={mc.id}
-                                            className="relative shrink-0 group"
-                                            onMouseEnter={() => {
-                                                setIsMoreOpen(false);
-                                                handleNavEnter(mc.slug);
-                                            }}
-                                            onMouseLeave={handleNavLeave}
-                                        >
-                                            <Link
-                                                href={`/department/${mc.slug}`}
-                                                prefetch={true}
-                                                className={`text-[14px] xl:text-[15px] font-medium relative flex items-center gap-1 transition-colors whitespace-nowrap py-1 ${
-                                                    activeMegaMenu === mc.slug
-                                                        ? 'text-[#B8860B] dark:text-[#E5B54A]'
-                                                        : 'text-[#1A1A1A] dark:text-gray-200 hover:text-[#B8860B] dark:hover:text-[#E5B54A]'
-                                                }`}
-                                            >
-                                                <span>{displayName}</span>
-                                                <MdKeyboardArrowDown className={`text-base text-gray-500 group-hover:text-[#B8860B] dark:text-gray-400 dark:group-hover:text-[#E5B54A] transition-transform duration-200 ${activeMegaMenu === mc.slug ? 'rotate-180 text-[#B8860B] dark:text-[#E5B54A]' : ''}`} />
-                                            </Link>
-                                        </div>
-                                    );
-                                })}
+                            {/* Primary Navigation Links matching brief */}
+                            <div className="flex items-center justify-center gap-4 xl:gap-7 flex-nowrap">
+                                <Link
+                                    href="/"
+                                    className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
+                                >
+                                    {isArabic ? 'الرئيسية' : 'Home'}
+                                </Link>
 
-                                {/* More Departments Dropdown (Plain text + chevron matching screenshot) */}
-                                {overflowNavItems.length > 0 && (
+                                <Link
+                                    href="/about-us"
+                                    className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
+                                >
+                                    {isArabic ? 'من نحن' : 'About Us'}
+                                </Link>
+
+                                <Link
+                                    href="/agencies"
+                                    className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
+                                >
+                                    {isArabic ? 'وكالاتنا' : 'Our Agencies'}
+                                </Link>
+
+                                <Link
+                                    href="/products"
+                                    className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
+                                >
+                                    {isArabic ? 'المنتجات' : 'Products'}
+                                </Link>
+
+                                <Link
+                                    href="/services"
+                                    className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
+                                >
+                                    {isArabic ? 'خدمات التوزيع' : 'Distribution Services'}
+                                </Link>
+
+                                <Link
+                                    href="/blog"
+                                    className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
+                                >
+                                    {isArabic ? 'المدونة' : 'Blog'}
+                                </Link>
+
+                                <Link
+                                    href="/contact"
+                                    className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
+                                >
+                                    {isArabic ? 'تواصل معنا' : 'Contact Us'}
+                                </Link>
+
+                                {/* Optional Departments Mega Menu Trigger if navData exists */}
+                                {navData && navData.length > 0 && (
                                     <div
                                         className="relative shrink-0 group"
                                         onMouseEnter={handleMoreEnter}
@@ -334,14 +388,10 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                     >
                                         <button
                                             type="button"
-                                            className={`text-[14px] xl:text-[15px] font-medium relative flex items-center gap-1 transition-colors whitespace-nowrap py-1 ${
-                                                isMoreOpen
-                                                    ? 'text-[#B8860B] dark:text-[#E5B54A]'
-                                                    : 'text-[#1A1A1A] dark:text-gray-200 hover:text-[#B8860B] dark:hover:text-[#E5B54A]'
-                                            }`}
+                                            className="text-[13px] xl:text-[14px] font-bold text-[#8A6305] dark:text-[#8A6305] flex items-center gap-1 py-1"
                                         >
-                                            <span>{language === 'ar' ? 'المزيد' : 'More'}</span>
-                                            <MdKeyboardArrowDown className={`text-base text-gray-500 group-hover:text-[#B8860B] dark:text-gray-400 dark:group-hover:text-[#E5B54A] transition-transform duration-200 ${isMoreOpen ? 'rotate-180 text-[#B8860B] dark:text-[#E5B54A]' : ''}`} />
+                                            <span>{isArabic ? 'أقسام المنتجات' : 'Departments'}</span>
+                                            <MdKeyboardArrowDown className="text-base" />
                                         </button>
 
                                         {/* Floating More Dropdown Menu */}
@@ -350,18 +400,18 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                                 className="absolute top-full ltr:right-0 rtl:left-0 mt-1.5 w-64 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-white/10 p-2 z-50 animate-mega-menu-enter"
                                             >
                                                 <div className="flex flex-col gap-0.5 max-h-[340px] overflow-y-auto scrollbar-hide py-1">
-                                                    {overflowNavItems.map((mc) => {
+                                                    {navData.map((mc) => {
                                                         const name = language === 'ar' ? mc.name : (mc.nameEn || mc.name);
                                                         return (
-                                                            <Link
+                                                             <Link
                                                                 key={mc.id}
-                                                                href={`/department/${mc.slug}`}
+                                                                href={`/departments/${mc.slug}`}
                                                                 onClick={() => setIsMoreOpen(false)}
-                                                                className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-semibold text-zinc-800 dark:text-white/90 hover:bg-[#B8860B]/10 hover:text-[#B8860B] dark:hover:text-[#E5B54A] transition-all"
+                                                                className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-semibold text-zinc-800 dark:text-white/90 hover:bg-[#8A6305]/10 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-all"
                                                             >
                                                                 <span className="truncate">{name}</span>
                                                                 {mc.categories?.length > 0 && (
-                                                                    <span className="text-[11px] text-gray-400 font-normal shrink-0 ms-3">
+                                                                    <span className="text-[11px] text-[#475569] font-normal shrink-0 ms-3">
                                                                         {mc.categories.length} {language === 'ar' ? 'فئات' : 'cats'}
                                                                     </span>
                                                                 )}

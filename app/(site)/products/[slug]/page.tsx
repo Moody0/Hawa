@@ -11,6 +11,7 @@ import ProductShareButtons from '@/app/components/ProductDetailsComponents/Produ
 import RelatedProducts from '@/app/components/ProductDetailsComponents/RelatedProducts';
 import Breadcrumbs from '@/app/components/ProductDetailsComponents/Breadcrumbs';
 import ProductReviews from '@/app/components/ProductDetailsComponents/ProductReviews';
+import MobileStickyOrderBar from '@/app/components/ProductDetailsComponents/MobileStickyOrderBar';
 import { getI18n } from '@/lib/i18n';
 
 export const revalidate = 60; // Revalidate cache every 60 seconds
@@ -36,15 +37,15 @@ export async function generateMetadata(
 
     if (!product) {
         return {
-            title: 'Product Not Found | Zad Land',
+            title: 'منتج غير موجود | Hawa Distribution',
         };
     }
 
-    const title = `${product.name} | Zad Land - زاد لاند`;
-    const brandName = product.brand?.name ? product.brand.name.split('-')[0].trim() : 'Zad Land';
+    const title = `${product.name} | Hawa Distribution - هوا للتوزيع`;
+    const brandName = product.brand?.name ? product.brand.name.split('-')[0].trim() : 'Hawa';
     const description = product.description 
-        ? `${product.name} من ${brandName}. متوفر للطلب والبيع بالجملة مع شحن موثوق عبر منصة زاد لاند. ${product.description.slice(0, 120)}`
-        : `اشترِ ${product.name} من ${brandName} بأفضل أسعار الجملة المعتمدة من شركة زاد لاند لتجارة وتوزيع المواد الغذائية.`;
+        ? `${product.name} من وكالة ${brandName}. متوفر للطلب والبيع بالجملة مع شحن موثوق عبر شركة هوا للتوزيع والتجارة. ${product.description.slice(0, 120)}`
+        : `اشترِ ${product.name} من وكالة ${brandName} بأفضل أسعار الجملة المعتمدة من شركة هوا للتوزيع والتجارة.`;
 
     const mainImage = (product.images as string).split(',').map((img: string) => img.trim()).filter(Boolean)[0] || '/logo.jpeg';
 
@@ -120,11 +121,11 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
         "sku": product.id,
         "brand": {
             "@type": "Brand",
-            "name": product.brand?.name || "Zad Land",
+            "name": product.brand?.name || "Hawa Distribution",
         },
         "offers": {
             "@type": "Offer",
-            "url": `https://zadland.com/products/${product.slug}`,
+            "url": `https://hawatrading.com/products/${product.slug}`,
             "priceCurrency": "SYP",
             "price": Number(product.discountPrice || product.price),
             "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
@@ -176,6 +177,7 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                     <ProductPrice
                         price={product.price.toString()}
                         discountPrice={product.discountPrice?.toString()}
+                        hidePrice={product.hidePrice}
                     />
 
                     <ProductActions
@@ -191,6 +193,9 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                             description: product.description,
                             descriptionAr: product.descriptionAr,
                             descriptionEn: product.descriptionEn,
+                            packaging: product.packaging,
+                            itemsPerPackage: product.itemsPerPackage,
+                            minOrder: product.minOrder,
                         }}
                         stock={product.stock}
                     />
@@ -228,6 +233,26 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                     productImage={mainImage}
                 />
             </div>
+
+            <MobileStickyOrderBar
+                product={{
+                    id: product.id,
+                    name: product.name,
+                    nameAr: product.nameAr,
+                    nameEn: product.nameEn,
+                    price: Number(product.discountPrice || product.price),
+                    image: mainImage,
+                    slug: product.slug,
+                    options: product.options,
+                    description: product.description,
+                    descriptionAr: product.descriptionAr,
+                    descriptionEn: product.descriptionEn,
+                    packaging: product.packaging,
+                    itemsPerPackage: product.itemsPerPackage,
+                    minOrder: product.minOrder,
+                    hidePrice: product.hidePrice,
+                }}
+            />
         </main>
     );
 }

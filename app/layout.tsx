@@ -20,10 +20,10 @@ const noto_sans_arabic = Noto_Sans_Arabic({
 const metadataBase =
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.NEXTAUTH_URL ||
-  "https://zadland.com";
+  "https://hawatrading.com";
 
 export const viewport: Viewport = {
-  themeColor: "#072835",
+  themeColor: "#0B192C",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -32,37 +32,34 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBase),
   title: {
-    default: "Zad Land | Wholesale Food & Goods Trading - زاد لاند لتجارة وتوزيع المواد الغذائية",
-    template: "%s | Zad Land - زاد لاند",
+    default: "هوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد - Hawa Distribution",
+    template: "%s | Hawa Distribution - هوا للتوزيع",
   },
   description:
-    "شركة زاد لاند - المنصة الرائدة في استيراد وتوزيع المواد الغذائية والمنتجات الاستهلاكية بالجملة. موزعون معتمدون لكبرى العلامات العالمية (أمريكانا، تات، دي سيكو، سانتي، علي كافيه). توريد مباشر، جودة عالية، وأفضل أسعار الجملة.",
+    "شركة هوا للتوزيع والتجارة - كل منتجات وكالاتك… بطلب واحد. المنصة الرائدة لتوريد كبرى الوكالات والعلامات التجارية للمحلات والسوبرماركت بالجملة (زوان، الريف، حليبنا، صن بل، سيلفر فيش، بوفالو، روكافيرا، المغربي). توريد مباشر وطلب فوري عبر واتساب.",
   keywords: [
-    "Zad Land",
-    "زاد لاند",
+    "Hawa Distribution",
+    "هوا للتوزيع والتجارة",
+    "شركة هوا للتوزيع",
     "تجارة جملة مواد غذائية",
-    "توزيع مواد غذائية سوريا",
-    "استيراد مواد غذائية",
-    "عروض جملة",
-    "أمريكانا جملة",
-    "تات معجون طماطم",
-    "دي سيكو باستا",
-    "سانتي حبوب إفطار",
-    "علي كافيه جملة",
-    "مواد استهلاكية جملة",
-    "تجار جملة دمشق",
-    "wholesale food distributor",
+    "توزيع مواد استهلاكية ومنظفات",
+    "وكالات تجارية سوريا",
+    "زوان لانشون جملة",
+    "زيت الريف جملة",
+    "حليبنا مجفف",
+    "تونة صن بل",
+    "سيلفر فيش سردين",
+    "منظفات روكافيرا",
+    "منتجات بوفالو",
+    "طلب جملة عبر واتساب",
+    "تجار جملة سوريا",
+    "wholesale distributor B2B",
     "FMCG wholesale Syria",
-    "food importer",
-    "bulk food supply",
-    "Americana wholesale",
-    "Tat wholesale",
-    "De Cecco wholesale",
-    "grocery wholesale B2B"
+    "agency distribution B2B"
   ],
-  authors: [{ name: "Zad Land", url: metadataBase }],
-  creator: "Zad Land",
-  publisher: "Zad Land",
+  authors: [{ name: "Hawa Distribution & Trading", url: metadataBase }],
+  creator: "Hawa Distribution & Trading",
+  publisher: "Hawa Distribution & Trading",
   formatDetection: {
     email: false,
     address: false,
@@ -80,25 +77,25 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ar_SY",
     alternateLocale: ["en_US", "ar_SA"],
-    siteName: "Zad Land | زاد لاند",
-    title: "Zad Land | Wholesale Food & Goods Trading - زاد لاند",
+    siteName: "Hawa Distribution | هوا للتوزيع والتجارة",
+    title: "Hawa Distribution & Trading | Wholesale Agencies - هوا للتوزيع والتجارة",
     description:
-      "شركة زاد لاند لتجارة وتوزيع المواد الغذائية بالجملة. توريد مباشر من كبرى الشركات العالمية بأفضل الأسعار المعتمدة.",
+      "شركة هوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة. توريد مباشر وطلب سريع عبر واتساب.",
     url: metadataBase,
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Zad Land Wholesale Food & Goods Distribution",
+        alt: "Hawa Distribution & Trading",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zad Land | Wholesale Food & Goods Trading - زاد لاند",
+    title: "Hawa Distribution & Trading | Wholesale Agencies - هوا للتوزيع والتجارة",
     description:
-      "شركة زاد لاند لتجارة وتوزيع المواد الغذائية بالجملة. توريد مباشر من كبرى الشركات العالمية بأفضل الأسعار المعتمدة.",
+      "شركة هوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة. توريد مباشر وطلب سريع عبر واتساب.",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -141,11 +138,11 @@ export default async function RootLayout({
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "WholesaleStore",
-    "name": "Zad Land - زاد لاند",
+    "name": "Hawa Distribution & Trading - هوا للتوزيع والتجارة",
     "url": metadataBase,
     "logo": `${metadataBase}/logo.jpeg`,
     "image": `${metadataBase}/og-image.jpg`,
-    "description": "شركة زاد لاند لتجارة وتوزيع المواد الغذائية والمنتجات الاستهلاكية بالجملة.",
+    "description": "شركة هوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة.",
     "currenciesAccepted": "SYP, USD",
     "paymentAccepted": "Cash, Bank Transfer",
     "areaServed": "Syria",

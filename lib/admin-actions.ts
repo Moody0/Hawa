@@ -35,6 +35,10 @@ interface ProductInput {
     brandId: string;
     categoryId: string;
     mainCategoryId?: string | null;
+    packaging?: string | null;
+    itemsPerPackage?: string | null;
+    minOrder?: number | string | null;
+    hidePrice?: boolean;
 }
 
 interface CategoryInput {
@@ -912,6 +916,10 @@ export async function getAdminProducts() {
             createdAt: product.createdAt.toISOString(),
             updatedAt: product.updatedAt.toISOString(),
             isTrending: product.isTrending,
+            packaging: product.packaging || "طرد",
+            itemsPerPackage: product.itemsPerPackage || null,
+            minOrder: product.minOrder || 1,
+            hidePrice: Boolean(product.hidePrice),
         }));
     } catch (error) {
         console.error("Failed to fetch products:", error);
@@ -981,10 +989,12 @@ export async function getAdminOrders(page = 1, limit = 50) {
             prisma.order.findMany({
                 select: {
                     id: true,
+                    shopName: true,
                     Name: true,
                     phone: true,
                     streetAddress: true,
                     city: true,
+                    notes: true,
                     totalAmount: true,
                     status: true,
                     createdAt: true,
@@ -1000,7 +1010,9 @@ export async function getAdminOrders(page = 1, limit = 50) {
                                     id: true,
                                     name: true,
                                     images: true,
-                                    price: true
+                                    price: true,
+                                    packaging: true,
+                                    itemsPerPackage: true
                                 }
                             }
                         }
@@ -1018,10 +1030,12 @@ export async function getAdminOrders(page = 1, limit = 50) {
         return {
             orders: orders.map(order => ({
                 id: order.id,
+                shopName: order.shopName,
                 Name: order.Name,
                 phone: order.phone,
                 streetAddress: order.streetAddress,
                 city: order.city,
+                notes: order.notes,
                 totalAmount: Number(order.totalAmount),
                 status: order.status,
                 createdAt: order.createdAt.toISOString(),
@@ -1086,6 +1100,10 @@ export async function createProduct(data: ProductInput) {
                 brandId: data.brandId,
                 categoryId: data.categoryId,
                 mainCategoryId: data.mainCategoryId || category.mainCategoryId || null,
+                packaging: data.packaging || "طرد",
+                itemsPerPackage: data.itemsPerPackage || null,
+                minOrder: typeof data.minOrder === "number" ? data.minOrder : (parseInt(data.minOrder as string) || 1),
+                hidePrice: Boolean(data.hidePrice),
             }
         });
 
@@ -1117,6 +1135,10 @@ export async function createProduct(data: ProductInput) {
                 brandId: product.brandId,
                 categoryId: product.categoryId,
                 mainCategoryId: product.mainCategoryId,
+                packaging: product.packaging,
+                itemsPerPackage: product.itemsPerPackage,
+                minOrder: product.minOrder,
+                hidePrice: product.hidePrice,
                 createdAt: product.createdAt.toISOString(),
                 updatedAt: product.updatedAt.toISOString(),
             }
@@ -1161,6 +1183,10 @@ export async function updateProduct(id: string, data: ProductInput & { isTrendin
                 categoryId: data.categoryId,
                 mainCategoryId: data.mainCategoryId || category.mainCategoryId || null,
                 isTrending: data.isTrending,
+                packaging: data.packaging !== undefined ? (data.packaging || "طرد") : undefined,
+                itemsPerPackage: data.itemsPerPackage !== undefined ? (data.itemsPerPackage || null) : undefined,
+                minOrder: data.minOrder !== undefined ? (typeof data.minOrder === "number" ? data.minOrder : (parseInt(data.minOrder as string) || 1)) : undefined,
+                hidePrice: data.hidePrice !== undefined ? Boolean(data.hidePrice) : undefined,
             }
         });
 
@@ -1192,6 +1218,10 @@ export async function updateProduct(id: string, data: ProductInput & { isTrendin
                 brandId: product.brandId,
                 categoryId: product.categoryId,
                 mainCategoryId: product.mainCategoryId,
+                packaging: product.packaging,
+                itemsPerPackage: product.itemsPerPackage,
+                minOrder: product.minOrder,
+                hidePrice: product.hidePrice,
                 createdAt: product.createdAt.toISOString(),
                 updatedAt: product.updatedAt.toISOString(),
             }
@@ -1502,7 +1532,7 @@ export async function getHomeRailCategories() {
             include: {
                 products: {
                     where: {
-                        price: { gt: 0 },
+                        price: { gte: 0 },
                         NOT: [
                             { images: '/placeholder.svg' },
                             { images: '' }
@@ -1542,7 +1572,7 @@ export const getCategoryHighlightCardsData = unstable_cache(
                     ],
                     products: {
                         some: {
-                            price: { gt: 0 },
+                            price: { gte: 0 },
                             NOT: [
                                 { images: '/placeholder.svg' },
                                 { images: '' }
@@ -1558,7 +1588,7 @@ export const getCategoryHighlightCardsData = unstable_cache(
                 include: {
                     products: {
                         where: {
-                            price: { gt: 0 },
+                            price: { gte: 0 },
                             NOT: [
                                 { images: '/placeholder.svg' },
                                 { images: '' }
@@ -1630,6 +1660,45 @@ export const getApprovedReviews = unstable_cache(
                     }
                 }
             });
+            if (reviews.length === 0) {
+                const sampleProducts = await prisma.product.findMany({
+                    take: 3,
+                    select: { nameAr: true, nameEn: true, images: true, slug: true }
+                });
+                return [
+                    {
+                        id: 'rev-1',
+                        name: 'سوبرماركت الشام الحديث',
+                        feedback: 'أفضل موزع معتمد لوكالات زوان والريف. سرعة في تلبية طلبيات الطرود وتأكيد مباشر وسلس عبر واتساب.',
+                        rating: 5,
+                        image: sampleProducts[0]?.images ? sampleProducts[0].images.split(',')[0].trim() : '/logo.png',
+                        productNameAr: sampleProducts[0]?.nameAr || 'منتجات زوان الغذائية',
+                        productNameEn: sampleProducts[0]?.nameEn || 'Zwan Food Products',
+                        productSlug: sampleProducts[0]?.slug || ''
+                    },
+                    {
+                        id: 'rev-2',
+                        name: 'ميني ماركت الهدى',
+                        feedback: 'التوريد منتظم جداً ومواصفات التعبئة واضحة بالطرود، مما يسهل جرد وتوزيع البضائع في المحل بدقة.',
+                        rating: 5,
+                        image: sampleProducts[1]?.images ? sampleProducts[1].images.split(',')[0].trim() : '/logo.png',
+                        productNameAr: sampleProducts[1]?.nameAr || 'سمن وزيوت الريف',
+                        productNameEn: sampleProducts[1]?.nameEn || 'Al-Reef Ghee & Oils',
+                        productSlug: sampleProducts[1]?.slug || ''
+                    },
+                    {
+                        id: 'rev-3',
+                        name: 'بقالة البركة التجارية',
+                        feedback: 'توفير كبرى الوكالات بطلب واحد وفر علينا وقتاً كبيراً في التواصل واللوجستيات مع الموزعين.',
+                        rating: 5,
+                        image: sampleProducts[2]?.images ? sampleProducts[2].images.split(',')[0].trim() : '/logo.png',
+                        productNameAr: sampleProducts[2]?.nameAr || 'منظفات بوفالو وروكافيرا',
+                        productNameEn: sampleProducts[2]?.nameEn || 'Buffalo & Rocavera Cleaners',
+                        productSlug: sampleProducts[2]?.slug || ''
+                    }
+                ];
+            }
+
             return reviews.map(r => ({
                 id: r.id,
                 name: r.name,
@@ -1656,11 +1725,6 @@ export const getFeaturedCategories = unstable_cache(
                 where: {
                     isFeatured: true,
                     brand: { isActive: true },
-                    NOT: [
-                        { image: null },
-                        { image: '/placeholder.svg' },
-                        { image: '' }
-                    ]
                 },
                 take: 12,
                 orderBy: { updatedAt: 'desc' },
@@ -1671,26 +1735,39 @@ export const getFeaturedCategories = unstable_cache(
                             name: true,
                             slug: true,
                         }
+                    },
+                    products: {
+                        where: {
+                            NOT: [
+                                { images: '/placeholder.svg' },
+                                { images: '' }
+                            ]
+                        },
+                        take: 1,
+                        select: { images: true }
                     }
                 }
             });
-            return categories.map(category => ({
-                id: category.id,
-                name: category.name,
-                nameEn: category.description || category.name,
-                description: category.description,
-                image: category.image,
-                slug: category.slug,
-                brandId: category.brandId,
-                isFeatured: category.isFeatured,
-                brand: category.brand ? {
-                    id: category.brand.id,
-                    name: category.brand.name.split('-')[0].trim(),
-                    slug: category.brand.slug,
-                } : null,
-                createdAt: category.createdAt.toISOString(),
-                updatedAt: category.updatedAt.toISOString(),
-            }));
+            return categories.map(category => {
+                const prodImg = category.products[0]?.images ? category.products[0].images.split(',')[0].trim() : '/logo.png';
+                return {
+                    id: category.id,
+                    name: category.name,
+                    nameEn: category.description || category.name,
+                    description: category.description,
+                    image: category.image && category.image !== '/placeholder.svg' ? category.image : prodImg,
+                    slug: category.slug,
+                    brandId: category.brandId,
+                    isFeatured: category.isFeatured,
+                    brand: category.brand ? {
+                        id: category.brand.id,
+                        name: category.brand.name.split('-')[0].trim(),
+                        slug: category.brand.slug,
+                    } : null,
+                    createdAt: category.createdAt.toISOString(),
+                    updatedAt: category.updatedAt.toISOString(),
+                };
+            });
         } catch (error) {
             console.error("Failed to fetch featured categories:", error);
             return [];
@@ -1989,7 +2066,7 @@ export const getBestSellerProducts = unstable_cache(
                     isTrending: true,
                     brand: { isActive: true },
                     stock: { gt: 0 },
-                    price: { gt: 0 },
+                    price: { gte: 0 },
                     NOT: [
                         { images: '/placeholder.svg' },
                         { images: '' }
@@ -2037,7 +2114,7 @@ export const getNewArrivalProducts = unstable_cache(
                 where: {
                     brand: { isActive: true },
                     stock: { gt: 0 },
-                    price: { gt: 0 },
+                    price: { gte: 0 },
                     NOT: [
                         { images: '/placeholder.svg' },
                         { images: '' }
@@ -2085,7 +2162,7 @@ export const getTrendingWeeklyProducts = unstable_cache(
                 where: {
                     brand: { isActive: true },
                     stock: { gt: 0 },
-                    price: { gt: 0 },
+                    price: { gte: 0 },
                     NOT: [
                         { images: '/placeholder.svg' },
                         { images: '' }
@@ -2693,15 +2770,16 @@ export const getSiteSettings = unstable_cache(
                     categoriesCtaTitleAr: "تبحث عن شركات أو منتجات محددة؟",
                     categoriesCtaDescAr: "فريق المبيعات لدينا جاهز لتزويدكم بأفضل أسعار الجملة وجداول التوزيع المنتظمة.",
                     categoriesCtaImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC-S_GMsoebb73JIEWcxtvH2G-vVgkfypE8ysWpGMNiiiwyTno8rIbMCpHR-fsa76ZQL49aYswb7bGZh-kgwc6z9lv0VwUSUrStxNWz2qU3RuIb75ShOMAKZMRyrOXZHZjEBgtxfW7r97FEEshOkEd2MqgE6FpGYrmKa8msLtMOQxXBsmhr3ZGGEtL7jpzgMYbgrAXhiHcMfCspdvD5FRNuSbgFY9_xGqcJM9KbgG0MoC4Ie4WkkmCR4FsuavfglcnY13G2ADZxlK8F",
-                    footerBrandTitle: "Zad Land",
-                    footerBrandTitleAr: "زاد لاند",
+                    footerBrandTitle: "Hawa Distribution",
+                    footerBrandTitleAr: "شركة هوا للتوزيع والتجارة",
                     footerBrandDescription: "Your trusted partner in wholesale food and consumer goods distribution from top international brands.",
                     footerBrandDescriptionAr: "شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.",
-                    footerCopyright: "© 2026 Zad Land. All rights reserved.",
-                    footerCopyrightAr: "© 2026 زاد لاند. جميع الحقوق محفوظة.",
+                    footerCopyright: "© 2026 Hawa Distribution. All rights reserved.",
+                    footerCopyrightAr: "© 2026 شركة هوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
                     footerInstagramUrl: "#",
                     footerFacebookUrl: "#",
                     footerWhatsappUrl: "#",
+                    whatsappNumber: "+963900000000",
                     footerShopTitle: "Shop",
                     footerShopTitleAr: "المتجر",
                     footerSupportTitle: "Support",
@@ -2769,16 +2847,20 @@ export const getSiteSettings = unstable_cache(
                     middleBanner2ButtonText: "Explore Catalog",
                     middleBanner2ButtonTextAr: "تصفح الكتالوج",
                     exchangeRate: 135,
+                    statDeliveries: "+9000",
+                    statBrands: "+100",
+                    statProducts: "+500",
+                    statClients: "+300",
                     aboutHeroImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuAz8qN2iAHz-UZeEQfqOY49U5OCZ5z4ejVm7ILFjFSl9S5xg_6UuBa61qOmrkMPrBa4CuXDzHa9EN3-LNyUxi5IDK5A9TvJWkNuG-tt_RRyvJH8LvynO1daOEkTk47KDtkW3Md2ugZYShZJdxolsjiJUtDdOOz4Q7-6TNrexIvyClP0ADf1TWdbCUk1kBn8bfzhTC1cn8s9jG3yt0tDDht7__J5YKKf690SmKN4WIJX_pc2LOj3x1CnYk5JuqEu0Bzp2vGwsrYLaJWb",
                     
                     aboutNarrativeTitle: "Our Mission for Quality Distribution",
                     aboutNarrativeTitleAr: "مهمتنا في التوزيع الموثوق",
                     aboutNarrativeFounded: "Founded with Trust",
                     aboutNarrativeFoundedAr: "تأسست على الثقة",
-                    aboutNarrativeDesc1: "At Zad Land, we bridge the gap between world-renowned international brands and local markets. We believe in providing retailers and businesses with seamless access to authentic, top-tier goods at competitive wholesale prices.",
-                    aboutNarrativeDesc1Ar: "في زاد لاند، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية العالمية والأسواق المحلية.",
-                    aboutNarrativeDesc2: "With rigorous quality control, modern logistics, and a commitment to reliability, Zad Land has established itself as the trusted partner for food and consumer goods distribution across all governorates.",
-                    aboutNarrativeDesc2Ar: "بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت زاد لاند مكانتها كشركة رائدة وموثوقة لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.",
+                    aboutNarrativeDesc1: "At Hawa Distribution, we bridge the gap between world-renowned international brands and local markets. We believe in providing retailers and businesses with seamless access to authentic, top-tier goods at competitive wholesale prices.",
+                    aboutNarrativeDesc1Ar: "في شركة هوا للتوزيع والتجارة، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية والأسواق المحلية والمحلات التجارية.",
+                    aboutNarrativeDesc2: "With rigorous quality control, modern logistics, and a commitment to reliability, Hawa Distribution has established itself as the trusted partner for food and consumer goods distribution across all governorates.",
+                    aboutNarrativeDesc2Ar: "بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت شركة هوا مكانتها كشريك رائد وموثوق لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.",
                     aboutNarrativeQuote: "Connecting you with the world's finest brands.",
                     aboutNarrativeQuoteAr: "جودة مضمونة وخدمة توزيع موثوقة.",
                     aboutNarrativeImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC4yp4c_LJLNPwaV2ay8DZ6xRHD0UF1WqXU8eDtrdDoiVjtq9oNRc9Cn6cnbqsNwOLO-y-99jnkiLnCsGLs2rQqthU8TPqhAh2Msisbst1UyfyrILBR5fRO7KYu90u1FEoeRRjGceGVbB5vz2SJAtjzUrLLtA6BmR8VN5a5Seo4MraBJj7i4Gs4QPEZbURtSN-F7wbJsu4WNj3pEaWlye2SuJvokQhYXJ27gnAoabHg5_0_4DZY49qyKnQuMHHL9atOIILRIMD3FkeZ",
@@ -2809,7 +2891,12 @@ export const getSiteSettings = unstable_cache(
             
             return {
                 ...settings,
+                whatsappNumber: settings.whatsappNumber || "+963900000000",
                 exchangeRate: Number(settings.exchangeRate),
+                statDeliveries: settings.statDeliveries || "+9000",
+                statBrands: settings.statBrands || "+100",
+                statProducts: settings.statProducts || "+500",
+                statClients: settings.statClients || "+300",
             };
         } catch (error) {
             console.error("Failed to fetch site settings:", error);
@@ -2835,6 +2922,7 @@ export async function updateSiteSettings(data: {
     footerInstagramUrl?: string;
     footerFacebookUrl?: string;
     footerWhatsappUrl?: string;
+    whatsappNumber?: string;
     footerShopTitle?: string;
     footerShopTitleAr?: string;
     footerSupportTitle?: string;
@@ -2913,6 +3001,10 @@ export async function updateSiteSettings(data: {
     middleBanner2ButtonText?: string;
     middleBanner2ButtonTextAr?: string;
     exchangeRate?: number;
+    statDeliveries?: string;
+    statBrands?: string;
+    statProducts?: string;
+    statClients?: string;
 }) {
     try {
         await prisma.settings.upsert({

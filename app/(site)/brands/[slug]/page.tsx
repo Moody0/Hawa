@@ -13,12 +13,12 @@ export async function generateMetadata(
 
     if (!brand) {
         return {
-            title: "Brand Not Found | Zad Land",
+            title: "وكالة غير موجودة | Hawa Distribution",
         };
     }
 
-    const title = `${brand.name} | Zad Land - زاد لاند`;
-    const description = brand.description || `تصفح كتالوج منتجات ${brand.name} بأسعار الجملة المعتمدة لدى شركة زاد لاند لتجارة وتوزيع المواد الغذائية.`;
+    const title = `${brand.name} | Hawa Distribution - هوا للتوزيع`;
+    const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة هوا للتوزيع والتجارة.`;
     const image = brand.image || '/og-image.jpg';
 
     return {

@@ -72,33 +72,62 @@ const FeaturedCollection = ({ newArrivals, bundles, bestSellers }: FeaturedColle
     return (
         <section className="container-custom">
             <div 
-                className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 px-2"
+                className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 border-b border-slate-200 dark:border-white/10 pb-4"
             >
                 <div className="flex-1">
-                    <h2 className="text-lg sm:text-xl md:text-[32px] font-semibold text-[rgb(46,46,46)] dark:text-text-main-dark">
-                        {t('home.featuredCollection')}
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#475569] dark:text-slate-400">
+                            {t('home.featuredCollection')}
+                        </span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight">
+                        {t('home.featuredCollectionSubtitle') || (dir === 'rtl' ? 'المنتجات المميزة والأكثر طلباً' : 'Featured Wholesale Products')}
                     </h2>
-                    <p className="text-[15px] text-[rgb(46,46,46)] mt-1">
-                        {t('home.featuredCollectionSubtitle')}
-                    </p>
                 </div>
 
-                <div className="tabs-nav overflow-x-auto scrollbar-hide" role="tablist">
-                    <div className="flex md:justify-end gap-4 md:gap-2">
-                        {tabs.map((tab, index) => (
-                            <button
-                                key={tab.key}
-                                role="tab"
-                                aria-selected={activeTab === index}
-                                onClick={() => setActiveTab(index)}
-                                className={`tabs__btn whitespace-nowrap px-6 py-2.5 text-[15px] transition-all border-b-2 ${activeTab === index
-                                    ? 'border-[#B8860B] text-[#B8860B] dark:text-[#E5B54A] font-bold'
-                                    : 'border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 font-medium'
-                                    }`}
-                            >
-                                {t(tab.labelKey)}
-                            </button>
-                        ))}
+                <div className="flex items-center gap-3">
+                    <div className="tabs-nav overflow-x-auto scrollbar-hide" role="tablist">
+                        <div className="flex md:justify-end gap-2">
+                            {tabs.map((tab, index) => (
+                                <button
+                                    key={tab.key}
+                                    role="tab"
+                                    aria-selected={activeTab === index}
+                                    onClick={() => setActiveTab(index)}
+                                    className={`tabs__btn whitespace-nowrap px-4 py-2 text-xs sm:text-sm transition-all border-b-2 font-bold cursor-pointer ${activeTab === index
+                                        ? 'border-[#0B192C] dark:border-white text-[#0B192C] dark:text-white'
+                                        : 'border-transparent text-[#475569] hover:text-[#0B192C] dark:text-slate-400 dark:hover:text-slate-200 font-semibold'
+                                        }`}
+                                >
+                                    {t(tab.labelKey)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Header Navigation Arrows for Desktop */}
+                    <div className="hidden md:flex items-center gap-1.5 ms-2 border-s border-slate-200 dark:border-white/10 ps-3">
+                        <button
+                            onClick={scrollBackward}
+                            disabled={!canScrollBackward}
+                            className="w-8 h-8 rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 flex items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer shadow-2xs"
+                            aria-label="Previous slide"
+                        >
+                            <svg className={`w-4 h-4 ${dir === 'rtl' ? '-scale-x-100' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.5 16.25L6.25 10L12.5 3.75" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path>
+                            </svg>
+                        </button>
+                        <button
+                            onClick={scrollForward}
+                            disabled={!canScrollForward}
+                            className="w-8 h-8 rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 flex items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer shadow-2xs"
+                            aria-label="Next slide"
+                        >
+                            <svg className={`w-4 h-4 ${dir === 'rtl' ? '-scale-x-100' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7.5 3.75L13.75 10L7.5 16.25" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -127,44 +156,17 @@ const FeaturedCollection = ({ newArrivals, bundles, bestSellers }: FeaturedColle
                     </div>
                 </div>
                 
-                {/* Bottom Navigation and Progress Bar */}
-                <div className="mt-8 flex items-center gap-4 px-2 w-full">
-                    {/* Previous Button (White -> Dark Hover) */}
-                    <button
-                        onClick={scrollBackward}
-                        disabled={!canScrollBackward}
-                        className="hidden md:flex w-12 h-12 shrink-0 rounded-full border border-gray-200 bg-white items-center justify-center text-[#000000] disabled:opacity-50 disabled:cursor-not-allowed order-2 btn-curved-fill"
-                        aria-label="Previous slide"
-                    >
-                        <svg className={`w-5 h-5 ${dir === 'rtl' ? '-scale-x-100' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12.5 16.25L6.25 10L12.5 3.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                        </svg>
-                    </button>
-                    
-                    {/* Progress Bar */}
-                    <div className="flex-1 h-[2px] bg-gray-200 dark:bg-gray-800 relative overflow-hidden rounded-full order-1">
-                        <div 
-                            ref={progressBarRef}
-                            className="absolute top-0 bottom-0 bg-[#000000] dark:bg-gray-300 rounded-full"
-                            style={{ 
-                                width: '100%',
-                                transformOrigin: dir === 'rtl' ? 'right' : 'left',
-                                transform: 'scaleX(0)'
-                            }}
-                        />
-                    </div>
-
-                    {/* Next Button (White -> Dark Hover) */}
-                    <button
-                        onClick={scrollForward}
-                        disabled={!canScrollForward}
-                        className="hidden md:flex w-12 h-12 shrink-0 rounded-full border border-gray-200 bg-white items-center justify-center text-[#000000] disabled:opacity-50 disabled:cursor-not-allowed order-3 btn-curved-fill"
-                        aria-label="Next slide"
-                    >
-                        <svg className={`w-5 h-5 ${dir === 'rtl' ? '-scale-x-100' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7.5 3.75L13.75 10L7.5 16.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                        </svg>
-                    </button>
+                {/* Sleek Subdued Progress Bar */}
+                <div className="mt-3 h-[2px] bg-slate-100 dark:bg-white/5 relative overflow-hidden rounded-full w-full">
+                    <div 
+                        ref={progressBarRef}
+                        className="absolute top-0 bottom-0 bg-[#8A6305] dark:bg-[#8A6305] rounded-full transition-transform duration-150"
+                        style={{ 
+                            width: '100%',
+                            transformOrigin: dir === 'rtl' ? 'right' : 'left',
+                            transform: 'scaleX(0)'
+                        }}
+                    />
                 </div>
             </div>
         </section>

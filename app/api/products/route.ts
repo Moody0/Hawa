@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 const getCachedProductCount = (where: Prisma.ProductWhereInput, key: string) =>
     unstable_cache(
         async () => prisma.product.count({ where }),
-        [`product-count-${key}`],
-        { tags: ["catalog", "products"], revalidate: 120 }
+        [`product-count-v3-${key}`],
+        { tags: ["catalog", "products"], revalidate: 60 }
     )();
 
 export async function GET(request: Request) {
@@ -23,6 +23,9 @@ export async function GET(request: Request) {
         const brandIdsParam = searchParams.get("brandIds");
         const mainCategoryIdParam = searchParams.get("mainCategoryId");
         const search = searchParams.get("search");
+        const inStockParam = searchParams.get("inStock");
+        const onSaleParam = searchParams.get("onSale");
+        const isTrendingParam = searchParams.get("isTrending");
         const skipCount = searchParams.get("skipCount") === "true";
         const knownTotalParam = searchParams.get("knownTotal");
         const knownTotal = knownTotalParam !== null ? parseInt(knownTotalParam) : undefined;
@@ -34,10 +37,31 @@ export async function GET(request: Request) {
                 isActive: true,
             },
         };
+
+        const andConditions: Prisma.ProductWhereInput[] = [];
+
+        if (inStockParam === "true") {
+            where.stock = { gt: 0 };
+        }
+
+        if (onSaleParam === "true") {
+            where.discountPrice = { not: null };
+        }
+
+        if (isTrendingParam === "true") {
+            where.isTrending = true;
+        }
+
         if (categoryIdsParam) {
             const ids = categoryIdsParam.split(",").filter(Boolean);
             if (ids.length > 0) {
-                where.categoryId = { in: ids };
+                andConditions.push({
+                    OR: [
+                        { categoryId: { in: ids } },
+                        { mainCategoryId: { in: ids } },
+                        { category: { mainCategoryId: { in: ids } } },
+                    ],
+                });
             }
         }
 
@@ -49,18 +73,30 @@ export async function GET(request: Request) {
         }
 
         if (mainCategoryIdParam) {
-            where.mainCategoryId = mainCategoryIdParam;
+            andConditions.push({
+                OR: [
+                    { mainCategoryId: mainCategoryIdParam },
+                    { category: { mainCategoryId: mainCategoryIdParam } },
+                ],
+            });
         }
 
         if (search) {
-            where.OR = [
-                { name: { contains: search, mode: "insensitive" } },
-                { nameAr: { contains: search, mode: "insensitive" } },
-                { nameEn: { contains: search, mode: "insensitive" } },
-                { description: { contains: search, mode: "insensitive" } },
-                { descriptionAr: { contains: search, mode: "insensitive" } },
-                { descriptionEn: { contains: search, mode: "insensitive" } },
-            ];
+            andConditions.push({
+                OR: [
+                    { name: { contains: search, mode: "insensitive" } },
+                    { nameAr: { contains: search, mode: "insensitive" } },
+                    { nameEn: { contains: search, mode: "insensitive" } },
+                    { description: { contains: search, mode: "insensitive" } },
+                    { descriptionAr: { contains: search, mode: "insensitive" } },
+                    { descriptionEn: { contains: search, mode: "insensitive" } },
+                    { brand: { name: { contains: search, mode: "insensitive" } } },
+                ],
+            });
+        }
+
+        if (andConditions.length > 0) {
+            where.AND = andConditions;
         }
 
         let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: "desc" };
@@ -72,7 +108,7 @@ export async function GET(request: Request) {
             orderBy = { createdAt: "desc" };
         }
 
-        const countKey = `${categoryIdsParam || 'all'}_${brandIdsParam || 'all'}_${mainCategoryIdParam || 'all'}_${search || 'none'}`;
+        const countKey = `${categoryIdsParam || 'all'}_${brandIdsParam || 'all'}_${mainCategoryIdParam || 'all'}_${search || 'none'}_${inStockParam || 'all'}_${onSaleParam || 'all'}_${isTrendingParam || 'all'}`;
 
         const totalPromise = (skipCount || (page > 1 && knownTotal !== undefined))
             ? Promise.resolve(knownTotal ?? 0)
@@ -101,6 +137,9 @@ export async function GET(request: Request) {
                     stock: true,
                     options: true,
                     isTrending: true,
+                    packaging: true,
+                    itemsPerPackage: true,
+                    minOrder: true,
                     brandId: true,
                     categoryId: true,
                     mainCategoryId: true,

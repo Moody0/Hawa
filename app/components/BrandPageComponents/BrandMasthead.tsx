@@ -23,9 +23,10 @@ interface BrandMastheadProps {
         } | null;
     };
     totalProducts?: number;
+    basePath?: string;
 }
 
-export default function BrandMasthead({ brand }: BrandMastheadProps) {
+export default function BrandMasthead({ brand, totalProducts, basePath = "/brands" }: BrandMastheadProps) {
     const { language, dir } = useLanguage();
     const isArabic = language === "ar";
     const isRtl = dir === "rtl";
@@ -55,16 +56,21 @@ export default function BrandMasthead({ brand }: BrandMastheadProps) {
         ? brand.description
         : naturalSubtitle;
 
+    const isAgencies = basePath === "/agencies";
+    const parentLabel = isAgencies
+        ? (isArabic ? "الوكالات المعتمدة" : "Authorized Agencies")
+        : (isArabic ? "العلامات التجارية" : "Brands");
+
     return (
         <section className="mb-8" aria-label="Brand Overview">
             {/* Clean Breadcrumb Strip */}
             <nav 
-                className="flex items-center flex-wrap gap-1.5 text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 mb-4"
+                className="flex items-center flex-wrap gap-1.5 text-[11px] sm:text-xs font-semibold text-[#475569] dark:text-slate-400 mb-4"
                 aria-label="Breadcrumb"
             >
                 <Link 
                     href="/" 
-                    className="hover:text-[#072835] dark:hover:text-white transition-colors py-1"
+                    className="hover:text-[#0B192C] dark:hover:text-white transition-colors py-1"
                 >
                     {isArabic ? "الرئيسية" : "Home"}
                 </Link>
@@ -74,17 +80,17 @@ export default function BrandMasthead({ brand }: BrandMastheadProps) {
                     <MdChevronRight className="text-slate-400 dark:text-slate-600 text-sm shrink-0" />
                 )}
                 <Link 
-                    href="/brands" 
-                    className="hover:text-[#072835] dark:hover:text-white transition-colors py-1"
+                    href={basePath} 
+                    className="hover:text-[#0B192C] dark:hover:text-white transition-colors py-1"
                 >
-                    {isArabic ? "العلامات التجارية" : "Brands"}
+                    {parentLabel}
                 </Link>
                 {isRtl ? (
                     <MdChevronLeft className="text-slate-400 dark:text-slate-600 text-sm shrink-0" />
                 ) : (
                     <MdChevronRight className="text-slate-400 dark:text-slate-600 text-sm shrink-0" />
                 )}
-                <span className="text-[#072835] dark:text-white font-bold truncate max-w-[200px] sm:max-w-none">
+                <span className="text-[#0B192C] dark:text-white font-bold truncate max-w-[200px] sm:max-w-none">
                     {primaryName}
                 </span>
             </nav>
@@ -92,7 +98,7 @@ export default function BrandMasthead({ brand }: BrandMastheadProps) {
             {/* Architectural Masthead Card */}
             <div className="relative rounded-2xl md:rounded-3xl bg-white dark:bg-[#0C1821] border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
                 {/* Refined Top Accent Bar */}
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#072835] via-[#B8860B] to-[#072835]" />
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#0B192C] via-[#8A6305] to-[#0B192C]" />
 
                 <div className="p-5 sm:p-7 md:p-8">
                     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-7">
@@ -111,16 +117,24 @@ export default function BrandMasthead({ brand }: BrandMastheadProps) {
 
                         {/* Brand Details */}
                         <div className={`flex-1 min-w-0 ${isRtl ? "text-right" : "text-left"} text-center sm:text-start`}>
-                            {/* Sector / Department */}
-                            {sectorName && (
-                                <p className="text-xs font-bold text-[#B8860B] dark:text-[#E5B54A] mb-1.5 uppercase tracking-wider">
-                                    {sectorName}
-                                </p>
-                            )}
+                            {/* Sector / Department & Product Count */}
+                            <div className="flex items-center flex-wrap justify-center sm:justify-start gap-2 mb-1.5">
+                                {sectorName && (
+                                    <p className="text-xs font-bold text-[#8A6305] dark:text-[#8A6305] uppercase tracking-wider">
+                                        {sectorName}
+                                    </p>
+                                )}
+                                {totalProducts !== undefined && totalProducts > 0 && (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200/80 dark:border-white/10">
+                                        <span>📦</span>
+                                        <span>{totalProducts} {isArabic ? 'منتج بالجملة' : 'products'}</span>
+                                    </span>
+                                )}
+                            </div>
 
                             {/* Dual-Language Title Treatment */}
                             <div className="flex flex-wrap items-baseline justify-center sm:justify-start gap-x-3 gap-y-1 mb-2">
-                                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#072835] dark:text-white tracking-tight">
+                                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#0B192C] dark:text-white tracking-tight">
                                     {primaryName}
                                 </h1>
                                 {secondaryName && (
@@ -131,7 +145,7 @@ export default function BrandMasthead({ brand }: BrandMastheadProps) {
                             </div>
 
                             {/* Natural, Real Subtitle */}
-                            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl">
+                            <p className="text-xs sm:text-sm text-[#475569] dark:text-slate-400 leading-relaxed max-w-2xl">
                                 {displayDescription}
                             </p>
                         </div>

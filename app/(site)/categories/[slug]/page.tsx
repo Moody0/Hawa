@@ -14,14 +14,14 @@ export async function generateMetadata(
 
     if (!category) {
         return {
-            title: "Category Not Found | Zad Land",
+            title: "قسم غير موجود | Hawa Distribution",
         };
     }
 
-    const title = `${category.name} | Zad Land - زاد لاند`;
+    const title = `${category.name} | Hawa Distribution - هوا للتوزيع`;
     const description = category.description 
-        ? `${category.name} (${category.description}). تسوق منتجات القسم بأسعار الجملة المعتمدة لدى شركة زاد لاند.`
-        : `تصفح تشكيلة ${category.name} بأسعار الجملة المعتمدة لدى شركة زاد لاند لتجارة وتوزيع المواد الغذائية.`;
+        ? `${category.name} (${category.description}). تسوق منتجات القسم بأسعار الجملة المعتمدة لدى شركة هوا للتوزيع والتجارة.`
+        : `تصفح تشكيلة ${category.name} بأسعار الجملة المعتمدة لدى شركة هوا للتوزيع والتجارة.`;
     const image = category.image || '/og-image.jpg';
 
     return {

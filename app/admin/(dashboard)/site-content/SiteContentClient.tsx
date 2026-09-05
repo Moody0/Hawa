@@ -14,7 +14,8 @@ import {
     MdViewCarousel,
     MdInfoOutline,
     MdSave,
-    MdStorefront
+    MdStorefront,
+    MdTrendingUp
 } from "react-icons/md";
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
@@ -44,6 +45,7 @@ interface SiteSettings {
     footerInstagramUrl: string | null;
     footerFacebookUrl: string | null;
     footerWhatsappUrl: string | null;
+    whatsappNumber: string | null;
     footerShopTitle: string | null;
     footerShopTitleAr: string | null;
     footerSupportTitle: string | null;
@@ -138,9 +140,13 @@ interface SiteSettings {
     middleBanner2SubtitleAr: string | null;
     middleBanner2ButtonText: string | null;
     middleBanner2ButtonTextAr: string | null;
+    statDeliveries?: string | null;
+    statBrands?: string | null;
+    statProducts?: string | null;
+    statClients?: string | null;
 }
 
-type TabType = "currency" | "footer" | "banners" | "shipping" | "about";
+type TabType = "currency" | "stats" | "footer" | "banners" | "shipping" | "about";
 
 export default function SiteContentClient({ 
     initialSettings,
@@ -149,10 +155,18 @@ export default function SiteContentClient({
     initialSettings: SiteSettings | null;
     categories: FooterCategoryOption[];
 }) {
-    const { t, dir } = useLanguage();
+    const { t, dir, language } = useLanguage();
     const { openSidebar } = useAdminSidebar();
     const [activeTab, setActiveTab] = useState<TabType>("currency");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Site Settings State - B2B Wholesale Statistics
+    const [statsContent, setStatsContent] = useState({
+        statDeliveries: initialSettings?.statDeliveries || "+9000",
+        statBrands: initialSettings?.statBrands || "+100",
+        statProducts: initialSettings?.statProducts || "+500",
+        statClients: initialSettings?.statClients || "+300",
+    });
 
     // Site Settings State - Categories CTA
     const [ctaTitle, setCtaTitle] = useState(initialSettings?.categoriesCtaTitle || "");
@@ -172,6 +186,7 @@ export default function SiteContentClient({
         footerInstagramUrl: initialSettings?.footerInstagramUrl || "",
         footerFacebookUrl: initialSettings?.footerFacebookUrl || "",
         footerWhatsappUrl: initialSettings?.footerWhatsappUrl || "",
+        whatsappNumber: initialSettings?.whatsappNumber || "+963900000000",
         footerShopTitle: initialSettings?.footerShopTitle || "",
         footerShopTitleAr: initialSettings?.footerShopTitleAr || "",
         footerSupportTitle: initialSettings?.footerSupportTitle || "",
@@ -341,6 +356,7 @@ export default function SiteContentClient({
                 middleBanner2SubtitleAr,
                 middleBanner2ButtonText,
                 middleBanner2ButtonTextAr,
+                ...statsContent,
             });
 
             if (result.success) {
@@ -358,6 +374,7 @@ export default function SiteContentClient({
 
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
         { id: "currency", label: t('admin.tabCurrency') || "Currency & Rates", icon: <MdCurrencyExchange className="text-lg" /> },
+        { id: "stats", label: t('admin.companyStats') || (language === 'ar' ? "إحصائيات الشركة" : "Company Statistics"), icon: <MdTrendingUp className="text-lg" /> },
         { id: "footer", label: t('admin.tabFooter') || "Footer & Social", icon: <MdStorefront className="text-lg" /> },
         { id: "banners", label: t('admin.tabBanners') || "Promo Banners", icon: <MdViewCarousel className="text-lg" /> },
         { id: "shipping", label: t('admin.tabShipping') || "Shipping & Policy", icon: <MdLocalShipping className="text-lg" /> },
@@ -383,7 +400,7 @@ export default function SiteContentClient({
                     <button
                         onClick={() => handleSaveAll()}
                         disabled={isSubmitting}
-                        className="bg-[#072835] hover:bg-[#0c4054] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed self-start md:self-auto"
+                        className="bg-[#0B192C] hover:bg-[#1e293b] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed self-start md:self-auto"
                     >
                         {isSubmitting ? (
                             <>
@@ -409,11 +426,11 @@ export default function SiteContentClient({
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap ${
                                     isActive
-                                        ? 'bg-[#072835] text-white shadow-xs'
+                                        ? 'bg-[#0B192C] text-white shadow-xs'
                                         : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800'
                                 }`}
                             >
-                                <span className={isActive ? 'text-[#E5B54A]' : 'text-slate-400'}>{tab.icon}</span>
+                                <span className={isActive ? 'text-[#8A6305]' : 'text-slate-400'}>{tab.icon}</span>
                                 <span>{tab.label}</span>
                             </button>
                         );
@@ -428,7 +445,7 @@ export default function SiteContentClient({
                     {activeTab === "currency" && (
                         <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
                             <div className="mb-6 flex items-start gap-4">
-                                <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-[#B8860B] dark:text-[#E5B54A] rounded-xl">
+                                <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-[#8A6305] dark:text-[#8A6305] rounded-xl">
                                     <MdCurrencyExchange className="text-2xl" />
                                 </div>
                                 <div>
@@ -452,7 +469,7 @@ export default function SiteContentClient({
                                         min="0"
                                         value={exchangeRate}
                                         onChange={(e) => setExchangeRate(parseFloat(e.target.value) || 0)}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-lg font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#072835] outline-none transition-all"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-lg font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
                                         placeholder="135"
                                         required
                                     />
@@ -463,6 +480,108 @@ export default function SiteContentClient({
                                 <p className="text-xs text-slate-400">
                                     {t('admin.currencyHelpText') || "All prices stored in USD will be multiplied by this rate when customer views prices in Syrian Pounds."}
                                 </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* TAB: B2B COMPANY STATISTICS */}
+                    {activeTab === "stats" && (
+                        <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
+                            <div className="mb-6 flex items-start gap-4">
+                                <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-[#8A6305] dark:text-[#8A6305] rounded-xl">
+                                    <MdTrendingUp className="text-2xl" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                        {t('admin.companyStats') || "إحصائيات الشركة"}
+                                    </h3>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                        {t('admin.companyStatsDesc') || "الأرقام والإنجازات المعروضة في قسم إحصائيات الصفحة الرئيسية لتعزيز ثقة المحلات والزبائن."}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
+                                        🚚 {t('admin.statDeliveries') || "عمليات التوصيل الناجحة"}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={statsContent.statDeliveries}
+                                        onChange={(e) => setStatsContent({ ...statsContent, statDeliveries: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
+                                        placeholder="+9000"
+                                    />
+                                    <p className="text-xs text-slate-400">مثال: +9000 توصيل لكافة المحافظات</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
+                                        🏢 {t('admin.statBrands') || "الوكالات والعلامات التجارية"}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={statsContent.statBrands}
+                                        onChange={(e) => setStatsContent({ ...statsContent, statBrands: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
+                                        placeholder="+100"
+                                    />
+                                    <p className="text-xs text-slate-400">مثال: +100 وكالة تجارية حصرية</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
+                                        📦 {t('admin.statProducts') || "المنتجات المتاحة بالجملة"}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={statsContent.statProducts}
+                                        onChange={(e) => setStatsContent({ ...statsContent, statProducts: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
+                                        placeholder="+500"
+                                    />
+                                    <p className="text-xs text-slate-400">مثال: +500 صنف غذائي واستهلاكي</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
+                                        🏪 {t('admin.statClients') || "العملاء والمحلات النشطة"}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={statsContent.statClients}
+                                        onChange={(e) => setStatsContent({ ...statsContent, statClients: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
+                                        placeholder="+300"
+                                    />
+                                    <p className="text-xs text-slate-400">مثال: +300 متجر وسوبرماركت شريك</p>
+                                </div>
+                            </div>
+
+                            {/* Live Preview Card */}
+                            <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-white/10">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+                                    {language === 'ar' ? 'معاينة مباشرة في المتجر' : 'Live Homepage Preview'}
+                                </h4>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5">
+                                    <div className="text-center p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-white/5">
+                                        <p className="text-xl md:text-2xl font-black text-[#0B192C] dark:text-[#8A6305]">{statsContent.statDeliveries}</p>
+                                        <p className="text-xs font-semibold text-slate-500 mt-1">{language === 'ar' ? 'عملية توصيل' : 'Deliveries'}</p>
+                                    </div>
+                                    <div className="text-center p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-white/5">
+                                        <p className="text-xl md:text-2xl font-black text-[#0B192C] dark:text-[#8A6305]">{statsContent.statBrands}</p>
+                                        <p className="text-xs font-semibold text-slate-500 mt-1">{language === 'ar' ? 'وكالة معتمدة' : 'Brands'}</p>
+                                    </div>
+                                    <div className="text-center p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-white/5">
+                                        <p className="text-xl md:text-2xl font-black text-[#0B192C] dark:text-[#8A6305]">{statsContent.statProducts}</p>
+                                        <p className="text-xs font-semibold text-slate-500 mt-1">{language === 'ar' ? 'منتج متاح' : 'Products'}</p>
+                                    </div>
+                                    <div className="text-center p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-white/5">
+                                        <p className="text-xl md:text-2xl font-black text-[#0B192C] dark:text-[#8A6305]">{statsContent.statClients}</p>
+                                        <p className="text-xs font-semibold text-slate-500 mt-1">{language === 'ar' ? 'عميل ومحل' : 'Active Clients'}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -503,7 +622,7 @@ export default function SiteContentClient({
                                                 type="text"
                                                 value={ctaImage}
                                                 onChange={(e) => setCtaImage(e.target.value)}
-                                                className="flex-1 px-4 py-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#072835] outline-none text-sm"
+                                                className="flex-1 px-4 py-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none text-sm"
                                                 placeholder="https://images.unsplash.com/..."
                                             />
                                             <div className="w-28 h-16 rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-gray-800 flex items-center justify-center shrink-0">

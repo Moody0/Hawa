@@ -81,15 +81,15 @@ export default function ProductReviews({ productId, productName, productImage }:
         <div className="mt-16 mb-4 w-full">
             {/* Section Title */}
             <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+                <h2 className="text-xl font-bold text-[#0B192C] dark:text-white tracking-tight">
                     {t('products.reviews')}
                     {reviews.length > 0 && (
-                        <span className="text-gray-400 font-normal text-base ms-2">({reviews.length})</span>
+                        <span className="text-[#475569] font-normal text-base ms-2">({reviews.length})</span>
                     )}
                 </h2>
                 <button
                     onClick={() => handleStarClick(5)}
-                    className="text-sm font-semibold text-gray-900 border border-gray-900 rounded-[10px] px-5 py-2.5 hover:bg-gray-900 hover:text-white transition-colors duration-200"
+                    className="text-sm font-semibold text-[#0B192C] dark:text-white border border-[#0B192C] dark:border-white/20 rounded-[10px] px-5 py-2.5 hover:bg-[#0B192C] hover:text-white dark:hover:bg-white dark:hover:text-[#0B192C] transition-colors duration-200"
                 >
                     {t('products.writeReview')}
                 </button>
@@ -103,16 +103,16 @@ export default function ProductReviews({ productId, productName, productImage }:
                     <div className="flex flex-col gap-5">
                         {/* Average */}
                         <div className="flex items-end gap-3">
-                            <span className="text-5xl font-bold text-gray-900 leading-none tracking-tight">{averageRating}</span>
+                            <span className="text-5xl font-bold text-[#0B192C] dark:text-white leading-none tracking-tight">{averageRating}</span>
                             <div className="flex flex-col gap-0.5 pb-0.5">
                                 <div className="flex items-center gap-px">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         star <= Math.round(Number(averageRating))
-                                            ? <MdStar key={star} className="text-gray-900 text-base" />
-                                            : <MdStarOutline key={star} className="text-gray-300 text-base" />
+                                            ? <MdStar key={star} className="text-[#8A6305] text-base" />
+                                            : <MdStarOutline key={star} className="text-gray-300 dark:text-zinc-600 text-base" />
                                     ))}
                                 </div>
-                                <span className="text-xs text-gray-400">{t('products.basedOn')} {reviews.length} {t('products.reviews').toLowerCase()}</span>
+                                <span className="text-xs text-[#475569] dark:text-gray-400">{t('products.basedOn')} {reviews.length} {t('products.reviews').toLowerCase()}</span>
                             </div>
                         </div>
 
@@ -123,22 +123,22 @@ export default function ProductReviews({ productId, productName, productImage }:
                                 const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                                 return (
                                     <div key={star} className="flex items-center gap-3">
-                                        <span className="text-xs font-medium text-gray-500 w-3 text-center">{star}</span>
-                                        <div className="flex-1 h-[6px] bg-gray-100 rounded-full overflow-hidden">
+                                        <span className="text-xs font-medium text-[#475569] dark:text-gray-400 w-3 text-center">{star}</span>
+                                        <div className="flex-1 h-[6px] bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-gray-900 rounded-full transition-all duration-700 ease-out"
+                                                className="h-full bg-[#8A6305] rounded-full transition-all duration-700 ease-out"
                                                 style={{ width: `${percentage}%` }}
                                             />
                                         </div>
-                                        <span className="text-xs text-gray-400 w-7 text-end tabular-nums">{count}</span>
+                                        <span className="text-xs text-[#475569] dark:text-gray-400 w-7 text-end tabular-nums">{count}</span>
                                     </div>
                                 );
                             })}
                         </div>
 
                         {/* Tap to Rate */}
-                        <div className="pt-3 border-t border-gray-100">
-                            <span className="text-xs text-gray-400 block mb-2">{t('products.tapToRate')}</span>
+                        <div className="pt-3 border-t border-gray-100 dark:border-white/10">
+                            <span className="text-xs text-[#475569] dark:text-gray-400 block mb-2">{t('products.tapToRate')}</span>
                             <div
                                 className="flex items-center gap-1 cursor-pointer"
                                 onMouseLeave={() => setHoveredRating(0)}
@@ -151,8 +151,8 @@ export default function ProductReviews({ productId, productName, productImage }:
                                         className="focus:outline-none transition-transform hover:scale-110"
                                     >
                                         {star <= hoveredRating
-                                            ? <MdStar className="text-2xl text-gray-900 transition-colors" />
-                                            : <MdStarOutline className="text-2xl text-gray-300 transition-colors" />
+                                            ? <MdStar className="text-2xl text-[#8A6305] transition-colors" />
+                                            : <MdStarOutline className="text-2xl text-gray-300 dark:text-zinc-600 transition-colors" />
                                         }
                                     </button>
                                 ))}
@@ -165,56 +165,56 @@ export default function ProductReviews({ productId, productName, productImage }:
                 <div className="flex-1 min-w-0">
                     {isLoading ? (
                         <div className="flex justify-center py-16">
-                            <div className="w-6 h-6 border-2 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+                            <div className="w-6 h-6 border-2 border-gray-200 border-t-[#0B192C] dark:border-t-[#8A6305] rounded-full animate-spin" />
                         </div>
                     ) : reviews.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
                             <div className="flex items-center gap-1 mb-4">
                                 {[1, 2, 3, 4, 5].map(s => (
-                                    <MdStarOutline key={s} className="text-2xl text-gray-200" />
+                                    <MdStarOutline key={s} className="text-2xl text-gray-200 dark:text-zinc-700" />
                                 ))}
                             </div>
-                            <p className="text-sm text-gray-400">{t('products.noReviews')}</p>
+                            <p className="text-sm text-[#475569]">{t('products.noReviews')}</p>
                         </div>
                     ) : (
                         <div className="flex flex-col">
                             {reviews.slice(0, visibleCount).map((review, index) => (
                                 <div
                                     key={review.id}
-                                    className={`py-6 ${index !== Math.min(visibleCount, reviews.length) - 1 ? 'border-b border-gray-100' : ''}`}
+                                    className={`py-6 ${index !== Math.min(visibleCount, reviews.length) - 1 ? 'border-b border-gray-100 dark:border-white/10' : ''}`}
                                 >
                                     {/* Review Header */}
                                     <div className="flex items-start justify-between gap-4 mb-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center shrink-0">
+                                            <div className="w-9 h-9 rounded-full bg-[#0B192C] dark:bg-zinc-800 flex items-center justify-center shrink-0">
                                                 <span className="text-[11px] font-semibold text-white leading-none">
                                                     {getInitials(review.name)}
                                                 </span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-semibold text-gray-900">{review.name}</span>
-                                                <span className="text-xs text-gray-400">{formatDate(review.createdAt)}</span>
+                                                <span className="text-sm font-semibold text-[#0B192C] dark:text-white">{review.name}</span>
+                                                <span className="text-xs text-[#475569]">{formatDate(review.createdAt)}</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-px shrink-0">
                                             {[1, 2, 3, 4, 5].map((star) => (
                                                 star <= review.rating
-                                                    ? <MdStar key={star} className="text-sm text-gray-900" />
-                                                    : <MdStarOutline key={star} className="text-sm text-gray-300" />
+                                                    ? <MdStar key={star} className="text-sm text-[#8A6305]" />
+                                                    : <MdStarOutline key={star} className="text-sm text-gray-300 dark:text-zinc-600" />
                                             ))}
                                         </div>
                                     </div>
 
                                     {/* Review Body */}
                                     {review.feedback && (
-                                        <p className="text-[13px] leading-relaxed text-gray-600 whitespace-pre-wrap">
+                                        <p className="text-[13px] leading-relaxed text-[#475569] dark:text-gray-300 whitespace-pre-wrap">
                                             {review.feedback}
                                         </p>
                                     )}
 
                                     {/* Review Image */}
                                     {review.image && (
-                                        <div className="mt-3 relative rounded-[10px] overflow-hidden w-24 h-24 bg-gray-50">
+                                        <div className="mt-3 relative rounded-[10px] overflow-hidden w-24 h-24 bg-gray-50 dark:bg-zinc-800">
                                             <ResilientImage src={review.image} alt="" className="w-full h-full object-cover" sizes="96px" />
                                         </div>
                                     )}
@@ -225,7 +225,7 @@ export default function ProductReviews({ productId, productName, productImage }:
                             {reviews.length > visibleCount && (
                                 <button
                                     onClick={() => setVisibleCount(reviews.length)}
-                                    className="flex items-center gap-1 text-sm font-semibold text-gray-900 pt-4 hover:text-gray-600 transition-colors"
+                                    className="flex items-center gap-1 text-sm font-semibold text-[#0B192C] dark:text-white pt-4 hover:text-[#8A6305] transition-colors"
                                 >
                                     {language === 'ar' ? 'عرض كل التقييمات' : 'Show all reviews'}
                                     <MdKeyboardArrowDown className="text-lg" />

@@ -48,10 +48,10 @@ const OnSaleProducts = ({ products }: OnSaleProductsProps) => {
             <div className="w-full">
                 <div className="flex items-center justify-between mb-6 px-2">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-text-main-light dark:text-text-main-dark flex items-center gap-1 md:gap-2">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#0B192C] dark:text-white flex items-center gap-1 md:gap-2">
                             {t('home.dailyOffers') || 'عروض اليوم'}
                         </h3>
-                        <span className="text-primary text-xl md:text-2xl">
+                        <span className="text-[#8A6305] text-xl md:text-2xl">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
                             </svg>
@@ -59,43 +59,43 @@ const OnSaleProducts = ({ products }: OnSaleProductsProps) => {
                     </div>
 
                     {/* Timer */}
-                    <div className="hidden sm:flex bg-primary text-white rounded-xl px-4 py-2 items-center gap-4 dir-ltr">
+                    <div className="hidden sm:flex bg-[#0B192C] text-white rounded-xl px-4 py-2 items-center gap-4 dir-ltr border border-[#8A6305]/30">
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">06</span>
-                            <span className="text-[10px]">ساعة</span>
+                            <span className="text-lg font-bold text-[#8A6305]">06</span>
+                            <span className="text-[10px] text-gray-300">ساعة</span>
                         </div>
-                        <span className="text-lg font-bold mb-3">:</span>
+                        <span className="text-lg font-bold mb-3 text-[#8A6305]">:</span>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">24</span>
-                            <span className="text-[10px]">دقيقة</span>
+                            <span className="text-lg font-bold text-[#8A6305]">24</span>
+                            <span className="text-[10px] text-gray-300">دقيقة</span>
                         </div>
-                        <span className="text-lg font-bold mb-3">:</span>
+                        <span className="text-lg font-bold mb-3 text-[#8A6305]">:</span>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">35</span>
-                            <span className="text-[10px]">ثانية</span>
+                            <span className="text-lg font-bold text-[#8A6305]">35</span>
+                            <span className="text-[10px] text-gray-300">ثانية</span>
                         </div>
                     </div>
 
-                    <Link className="text-primary font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all" href="/products">
+                    <Link className="text-[#8A6305] hover:text-[#725204] font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all" href="/products">
                         {t('common.viewAll')} <MdChevronRight className={`text-sm ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                     </Link>
                 </div>
                 
                 {/* Mobile Timer */}
-                <div className="flex sm:hidden bg-primary text-white rounded-xl px-4 py-2 items-center justify-center gap-4 dir-ltr mb-4 mx-2">
+                <div className="flex sm:hidden bg-[#0B192C] text-white rounded-xl px-4 py-2 items-center justify-center gap-4 dir-ltr mb-4 mx-2 border border-[#8A6305]/30">
                     <div className="flex flex-col items-center">
-                        <span className="text-lg font-bold">06</span>
-                        <span className="text-[10px]">ساعة</span>
+                        <span className="text-lg font-bold text-[#8A6305]">06</span>
+                        <span className="text-[10px] text-gray-300">ساعة</span>
                     </div>
-                    <span className="text-lg font-bold mb-3">:</span>
+                    <span className="text-lg font-bold mb-3 text-[#8A6305]">:</span>
                     <div className="flex flex-col items-center">
-                        <span className="text-lg font-bold">24</span>
-                        <span className="text-[10px]">دقيقة</span>
+                        <span className="text-lg font-bold text-[#8A6305]">24</span>
+                        <span className="text-[10px] text-gray-300">دقيقة</span>
                     </div>
-                    <span className="text-lg font-bold mb-3">:</span>
+                    <span className="text-lg font-bold mb-3 text-[#8A6305]">:</span>
                     <div className="flex flex-col items-center">
-                        <span className="text-lg font-bold">35</span>
-                        <span className="text-[10px]">ثانية</span>
+                        <span className="text-lg font-bold text-[#8A6305]">35</span>
+                        <span className="text-[10px] text-gray-300">ثانية</span>
                     </div>
                 </div>
 
@@ -126,7 +126,7 @@ const OnSaleProducts = ({ products }: OnSaleProductsProps) => {
                     <button
                         onClick={scrollBackward}
                         disabled={!canScrollBackward}
-                        className="hidden md:flex w-12 h-12 shrink-0 rounded-full border border-gray-200 bg-white items-center justify-center text-[#000000] disabled:opacity-50 disabled:cursor-not-allowed order-2 btn-curved-fill"
+                        className="hidden md:flex w-12 h-12 shrink-0 rounded-full border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-800 items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] disabled:opacity-50 disabled:cursor-not-allowed order-2 transition-all cursor-pointer shadow-2xs"
                         aria-label="Previous slide"
                     >
                         <svg className={`w-5 h-5 ${dir === 'rtl' ? '-scale-x-100' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -138,7 +138,7 @@ const OnSaleProducts = ({ products }: OnSaleProductsProps) => {
                     <div className="flex-1 h-[2px] bg-gray-200 dark:bg-gray-800 relative overflow-hidden rounded-full order-1">
                         <div 
                             ref={progressBarRef}
-                            className="absolute top-0 bottom-0 bg-[#000000] dark:bg-gray-300 rounded-full"
+                            className="absolute top-0 bottom-0 bg-[#8A6305] rounded-full"
                             style={{ 
                                 width: '100%',
                                 transformOrigin: dir === 'rtl' ? 'right' : 'left',
@@ -151,7 +151,7 @@ const OnSaleProducts = ({ products }: OnSaleProductsProps) => {
                     <button
                         onClick={scrollForward}
                         disabled={!canScrollForward}
-                        className="hidden md:flex w-12 h-12 shrink-0 rounded-full border border-gray-200 bg-white items-center justify-center text-[#000000] disabled:opacity-50 disabled:cursor-not-allowed order-3 btn-curved-fill"
+                        className="hidden md:flex w-12 h-12 shrink-0 rounded-full border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-800 items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] disabled:opacity-50 disabled:cursor-not-allowed order-3 transition-all cursor-pointer shadow-2xs"
                         aria-label="Next slide"
                     >
                         <svg className={`w-5 h-5 ${dir === 'rtl' ? '-scale-x-100' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

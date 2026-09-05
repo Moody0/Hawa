@@ -11,6 +11,9 @@ export interface CartItem {
     slug: string;
     description?: string;
     selectedOption?: string;
+    packaging?: string | null;
+    itemsPerPackage?: string | number | null;
+    minOrder?: number | null;
 }
 
 interface CartContextType {

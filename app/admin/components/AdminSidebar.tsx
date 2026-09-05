@@ -16,7 +16,9 @@ import {
     MdClose,
     MdLogout,
     MdAccountTree,
-    MdStar
+    MdStar,
+    MdPeople,
+    MdArticle
 } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -77,6 +79,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             title: t('admin.salesAndCustomers') || "Sales & Customers",
             items: [
                 { href: "/admin/orders", icon: MdInventory2, label: t('admin.orders'), permission: "canManageOrders" },
+                { href: "/admin/customers", icon: MdPeople, label: t('admin.customers') || "Customers", permission: "canManageOrders" },
                 { href: "/admin/promocodes", icon: MdLocalOffer, label: t('admin.promoCodes'), permission: "canManagePromoCodes" },
                 { href: "/admin/reviews", icon: MdStar, label: t('admin.reviews'), permission: "canManageReviews" }
             ]
@@ -85,6 +88,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             title: t('admin.storeAndSystem') || "Store & System",
             items: [
                 { href: "/admin/banners", icon: MdViewCarousel, label: t('admin.banners'), permission: "canManageBanners" },
+                { href: "/admin/blog", icon: MdArticle, label: t('admin.blog') || "Blog", superAdminOnly: true },
                 { href: "/admin/site-content", icon: MdEditNote, label: t('admin.siteContent'), superAdminOnly: true },
                 { href: "/admin/users", icon: MdGroup, label: t('admin.users'), superAdminOnly: true },
                 { href: "/admin/settings", icon: MdSettings, label: t('admin.settings'), superAdminOnly: true }
@@ -126,14 +130,14 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                             <Link href="/admin/dashboard" className="flex items-center gap-3 group">
                                 <Image
                                     src="/logo.png"
-                                    alt="Zad Land"
+                                    alt="Hawa Distribution"
                                     width={140}
                                     height={44}
                                     priority
                                     className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
                                 />
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#072835] dark:text-[#E5B54A]">
+                                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#0B192C] dark:text-[#8A6305]">
                                         {isArabic ? "لوحة الإدارة" : "Admin Portal"}
                                     </span>
                                 </div>
@@ -163,7 +167,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
                                 return (
                                     <div key={sIdx} className="flex flex-col gap-1">
-                                        <p className="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-widest text-slate-600 dark:text-slate-300">
+                                        <p className="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-widest text-[#475569] dark:text-slate-300">
                                             {section.title}
                                         </p>
                                         <div className="flex flex-col gap-0.5">
@@ -176,14 +180,14 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                                                         onClick={onClose}
                                                         className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group ${
                                                             isActive
-                                                                ? "bg-[#072835] text-white shadow-xs font-semibold"
+                                                                ? "bg-[#0B192C] text-white shadow-xs font-semibold"
                                                                 : "text-slate-600 dark:text-slate-300 hover:bg-slate-100/90 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white font-medium"
                                                         }`}
                                                     >
                                                         <item.icon
                                                             className={`text-[19px] shrink-0 transition-colors ${
                                                                 isActive
-                                                                    ? "text-[#E5B54A]"
+                                                                    ? "text-[#8A6305]"
                                                                     : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200"
                                                             }`}
                                                         />
@@ -203,7 +207,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     {/* Bottom User & Sign Out Footer */}
                     <div className="flex flex-col gap-2 pt-4 mt-4 border-t border-slate-200/80 dark:border-white/10">
                         <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-white/5">
-                            <div className="h-8 w-8 rounded-full bg-[#072835] dark:bg-[#E5B54A] text-white dark:text-[#072835] flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                            <div className="h-8 w-8 rounded-full bg-[#0B192C] dark:bg-[#8A6305] text-white dark:text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                                 {session?.user?.name?.charAt(0).toUpperCase() || "A"}
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">

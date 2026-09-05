@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
                         <div className="w-16 h-16 bg-black/5 dark:bg-white/5 rounded-2xl mb-6 p-2 flex items-center justify-center shadow-inner">
                             <img
                                 src="/logo.jpeg"
-                                alt="Zad Land"
+                                alt="Hawa Distribution"
                                 className="h-full w-full object-contain rounded-xl"
                             />
                         </div>

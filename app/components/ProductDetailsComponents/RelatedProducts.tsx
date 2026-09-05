@@ -16,7 +16,7 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
 
     return (
         <section className="mt-12 lg:mt-20 pt-10 border-t border-gray-200 dark:border-white/10">
-            <h3 className={`text-lg sm:text-xl md:text-2xl font-bold mb-6 sm:mb-8 text-zinc-900 dark:text-white uppercase tracking-wider text-center ${language === 'ar' ? 'lg:text-right' : 'lg:text-left'}`}>
+            <h3 className={`text-lg sm:text-xl md:text-2xl font-bold mb-6 sm:mb-8 text-[#0B192C] dark:text-white uppercase tracking-wider text-center ${language === 'ar' ? 'lg:text-right' : 'lg:text-left'}`}>
                 {t('products.relatedProducts')}
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
