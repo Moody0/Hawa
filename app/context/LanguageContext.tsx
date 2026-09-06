@@ -33,9 +33,7 @@ export function LanguageProvider({
         const savedLang = localStorage.getItem('language') as Language;
         const currentDocLang = (document.documentElement.lang || 'ar') as Language;
         if (savedLang && (savedLang === 'en' || savedLang === 'ar') && savedLang !== currentDocLang) {
-            document.cookie = `language=${savedLang}; path=/; max-age=31536000`;
-            document.documentElement.lang = savedLang;
-            document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr';
+            document.cookie = `language=${savedLang}; path=/; max-age=31536000; SameSite=Lax`;
             window.location.reload();
         }
     }, []);
@@ -49,15 +47,19 @@ export function LanguageProvider({
     const setLanguage = useCallback((lang: Language) => {
         try {
             localStorage.setItem('language', lang);
-            document.cookie = `language=${lang}; path=/; max-age=31536000`;
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.cookie = `language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
         } catch (e) {
             console.warn('Could not persist language immediately', e);
         }
 
         if (typeof window !== 'undefined') {
-            // Reload page so all server and client components match the new language and direction
+            // Smoothly fade out pointer interactions during reload without premature layout/direction jumps
+            try {
+                document.body.style.pointerEvents = 'none';
+                document.body.style.transition = 'opacity 0.15s ease-out';
+                document.body.style.opacity = '0.7';
+            } catch {}
+            // Reload page so all server and client components render atomically in the new language and direction
             window.location.reload();
         }
     }, []);

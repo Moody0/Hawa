@@ -3,7 +3,7 @@ import { getSiteSettings } from "@/lib/admin-actions";
 import ShippingReturnsContent from "./ShippingReturnsContent";
 import { Metadata } from "next";
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 60; // 1 minute ISR revalidation
 
 export const metadata: Metadata = {
     title: "الشحن والتوصيل وسياسة التوريد | Shipping & Delivery Terms - Hawa Distribution",

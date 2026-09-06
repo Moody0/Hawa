@@ -31,7 +31,9 @@ export default function CategoriesContent({ categories, siteSettings }: Categori
         ? (siteSettings?.categoriesCtaDescAr || t('categoriesPage.skinQuizDescription'))
         : (siteSettings?.categoriesCtaDesc || t('categoriesPage.skinQuizDescription'));
 
-    const ctaImage = siteSettings?.categoriesCtaImage || "https://lh3.googleusercontent.com/aida-public/AB6AXuC-S_GMsoebb73JIEWcxtvH2G-vVgkfypE8ysWpGMNiiiwyTno8rIbMCpHR-fsa76ZQL49aYswb7bGZh-kgwc6z9lv0VwUSUrStxNWz2qU3RuIb75ShOMAKZMRyrOXZHZjEBgtxfW7r97FEEshOkEd2MqgE6FpGYrmKa8msLtMOQxXBsmhr3ZGGEtL7jpzgMYbgrAXhiHcMfCspdvD5FRNuSbgFY9_xGqcJM9KbgG0MoC4Ie4WkkmCR4FsuavfglcnY13G2ADZxlK8F";
+    const ctaImage = (siteSettings?.categoriesCtaImage && !siteSettings.categoriesCtaImage.includes('aida-public'))
+        ? siteSettings.categoriesCtaImage 
+        : "/uploads/banners/hawa-food-agencies-banner.jpg";
 
     return (
         <div className="w-full pb-20">

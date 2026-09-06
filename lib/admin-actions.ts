@@ -2851,7 +2851,7 @@ const DEFAULT_SITE_SETTINGS = {
     categoriesCtaDesc: "Our wholesale team is ready to provide custom pricing and scheduled deliveries for your business.",
     categoriesCtaTitleAr: "تبحث عن شركات أو منتجات محددة؟",
     categoriesCtaDescAr: "فريق المبيعات لدينا جاهز لتزويدكم بأفضل أسعار الجملة وجداول التوزيع المنتظمة.",
-    categoriesCtaImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC-S_GMsoebb73JIEWcxtvH2G-vVgkfypE8ysWpGMNiiiwyTno8rIbMCpHR-fsa76ZQL49aYswb7bGZh-kgwc6z9lv0VwUSUrStxNWz2qU3RuIb75ShOMAKZMRyrOXZHZjEBgtxfW7r97FEEshOkEd2MqgE6FpGYrmKa8msLtMOQxXBsmhr3ZGGEtL7jpzgMYbgrAXhiHcMfCspdvD5FRNuSbgFY9_xGqcJM9KbgG0MoC4Ie4WkkmCR4FsuavfglcnY13G2ADZxlK8F",
+    categoriesCtaImage: "/uploads/banners/hawa-food-agencies-banner.jpg",
     footerBrandTitle: "Hawa Distribution",
     footerBrandTitleAr: "شركة حوا للتوزيع والتجارة",
     footerBrandDescription: "Your trusted partner in wholesale food and consumer goods distribution from top international brands.",
@@ -2912,7 +2912,7 @@ const DEFAULT_SITE_SETTINGS = {
     hygieneDesc: "Our temperature-controlled warehouses ensure optimal quality preservation.",
     hygieneTitleAr: "بروتوكولات السلامة والتخزين",
     hygieneDescAr: "تضمن مستودعاتنا وشاحناتنا درجات حرارة وبيئة تخزين مثالية حتى نقطة التسليم.",
-    shippingReturnsImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC1GmfD6bueEsJqlHNPjDWHMlhsLZSm2Jmp21TUCLKvobkcd7oAPMMdwzfm8BOHC5XtR0EP6tLI7DT5hhyLxuijsbpX2kQf6iNlqROU-8k-DrqZAUqdc7-0lE4nxuCcLaEb0fEaXVBxc_yXkiUlyhfvaYJ1FfHZtngnoJbeanLgsf7rcxqON6rjkoC4BQv6FhlwLNKZrMbxjCugphq-bo5GCqBoLfmjjZSuH0N5eV-Kz33xFQTD5jSYCTsVYAwOkwhLQsQiPD_lnD9U",
+    shippingReturnsImage: "/images/hawa_hero.jpg",
     
     aboutHeroTitle: "Our Story in Wholesale Food & FMCG Distribution",
     aboutHeroTitleAr: "قصتنا في ريادة وتوريد السلع الغذائية والاستهلاكية",

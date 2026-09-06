@@ -119,7 +119,7 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
 
                     <div className="flex items-center gap-3">
                         {/* Desktop Navigation Chevrons */}
-                        <div className="hidden md:flex items-center gap-1.5 me-2 border-e border-slate-200 dark:border-white/10 pe-3">
+                        <div className="hidden md:flex items-center gap-1.5 me-2 border-e border-slate-200 dark:border-white/10 pe-3 rtl:flex-row ltr:flex-row-reverse">
                             <button
                                 type="button"
                                 className="agency-nav-right w-8 h-8 rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 flex items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] transition cursor-pointer shadow-2xs disabled:opacity-30"

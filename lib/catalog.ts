@@ -115,7 +115,7 @@ export const getCatalogBrands = cache(
                     };
                 });
             } catch (error) {
-                console.error("Error in getCatalogBrands:", error);
+                console.warn("getCatalogBrands: DB unreachable, returning empty list");
                 return [];
             }
         },
@@ -192,7 +192,7 @@ export const getCatalogCategories = cache(async (brandId?: string) => {
                     select: catalogCategorySelect,
                 });
             } catch (error) {
-                console.error(`Error in getCatalogCategories (brandId: ${brandId}):`, error);
+                console.warn(`getCatalogCategories: DB unreachable (brandId: ${brandId}), returning empty list`);
                 return [];
             }
         },
@@ -247,7 +247,7 @@ export const getFooterCategories = cache(async (preferredIds: string[] = []) => 
             },
         });
     } catch (error) {
-        console.error("Error in getFooterCategories:", error);
+        console.warn("getFooterCategories: DB unreachable, returning fallback categories");
         return [];
     }
 });
@@ -295,7 +295,7 @@ export const getCategoryBySlug = cache(async (slug: string) => {
 
                 return category;
             } catch (error) {
-                console.error(`Error in getCategoryBySlug (${slug}):`, error);
+                console.warn(`getCategoryBySlug: DB unreachable (${slug}), returning null`);
                 return null;
             }
         },
@@ -320,7 +320,7 @@ export const getCatalogCategoriesByMainCategory = cache(async (mainCategoryId: s
                     select: catalogCategorySelect,
                 });
             } catch (error) {
-                console.error(`Error in getCatalogCategoriesByMainCategory (${mainCategoryId}):`, error);
+                console.warn(`getCatalogCategoriesByMainCategory: DB unreachable (${mainCategoryId}), returning empty list`);
                 return [];
             }
         },
@@ -370,7 +370,7 @@ export const getCatalogMainCategories = cache(
                     _count: mc._count,
                 }));
             } catch (error) {
-                console.error("Error in getCatalogMainCategories:", error);
+                console.warn("getCatalogMainCategories: DB unreachable, returning empty list");
                 return [];
             }
         },
@@ -488,7 +488,7 @@ export const getCatalogInitialData = cache(
                         totalProducts,
                     };
                 } catch (error) {
-                    console.error("Error in getCatalogInitialData:", error);
+                    console.warn("getCatalogInitialData: DB unreachable, returning empty catalog");
                     return {
                         categories: [],
                         products: [],

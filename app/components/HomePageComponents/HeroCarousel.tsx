@@ -132,7 +132,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     </div>
 
                                     {/* Clean Text Content Container - High Contrast Dark Navy Text on Clean Cream Background */}
-                                    <div className="relative z-10 w-full md:w-1/2 flex flex-col items-center justify-center text-center p-5 sm:p-6 md:px-10 lg:px-14 bg-[#FAF6EC] dark:bg-[#1A1A14]">
+                                    <div className="relative z-10 w-full md:w-1/2 flex flex-col items-center justify-center text-center p-5 pb-9 sm:p-6 sm:pb-10 md:p-10 lg:px-14 bg-[#FAF6EC] dark:bg-[#1A1A14]">
                                         <div className="w-full max-w-md flex flex-col items-center text-center">
                                             
                                             {/* Badge */}
@@ -153,7 +153,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                             </p>
                                             
                                             {/* Action Buttons */}
-                                            <div className="flex items-center justify-center gap-2.5 sm:gap-3 flex-wrap">
+                                            <div className="flex items-center justify-center gap-2.5 sm:gap-3 flex-wrap mb-2 md:mb-0">
                                                 <Link
                                                     href={banner.link || "/products"}
                                                     className="px-5 sm:px-6 py-2 sm:py-2.5 bg-[#8A6305] hover:bg-[#735204] text-white rounded-full font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs"
@@ -179,7 +179,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                     </Swiper>
 
                     {/* Navigation and Pagination Group */}
-                    <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:bottom-4 md:right-6 rtl:md:right-auto rtl:md:left-6 z-20 flex items-center pointer-events-none">
+                    <div className="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:bottom-4 md:right-6 rtl:md:right-auto rtl:md:left-6 z-20 flex items-center pointer-events-none">
                         
                         <button 
                             className="swiper-button-prev-hero pointer-events-auto hidden md:flex items-center justify-center text-[#4A4A4A] hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors mr-2 rtl:mr-0 rtl:ml-2"
