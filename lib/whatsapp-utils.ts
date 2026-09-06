@@ -42,7 +42,7 @@ export interface WhatsAppOrderData {
 
 export function generateWhatsAppOrderMessage(order: WhatsAppOrderData): string {
     const lines: string[] = [];
-    lines.push(`🛒 *طلب جملة جديد – شركة هوا للتوزيع والتجارة*`);
+    lines.push(`🛒 *طلب جملة جديد – شركة حوا للتوزيع والتجارة*`);
     lines.push(`━━━━━━━━━━━━━━━━━━`);
     lines.push(`📦 *رقم الطلبية:* #${order.id.slice(-8).toUpperCase()}`);
     if (order.shopName) {

@@ -44,11 +44,11 @@ export function Providers({
                                 },
                                 success: {
                                     iconTheme: {
-                                        primary: '#2E7D32',
+                                        primary: '#10B981',
                                         secondary: 'white',
                                     },
                                     style: {
-                                        border: '1px solid rgba(46, 125, 50, 0.2)',
+                                        border: '1px solid rgba(16, 185, 129, 0.2)',
                                     }
                                 },
                                 error: {

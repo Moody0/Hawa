@@ -21,7 +21,7 @@ const OrderBasicInfo = ({ orderId, totalAmount }: OrderBasicInfoProps) => {
             </div>
             <div className="flex flex-col gap-1 items-center md:items-start">
                 <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('cart.total')}</span>
-                <p className="text-base sm:text-lg font-extrabold text-[#2E7D32]">
+                <p className="text-base sm:text-lg font-black text-[#0B192C] dark:text-white">
                     {Number(totalAmount) > 0 ? (
                         <span dir="ltr">{formatPrice(Number(totalAmount))}</span>
                     ) : (

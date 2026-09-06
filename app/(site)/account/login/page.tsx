@@ -58,7 +58,7 @@ export default function MerchantLoginPage() {
                     </h1>
                     <p className="mt-2 text-xs sm:text-sm text-[#475569] dark:text-gray-400">
                         {isArabic 
-                            ? 'أهلاً بك في بوابة أصحاب المحلات والمتاجر لشركة هوا للتوزيع' 
+                            ? 'أهلاً بك في بوابة أصحاب المحلات والمتاجر لشركة حوا للتوزيع' 
                             : 'Access your commercial orders, re-orders, and saved agency products'}
                     </p>
                 </div>

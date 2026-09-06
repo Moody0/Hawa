@@ -15,9 +15,9 @@ import { FaWhatsapp } from 'react-icons/fa';
 
 export const metadata: Metadata = {
     title: 'خدمات التوزيع والتجارة | Distribution Services - Hawa',
-    description: 'تعرف على خدمات التوزيع، أسطول النقل المجهز، المستودعات المركزية، والتسويق التجاري التي تقدمها شركة هوا للتوزيع والتجارة.',
+    description: 'تعرف على خدمات التوزيع، أسطول النقل المجهز، المستودعات المركزية، والتسويق التجاري التي تقدمها شركة حوا للتوزيع والتجارة.',
     openGraph: {
-        title: 'خدمات التوزيع والتجارة | شركة هوا للتوزيع',
+        title: 'خدمات التوزيع والتجارة | شركة حوا للتوزيع',
         description: 'حلول توزيع وتخزين وتسويق متكاملة للسلع الغذائية والاستهلاكية.',
     },
 };
@@ -100,7 +100,7 @@ export default function ServicesPage() {
                                 <ul className="space-y-2.5 pt-4 border-t border-gray-100 dark:border-white/5">
                                     {svc.points.map((pt, i) => (
                                         <li key={i} className="flex items-center gap-2 text-xs font-bold text-[#0B192C] dark:text-gray-200">
-                                            <MdCheckCircle className="text-base text-[#2E7D32] shrink-0" />
+                                            <MdCheckCircle className="text-base text-[#8A6305] dark:text-[#E5B54A] shrink-0" />
                                             <span>{pt}</span>
                                         </li>
                                     ))}
@@ -117,7 +117,7 @@ export default function ServicesPage() {
                             هل تريد توسيع انتشار منتجاتك أو تزويد محلك بالطرود؟
                         </h3>
                         <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                            فريق التوزيع والمبيعات في شركة هوا جاهز للإجابة على جميع الاستفسارات التجارية وجدولة طلبياتكم فوراً.
+                            فريق التوزيع والمبيعات في شركة حوا جاهز للإجابة على جميع الاستفسارات التجارية وجدولة طلبياتكم فوراً.
                         </p>
                     </div>
 
@@ -129,7 +129,7 @@ export default function ServicesPage() {
                             تصفح المنتجات والطرود
                         </Link>
                         <a
-                            href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent('مرحباً شركة هوا، أود الاستفسار عن خدمات التوزيع والشراكات التجارية.')}`}
+                            href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent('مرحباً شركة حوا، أود الاستفسار عن خدمات التوزيع والشراكات التجارية.')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-6 py-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 shadow-md"

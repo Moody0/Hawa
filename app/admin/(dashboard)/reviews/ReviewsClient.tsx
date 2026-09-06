@@ -137,7 +137,7 @@ export default function ReviewsClient() {
                         </div>
                         <div className="bg-white dark:bg-[#0f172a] p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs transition-all duration-300 hover:shadow-md flex flex-col gap-1 col-span-2 sm:col-span-1">
                             <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider truncate">{t('admin.approvedReviews') || "Approved"}</p>
-                            <p className="text-lg sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-[#2E7D32] dark:text-[#4ade80]">{reviews.filter(r => r.isApproved).length}</p>
+                            <p className="text-lg sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">{reviews.filter(r => r.isApproved).length}</p>
                         </div>
                     </div>
 

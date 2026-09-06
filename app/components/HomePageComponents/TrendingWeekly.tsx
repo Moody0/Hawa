@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
+import { useCustomer } from '@/app/context/CustomerContext';
 import ResilientImage from '@/app/components/ResilientImage';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,6 +38,8 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
     const isArabic = dir === 'rtl';
     const [showAll, setShowAll] = useState(false);
     const { formatPrice } = useCurrency();
+    const { customer } = useCustomer();
+    const isLockedForGuest = !customer;
 
     if (!products || products.length === 0) {
         return null;
@@ -117,7 +120,12 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
                                     </h3>
                                     
                                     <div className="flex items-center gap-2">
-                                        {product.discountPrice ? (
+                                        {isLockedForGuest ? (
+                                            <span className="text-[11px] font-bold text-[#8A6305] dark:text-[#E5B54A] flex items-center gap-1">
+                                                <span>🔒</span>
+                                                <span>{isArabic ? 'أسعار الجملة للتجار' : 'Wholesale (Login)'}</span>
+                                            </span>
+                                        ) : product.discountPrice ? (
                                             <>
                                                 <span className="text-xs sm:text-sm font-black text-[#16A34A] dark:text-[#4ade80]">
                                                     {formatPrice(Number(product.discountPrice))}

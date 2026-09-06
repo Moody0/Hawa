@@ -7,13 +7,13 @@ export const revalidate = 3600; // Revalidate every hour
 
 export const metadata: Metadata = {
     title: "الشحن والتوصيل وسياسة التوريد | Shipping & Delivery Terms - Hawa Distribution",
-    description: "تعرف على شروط الشحن والتوريد المباشر لكافة المحافظات والمناطق وسياسة الاستلام المعتمدة لدى شركة هوا للتوزيع والتجارة.",
+    description: "تعرف على شروط الشحن والتوريد المباشر لكافة المحافظات والمناطق وسياسة الاستلام المعتمدة لدى شركة حوا للتوزيع والتجارة.",
     alternates: {
         canonical: "/shipping-returns",
     },
     openGraph: {
-        title: "الشحن والتوصيل وسياسة التوريد | Hawa Distribution - هوا للتوزيع",
-        description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة هوا للتوزيع والتجارة.",
+        title: "الشحن والتوصيل وسياسة التوريد | Hawa Distribution - حوا للتوزيع",
+        description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة حوا للتوزيع والتجارة.",
         url: "/shipping-returns",
         images: [
             {
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "الشحن والتوصيل وسياسة التوريد | Hawa Distribution - هوا للتوزيع",
-        description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة هوا للتوزيع والتجارة.",
+        title: "الشحن والتوصيل وسياسة التوريد | Hawa Distribution - حوا للتوزيع",
+        description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة حوا للتوزيع والتجارة.",
         images: ["/og-image.jpg"],
     },
 };

@@ -78,7 +78,7 @@ const TestimonialsMasonry = ({ reviews = [], products }: TestimonialsMasonryProp
                                 const productUrl = review.productSlug ? `/products/${review.productSlug}` : '/products';
                                 const productImg = review.image || '/placeholder.svg';
                                 const productName = isArabic 
-                                    ? (review.productNameAr || review.productNameEn || 'منتجات شركة هوا') 
+                                    ? (review.productNameAr || review.productNameEn || 'منتجات شركة حوا') 
                                     : (review.productNameEn || review.productNameAr || 'Hawa Distribution Products');
 
                                 return (

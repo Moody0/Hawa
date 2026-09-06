@@ -112,7 +112,7 @@ const ProductGallery = ({ images, isTrending }: ProductGalleryProps) => {
                 {/* Trending Badge */}
                 {isTrending && (
                     <div className="absolute top-4 right-4 z-20 pointer-events-none">
-                        <span className="inline-block bg-[#2E7D32] text-white px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase leading-tight">
+                        <span className="inline-block bg-[#0B192C] text-[#E5B54A] border border-[#8A6305]/40 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase leading-tight shadow-xs">
                             Trending
                         </span>
                     </div>

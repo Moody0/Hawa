@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { CartItem as CartItemType } from '@/app/context/CartContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
+import { useCustomer } from '@/app/context/CustomerContext';
 import { getSafeImageUrl } from '@/lib/image-utils';
 
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -17,7 +18,9 @@ interface CartItemProps {
 
 const CartItem = ({ item, removeItem, updateQuantity }: CartItemProps) => {
     const { formatPrice } = useCurrency();
+    const { customer } = useCustomer();
     const { language } = useLanguage();
+    const isLockedForGuest = !customer;
 
     return (
         <div className="flex items-center gap-4 md:gap-6 py-6 transition-all hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
@@ -64,7 +67,11 @@ const CartItem = ({ item, removeItem, updateQuantity }: CartItemProps) => {
                             </span>
                         )}
                     </div>
-                    {item.price > 0 ? (
+                    {isLockedForGuest ? (
+                        <span className="text-[11px] font-bold text-[#8A6305]">
+                            🔒 {language === 'ar' ? 'أسعار الجملة للتجار' : 'Wholesale (Login)'}
+                        </span>
+                    ) : item.price > 0 ? (
                         <p dir="ltr" className="text-xs md:text-sm font-extrabold text-[#0B192C] dark:text-white w-fit">
                             {formatPrice(item.price)}
                         </p>
@@ -97,7 +104,11 @@ const CartItem = ({ item, removeItem, updateQuantity }: CartItemProps) => {
 
                     {/* Total */}
                     <div className="text-right rtl:text-left min-w-[90px] shrink-0">
-                        {item.price > 0 ? (
+                        {isLockedForGuest ? (
+                            <span className="font-bold text-xs text-[#8A6305]">
+                                🔒 {language === 'ar' ? 'للتجار المسجلين' : 'Merchants Only'}
+                            </span>
+                        ) : item.price > 0 ? (
                             <p dir="ltr" className="font-extrabold text-sm md:text-base text-[#0B192C] dark:text-white">
                                 {formatPrice(item.price * item.quantity)}
                             </p>

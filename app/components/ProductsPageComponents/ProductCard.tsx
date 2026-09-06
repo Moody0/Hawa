@@ -1,14 +1,14 @@
 "use client";
 
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import ResilientImage from '@/app/components/ResilientImage';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCart } from '@/app/context/CartContext';
 import { useCustomer } from '@/app/context/CustomerContext';
-import { MdSearch, MdShoppingBag, MdAdd, MdRemove, MdFavorite, MdFavoriteBorder, MdVisibility } from 'react-icons/md';
+import { MdSearch, MdShoppingBag, MdAdd, MdRemove, MdFavorite, MdFavoriteBorder, MdVisibility, MdLock } from 'react-icons/md';
 import { formatPackaging, formatPackageItems } from '@/lib/packaging';
 import toast from 'react-hot-toast';
 
@@ -54,14 +54,32 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
     const { language, dir } = useLanguage();
     const { formatPrice } = useCurrency();
     const { items, addItem, updateQuantity, removeItem } = useCart();
-    const { isFavorite, toggleWishlist } = useCustomer();
+    const { customer, isFavorite, toggleWishlist } = useCustomer();
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
     const [isSecondaryLoaded, setIsSecondaryLoaded] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const isFav = isFavorite(product.id);
 
+    const isLockedForGuest = !customer;
+    const isPriceOnInquiry = Boolean(product.hidePrice || Number(product.price) <= 0);
+
     // Localized title & description
     const displayName = (language === 'ar' ? product.nameAr : product.nameEn) || product.name || product.nameAr || '';
+
+    // Clean redundant brand prefix if title starts with the brand name (e.g. "بوفالو صابون..." -> "صابون...")
+    const brandName = product.brand?.name || '';
+    const cleanDisplayName = useMemo(() => {
+        if (!brandName || !displayName) return displayName;
+        const brandParts = brandName.split('-').map(s => s.trim()).filter(Boolean);
+        for (const part of brandParts) {
+            const escaped = part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`^${escaped}\\s+`, 'i');
+            if (regex.test(displayName)) {
+                return displayName.replace(regex, '');
+            }
+        }
+        return displayName;
+    }, [displayName, brandName]);
 
     const displayDesc = language === 'ar'
         ? (product.descriptionAr || product.description)
@@ -101,7 +119,19 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
             itemsPerPackage: product.itemsPerPackage || null,
             minOrder: product.minOrder || 1,
         });
-        toast.success(language === 'ar' ? `تمت إضافة ${displayName} إلى السلة` : `Added ${displayName} to cart`);
+        if (isPriceOnInquiry) {
+            toast.success(
+                language === 'ar'
+                    ? `تمت إضافة ${displayName} لقائمة طلب التسعير`
+                    : `Added ${displayName} to quote request`,
+                { id: `quote-${product.id}` }
+            );
+        } else {
+            toast.success(
+                language === 'ar' ? `تمت إضافة ${displayName} إلى السلة` : `Added ${displayName} to cart`,
+                { id: `cart-${product.id}` }
+            );
+        }
     };
 
     const handleIncrease = (e: React.MouseEvent) => {
@@ -199,7 +229,7 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                         className={`text-xs sm:text-sm font-semibold text-[#0B192C] dark:text-white line-clamp-2 leading-snug mb-1 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
                     >
                         <Link href={`/products/${product.slug}`} className="hover:underline">
-                            {displayName}
+                            {cleanDisplayName}
                         </Link>
                     </h3>
 
@@ -233,20 +263,29 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
 
                     {/* Price and Minimum Order */}
                     <div className="mt-auto pt-1 flex items-baseline justify-between gap-1 text-[#0B192C] dark:text-white">
-                        {!product.hidePrice && Number(product.price) > 0 ? (
+                        {isLockedForGuest ? (
+                            <Link
+                                href="/account/login"
+                                className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold text-[#8A6305] bg-[#FAF6EC] dark:bg-[#8A6305]/15 border border-[#8A6305]/30 px-2 py-0.5 rounded hover:bg-[#8A6305] hover:text-white transition-all shadow-2xs group/lock"
+                                title={language === 'ar' ? 'سجل دخولك كتاجر للاطلاع على أسعار الجملة' : 'Login as merchant to view wholesale prices'}
+                            >
+                                <MdLock className="text-xs shrink-0" />
+                                <span className="truncate">{language === 'ar' ? 'أسعار الجملة للتجار' : 'Wholesale (Login)'}</span>
+                            </Link>
+                        ) : !isPriceOnInquiry ? (
                             <div className="flex items-baseline gap-1.5 sm:gap-2">
                                 {product.discountPrice && Number(product.discountPrice) < Number(product.price) ? (
                                     <>
-                                        <span className="text-xs sm:text-base font-extrabold text-[#2E7D32] dark:text-[#4ade80]">{formatPrice(Number(product.discountPrice))}</span>
+                                        <span className="text-xs sm:text-base font-black text-[#0B192C] dark:text-white">{formatPrice(Number(product.discountPrice))}</span>
                                         <span className="text-[10px] sm:text-xs text-gray-400 line-through font-normal">{formatPrice(Number(product.price))}</span>
                                     </>
                                 ) : (
-                                    <span className="text-xs sm:text-base font-extrabold text-[#0B192C] dark:text-white">{formatPrice(Number(product.price))}</span>
+                                    <span className="text-xs sm:text-base font-black text-[#0B192C] dark:text-white">{formatPrice(Number(product.price))}</span>
                                 )}
                             </div>
                         ) : (
                             <div className="flex items-center">
-                                <span className="inline-flex items-center text-[10px] sm:text-xs font-bold text-[#0F172A] dark:text-amber-300 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-white/10 px-2 py-0.5 rounded">
+                                <span className="inline-flex items-center text-[10px] sm:text-xs font-bold text-[#8A6305] bg-[#FAF6EC] dark:bg-[#8A6305]/15 border border-[#8A6305]/30 px-2 py-0.5 rounded">
                                     {language === 'ar' ? 'السعر يحدد حسب الوكالة' : 'Price on Inquiry'}
                                 </span>
                             </div>
@@ -261,18 +300,32 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                     {/* Mobile-Optimized Touch Target Add to Cart / Quantity Controller */}
                     <div className="mt-2.5 relative h-9 sm:h-10 w-full overflow-hidden rounded-lg">
                         {quantityInCart === 0 ? (
-                            <button
-                                onClick={handleInitialAdd}
-                                className="w-full h-full bg-[#16A34A] hover:bg-[#15803d] text-white rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 touch-manipulation select-none shadow-xs cursor-pointer"
-                            >
-                                <MdShoppingBag className="text-sm sm:text-base shrink-0 text-white" />
-                                <span className="truncate">{language === 'ar' ? 'إضافة للسلة' : 'Add to Cart'}</span>
-                            </button>
+                            !isPriceOnInquiry ? (
+                                <button
+                                    onClick={handleInitialAdd}
+                                    className="w-full h-full bg-[#0B192C] hover:bg-[#8A6305] text-white rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 touch-manipulation select-none shadow-xs cursor-pointer dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white"
+                                >
+                                    <MdShoppingBag className="text-sm sm:text-base shrink-0 text-current" />
+                                    <span className="truncate">{language === 'ar' ? 'إضافة للطلب' : 'Add to Cart'}</span>
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleInitialAdd}
+                                    className="w-full h-full bg-[#FAF6EC] hover:bg-[#8A6305] text-[#0B192C] hover:text-white border border-[#8A6305]/40 rounded-lg font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 touch-manipulation select-none shadow-xs cursor-pointer dark:bg-[#8A6305]/20 dark:text-white dark:hover:bg-[#8A6305]"
+                                >
+                                    <span className="text-xs">📋</span>
+                                    <span className="truncate">{language === 'ar' ? 'طلب تسعير جملة' : 'Request Wholesale Quote'}</span>
+                                </button>
+                            )
                         ) : (
-                            <div className="w-full h-full bg-[#16A34A] text-white rounded-lg font-bold text-xs flex items-center justify-between px-1.5 sm:px-2 transition-all duration-300 animate-scaleUp">
+                            <div className={`w-full h-full rounded-lg font-bold text-xs flex items-center justify-between px-1.5 sm:px-2 transition-all duration-300 animate-scaleUp text-white ${
+                                isPriceOnInquiry
+                                    ? 'bg-[#8A6305] border border-[#8A6305]'
+                                    : 'bg-[#0B192C] dark:bg-[#132035] border border-[#8A6305]/40'
+                            }`}>
                                 <button
                                     onClick={handleDecrease}
-                                    className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation cursor-pointer"
+                                    className="w-8 h-8 rounded-lg bg-black/15 hover:bg-black/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation cursor-pointer"
                                     aria-label="Decrease quantity"
                                 >
                                     <MdRemove className="text-base" />
@@ -281,11 +334,16 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                                 <span className="text-xs font-extrabold tracking-wide px-1 select-none flex items-center gap-1">
                                     <span>{quantityInCart}</span>
                                     <span className="text-[10px] font-semibold opacity-90">{formatPackaging(product.packaging, language, { short: true })}</span>
+                                    {isPriceOnInquiry && (
+                                        <span className="text-[9px] bg-white/20 px-1 py-0.2 rounded font-normal">
+                                            {language === 'ar' ? 'تسعير' : 'Quote'}
+                                        </span>
+                                    )}
                                 </span>
 
                                 <button
                                     onClick={handleIncrease}
-                                    className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation cursor-pointer"
+                                    className="w-8 h-8 rounded-lg bg-black/15 hover:bg-black/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation cursor-pointer"
                                     aria-label="Increase quantity"
                                 >
                                     <MdAdd className="text-base" />

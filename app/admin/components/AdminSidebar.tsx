@@ -214,7 +214,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                                 <p className="text-slate-900 dark:text-white text-[13px] font-bold leading-tight truncate">
                                     {session?.user?.name || "Admin"}
                                 </p>
-                                <p className="text-[#2E7D32] dark:text-[#4ade80] text-[10.5px] font-bold tracking-tight uppercase truncate">
+                                <p className="text-emerald-600 dark:text-emerald-400 text-[10.5px] font-bold tracking-tight uppercase truncate">
                                     {isSuperAdmin ? t('admin.superAdmin') : t('admin.editor')}
                                 </p>
                             </div>

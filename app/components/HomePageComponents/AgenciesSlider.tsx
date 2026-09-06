@@ -33,12 +33,12 @@ const BRAND_LATIN_NAMES: Record<string, string> = {
     'alreef': 'Alreef',
     'monda': 'Monda',
     'moria': 'Moria',
-    'zwan': 'Rona',
+    'zwan': 'Zwan',
     'haleebna': 'Haleebna',
     'sunbell': 'Sunbell',
     'silver-fish': 'Silver Fish',
-    'almaghrabi': 'Alreef',
     'al-maghrabi': 'Al-Maghrabi',
+    'almaghrabi': 'Al-Maghrabi',
     'americana': 'Americana',
     'tat': 'Tat',
     'de-cecco-italy': 'De Cecco',
@@ -46,21 +46,17 @@ const BRAND_LATIN_NAMES: Record<string, string> = {
 };
 
 const BRAND_SPECIALTIES: Record<string, { ar: string; en: string }> = {
-    'rocavera': { ar: 'منتجات غذائية متنوعة', en: 'Assorted Food Products' },
-    'buffalo': { ar: 'منتجات استهلاكية', en: 'Consumer Goods & FMCG' },
-    'alreef': { ar: 'منتجات غذائية ومكسرات', en: 'Food Products & Nuts' },
+    'rocavera': { ar: 'منظفات ومستحضرات عناية شخصية', en: 'Hygiene & Personal Care' },
+    'buffalo': { ar: 'سوائل جلي ومنظفات استهلاكية', en: 'Detergents & Consumer FMCG' },
+    'alreef': { ar: 'زيوت وسمن وبقوليات أساسية', en: 'Cooking Oils, Ghee & Legumes' },
     'monda': { ar: 'منتجات شوكولاتة وحلويات', en: 'Chocolates & Confectionery' },
     'moria': { ar: 'منتجات شوكولاتة وحلويات', en: 'Chocolates & Confectionery' },
-    'zwan': { ar: 'منتجات متنوعة', en: 'Assorted Products' },
-    'haleebna': { ar: 'منتجات حليب وألبان عالية الجودة', en: 'Dairy & Milk Products' },
-    'sunbell': { ar: 'تونة ومعلبات بحرية', en: 'Seafood & Tuna' },
-    'silver-fish': { ar: 'سردين وأسماك معلبة', en: 'Canned Sardines & Fish' },
-    'almaghrabi': { ar: 'بقوليات وحبوب أساسية', en: 'Legumes & Staple Grains' },
-    'al-maghrabi': { ar: 'بقوليات وحبوب أساسية', en: 'Legumes & Staple Grains' },
-    'americana': { ar: 'مفرزات وأغذية جاهزة معتمدة', en: 'Certified Frozen Goods' },
-    'tat': { ar: 'صلصات ومعلبات تركية', en: 'Turkish Sauces & Pastes' },
-    'de-cecco-italy': { ar: 'باستا ومواد إيطالية أصيلة', en: 'Authentic Italian Pasta' },
-    'rio-mare': { ar: 'تونة وزيوت إيطالية معتمدة', en: 'Italian Tuna & Seafood' },
+    'zwan': { ar: 'لانشون ولحوم معلبة فاخرة', en: 'Premium Luncheon & Canned Meats' },
+    'haleebna': { ar: 'سمن بقري نقي وألبان مجففة', en: 'Pure Cow Ghee & Dairy' },
+    'sunbell': { ar: 'تونة ولحوم معلبة ممتازة', en: 'Corned Beef & Seafood' },
+    'silver-fish': { ar: 'تونة خفيفة وسردين بالزيت', en: 'Canned Sardines & Tuna' },
+    'al-maghrabi': { ar: 'سردين بالزيت وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
+    'almaghrabi': { ar: 'سردين بالزيت وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
 };
 
 export default function AgenciesSlider({ brands = [], title, subtitle }: AgenciesSliderProps) {
@@ -74,11 +70,9 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
         if (key && BRAND_LATIN_NAMES[key]) {
             return BRAND_LATIN_NAMES[key];
         }
-        // If brand.name contains English characters, use it
         if (/[a-zA-Z]/.test(brand.name)) {
             return brand.name;
         }
-        // Fallback capitalize slug
         if (brand.slug) {
             return brand.slug
                 .split('-')
@@ -89,12 +83,12 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
     };
 
     const getBrandSpecialty = (brand: AgencyBrand) => {
+        if (brand.description && brand.description.trim()) {
+            return brand.description.trim();
+        }
         const key = brand.slug?.toLowerCase();
         if (key && BRAND_SPECIALTIES[key]) {
             return isArabic ? BRAND_SPECIALTIES[key].ar : BRAND_SPECIALTIES[key].en;
-        }
-        if (brand.description && brand.description.trim()) {
-            return brand.description.trim();
         }
         return isArabic ? 'منتجات تجارية معتمدة' : 'Certified Agency Products';
     };
@@ -108,6 +102,43 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
 
     return (
         <section className="w-full py-6 md:py-8 bg-[#FCFCFD] dark:bg-[#0B192C]">
+            {/* Inline CSS to guarantee multi-column layout prior to Swiper JS initialization */}
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .agencies-slider-swiper:not(.swiper-initialized) .swiper-wrapper {
+                    display: flex !important;
+                    gap: 16px !important;
+                    overflow: hidden !important;
+                    width: 100% !important;
+                }
+                .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
+                    flex: 0 0 calc((100% - 16px) / 2) !important;
+                    max-width: calc((100% - 16px) / 2) !important;
+                    width: calc((100% - 16px) / 2) !important;
+                    display: block !important;
+                }
+                @media (min-width: 640px) {
+                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
+                        flex: 0 0 calc((100% - 32px) / 3) !important;
+                        max-width: calc((100% - 32px) / 3) !important;
+                        width: calc((100% - 32px) / 3) !important;
+                    }
+                }
+                @media (min-width: 1024px) {
+                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
+                        flex: 0 0 calc((100% - 60px) / 4) !important;
+                        max-width: calc((100% - 60px) / 4) !important;
+                        width: calc((100% - 60px) / 4) !important;
+                    }
+                }
+                @media (min-width: 1280px) {
+                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
+                        flex: 0 0 calc((100% - 80px) / 5) !important;
+                        max-width: calc((100% - 80px) / 5) !important;
+                        width: calc((100% - 80px) / 5) !important;
+                    }
+                }
+            `}} />
             <div className="container-custom">
                 {/* Centered Ornamental Section Header with Golden Accent Lines */}
                 <div className="text-center mb-5 md:mb-6">
@@ -154,7 +185,11 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                             disableOnInteraction: false,
                             pauseOnMouseEnter: true,
                         }}
-                        loop={brands.length > 4}
+                        observer={true}
+                        observeParents={true}
+                        resizeObserver={true}
+                        watchOverflow={true}
+                        loop={brands.length > 5}
                         spaceBetween={16}
                         slidesPerView={2}
                         breakpoints={{
@@ -165,13 +200,13 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                         className="agencies-slider-swiper !py-3 !px-1"
                     >
                         {brands.map((brand) => {
-                            const latinName = getBrandLatinName(brand);
+                            const displayName = isArabic ? brand.name : getBrandLatinName(brand);
                             const specialty = getBrandSpecialty(brand);
 
                             return (
                                 <SwiperSlide key={brand.id || brand.slug} className="h-auto">
                                     <Link
-                                        href={`/brands/${brand.slug}`}
+                                        href={`/products?brand=${brand.slug}`}
                                         className="group h-[185px] sm:h-[195px] w-full flex flex-col items-center justify-between p-4 sm:p-4.5 rounded-xl bg-white dark:bg-[#132035] border border-slate-100 dark:border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 text-center"
                                     >
                                         {/* Brand Logo Container */}
@@ -185,15 +220,15 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                                                 />
                                             ) : (
                                                 <span className="text-lg font-black text-[#0B192C] dark:text-white">
-                                                    {latinName}
+                                                    {displayName}
                                                 </span>
                                             )}
                                         </div>
 
-                                        {/* Brand Typography (Latin Name & Specialty) */}
+                                        {/* Brand Typography (Name & Specialty) */}
                                         <div className="w-full flex flex-col items-center">
                                             <h3 className="text-sm sm:text-base font-bold text-[#0B192C] dark:text-white group-hover:text-[#8A6305] transition-colors truncate max-w-full">
-                                                {latinName}
+                                                {displayName}
                                             </h3>
                                             <p className="text-xs text-[#475569] dark:text-slate-400 mt-0.5 line-clamp-1 font-normal">
                                                 {specialty}

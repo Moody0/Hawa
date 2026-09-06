@@ -2,8 +2,11 @@
 
 import React, { useState } from 'react';
 import { useCart } from "@/app/context/CartContext";
+import { useCustomer } from "@/app/context/CustomerContext";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { MdRemove, MdAdd, MdShoppingBag } from "react-icons/md";
+import { MdRemove, MdAdd, MdShoppingBag, MdLock, MdStore } from "react-icons/md";
+import { FaWhatsapp } from "react-icons/fa";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
 import { formatPackaging, formatPackageItems } from "@/lib/packaging";
@@ -30,9 +33,12 @@ interface ProductActionsProps {
 
 const ProductActions = ({ product, stock }: ProductActionsProps) => {
     const { addItem } = useCart();
+    const { customer } = useCustomer();
     const { language } = useLanguage();
     const router = useRouter();
     const [quantity, setQuantity] = useState(product.minOrder || 1);
+
+    const isLockedForGuest = !customer;
 
     // Options parsing
     const parsedOptions = product.options 
@@ -132,12 +138,12 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
             <div className="w-full rounded-2xl bg-[#FAF6EC] dark:bg-zinc-800/60 border border-[#8A6305]/25 dark:border-white/10 p-4 flex flex-col gap-3 shadow-2xs">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white">
-                        <span className="inline-flex rounded-full h-2.5 w-2.5 bg-[#2E7D32]"></span>
+                        <span className="inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 animate-pulse"></span>
                         <span>
                             {language === 'ar' ? 'متوفر للتوريد المباشر بالجملة' : 'In Stock for Wholesale Supply'}
                         </span>
                     </div>
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#2E7D32]/10 text-[#2E7D32] dark:bg-[#2E7D32]/20 dark:text-[#4ade80]">
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#8A6305]/10 text-[#8A6305] border border-[#8A6305]/20">
                         {language === 'ar' ? 'بيع بالجملة' : 'Wholesale B2B'}
                     </span>
                 </div>
@@ -151,7 +157,7 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
                     </div>
                     <div className="flex flex-col gap-0.5">
                         <span className="text-[#475569] dark:text-gray-400 font-medium">{language === 'ar' ? 'الحد الأدنى للطلب:' : 'Minimum Order:'}</span>
-                        <span className="font-bold text-[#2E7D32] dark:text-[#4ade80]">
+                        <span className="font-bold text-[#0B192C] dark:text-white">
                             {product.minOrder || 1} {formatPackaging(product.packaging, language)}
                         </span>
                     </div>
@@ -168,7 +174,7 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
                 </div>
             </div>
 
-            {/* Quantity and Add to Cart Row */}
+            {/* Quantity and Action Buttons Row */}
             <div className="flex flex-col gap-1.5 mt-1">
                 <div className="flex items-center justify-between text-xs font-bold text-[#475569] dark:text-gray-300 px-0.5">
                     <span>{language === 'ar' ? 'عدد الطرود المطلوبة:' : 'Requested Cartons:'}</span>
@@ -211,7 +217,7 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
                     {/* Add to Cart Button */}
                     <button
                         onClick={handleAddToCart}
-                        className="flex-1 h-12 bg-[#0B192C] hover:bg-[#0F172A] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.99] cursor-pointer"
+                        className="flex-1 h-12 bg-[#0B192C] hover:bg-[#8A6305] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.99] cursor-pointer"
                     >
                         <MdShoppingBag className="text-lg" />
                         <span>{language === 'ar' ? 'إضافة للطلبية' : 'Add to Cart'}</span>
@@ -222,10 +228,27 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
             {/* Buy Now Button */}
             <button
                 onClick={handleBuyNow}
-                className="w-full h-12 bg-[#2E7D32] hover:bg-[#236327] text-white rounded-xl font-bold text-sm transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
+                className="w-full h-12 bg-[#8A6305] hover:bg-[#735204] text-white rounded-xl font-bold text-sm transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer dark:bg-[#E5B54A] dark:text-[#0B192C] dark:hover:bg-[#d9a432]"
             >
-                {language === 'ar' ? 'شراء وتثبيت الطلب' : 'Buy Now'}
+                {language === 'ar' ? 'متابعة وتثبيت الطلب' : 'Proceed to Order'}
             </button>
+
+            {/* Direct WhatsApp quote for guests */}
+            {isLockedForGuest && (
+                <a
+                    href={`https://wa.me/963993443901?text=${encodeURIComponent(
+                        language === 'ar'
+                            ? `مرحباً مدير المبيعات بشركة حوا، أود الاستفسار عن توفر وتسعير جملة لمنتج: ${displayName} (${quantity} ${formatPackaging(product.packaging, 'ar')})`
+                            : `Hello Hawa Sales, I would like to inquire about wholesale pricing for: ${displayName}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-10 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/25 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                >
+                    <FaWhatsapp className="text-base" />
+                    <span>{language === 'ar' ? 'أو استفسر فورا عبر واتساب مدير المبيعات' : 'Or Inquire via Sales WhatsApp'}</span>
+                </a>
+            )}
         </div>
     );
 };

@@ -43,7 +43,7 @@ export default function MainBrands({ brands }: MainBrandsProps) {
                         {brands.map((brand) => (
                             <Link
                                 key={brand.id}
-                                href={`/brands/${brand.slug}`}
+                                href={`/products?brand=${brand.slug}`}
                                 className="group flex flex-col items-center justify-between w-[140px] min-w-[140px] h-[150px] rounded-xl border border-gray-200 bg-white p-3 transition-all hover:border-primary/40 hover:shadow-md dark:border-white/10 dark:bg-white/5 md:w-[170px] md:min-w-[170px] md:h-[180px]"
                             >
                                 <div className="flex-1 flex items-center justify-center w-full h-[80px] md:h-[100px]">

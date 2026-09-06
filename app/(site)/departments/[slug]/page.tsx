@@ -18,8 +18,8 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 
     if (!department) return { title: "القسم غير موجود | Hawa Distribution" };
 
-    const title = `${department.name} بالجملة | Hawa Distribution - هوا للتوزيع`;
-    const description = department.description || `تصفح منتجات قسم ${department.name} بأسعار الجملة المعتمدة لدى شركة هوا للتوزيع والتجارة.`;
+    const title = `${department.name} بالجملة | Hawa Distribution - حوا للتوزيع`;
+    const description = department.description || `تصفح منتجات قسم ${department.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
     const image = department.image || '/og-image.jpg';
 
     return {

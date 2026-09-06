@@ -89,9 +89,13 @@ export default function BrandShowcaseClient({
             if (res.ok) {
                 const data = await res.json();
                 if (reset) {
-                    setProducts(data.products);
+                    setProducts(data.products || []);
                 } else {
-                    setProducts((prev) => [...prev, ...data.products]);
+                    setProducts((prev) => {
+                        const existingIds = new Set(prev.map((p) => p.id));
+                        const uniqueNew = (data.products || []).filter((p: BrandProductItem) => !existingIds.has(p.id));
+                        return [...prev, ...uniqueNew];
+                    });
                 }
                 if (data.pagination?.total !== undefined) {
                     setTotalProducts(data.pagination.total);

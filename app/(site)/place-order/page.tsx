@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useCart } from '@/app/context/CartContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -164,7 +165,7 @@ const PlaceOrderPage = () => {
                     }))
                 });
 
-                const targetNumber = data.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000';
+                const targetNumber = data.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901';
                 const whatsappUrl = buildWhatsAppUrl(targetNumber, waMessage);
 
                 // Open WhatsApp
@@ -190,6 +191,20 @@ const PlaceOrderPage = () => {
 
     return (
         <main className="grow w-full mx-auto container-custom py-4 lg:py-8">
+            {!customer && (
+                <div className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-zinc-800/80 border border-[#8A6305]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-[#0B192C] dark:text-white font-bold">
+                        <span className="text-base">🔒</span>
+                        <span>{language === 'ar' ? 'أنت تتصفح كضيف. للحصول على أسعار الجملة الرسمية وتثبيت حساب محلك، يمكنك تسجيل الدخول.' : 'You are currently ordering as a guest. Sign in to your merchant account to lock wholesale rates.'}</span>
+                    </div>
+                    <Link
+                        href="/account/login"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0B192C] hover:bg-[#8A6305] text-white text-xs font-bold shrink-0 transition-colors shadow-xs"
+                    >
+                        <span>{language === 'ar' ? 'تسجيل دخول التاجر' : 'Merchant Login'}</span>
+                    </Link>
+                </div>
+            )}
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 <div className="lg:col-span-7">
                     <CheckoutSteps />

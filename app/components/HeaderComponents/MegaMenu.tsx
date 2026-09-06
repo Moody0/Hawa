@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { useCurrency } from "@/app/context/CurrencyContext";
 import { useCart } from "@/app/context/CartContext";
+import { useCustomer } from "@/app/context/CustomerContext";
 import ResilientImage from "@/app/components/ResilientImage";
-import { MdSearch } from "react-icons/md";
+import { MdSearch, MdLock } from "react-icons/md";
 import toast from "react-hot-toast";
 
 interface Brand {
@@ -62,7 +63,9 @@ interface MegaMenuProps {
 function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClose: () => void }) {
     const { formatPrice } = useCurrency();
     const { addItem } = useCart();
+    const { customer } = useCustomer();
     const { language, dir } = useLanguage();
+    const isLockedForGuest = !customer;
 
     const displayName = (language === "ar" ? product.nameAr : product.nameEn) || product.name || product.nameAr || "";
 
@@ -136,7 +139,7 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
                         onClick={handleAddToCart}
                         className="w-full bg-[#0B192C] hover:bg-[#8A6305] text-white h-[36px] rounded-full text-[12px] font-bold transition-all duration-300 flex items-center justify-center cursor-pointer"
                     >
-                        {language === "ar" ? "اضافة للعربة" : "Add to Cart"}
+                        {language === "ar" ? "إضافة للطلب" : "Add to Order"}
                     </button>
                 </div>
             </div>
@@ -159,7 +162,11 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
                 </h3>
                 {/* Price */}
                 <div className="flex items-center gap-1.5 mt-auto">
-                    {product.discountPrice ? (
+                    {isLockedForGuest ? (
+                        <span className="text-[11px] font-bold text-[#8A6305]">
+                            🔒 {language === "ar" ? "أسعار الجملة للتجار" : "Wholesale (Login)"}
+                        </span>
+                    ) : product.discountPrice ? (
                         <>
                             <span className="text-[13px] font-bold text-[#0B192C] dark:text-white">
                                 {formatPrice(product.discountPrice)}
@@ -220,7 +227,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                      return (
                                          <li key={brand.id}>
                                              <Link 
-                                                 href={`/brands/${brand.slug}`} 
+                                                 href={`/products?brand=${brand.slug}`} 
                                                  onClick={onClose}
                                                  className="text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] leading-relaxed inline hover-underline-animated"
                                              >

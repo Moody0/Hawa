@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
+import { useCustomer } from '@/app/context/CustomerContext';
 import ResilientImage from './ResilientImage';
 import { getPrimaryImage } from '@/lib/image-utils';
 import { MdArrowForward, MdSearch } from 'react-icons/md';
@@ -54,6 +55,8 @@ const dynamicItemsEn = [
 const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false, locale }: HeaderSearchProps) => {
     const { t, dir, language } = useLanguage();
     const { formatPrice } = useCurrency();
+    const { customer } = useCustomer();
+    const isLockedForGuest = !customer;
     const currentLocale = locale ?? language;
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
@@ -313,7 +316,7 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                                             {categories.map((cat) => (
                                                 <li key={cat.id}>
                                                     <Link
-                                                        href={`/brands/${cat.slug}`}
+                                                        href={`/products?brand=${cat.slug}`}
                                                         onClick={handleProductClick}
                                                         className="text-[13px] text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors block"
                                                         style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
@@ -368,8 +371,14 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                                                 {product.name}
                                             </h4>
                                             
-                                            <div className="text-[13px] font-extrabold text-zinc-900 dark:text-white" dir="ltr">
-                                                {formatPrice(Number(product.discountPrice || product.price))}
+                                            <div className="text-[12px] font-extrabold text-zinc-900 dark:text-white" dir="ltr">
+                                                {isLockedForGuest ? (
+                                                    <span className="text-[11px] font-bold text-[#8A6305]">
+                                                        🔒 {isArabic ? 'أسعار الجملة للتجار' : 'Wholesale (Login)'}
+                                                    </span>
+                                                ) : (
+                                                    formatPrice(Number(product.discountPrice || product.price))
+                                                )}
                                             </div>
                                         </Link>
                                     ))}

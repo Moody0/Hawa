@@ -48,7 +48,7 @@ const CountdownOffer = () => {
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0B192C] via-[#0F172A] to-[#0B192C] border border-[#8A6305]/30 p-5 sm:p-7 lg:p-8 shadow-sm">
                 {/* Ambient Background Glow */}
                 <div className="absolute top-0 end-0 w-80 h-80 bg-[#8A6305]/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-                <div className="absolute bottom-0 start-0 w-60 h-60 bg-[#2E7D32]/10 rounded-full blur-3xl pointer-events-none -ml-16 -mb-16" />
+                <div className="absolute bottom-0 start-0 w-60 h-60 bg-[#8A6305]/10 rounded-full blur-3xl pointer-events-none -ml-16 -mb-16" />
 
                 <div className={`relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 ${dir === 'rtl' ? 'lg:flex-row' : 'lg:flex-row'}`}>
                     

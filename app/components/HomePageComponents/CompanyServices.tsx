@@ -27,7 +27,7 @@ export default function CompanyServices() {
             title: isArabic ? 'الجودة والموثوقية' : 'Quality & Reliability',
             desc: isArabic ? 'منتجات أصلية 100% مطابقة لأعلى المعايير والمواصفات القياسية مباشرة من مصادرها.' : '100% authentic wholesale products conforming to global industry standards.',
             tag: isArabic ? 'أصالة مضمونة' : 'Guaranteed Authentic',
-            accent: 'border-emerald-500/20 text-[#2E7D32] dark:text-emerald-400',
+            accent: 'border-[#8A6305]/25 text-[#8A6305] dark:text-[#E5B54A]',
         },
         {
             icon: MdCampaign,

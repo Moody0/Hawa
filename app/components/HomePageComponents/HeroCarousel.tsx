@@ -38,16 +38,16 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     
     const DEFAULT_BANNER: Banner = {
         id: 'default',
-        title: 'Authentic Pasta, Sauces & Canned Goods',
-        subtitle: 'Direct from certified international suppliers with bulk wholesale discounts.',
-        titleAr: 'معكرونة، صلصات ومعلبات فاخرة',
-        subtitleAr: 'توريد مباشر من كبرى الشركات العالمية بأسعار الجملة المعتمدة للمتاجر.',
-        image: "/uploads/banners/1787222533353-201908699.webp",
-        buttonText: 'Explore Products',
-        buttonTextAr: 'تصفح المنتجات',
-        link: "/products",
-        badge: '100% Authentic',
-        badgeAr: 'منتجات أصلية 100%',
+        title: 'Certified Food Agencies & Supplies',
+        subtitle: 'Direct wholesale distribution of Zwan meats, Alreef oils & ghee, and Haleebna dairy.',
+        titleAr: 'وكالات المواد الغذائية المعتمدة',
+        subtitleAr: 'توزيع مباشر لمنتجات زوان، سمن وزيوت الريف، ومشتقات حليبنا بأسعار الجملة المعتمدة.',
+        image: "/uploads/banners/hawa-food-agencies-banner.jpg",
+        buttonText: 'Explore Food Catalog',
+        buttonTextAr: 'تصفح المواد الغذائية',
+        link: "/products?mainCategory=food",
+        badge: 'Official Agencies',
+        badgeAr: 'وكالات غذائية رسمية',
         isActive: true
     };
 

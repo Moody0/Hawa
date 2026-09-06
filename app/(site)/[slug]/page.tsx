@@ -61,7 +61,7 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                         />
                         {product.brand && (
                             <Link
-                                href={`/brands/${product.brand.slug}`}
+                                href={`/products?brand=${product.brand.slug}`}
                                 className="mb-4 mt-2 inline-flex w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary transition-colors hover:bg-primary/20"
                             >
                                 {product.brand.name}

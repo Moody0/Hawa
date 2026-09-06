@@ -201,7 +201,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                         <div className="bg-white dark:bg-[#0f172a] p-3.5 sm:p-5 lg:p-6 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs transition-all hover:shadow-md flex flex-col justify-between">
                             <div className="flex justify-between items-center gap-1 mb-2 sm:mb-4">
                                 <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">{t('admin.deliveredMtd')}</p>
-                                <div className="p-1.5 sm:p-2.5 bg-emerald-50 dark:bg-emerald-950/50 text-[#2E7D32] dark:text-[#4ade80] rounded-lg sm:rounded-xl shrink-0">
+                                <div className="p-1.5 sm:p-2.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-lg sm:rounded-xl shrink-0">
                                     <MdTaskAlt className="text-lg sm:text-2xl" />
                                 </div>
                             </div>
@@ -272,8 +272,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                         onClick={() => setFilter("DELIVERED")}
                                         className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
                                             filter === "DELIVERED" 
-                                                ? "bg-[#2E7D32] text-white shadow-2xs" 
-                                                : "text-slate-600 dark:text-slate-400 hover:text-[#2E7D32]"
+                                                ? "bg-emerald-600 text-white shadow-2xs" 
+                                                : "text-slate-600 dark:text-slate-400 hover:text-emerald-600"
                                         }`}
                                     >
                                         {t('admin.delivered')} ({orders.filter(o => o.status === 'DELIVERED').length})

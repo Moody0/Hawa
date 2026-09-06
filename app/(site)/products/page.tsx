@@ -1,39 +1,83 @@
 import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import ProductsClient from "./ProductsClient";
-import { getCatalogInitialData, getCatalogBrands } from "@/lib/catalog";
+import { getCatalogInitialData, getCatalogBrands, getBrandBySlug } from "@/lib/catalog";
 import { findCategoryByIdentifier } from "@/lib/category-utils";
 
 import { Metadata } from "next";
 
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
-export const metadata: Metadata = {
-    title: "كتالوج المنتجات وعروض الوكالات | Products Catalog - Hawa Distribution",
-    description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة من مواد غذائية ومنظفات بأسعار الجملة لدى شركة هوا للتوزيع والتجارة.",
-    alternates: {
-        canonical: "/products",
-    },
-    openGraph: {
-        title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - هوا للتوزيع",
-        description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة هوا للتوزيع والتجارة.",
-        url: "/products",
-        images: [
-            {
-                url: "/og-image.jpg",
-                width: 1200,
-                height: 630,
-                alt: "Hawa Distribution Product Catalog",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - هوا للتوزيع",
-        description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة هوا للتوزيع والتجارة.",
-        images: ["/og-image.jpg"],
-    },
-};
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<Metadata> {
+    const params = await searchParams;
+    const brandSlug = typeof params.brand === "string" ? params.brand : null;
+
+    if (brandSlug) {
+        const brand = await getBrandBySlug(brandSlug);
+        if (brand) {
+            const title = `منتجات وكالة ${brand.name} بالجملة | Hawa Distribution - حوا للتوزيع`;
+            const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
+            const image = brand.image || '/og-image.jpg';
+            return {
+                title,
+                description,
+                alternates: {
+                    canonical: `/products?brand=${brand.slug}`,
+                },
+                openGraph: {
+                    title,
+                    description,
+                    url: `/products?brand=${brand.slug}`,
+                    images: [
+                        {
+                            url: image,
+                            width: 1200,
+                            height: 630,
+                            alt: brand.name,
+                        },
+                    ],
+                },
+                twitter: {
+                    card: "summary_large_image",
+                    title,
+                    description,
+                    images: [image],
+                },
+            };
+        }
+    }
+
+    return {
+        title: "كتالوج المنتجات وعروض الوكالات | Products Catalog - Hawa Distribution",
+        description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة من مواد غذائية ومنظفات بأسعار الجملة لدى شركة حوا للتوزيع والتجارة.",
+        alternates: {
+            canonical: "/products",
+        },
+        openGraph: {
+            title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - حوا للتوزيع",
+            description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة حوا للتوزيع والتجارة.",
+            url: "/products",
+            images: [
+                {
+                    url: "/og-image.jpg",
+                    width: 1200,
+                    height: 630,
+                    alt: "Hawa Distribution Product Catalog",
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - حوا للتوزيع",
+            description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة حوا للتوزيع والتجارة.",
+            images: ["/og-image.jpg"],
+        },
+    };
+}
 
 export default async function ProductsPage({
     searchParams,
@@ -48,20 +92,24 @@ export default async function ProductsPage({
         redirect(resolvedCategory ? `/categories/${resolvedCategory.slug}` : "/products");
     }
 
+    const brandSlug = typeof params.brand === "string" ? params.brand : null;
+    const activeBrand = brandSlug ? await getBrandBySlug(brandSlug) : null;
+
     const [{ categories, products, totalProducts }, brands] = await Promise.all([
-        getCatalogInitialData(),
+        getCatalogInitialData(undefined, activeBrand?.id),
         getCatalogBrands(),
     ]);
 
     return (
         <Suspense fallback={<CatalogLoadingFallback />}>
             <ProductsClient
-                key="all-products"
+                key={activeBrand ? `brand-${activeBrand.id}` : "all-products"}
                 initialCategories={categories}
                 initialBrands={brands}
                 initialProducts={products}
                 initialTotal={totalProducts}
                 activeCategory={null}
+                activeBrand={activeBrand}
             />
         </Suspense>
     );

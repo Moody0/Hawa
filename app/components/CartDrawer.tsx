@@ -2,17 +2,20 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MdClose, MdShoppingBag, MdDelete, MdArrowForward, MdArrowBack } from 'react-icons/md';
+import { MdClose, MdShoppingBag, MdDelete, MdArrowForward, MdArrowBack, MdLock } from 'react-icons/md';
 import { useCart } from '@/app/context/CartContext';
+import { useCustomer } from '@/app/context/CustomerContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { formatPackaging, formatPackageItems } from '@/lib/packaging';
 
 const CartDrawer = () => {
     const { items, isDrawerOpen, closeDrawer, subtotal, updateQuantity, removeItem } = useCart();
+    const { customer } = useCustomer();
     const { t, dir, language } = useLanguage();
     const { formatPrice } = useCurrency();
     const [mounted, setMounted] = useState(false);
+    const isLockedForGuest = !customer;
 
     useEffect(() => {
         setMounted(true);
@@ -124,15 +127,19 @@ const CartDrawer = () => {
                                                 )}
                                             </div>
 
-                                            {item.price > 0 ? (
-                                                <p className="text-[#0B192C] dark:text-white font-extrabold text-xs sm:text-sm mt-1" dir="ltr">
-                                                    {formatPrice(item.price)}
-                                                </p>
-                                            ) : (
-                                                <span className="inline-block mt-1 text-[10px] font-bold text-[#8A6305] bg-[#8A6305]/10 border border-[#8A6305]/20 px-1.5 py-0.5 rounded">
-                                                    {language === 'ar' ? 'السعر عند الطلب' : 'Price on Inquiry'}
-                                                </span>
-                                            )}
+                                             {isLockedForGuest ? (
+                                                 <span className="inline-block mt-1 text-[10px] font-bold text-[#8A6305]">
+                                                     🔒 {language === 'ar' ? 'أسعار الجملة للتجار' : 'Wholesale (Login)'}
+                                                 </span>
+                                             ) : item.price > 0 ? (
+                                                 <p className="text-[#0B192C] dark:text-white font-extrabold text-xs sm:text-sm mt-1" dir="ltr">
+                                                     {formatPrice(item.price)}
+                                                 </p>
+                                             ) : (
+                                                 <span className="inline-block mt-1 text-[10px] font-bold text-[#8A6305] bg-[#8A6305]/10 border border-[#8A6305]/20 px-1.5 py-0.5 rounded">
+                                                     {language === 'ar' ? 'السعر عند الطلب' : 'Price on Inquiry'}
+                                                 </span>
+                                             )}
                                         </div>
                                         
                                         <div className="flex items-center justify-between mt-2">
@@ -172,7 +179,11 @@ const CartDrawer = () => {
                     <div className="p-4 sm:p-5 border-t border-gray-100 dark:border-white/10 bg-white dark:bg-zinc-900 shrink-0 space-y-3">
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-[#475569] dark:text-gray-400 font-medium">{language === 'ar' ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
-                            {subtotal > 0 ? (
+                            {isLockedForGuest ? (
+                                <span className="font-bold text-[#8A6305] text-xs sm:text-sm">
+                                    🔒 {language === 'ar' ? 'متاح للتجار المسجلين' : 'Wholesale (Login)'}
+                                </span>
+                            ) : subtotal > 0 ? (
                                 <span className="font-extrabold text-[#0B192C] dark:text-white text-base" dir="ltr">{formatPrice(subtotal)}</span>
                             ) : (
                                 <span className="font-bold text-[#8A6305] text-xs sm:text-sm">{language === 'ar' ? 'يحدد حسب فواتير الوكالة' : 'Determined by Agency'}</span>
@@ -180,7 +191,11 @@ const CartDrawer = () => {
                         </div>
 
                         {/* Wholesale Pricing Reassurance Banner */}
-                        {subtotal <= 0 && (
+                        {isLockedForGuest ? (
+                            <p className="text-[11px] text-[#8A6305] bg-[#FAF6EC] dark:bg-white/5 p-2 rounded-lg border border-[#8A6305]/20 text-center font-medium">
+                                🔒 {language === 'ar' ? 'الأسعار الرسمية المعتمدة تحدد بعد مراجعة الطلب من إدارة المبيعات' : 'Official prices confirmed upon order review by sales'}
+                            </p>
+                        ) : subtotal <= 0 && (
                             <p className="text-[11px] text-[#475569] dark:text-gray-400 bg-gray-50 dark:bg-zinc-800/80 p-2 rounded-lg border border-gray-200/60 dark:border-white/10 text-center">
                                 🏷️ {language === 'ar' ? 'الأسعار الرسمية المعتمدة تثبت على الفاتورة الورقية عند التسليم' : 'Official prices confirmed on invoice upon delivery'}
                             </p>
@@ -198,7 +213,7 @@ const CartDrawer = () => {
                             <Link
                                 href="/place-order"
                                 onClick={closeDrawer}
-                                className="w-full py-3 bg-[#2E7D32] hover:bg-[#256628] text-white text-center rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 active:scale-95 shadow-xs"
+                                className="w-full py-3 bg-[#0B192C] hover:bg-[#8A6305] text-white text-center rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 active:scale-95 shadow-md dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white"
                             >
                                 <span>{language === 'ar' ? 'متابعة الطلب' : 'Proceed'}</span>
                                 {dir === 'rtl' ? <MdArrowBack className="text-sm" /> : <MdArrowForward className="text-sm" />}

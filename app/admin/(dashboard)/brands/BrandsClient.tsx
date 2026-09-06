@@ -407,7 +407,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                         <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-3 mt-auto">
                                             {/* Preview Link */}
                                             <a
-                                                href={`/brands/${brand.slug}`}
+                                                href={`/products?brand=${brand.slug}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"

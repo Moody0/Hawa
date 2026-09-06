@@ -21,7 +21,7 @@ export default function MarketingShowcase() {
     const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
     const marketingWaUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(
         isArabic 
-            ? 'مرحباً شركة هوا للتوزيع والتجارة، أود الاستفسار عن خدمات التسويق وبناء الحضور لعلامتنا التجارية.'
+            ? 'مرحباً شركة حوا للتوزيع والتجارة، أود الاستفسار عن خدمات التسويق وبناء الحضور لعلامتنا التجارية.'
             : 'Hello Hawa Distribution, I would like to inquire about marketing and agency brand presence services.'
     )}`;
 

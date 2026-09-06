@@ -57,7 +57,7 @@ const ProductAccordions = ({ description, descriptionAr, descriptionEn, options 
         <div className="flex flex-col w-full mt-1 md:border-t border-[#D5D5D5] dark:border-white/5">
             <AccordionItem
                 title={isRTL ? 'تفاصيل ومواصفات المنتج' : 'Product Details & Specs'}
-                content={<div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line leading-relaxed">{activeDescription || (isRTL ? 'منتج أصلي عالي الجودة من شركة هوا للتوزيع والتجارة' : 'Authentic high quality product from Hawa Distribution & Trading')}</div>}
+                content={<div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line leading-relaxed">{activeDescription || (isRTL ? 'منتج أصلي عالي الجودة من شركة حوا للتوزيع والتجارة' : 'Authentic high quality product from Hawa Distribution & Trading')}</div>}
                 isOpen={openIndex === 0}
                 onClick={() => toggleAccordion(0)}
                 isRTL={isRTL}

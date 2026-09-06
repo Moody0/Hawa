@@ -11,7 +11,7 @@ interface TopBarProps {
 const TopBar = ({ isVisible }: TopBarProps) => {
     const { dir, language } = useLanguage();
     const isArabic = dir === 'rtl' || language === 'ar';
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000';
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901';
     const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
 
     return (
@@ -23,17 +23,25 @@ const TopBar = ({ isVisible }: TopBarProps) => {
             <div className="container-custom h-9 flex items-center justify-between">
                 {/* Left Column: Slogan & B2B Identity */}
                 <div className="flex-1 flex items-center gap-2">
-                    <span className="inline-block w-2 h-2 rounded-full bg-[#2E7D32] animate-pulse" />
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <p className="text-xs font-bold text-[#0B192C] dark:text-gray-200 truncate">
                         {isArabic 
-                            ? 'شركة هوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد' 
+                            ? 'شركة حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد' 
                             : 'Hawa Distribution & Trading | All your agency products... in one single order'}
                     </p>
                 </div>
                 
-                {/* Center Column: Direct Delivery Notice */}
-                <div className="hidden xl:flex items-center justify-center text-xs font-semibold text-[#475569] dark:text-gray-400">
-                    <span>{isArabic ? '📦 توريد وتوزيع جملة لمحلات البقالة والتجزئة' : '📦 Direct wholesale supply to grocery stores'}</span>
+                {/* Center Column: Sales Manager Hotline */}
+                <div className="hidden xl:flex items-center justify-center gap-3 text-xs font-bold text-[#0B192C] dark:text-gray-200">
+                    <a 
+                        href="tel:+963993443901"
+                        className="hover:text-[#8A6305] transition-colors flex items-center gap-1.5"
+                        title={isArabic ? 'اتصال مباشر بمدير المبيعات' : 'Call Sales Manager'}
+                    >
+                        <span>📞</span>
+                        <span>{isArabic ? 'مبيعات الجملة:' : 'Wholesale Sales:'}</span>
+                        <span dir="ltr" className="font-extrabold text-[#8A6305]">+963 993 443 901</span>
+                    </a>
                 </div>
                 
                 {/* Right Column: Switchers and Live WhatsApp Link */}
@@ -47,7 +55,7 @@ const TopBar = ({ isVisible }: TopBarProps) => {
                     {/* Socials & WhatsApp Order Link */}
                     <div className="flex items-center gap-3">
                         <a 
-                            href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(isArabic ? 'مرحباً شركة هوا، أرغب بالاستفسار عن طلبيات الجملة للمحل.' : 'Hello Hawa Distribution, I would like to inquire about wholesale orders.')}`}
+                            href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(isArabic ? 'مرحباً شركة حوا، أرغب بالاستفسار عن طلبيات الجملة للمحل.' : 'Hello Hawa Distribution, I would like to inquire about wholesale orders.')}`}
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="text-[#25D366] hover:text-[#1ebe5d] transition-colors flex items-center gap-1.5 font-bold text-xs" 

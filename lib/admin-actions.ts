@@ -1445,6 +1445,7 @@ export interface RailBrand {
     nameAr: string;
     fullName: string;
     slug: string;
+    description?: string | null;
     image: string;
     productCount?: number;
 }
@@ -1472,6 +1473,7 @@ export const getHomeRailBrands = unstable_cache(
                     id: true,
                     name: true,
                     slug: true,
+                    description: true,
                     image: true,
                     products: {
                         where: {
@@ -1504,6 +1506,7 @@ export const getHomeRailBrands = unstable_cache(
                     nameAr: ar,
                     fullName: b.name,
                     slug: b.slug,
+                    description: b.description,
                     image: b.image || productImg || '/logo.png',
                     productCount: b._count.products
                 };
@@ -1513,7 +1516,7 @@ export const getHomeRailBrands = unstable_cache(
             return [];
         }
     },
-    ["home-rail-brands"],
+    ["home-rail-brands-v2"],
     { tags: ["brands", "catalog"], revalidate: 3600 }
 );
 
@@ -2528,7 +2531,7 @@ export const getActiveBanners = unstable_cache(
             return [];
         }
     },
-    ["active-banners"],
+    ["active-banners-v2"],
     { tags: ["banners"], revalidate: 3600 }
 );
 
@@ -2771,11 +2774,11 @@ export const getSiteSettings = unstable_cache(
                     categoriesCtaDescAr: "فريق المبيعات لدينا جاهز لتزويدكم بأفضل أسعار الجملة وجداول التوزيع المنتظمة.",
                     categoriesCtaImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC-S_GMsoebb73JIEWcxtvH2G-vVgkfypE8ysWpGMNiiiwyTno8rIbMCpHR-fsa76ZQL49aYswb7bGZh-kgwc6z9lv0VwUSUrStxNWz2qU3RuIb75ShOMAKZMRyrOXZHZjEBgtxfW7r97FEEshOkEd2MqgE6FpGYrmKa8msLtMOQxXBsmhr3ZGGEtL7jpzgMYbgrAXhiHcMfCspdvD5FRNuSbgFY9_xGqcJM9KbgG0MoC4Ie4WkkmCR4FsuavfglcnY13G2ADZxlK8F",
                     footerBrandTitle: "Hawa Distribution",
-                    footerBrandTitleAr: "شركة هوا للتوزيع والتجارة",
+                    footerBrandTitleAr: "شركة حوا للتوزيع والتجارة",
                     footerBrandDescription: "Your trusted partner in wholesale food and consumer goods distribution from top international brands.",
                     footerBrandDescriptionAr: "شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.",
                     footerCopyright: "© 2026 Hawa Distribution. All rights reserved.",
-                    footerCopyrightAr: "© 2026 شركة هوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
+                    footerCopyrightAr: "© 2026 شركة حوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
                     footerInstagramUrl: "#",
                     footerFacebookUrl: "#",
                     footerWhatsappUrl: "#",
@@ -2858,9 +2861,9 @@ export const getSiteSettings = unstable_cache(
                     aboutNarrativeFounded: "Founded with Trust",
                     aboutNarrativeFoundedAr: "تأسست على الثقة",
                     aboutNarrativeDesc1: "At Hawa Distribution, we bridge the gap between world-renowned international brands and local markets. We believe in providing retailers and businesses with seamless access to authentic, top-tier goods at competitive wholesale prices.",
-                    aboutNarrativeDesc1Ar: "في شركة هوا للتوزيع والتجارة، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية والأسواق المحلية والمحلات التجارية.",
+                    aboutNarrativeDesc1Ar: "في شركة حوا للتوزيع والتجارة، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية والأسواق المحلية والمحلات التجارية.",
                     aboutNarrativeDesc2: "With rigorous quality control, modern logistics, and a commitment to reliability, Hawa Distribution has established itself as the trusted partner for food and consumer goods distribution across all governorates.",
-                    aboutNarrativeDesc2Ar: "بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت شركة هوا مكانتها كشريك رائد وموثوق لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.",
+                    aboutNarrativeDesc2Ar: "بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت شركة حوا مكانتها كشريك رائد وموثوق لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.",
                     aboutNarrativeQuote: "Connecting you with the world's finest brands.",
                     aboutNarrativeQuoteAr: "جودة مضمونة وخدمة توزيع موثوقة.",
                     aboutNarrativeImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC4yp4c_LJLNPwaV2ay8DZ6xRHD0UF1WqXU8eDtrdDoiVjtq9oNRc9Cn6cnbqsNwOLO-y-99jnkiLnCsGLs2rQqthU8TPqhAh2Msisbst1UyfyrILBR5fRO7KYu90u1FEoeRRjGceGVbB5vz2SJAtjzUrLLtA6BmR8VN5a5Seo4MraBJj7i4Gs4QPEZbURtSN-F7wbJsu4WNj3pEaWlye2SuJvokQhYXJ27gnAoabHg5_0_4DZY49qyKnQuMHHL9atOIILRIMD3FkeZ",
@@ -2903,7 +2906,7 @@ export const getSiteSettings = unstable_cache(
             return null;
         }
     },
-    ["site-settings"],
+    ["site-settings-v2"],
     { tags: ["settings"], revalidate: 3600 }
 );
 

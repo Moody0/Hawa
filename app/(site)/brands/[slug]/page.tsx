@@ -17,8 +17,8 @@ export async function generateMetadata(
         };
     }
 
-    const title = `${brand.name} | Hawa Distribution - هوا للتوزيع`;
-    const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة هوا للتوزيع والتجارة.`;
+    const title = `${brand.name} | Hawa Distribution - حوا للتوزيع`;
+    const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
     const image = brand.image || '/og-image.jpg';
 
     return {

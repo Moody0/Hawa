@@ -41,11 +41,11 @@ export async function generateMetadata(
         };
     }
 
-    const title = `${product.name} | Hawa Distribution - هوا للتوزيع`;
+    const title = `${product.name} | Hawa Distribution - حوا للتوزيع`;
     const brandName = product.brand?.name ? product.brand.name.split('-')[0].trim() : 'Hawa';
     const description = product.description 
-        ? `${product.name} من وكالة ${brandName}. متوفر للطلب والبيع بالجملة مع شحن موثوق عبر شركة هوا للتوزيع والتجارة. ${product.description.slice(0, 120)}`
-        : `اشترِ ${product.name} من وكالة ${brandName} بأفضل أسعار الجملة المعتمدة من شركة هوا للتوزيع والتجارة.`;
+        ? `${product.name} من وكالة ${brandName}. متوفر للطلب والبيع بالجملة مع شحن موثوق عبر شركة حوا للتوزيع والتجارة. ${product.description.slice(0, 120)}`
+        : `اشترِ ${product.name} من وكالة ${brandName} بأفضل أسعار الجملة المعتمدة من شركة حوا للتوزيع والتجارة.`;
 
     const mainImage = (product.images as string).split(',').map((img: string) => img.trim()).filter(Boolean)[0] || '/logo.jpeg';
 

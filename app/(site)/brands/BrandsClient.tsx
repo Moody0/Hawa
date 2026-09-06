@@ -46,7 +46,7 @@ export default function BrandsClient({ brands, basePath = "/brands" }: BrandsCli
         return (
             <Link
                 key={brand.id}
-                href={`${basePath}/${brand.slug}`}
+                href={`/products?brand=${brand.slug}`}
                 className={`group flex min-h-[170px] flex-col justify-between rounded-2xl border transition-all duration-300 hover:-translate-y-1 p-3 sm:p-4 ${
                     isHighlight
                         ? "border-[#8A6305]/30 bg-gradient-to-b from-[#FAF6EC]/60 to-white shadow-xs hover:border-[#8A6305] hover:shadow-md dark:border-[#8A6305]/20 dark:from-[#8A6305]/5 dark:to-white/5"

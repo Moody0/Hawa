@@ -132,6 +132,18 @@ const Footer = async ({ t, language }: FooterProps) => {
                                 );
                             })}
                         </div>
+
+                        {/* Direct Contacts */}
+                        <div className="pt-2 flex flex-col gap-1.5 text-xs text-gray-300">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[#8A6305] font-bold">{language === 'ar' ? 'مبيعات الجملة:' : 'Wholesale Sales:'}</span>
+                                <a href="tel:+963993443901" dir="ltr" className="hover:text-white transition-colors font-semibold">+963 993 443 901</a>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[#8A6305] font-bold">{language === 'ar' ? 'الإدارة العامة:' : 'General Management:'}</span>
+                                <a href="tel:+963994166000" dir="ltr" className="hover:text-white transition-colors font-semibold">+963 994 166 000</a>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Shop Links */}

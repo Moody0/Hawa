@@ -65,7 +65,7 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
         return (
             <Link
                 key={brand.id || brand.slug}
-                href={`/agencies/${brand.slug}`}
+                href={`/products?brand=${brand.slug}`}
                 className={`group flex flex-col items-center justify-between bg-white dark:bg-[#1A1A14] border border-[#8A6305]/20 dark:border-white/10 hover:border-[#8A6305] hover:shadow-md hover:-translate-y-0.5 rounded-xl sm:rounded-2xl transition-all duration-300 ${
                     isCompact ? 'p-2 min-h-[92px] w-full snap-start' : 'p-2.5 sm:p-3 min-h-[105px] sm:min-h-[115px]'
                 }`}
@@ -151,7 +151,7 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
                     {brands.length > 16 && (
                         <div className="mt-5 flex justify-center">
                             <Link
-                                href="/agencies"
+                                href="/brands"
                                 className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-[#0B192C] dark:text-[#8A6305] hover:text-[#8A6305] bg-[#FAF6EC] dark:bg-white/5 border border-[#8A6305]/20 hover:border-[#8A6305]/50 transition-all duration-200 shadow-2xs hover:shadow-xs group"
                             >
                                 <span>{isArabic ? `تصفح كافة الشركات والعلامات (${brands.length}+)` : `View All Partner Brands (${brands.length}+)`}</span>

@@ -80,11 +80,11 @@ async function main() {
     where: { id: 'site-settings' },
     update: {
       footerBrandTitle: 'Hawa Distribution',
-      footerBrandTitleAr: 'هوا للتوزيع والتجارة',
+      footerBrandTitleAr: 'حوا للتوزيع والتجارة',
       footerBrandDescription: 'Your trusted partner in wholesale food and consumer goods distribution.',
       footerBrandDescriptionAr: 'شريككم الموثوق لتوزيع البضائع والمواد الغذائية والاستهلاكية من أفضل الشركات العالمية.',
       footerCopyright: '© 2026 Hawa Distribution & Trading. All rights reserved.',
-      footerCopyrightAr: '© 2026 شركة هوا للتوزيع والتجارة. جميع الحقوق محفوظة.',
+      footerCopyrightAr: '© 2026 شركة حوا للتوزيع والتجارة. جميع الحقوق محفوظة.',
       whatsappNumber: '+963900000000',
       shippingTitleAr: 'توزيع سريع وموثوق للمحلات',
       finalSaleTitleAr: 'شروط التوزيع والتسليم بالجملة',
@@ -93,11 +93,11 @@ async function main() {
     create: {
       id: 'site-settings',
       footerBrandTitle: 'Hawa Distribution',
-      footerBrandTitleAr: 'هوا للتوزيع والتجارة',
+      footerBrandTitleAr: 'حوا للتوزيع والتجارة',
       footerBrandDescription: 'Your trusted partner in wholesale food and consumer goods distribution.',
       footerBrandDescriptionAr: 'شريككم الموثوق لتوزيع البضائع والمواد الغذائية والاستهلاكية من أفضل الشركات العالمية.',
       footerCopyright: '© 2026 Hawa Distribution & Trading. All rights reserved.',
-      footerCopyrightAr: '© 2026 شركة هوا للتوزيع والتجارة. جميع الحقوق محفوظة.',
+      footerCopyrightAr: '© 2026 شركة حوا للتوزيع والتجارة. جميع الحقوق محفوظة.',
       whatsappNumber: '+963900000000',
       shippingTitleAr: 'توزيع سريع وموثوق للمحلات',
       finalSaleTitleAr: 'شروط التوزيع والتسليم بالجملة',
@@ -113,7 +113,7 @@ async function main() {
       data: [
         {
           title: 'Hawa Distribution & Trading',
-          titleAr: 'شركة هوا للتوزيع والتجارة',
+          titleAr: 'شركة حوا للتوزيع والتجارة',
           subtitle: 'Your trusted wholesale partner connecting premium agencies with retail stores.',
           subtitleAr: 'نوفر أفضل العلامات التجارية ونقدم حلول توزيع متكاملة تغطي الأسواق والمتاجر',
           image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600',

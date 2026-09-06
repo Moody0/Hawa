@@ -36,7 +36,7 @@ const PromoBanner = ({ settings, dir = 'rtl' }: PromoBannerProps) => {
                     <div className="w-full md:w-auto flex justify-center md:justify-end shrink-0">
                         <Link
                             href={bannerLink}
-                            className="w-full md:w-auto text-center px-6 sm:px-8 py-2.5 sm:py-3 bg-[#2E7D32] hover:bg-[#256629] text-white rounded-full font-bold text-xs sm:text-sm md:text-base transition-all active:scale-95 whitespace-nowrap shadow-xs"
+                            className="w-full md:w-auto text-center px-6 sm:px-8 py-2.5 sm:py-3 bg-[#0B192C] hover:bg-[#8A6305] text-white rounded-full font-bold text-xs sm:text-sm md:text-base transition-all active:scale-95 whitespace-nowrap shadow-md dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white"
                         >
                             {isArabic ? 'استعراض عروض التوريد' : 'Explore Supply Deals'}
                         </Link>

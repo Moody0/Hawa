@@ -263,7 +263,7 @@ const MobileMenu = ({
                                                         {activeMainCat.brands.map((brand) => (
                                                             <Link
                                                                 key={brand.id}
-                                                                href={`/brands/${brand.slug}`}
+                                                                href={`/products?brand=${brand.slug}`}
                                                                 onClick={() => setIsMobileMenuOpen(false)}
                                                                 className="flex items-center py-3 text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-white border-b border-gray-100/50 dark:border-white/5 last:border-b-0 transition-colors"
                                                             >

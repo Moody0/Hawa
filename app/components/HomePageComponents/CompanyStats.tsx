@@ -37,7 +37,7 @@ export default function CompanyStats({ stats }: CompanyStatsProps) {
             label: isArabic ? 'منتج غذائي واستهلاكي' : 'Diverse Products',
             sublabel: isArabic ? 'بأعلى مواصفات الجودة والأصالة' : 'Highest Certified Standards',
             icon: MdCategory,
-            iconColor: 'text-[#2E7D32] dark:text-emerald-400',
+            iconColor: 'text-[#8A6305] dark:text-[#E5B54A]',
         },
         {
             value: stats?.clients || '+300',

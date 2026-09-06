@@ -134,10 +134,10 @@ const ProductsSidebarFilter: React.FC<ProductsSidebarFilterProps> = ({
                     <button
                         type="button"
                         onClick={onResetFilters}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 hover:text-red-700 dark:text-red-400 cursor-pointer transition-colors"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-400 hover:text-red-600 dark:hover:text-red-400 cursor-pointer transition-colors"
                     >
                         <MdRefresh className="text-sm" />
-                        <span>{isArabic ? "مسح الكل" : "Reset"}</span>
+                        <span>{isArabic ? "إعادة ضبط" : "Reset"}</span>
                     </button>
                 )}
             </div>
@@ -153,87 +153,81 @@ const ProductsSidebarFilter: React.FC<ProductsSidebarFilterProps> = ({
                     <button
                         type="button"
                         onClick={handleToggleInStock}
-                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-98 ${
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-98 text-start ${
                             filters.inStock
-                                ? "bg-[#0B192C] dark:bg-[#8A6305] text-white border-[#0B192C] dark:border-[#8A6305] shadow-xs"
+                                ? "bg-[#FAF6EC] dark:bg-[#8A6305]/15 text-[#0B192C] dark:text-white border-[#8A6305]/40 shadow-xs"
                                 : "bg-white dark:bg-zinc-900 text-[#475569] dark:text-gray-300 border-gray-200/80 dark:border-white/10 hover:border-[#8A6305]"
                         }`}
                     >
-                        <div className="flex items-center gap-2">
-                            <MdCheckCircle
-                                className={`text-base ${
-                                    filters.inStock ? "text-[#8A6305] dark:text-white" : "text-emerald-500"
-                                }`}
-                            />
-                            <span>{isArabic ? "المتوفر في المخزون فقط" : "In Stock Only"}</span>
-                        </div>
                         <div
-                            className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
+                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                                 filters.inStock
-                                    ? "bg-[#8A6305] dark:bg-white text-white dark:text-[#0B192C] border-transparent"
-                                    : "border-gray-300 dark:border-zinc-700 bg-transparent"
+                                    ? "bg-[#8A6305] text-white border-[#8A6305]"
+                                    : "border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                             }`}
                         >
                             {filters.inStock && <MdCheck className="text-xs" />}
                         </div>
+                        <MdCheckCircle
+                            className={`text-base shrink-0 ${
+                                filters.inStock ? "text-[#8A6305]" : "text-emerald-500"
+                            }`}
+                        />
+                        <span className="truncate">{isArabic ? "المتوفر في المخزون فقط" : "In Stock Only"}</span>
                     </button>
 
                     {/* On Sale */}
                     <button
                         type="button"
                         onClick={handleToggleOnSale}
-                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-98 ${
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-98 text-start ${
                             filters.onSale
-                                ? "bg-[#0B192C] dark:bg-[#8A6305] text-white border-[#0B192C] dark:border-[#8A6305] shadow-xs"
+                                ? "bg-[#FAF6EC] dark:bg-[#8A6305]/15 text-[#0B192C] dark:text-white border-[#8A6305]/40 shadow-xs"
                                 : "bg-white dark:bg-zinc-900 text-[#475569] dark:text-gray-300 border-gray-200/80 dark:border-white/10 hover:border-[#8A6305]"
                         }`}
                     >
-                        <div className="flex items-center gap-2">
-                            <MdLocalOffer
-                                className={`text-base ${
-                                    filters.onSale ? "text-[#8A6305] dark:text-white" : "text-amber-500"
-                                }`}
-                            />
-                            <span>{isArabic ? "عروض وتخفيضات خاصة" : "On Sale & Offers"}</span>
-                        </div>
                         <div
-                            className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
+                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                                 filters.onSale
-                                    ? "bg-[#8A6305] dark:bg-white text-white dark:text-[#0B192C] border-transparent"
-                                    : "border-gray-300 dark:border-zinc-700 bg-transparent"
+                                    ? "bg-[#8A6305] text-white border-[#8A6305]"
+                                    : "border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                             }`}
                         >
                             {filters.onSale && <MdCheck className="text-xs" />}
                         </div>
+                        <MdLocalOffer
+                            className={`text-base shrink-0 ${
+                                filters.onSale ? "text-[#8A6305]" : "text-amber-500"
+                            }`}
+                        />
+                        <span className="truncate">{isArabic ? "عروض وتخفيضات خاصة" : "On Sale & Offers"}</span>
                     </button>
 
                     {/* Trending / Best Sellers */}
                     <button
                         type="button"
                         onClick={handleToggleTrending}
-                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-98 ${
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer active:scale-98 text-start ${
                             filters.isTrending
-                                ? "bg-[#0B192C] dark:bg-[#8A6305] text-white border-[#0B192C] dark:border-[#8A6305] shadow-xs"
+                                ? "bg-[#FAF6EC] dark:bg-[#8A6305]/15 text-[#0B192C] dark:text-white border-[#8A6305]/40 shadow-xs"
                                 : "bg-white dark:bg-zinc-900 text-[#475569] dark:text-gray-300 border-gray-200/80 dark:border-white/10 hover:border-[#8A6305]"
                         }`}
                     >
-                        <div className="flex items-center gap-2">
-                            <MdBolt
-                                className={`text-base ${
-                                    filters.isTrending ? "text-[#8A6305] dark:text-white" : "text-amber-500"
-                                }`}
-                            />
-                            <span>{isArabic ? "الأكثر طلباً ورواجاً" : "Trending Products"}</span>
-                        </div>
                         <div
-                            className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
+                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                                 filters.isTrending
-                                    ? "bg-[#8A6305] dark:bg-white text-white dark:text-[#0B192C] border-transparent"
-                                    : "border-gray-300 dark:border-zinc-700 bg-transparent"
+                                    ? "bg-[#8A6305] text-white border-[#8A6305]"
+                                    : "border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                             }`}
                         >
                             {filters.isTrending && <MdCheck className="text-xs" />}
                         </div>
+                        <MdBolt
+                            className={`text-base shrink-0 ${
+                                filters.isTrending ? "text-[#8A6305]" : "text-amber-500"
+                            }`}
+                        />
+                        <span className="truncate">{isArabic ? "الأكثر طلباً ورواجاً" : "Trending Products"}</span>
                     </button>
                 </div>
             </div>
@@ -329,7 +323,7 @@ const ProductsSidebarFilter: React.FC<ProductsSidebarFilterProps> = ({
                                     </div>
 
                                     {count !== undefined && (
-                                        <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500 shrink-0 ms-2">
+                                        <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500 shrink-0">
                                             ({count})
                                         </span>
                                     )}
@@ -402,7 +396,7 @@ const ProductsSidebarFilter: React.FC<ProductsSidebarFilterProps> = ({
                                     </div>
 
                                     {cat._count?.products !== undefined && (
-                                        <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500 shrink-0 ms-2">
+                                        <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500 shrink-0">
                                             ({cat._count.products})
                                         </span>
                                     )}

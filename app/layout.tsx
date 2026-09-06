@@ -32,15 +32,15 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBase),
   title: {
-    default: "هوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد - Hawa Distribution",
-    template: "%s | Hawa Distribution - هوا للتوزيع",
+    default: "حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد - Hawa Distribution",
+    template: "%s | Hawa Distribution - حوا للتوزيع",
   },
   description:
-    "شركة هوا للتوزيع والتجارة - كل منتجات وكالاتك… بطلب واحد. المنصة الرائدة لتوريد كبرى الوكالات والعلامات التجارية للمحلات والسوبرماركت بالجملة (زوان، الريف، حليبنا، صن بل، سيلفر فيش، بوفالو، روكافيرا، المغربي). توريد مباشر وطلب فوري عبر واتساب.",
+    "شركة حوا للتوزيع والتجارة - كل منتجات وكالاتك… بطلب واحد. المنصة الرائدة لتوريد كبرى الوكالات والعلامات التجارية للمحلات والسوبرماركت بالجملة (زوان، الريف، حليبنا، صن بل، سيلفر فيش، بوفالو، روكافيرا، المغربي). توريد مباشر وطلب فوري عبر واتساب.",
   keywords: [
     "Hawa Distribution",
-    "هوا للتوزيع والتجارة",
-    "شركة هوا للتوزيع",
+    "حوا للتوزيع والتجارة",
+    "شركة حوا للتوزيع",
     "تجارة جملة مواد غذائية",
     "توزيع مواد استهلاكية ومنظفات",
     "وكالات تجارية سوريا",
@@ -77,10 +77,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ar_SY",
     alternateLocale: ["en_US", "ar_SA"],
-    siteName: "Hawa Distribution | هوا للتوزيع والتجارة",
-    title: "Hawa Distribution & Trading | Wholesale Agencies - هوا للتوزيع والتجارة",
+    siteName: "Hawa Distribution | حوا للتوزيع والتجارة",
+    title: "Hawa Distribution & Trading | Wholesale Agencies - حوا للتوزيع والتجارة",
     description:
-      "شركة هوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة. توريد مباشر وطلب سريع عبر واتساب.",
+      "شركة حوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة. توريد مباشر وطلب سريع عبر واتساب.",
     url: metadataBase,
     images: [
       {
@@ -93,9 +93,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hawa Distribution & Trading | Wholesale Agencies - هوا للتوزيع والتجارة",
+    title: "Hawa Distribution & Trading | Wholesale Agencies - حوا للتوزيع والتجارة",
     description:
-      "شركة هوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة. توريد مباشر وطلب سريع عبر واتساب.",
+      "شركة حوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة. توريد مباشر وطلب سريع عبر واتساب.",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -138,11 +138,11 @@ export default async function RootLayout({
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "WholesaleStore",
-    "name": "Hawa Distribution & Trading - هوا للتوزيع والتجارة",
+    "name": "Hawa Distribution & Trading - حوا للتوزيع والتجارة",
     "url": metadataBase,
     "logo": `${metadataBase}/logo.jpeg`,
     "image": `${metadataBase}/og-image.jpg`,
-    "description": "شركة هوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة.",
+    "description": "شركة حوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة.",
     "currenciesAccepted": "SYP, USD",
     "paymentAccepted": "Cash, Bank Transfer",
     "areaServed": "Syria",

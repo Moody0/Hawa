@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useCart } from "@/app/context/CartContext";
+import { useCustomer } from "@/app/context/CustomerContext";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { useCurrency } from "@/app/context/CurrencyContext";
-import { MdRemove, MdAdd, MdShoppingBag } from "react-icons/md";
+import { MdRemove, MdAdd, MdShoppingBag, MdLock } from "react-icons/md";
 import toast from 'react-hot-toast';
 import { formatPackaging } from "@/lib/packaging";
 
@@ -30,9 +32,12 @@ interface MobileStickyOrderBarProps {
 
 export default function MobileStickyOrderBar({ product }: MobileStickyOrderBarProps) {
     const { addItem } = useCart();
+    const { customer } = useCustomer();
     const { language, dir } = useLanguage();
     const { formatPrice } = useCurrency();
     const [quantity, setQuantity] = useState(product.minOrder || 1);
+
+    const isLockedForGuest = !customer;
 
     const displayName = (language === 'ar' ? product.nameAr : product.nameEn) || product.name || product.nameAr || '';
     const displayDesc = language === 'ar'
@@ -78,7 +83,12 @@ export default function MobileStickyOrderBar({ product }: MobileStickyOrderBarPr
                     <span className="text-[10px] text-[#475569] font-medium truncate">
                         {formatPackaging(product.packaging, language)}
                     </span>
-                    {!product.hidePrice && Number(product.price) > 0 ? (
+                    {isLockedForGuest ? (
+                        <span className="text-xs font-bold text-[#8A6305] flex items-center gap-1">
+                            <MdLock className="text-xs shrink-0" />
+                            <span className="truncate">{language === 'ar' ? 'أسعار الجملة' : 'Wholesale'}</span>
+                        </span>
+                    ) : !product.hidePrice && Number(product.price) > 0 ? (
                         <span className="text-sm font-extrabold text-[#0B192C] dark:text-white leading-tight">
                             {formatPrice(Number(product.price))}
                         </span>
@@ -113,7 +123,7 @@ export default function MobileStickyOrderBar({ product }: MobileStickyOrderBarPr
                 {/* Primary CTA */}
                 <button
                     onClick={handleAddToCart}
-                    className="flex-1 h-10 bg-[#2E7D32] hover:bg-[#256628] active:scale-95 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer px-2"
+                    className="flex-1 h-10 bg-[#0B192C] hover:bg-[#8A6305] active:scale-95 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer px-2 dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white"
                 >
                     <MdShoppingBag className="text-base shrink-0" />
                     <span className="truncate">{language === 'ar' ? 'إضافة للطلبية' : 'Add to Order'}</span>

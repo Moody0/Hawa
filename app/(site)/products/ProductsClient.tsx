@@ -134,8 +134,12 @@ const ProductsClient = ({
         (filters.isTrending ? 1 : 0) +
         (debouncedSearch ? 1 : 0);
 
+    const isFetchingRef = useRef(false);
+
     const fetchProducts = useCallback(
         async (reset = false) => {
+            if (isFetchingRef.current) return;
+            isFetchingRef.current = true;
             setLoading(true);
 
             try {
@@ -149,12 +153,10 @@ const ProductsClient = ({
                     categoryQuery = `&categoryIds=${activeCategory.id}`;
                 }
 
-                // Priority to filters.brandIds, fallback to activeBrand
+                // Brand filter query
                 let brandQuery = "";
                 if (filters.brandIds.length > 0) {
                     brandQuery = `&brandIds=${filters.brandIds.join(",")}`;
-                } else if (activeBrand) {
-                    brandQuery = `&brandIds=${activeBrand.id}`;
                 }
 
                 const mainCategoryQuery = activeMainCategory
@@ -184,10 +186,15 @@ const ProductsClient = ({
 
                 if (response.ok) {
                     const data = await response.json();
+                    const incomingProducts: Product[] = data.products || [];
                     if (reset) {
-                        setProducts(data.products);
+                        setProducts(incomingProducts);
                     } else {
-                        setProducts((prev) => [...prev, ...data.products]);
+                        setProducts((prev) => {
+                            const existingIds = new Set(prev.map((p) => p.id));
+                            const uniqueNew = incomingProducts.filter((p) => !existingIds.has(p.id));
+                            return [...prev, ...uniqueNew];
+                        });
                     }
                     if (data.pagination?.total !== undefined) {
                         setTotalProducts(data.pagination.total);
@@ -197,6 +204,7 @@ const ProductsClient = ({
                 console.error("Failed to fetch products", error);
             } finally {
                 setLoading(false);
+                isFetchingRef.current = false;
             }
         },
         [
@@ -215,10 +223,6 @@ const ProductsClient = ({
     useEffect(() => {
         if (isInitialRender) {
             setIsInitialRender(false);
-            if (sort !== "best_sellers" || debouncedSearch || activeFiltersCount > 0) {
-                setPage(1);
-                fetchProducts(true);
-            }
             return;
         }
 
@@ -241,11 +245,11 @@ const ProductsClient = ({
 
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting) {
+                if (entries[0].isIntersecting && !loading && !isFetchingRef.current) {
                     setPage((prevPage) => prevPage + 1);
                 }
             },
-            { rootMargin: "1000px" }
+            { rootMargin: "300px" }
         );
 
         const currentRef = observerRef.current;
@@ -270,8 +274,8 @@ const ProductsClient = ({
 
     const handleResetAllFilters = () => {
         setFilters({
-            brandIds: activeBrand ? [activeBrand.id] : [],
-            categoryIds: activeCategory ? [activeCategory.id] : [],
+            brandIds: [],
+            categoryIds: [],
             inStock: false,
             onSale: false,
             isTrending: false,
@@ -298,11 +302,24 @@ const ProductsClient = ({
                 ? activeMainCategory.name
                 : activeMainCategory.description || activeMainCategory.name;
         }
-        if (activeBrand) {
-            return activeBrand.name;
+        if (singleSelectedBrand) {
+            return singleSelectedBrand.name;
+        }
+        if (filters.brandIds.length > 1) {
+            return isArabic
+                ? `منتجات الوكالات المحددة (${filters.brandIds.length} وكالات)`
+                : `Products of Selected Agencies (${filters.brandIds.length})`;
         }
         return t("products.allProducts");
     };
+
+    // Single selected brand object (only when EXACTLY ONE brand is selected)
+    const singleSelectedBrand = useMemo(() => {
+        if (filters.brandIds.length === 1) {
+            return initialBrands.find((b) => b.id === filters.brandIds[0]) || activeBrand || null;
+        }
+        return null;
+    }, [filters.brandIds, initialBrands, activeBrand]);
 
     // Find brand / category names for active filter chips
     const selectedBrandObjects = useMemo(() => {
@@ -318,13 +335,13 @@ const ProductsClient = ({
             {/* Breadcrumbs */}
             <ProductsBreadcrumbs
                 activeCategory={activeCategory}
-                activeBrand={activeBrand}
+                activeBrand={singleSelectedBrand}
                 activeMainCategory={activeMainCategory}
             />
 
-            {/* Brand Hero or Page Header */}
-            {activeBrand ? (
-                <BrandHeroHeader brand={activeBrand} totalProducts={totalProducts} />
+            {/* Brand Hero or Page Header (Only displayed if EXACTLY one brand is active) */}
+            {singleSelectedBrand && !activeCategory && !activeMainCategory ? (
+                <BrandHeroHeader brand={singleSelectedBrand} totalProducts={totalProducts} />
             ) : (
                 <ProductsHeader />
             )}
@@ -529,14 +546,14 @@ const ProductsClient = ({
                                     </span>
                                 )}
 
-                                {/* Clear All Button */}
+                                {/* Clear All Button - Clean inline action pill right after chips */}
                                 <button
                                     type="button"
                                     onClick={handleResetAllFilters}
-                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#8A6305] hover:text-[#705004] ms-auto cursor-pointer"
+                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 px-2.5 py-1 rounded-lg border border-red-200/80 dark:border-red-900/40 transition-colors cursor-pointer"
                                 >
                                     <MdRefresh className="text-xs" />
-                                    <span>{isArabic ? "مسح الكل" : "Clear All"}</span>
+                                    <span>{isArabic ? "مسح كافة الفلاتر" : "Clear All"}</span>
                                 </button>
                             </div>
                         )}
@@ -545,7 +562,7 @@ const ProductsClient = ({
                     {/* Results Counter & Section Title */}
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            {!(activeBrand && !activeCategory && !activeMainCategory) && (
+                            {!(singleSelectedBrand && !activeCategory && !activeMainCategory) && (
                                 <h1 className="text-lg md:text-xl font-bold text-[#0B192C] dark:text-white tracking-tight">
                                     {getHeadingTitle()}
                                 </h1>

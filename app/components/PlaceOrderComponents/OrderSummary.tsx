@@ -4,7 +4,8 @@ import React from 'react';
 import { CartItem } from '@/app/context/CartContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
-import { MdPayments, MdRefresh, MdCheckCircle, MdSupportAgent } from 'react-icons/md';
+import { useCustomer } from '@/app/context/CustomerContext';
+import { MdPayments, MdRefresh, MdCheckCircle, MdSupportAgent, MdLock } from 'react-icons/md';
 import { getSafeImageUrl } from '@/lib/image-utils';
 import { formatPackaging } from '@/lib/packaging';
 
@@ -20,6 +21,8 @@ interface OrderSummaryProps {
 const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPromo }: OrderSummaryProps) => {
     const { t, language } = useLanguage();
     const { formatPrice } = useCurrency();
+    const { customer } = useCustomer();
+    const isLockedForGuest = !customer;
     const [promoCode, setPromoCode] = React.useState("");
     const [promoMessage, setPromoMessage] = React.useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [isApplyingPromo, setIsApplyingPromo] = React.useState(false);
@@ -77,7 +80,9 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                                         </span>
                                     )}
                                     <p className="text-xs font-medium text-[#475569] dark:text-gray-400 mt-0.5">
-                                        {t('cart.quantity')}: {item.quantity} {formatPackaging(item.packaging, language, { short: true })} • {item.price > 0 ? (
+                                        {t('cart.quantity')}: {item.quantity} {formatPackaging(item.packaging, language, { short: true })} • {isLockedForGuest ? (
+                                            <span className="text-[#8A6305] font-bold">🔒 {language === 'ar' ? 'للتجار المسجلين' : 'Wholesale (Login)'}</span>
+                                        ) : item.price > 0 ? (
                                             <span className="text-[#0B192C] dark:text-white font-extrabold" dir="ltr">{formatPrice(item.price)}</span>
                                         ) : (
                                             <span className="text-[#8A6305] font-bold">{language === 'ar' ? 'السعر عند الطلب' : 'On Inquiry'}</span>
@@ -114,7 +119,7 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                             </button>
                         </div>
                         {promoMessage && (
-                            <p className={`text-xs mt-2 font-bold ${promoMessage.type === 'success' ? 'text-[#2E7D32]' : 'text-red-500'}`}>
+                            <p className={`text-xs mt-2 font-bold ${promoMessage.type === 'success' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
                                 {promoMessage.text}
                             </p>
                         )}
@@ -125,21 +130,23 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                 <div className="flex flex-col gap-3 mb-6 border-t border-b border-gray-200 dark:border-white/10 py-5">
                     <div className="flex justify-between text-[#475569] dark:text-gray-400 text-xs font-medium">
                         <span>{t('cart.subtotal')}</span>
-                        {subtotal > 0 ? (
+                        {isLockedForGuest ? (
+                            <span className="font-bold text-[#8A6305]">🔒 {language === 'ar' ? 'يحدد بعد مراجعة الطلب' : 'Priced upon Review'}</span>
+                        ) : subtotal > 0 ? (
                             <span className="font-bold text-[#0B192C] dark:text-white" dir="ltr">{formatPrice(subtotal)}</span>
                         ) : (
                             <span className="font-bold text-[#8A6305]">{language === 'ar' ? 'يحدد حسب الوكالة' : 'Agency Rate'}</span>
                         )}
                     </div>
                     {discount > 0 && (
-                        <div className="flex justify-between text-[#2E7D32] font-bold text-xs">
+                        <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold text-xs">
                             <span>{t('checkout.discount')}</span>
                             <span dir="ltr">-{formatPrice(discount)}</span>
                         </div>
                     )}
                     <div className="flex justify-between text-[#475569] dark:text-gray-400 text-xs font-medium">
                         <span>{t('cart.shipping')}</span>
-                        <span className="font-bold text-[#2E7D32] uppercase tracking-wide text-xs">{t('cart.freeShipping')}</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide text-xs">{t('cart.freeShipping')}</span>
                     </div>
                 </div>
 
@@ -155,7 +162,9 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                 {/* Total */}
                 <div className="flex justify-between items-end mb-6">
                     <span className="text-base font-extrabold text-[#0B192C] dark:text-white uppercase tracking-wider">{t('cart.total')}</span>
-                    {total > 0 ? (
+                    {isLockedForGuest ? (
+                        <span className="text-xs sm:text-sm font-extrabold text-[#8A6305]">🔒 {language === 'ar' ? 'يحدد بعد مراجعة الطلب' : 'Priced upon Review'}</span>
+                    ) : total > 0 ? (
                         <span className="text-2xl sm:text-3xl font-extrabold text-[#0B192C] dark:text-white leading-none" dir="ltr">{formatPrice(total)}</span>
                     ) : (
                         <span className="text-sm sm:text-base font-extrabold text-[#8A6305]">{language === 'ar' ? 'يحدد حسب فواتير الوكالة' : 'Price on Inquiry'}</span>
@@ -166,7 +175,7 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                 <button
                     type="submit"
                     disabled={loading || items.length === 0}
-                    className="w-full bg-[#2E7D32] hover:bg-[#236327] text-white font-bold rounded-xl h-12 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+                    className="w-full bg-[#0B192C] hover:bg-[#8A6305] text-white font-bold rounded-xl h-12 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-sm shadow-md dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white cursor-pointer"
                 >
                     {loading ? (
                         <MdRefresh className="animate-spin text-xl" />
@@ -189,7 +198,7 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                     <p className="text-xs font-bold text-[#0B192C] dark:text-white mb-0.5">{t('checkout.needAssistance')}</p>
                     <a
                         className="text-xs font-semibold text-[#475569] hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors hover:underline"
-                        href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000').replace(/[^0-9]/g, '')}`}
+                        href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901').replace(/[^0-9]/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
                     >

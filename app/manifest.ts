@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Hawa Distribution & Trading | هوا للتوزيع والتجارة',
+        name: 'Hawa Distribution & Trading | حوا للتوزيع والتجارة',
         short_name: 'Hawa',
-        description: 'شركة هوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة.',
+        description: 'شركة حوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة.',
         start_url: '/',
         display: 'standalone',
         background_color: '#FFFFFF',

@@ -15,7 +15,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 export default function ContactUsPage() {
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000';
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901';
     const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
 
     const [formData, setFormData] = useState({
@@ -33,7 +33,7 @@ export default function ContactUsPage() {
             return;
         }
 
-        const text = `مرحباً شركة هوا للتوزيع،\nالاسم: ${formData.name}\nالمحل: ${formData.shopName || 'غير محدد'}\nالهاتف: ${formData.phone}\nالمدينة: ${formData.city}\nالرسالة: ${formData.message}`;
+        const text = `مرحباً شركة حوا للتوزيع،\nالاسم: ${formData.name}\nالمحل: ${formData.shopName || 'غير محدد'}\nالهاتف: ${formData.phone}\nالمدينة: ${formData.city}\nالرسالة: ${formData.message}`;
         window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`, '_blank');
         toast.success('جاري توجيه رسالتك إلى واتساب المبيعات...');
     };
@@ -49,37 +49,94 @@ export default function ContactUsPage() {
                     يسعدنا تواصلكم وخدمة متجركم
                 </h1>
                 <p className="text-xs sm:text-sm md:text-base text-[#475569] dark:text-gray-300 max-w-xl mx-auto leading-relaxed">
-                    فريق شركة هوا للتوزيع والتجارة في خدمتكم للإجابة على استفسارات أسعار الجملة، الشراكات مع الوكالات، وجدولة تسليم الطرود.
+                    فريق شركة حوا للتوزيع والتجارة في خدمتكم للإجابة على استفسارات أسعار الجملة، الشراكات مع الوكالات، وجدولة تسليم الطرود.
                 </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 {/* Contact Cards (Left 5 cols) */}
                 <div className="lg:col-span-5 space-y-4">
-                    {/* WhatsApp Primary Card */}
-                    <a
-                        href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent('مرحباً شركة هوا للتوزيع والتجارة، أود الاستفسار عن طلبيات الجملة.')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block bg-gradient-to-br from-[#25D366]/10 via-[#25D366]/5 to-transparent border border-[#25D366]/30 hover:border-[#25D366] rounded-3xl p-6 transition-all shadow-xs hover:shadow-md group"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-[#25D366] text-white flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
+                    {/* Sales Manager Dedicated Card */}
+                    <div className="bg-gradient-to-br from-emerald-500/10 via-[#25D366]/5 to-transparent border border-emerald-500/30 hover:border-emerald-500 rounded-3xl p-6 transition-all shadow-xs hover:shadow-md">
+                        <div className="flex items-start gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-[#25D366] text-white flex items-center justify-center text-3xl shrink-0 shadow-sm">
                                 <FaWhatsapp />
                             </div>
-                            <div>
-                                <span className="text-[11px] font-black text-[#2E7D32] uppercase tracking-wider">
-                                    الاستجابة الفورية المباشرة
+                            <div className="flex-1 min-w-0">
+                                <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[11px] font-extrabold mb-1">
+                                    إدارة المبيعات وطلبيات الجملة
                                 </span>
-                                <h3 className="text-lg font-black text-[#0B192C] dark:text-white">
-                                    واتساب المبيعات والطلبات
+                                <h3 className="text-base sm:text-lg font-black text-[#0B192C] dark:text-white leading-tight">
+                                    مدير المبيعات التجارية
                                 </h3>
-                                <p className="text-xs text-[#475569] dark:text-gray-300 mt-0.5" dir="ltr">
-                                    {whatsappNumber}
+                                <p className="text-xs text-[#475569] dark:text-gray-300 mt-1 leading-relaxed">
+                                    لطلبيات المحلات والسوبرماركت، اعتماد حسابات التجار الجدد، وجدولة تسليم بضائع الوكالات.
                                 </p>
+                                <p className="text-sm font-extrabold text-[#0B192C] dark:text-white mt-2" dir="ltr">
+                                    +963 993 443 901
+                                </p>
+                                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-emerald-500/20">
+                                    <a
+                                        href={`https://wa.me/963993443901?text=${encodeURIComponent('مرحباً أستاذ مدير المبيعات بشركة حوا للتوزيع، أود الاستفسار عن طلبيات الجملة واعتماد حساب تجاري.')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold transition-all shadow-xs"
+                                    >
+                                        <FaWhatsapp />
+                                        <span>محادثة واتساب</span>
+                                    </a>
+                                    <a
+                                        href="tel:+963993443901"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-gray-50 text-xs font-bold transition-all shadow-xs"
+                                    >
+                                        <MdPhone />
+                                        <span>اتصال هاتفي</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </a>
+                    </div>
+
+                    {/* Company General Manager Dedicated Card */}
+                    <div className="bg-gradient-to-br from-[#FAF6EC] via-amber-50/40 to-transparent dark:from-[#132035] dark:via-[#0B192C] border border-[#8A6305]/30 hover:border-[#8A6305] rounded-3xl p-6 transition-all shadow-xs hover:shadow-md">
+                        <div className="flex items-start gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-[#0B192C] dark:bg-[#8A6305] text-[#8A6305] dark:text-white border border-[#8A6305]/40 flex items-center justify-center text-2xl shrink-0 shadow-sm">
+                                <MdStore className="text-3xl" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#8A6305]/10 text-[#8A6305] dark:text-[#8A6305] text-[11px] font-extrabold mb-1">
+                                    الإدارة العامة والشراكات الاستراتيجية
+                                </span>
+                                <h3 className="text-base sm:text-lg font-black text-[#0B192C] dark:text-white leading-tight">
+                                    مدير الشركة
+                                </h3>
+                                <p className="text-xs text-[#475569] dark:text-gray-300 mt-1 leading-relaxed">
+                                    لتمثيل الوكالات التجارية الجديدة، عقود التوريد الحصرية الكبرى، والتعاقدات المؤسساتية.
+                                </p>
+                                <p className="text-sm font-extrabold text-[#0B192C] dark:text-white mt-2" dir="ltr">
+                                    +963 994 166 000
+                                </p>
+                                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#8A6305]/20">
+                                    <a
+                                        href="tel:+963994166000"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B192C] hover:bg-[#1a2e4c] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white text-xs font-bold transition-all shadow-xs"
+                                    >
+                                        <MdPhone />
+                                        <span>اتصال هاتفي</span>
+                                    </a>
+                                    <a
+                                        href={`https://wa.me/963994166000?text=${encodeURIComponent('مرحباً إدارة شركة حوا للتوزيع، أود الاستفسار بخصوص شراكة تجارية / تمثيل وكالة.')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 text-xs font-bold transition-all shadow-xs"
+                                    >
+                                        <FaWhatsapp />
+                                        <span>واتساب الإدارة</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Central Warehouse & Headquarters */}
                     <div className="bg-white dark:bg-[#132035] rounded-3xl p-6 border border-gray-200/80 dark:border-white/10 shadow-xs">

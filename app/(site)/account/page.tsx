@@ -265,7 +265,7 @@ export default function MerchantPortalPage() {
                         <a
                             href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(
                                 isArabic
-                                    ? `مرحباً شركة هوا، معكم ${customer.ownerName} من ${customer.shopName} (${customer.city}). أود الاستفسار عن طلبيتي.`
+                                    ? `مرحباً شركة حوا، معكم ${customer.ownerName} من ${customer.shopName} (${customer.city}). أود الاستفسار عن طلبيتي.`
                                     : `Hello Hawa Distribution, this is ${customer.ownerName} from ${customer.shopName}.`
                             )}`}
                             target="_blank"

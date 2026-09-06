@@ -175,7 +175,7 @@ export default function MainCategoryModal({ isOpen, onClose, mainCategory }: Mai
                                 type="checkbox"
                                 checked={formData.isActive}
                                 onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                                className="size-4 rounded border-gray-300 text-[#2E7D32] focus:ring-[#2E7D32]"
+                                className="size-4 rounded border-gray-300 text-[#8A6305] focus:ring-[#8A6305]"
                             />
                             <div className="flex flex-col">
                                 <span className="text-xs font-bold text-[#0B192C] dark:text-white">

@@ -191,7 +191,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                     <Link href="/" className="flex items-center gap-3 group">
                                         <Image
                                             src="/logo.png"
-                                            alt="Hawa Distribution & Trading - شركة هوا للتوزيع والتجارة"
+                                            alt="Hawa Distribution & Trading - شركة حوا للتوزيع والتجارة"
                                             width={64}
                                             height={64}
                                             priority
@@ -199,7 +199,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                         />
                                         <div className="flex flex-col text-start">
                                             <span className="font-black text-[#0B192C] dark:text-white text-base xl:text-lg tracking-tight leading-tight">
-                                                {isArabic ? 'هـوا للتوزيع' : 'HAWA TRADING'}
+                                                {isArabic ? 'حـوا للتوزيع' : 'HAWA TRADING'}
                                             </span>
                                             <span className="text-[10px] font-extrabold text-[#8A6305] dark:text-[#8A6305] tracking-wider uppercase">
                                                 {isArabic ? 'توريد وتوزيع جملة' : 'Wholesale Distribution'}
@@ -231,7 +231,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                 >
                                     <MdOutlineShoppingBag />
                                     {totalItems > 0 && (
-                                        <span className="absolute -top-1 -right-1 bg-[#2E7D32] text-white text-[10px] font-extrabold w-4.5 h-4.5 flex items-center justify-center rounded-full shadow-sm">
+                                        <span className="absolute -top-1 -right-1 bg-[#8A6305] text-white text-[10px] font-extrabold w-4.5 h-4.5 flex items-center justify-center rounded-full shadow-xs">
                                             {totalItems}
                                         </span>
                                     )}
@@ -258,7 +258,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                     <Link href="/" className="flex items-center gap-2 group">
                                         <Image
                                             src="/logo.png"
-                                            alt="Hawa Distribution & Trading - شركة هوا للتوزيع والتجارة"
+                                            alt="Hawa Distribution & Trading - شركة حوا للتوزيع والتجارة"
                                             width={48}
                                             height={48}
                                             priority
@@ -266,7 +266,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                         />
                                         <div className="flex flex-col text-start">
                                             <span className="font-black text-[#0B192C] dark:text-white text-sm leading-tight">
-                                                {isArabic ? 'هـوا للتوزيع' : 'HAWA TRADING'}
+                                                {isArabic ? 'حـوا للتوزيع' : 'HAWA TRADING'}
                                             </span>
                                             <span className="text-[9px] font-extrabold text-[#8A6305] leading-none">
                                                 {isArabic ? 'توريد جملة' : 'Wholesale'}
@@ -293,7 +293,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                     >
                                         <MdOutlineShoppingBag />
                                         {totalItems > 0 && (
-                                            <span className="absolute -top-1 -right-1 bg-[#2E7D32] text-white text-[10px] font-extrabold w-4 h-4 flex items-center justify-center rounded-full">
+                                            <span className="absolute -top-1 -right-1 bg-[#8A6305] text-white text-[10px] font-extrabold w-4 h-4 flex items-center justify-center rounded-full shadow-xs">
                                                 {totalItems}
                                             </span>
                                         )}
@@ -345,7 +345,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                 </Link>
 
                                 <Link
-                                    href="/agencies"
+                                    href="/brands"
                                     className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
                                 >
                                     {isArabic ? 'وكالاتنا' : 'Our Agencies'}

@@ -104,9 +104,7 @@ const Main = async ({
             <HeroCarousel banners={banners} />
 
             {/* 2. Authorized Commercial Agencies Slider (Clean, high-density trade marks) */}
-            <ScrollReveal>
-                <AgenciesSlider brands={railBrands} />
-            </ScrollReveal>
+            <AgenciesSlider brands={railBrands} />
 
             {/* 4. Best Sellers & New Arrivals (Product Rails with Carton Specs) */}
             <ScrollReveal>

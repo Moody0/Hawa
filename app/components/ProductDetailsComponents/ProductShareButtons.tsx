@@ -39,7 +39,7 @@ export default function ProductShareButtons({
 
     const productUrl = typeof window !== 'undefined' ? `${window.location.origin}/products/${productSlug}` : `https://hawatrading.com/products/${productSlug}`;
     const shareMessage = isArabic
-        ? `شاهد ${productName} لدى شركة هوا للتوزيع والتجارة - أسعار الجملة المعتمدة:\n${productUrl}`
+        ? `شاهد ${productName} لدى شركة حوا للتوزيع والتجارة - أسعار الجملة المعتمدة:\n${productUrl}`
         : `Check out ${productName} on Hawa Distribution Wholesale:\n${productUrl}`;
 
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;

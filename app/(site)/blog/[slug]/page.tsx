@@ -22,7 +22,7 @@ export async function generateMetadata(
     }
 
     return {
-        title: `${post.title} | شركة هوا للتوزيع والتجارة`,
+        title: `${post.title} | شركة حوا للتوزيع والتجارة`,
         description: post.excerpt || post.title,
         openGraph: {
             title: post.title,
@@ -59,12 +59,12 @@ export default async function BlogPostPage(
 
 ### 2. شراء الطرود بأسعار الجملة المعتمدة
 الشراء عبر موزع معتمد يمتلك وكالات حصرية يضمن لك:
-- الحصول على أسعار جملة أولية دون هوامش وسيطة زائدة.
+- الحصول على أسعار جملة أولية دون حوامش وسيطة زائدة.
 - فواتير مطابقة وتاريخ صلاحية حديث ومضمون المصدر.
 - التزام سيارات التوزيع بمواعيد تسليم مجدولة تصلك حتى باب المحل.
 
 ### 3. تقليل تكلفة التخزين عبر الجدولة المنتظمة
-بدلاً من تجميد سيولة مالية ضخمة في تخزين كميات هائلة، اعتمد على التوريد الأسبوعي المنتظم عبر شركة هوا، بحيث تطلب فقط الطرود التي تحتاجها أسبوعياً وتستثمر السيولة المتبقية في توسيع أصناف متجرك.
+بدلاً من تجميد سيولة مالية ضخمة في تخزين كميات هائلة، اعتمد على التوريد الأسبوعي المنتظم عبر شركة حوا، بحيث تطلب فقط الطرود التي تحتاجها أسبوعياً وتستثمر السيولة المتبقية في توسيع أصناف متجرك.
                 `,
             },
             'alreef-agency-new-product-launches': {
@@ -73,7 +73,7 @@ export default async function BlogPostPage(
                 createdAt: new Date('2026-08-15'),
                 image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&q=80',
                 content: `
-ضمن خطتها المستمرة لتلبية متطلبات السوق السوري ودعم المتاجر بأصناف غذائية متميزة، أعلنت شركة هوا للتوزيع والتجارة عن وصول التشكيلة الكاملة من منتجات وكالة الريف المعتمدة.
+ضمن خطتها المستمرة لتلبية متطلبات السوق السوري ودعم المتاجر بأصناف غذائية متميزة، أعلنت شركة حوا للتوزيع والتجارة عن وصول التشكيلة الكاملة من منتجات وكالة الريف المعتمدة.
 
 ### مواصفات الطرود والكميات:
 - **زيت الريف نقي 1 لتر**: طرد يحتوي على 6 عبوات مطابقة لأعلى معايير النقاء.
@@ -133,7 +133,7 @@ export default async function BlogPostPage(
                         {dateStr}
                     </span>
                     <span>•</span>
-                    <span>شركة هوا للتوزيع والتجارة</span>
+                    <span>شركة حوا للتوزيع والتجارة</span>
                 </div>
             </header>
 
@@ -186,12 +186,12 @@ export default async function BlogPostPage(
                         هل لديك استفسار تجاري حول هذا الموضوع أو عروض الوكالات؟
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">
-                        فريق مبيعات وتوزيع شركة هوا جاهز للإجابة وتزويد محلك بأحدث الأسعار.
+                        فريق مبيعات وتوزيع شركة حوا جاهز للإجابة وتزويد محلك بأحدث الأسعار.
                     </p>
                 </div>
 
                 <a
-                    href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(`مرحباً شركة هوا، أود الاستفسار بخصوص: ${post.title}`)}`}
+                    href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(`مرحباً شركة حوا، أود الاستفسار بخصوص: ${post.title}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-5 py-3 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold text-xs flex items-center gap-2 shadow-md active:scale-95 transition-all shrink-0"

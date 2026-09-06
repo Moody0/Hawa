@@ -18,10 +18,10 @@ export async function generateMetadata(
         };
     }
 
-    const title = `${category.name} | Hawa Distribution - هوا للتوزيع`;
+    const title = `${category.name} | Hawa Distribution - حوا للتوزيع`;
     const description = category.description 
-        ? `${category.name} (${category.description}). تسوق منتجات القسم بأسعار الجملة المعتمدة لدى شركة هوا للتوزيع والتجارة.`
-        : `تصفح تشكيلة ${category.name} بأسعار الجملة المعتمدة لدى شركة هوا للتوزيع والتجارة.`;
+        ? `${category.name} (${category.description}). تسوق منتجات القسم بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`
+        : `تصفح تشكيلة ${category.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
     const image = category.image || '/og-image.jpg';
 
     return {

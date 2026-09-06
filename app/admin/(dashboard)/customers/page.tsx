@@ -198,7 +198,7 @@ export default function AdminCustomersPage() {
                                             <td className="p-3.5 text-center">
                                                 <a
                                                     href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(
-                                                        `مرحباً السيد ${c.ownerName} صاحب ${c.shopName}، معكم إدارة المبيعات والتوزيع من شركة هوا.`
+                                                        `مرحباً السيد ${c.ownerName} صاحب ${c.shopName}، معكم إدارة المبيعات والتوزيع من شركة حوا.`
                                                     )}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"

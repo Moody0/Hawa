@@ -69,7 +69,7 @@ const CategoryHighlightCards = ({ cards = [], language = 'ar' }: CategoryHighlig
                                             <h3 className="text-[13px] sm:text-[14px] md:text-[16px] font-bold text-[#0B192C] dark:text-white leading-tight group-hover:text-[#8A6305] transition-colors truncate">
                                                 {categoryName}
                                             </h3>
-                                            <p className="text-[10px] md:text-xs text-[#2E7D32] dark:text-[#4ade80] font-semibold mt-0.5">
+                                            <p className="text-[10px] md:text-xs text-[#8A6305] dark:text-[#E5B54A] font-bold mt-0.5">
                                                 {language === 'ar' ? 'تسوق الآن' : 'Shop Now'}
                                             </p>
                                         </div>
