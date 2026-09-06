@@ -60,50 +60,50 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
     return (
         <section className="container-custom py-2 md:py-4">
             {/* Header */}
-            <div className="flex items-end justify-between mb-6 md:mb-8 border-b border-slate-200 dark:border-white/10 pb-4">
+            <div className="flex items-end justify-between mb-4 sm:mb-6 border-b border-slate-200 dark:border-white/10 pb-3">
                 <div>
-                    <div className="flex items-center gap-2 mb-1.5">
+                    <div className="flex items-center gap-2 mb-1">
                         <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
                         <span className="text-xs font-bold uppercase tracking-wider text-[#475569] dark:text-slate-400">
                             {isArabic ? 'حركة توريد سريعة' : 'High Volume Demand'}
                         </span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight">
-                        {isArabic ? 'المنتجات الأكثر طلباً هذا الأسبوع' : 'Fast-Moving Products'}
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-black text-[#0B192C] dark:text-white tracking-tight">
+                        {isArabic ? 'المنتجات الأكثر طلباً هذا الأسبوع' : 'Fast-Moving Weekly Products'}
                     </h2>
                 </div>
 
                 <Link
                     href="/products"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#475569] dark:text-slate-300 hover:text-[#8A6305] transition-colors whitespace-nowrap"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#8A6305] hover:text-[#735204] dark:text-[#E5B54A] transition-colors whitespace-nowrap"
                 >
                     <span>{isArabic ? 'كافة المنتجات' : 'View All'}</span>
                     <span className={`text-sm ${isArabic ? 'rotate-180' : ''}`}>→</span>
                 </Link>
             </div>
 
-            {/* Product Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {/* Product Grid: 1 col on small mobile, 2 cols on tablet, 3 cols on desktop */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5">
                 <AnimatePresence initial={false}>
                     {visibleProducts.map((product) => (
                         <motion.div
                             key={product.id}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 6 }}
-                            transition={{ duration: 0.2 }}
+                            exit={{ opacity: 0, y: 4 }}
+                            transition={{ duration: 0.15 }}
                         >
                             <Link
                                 href={`/products/${product.slug}`}
-                                className="group flex items-center gap-3.5 bg-white dark:bg-[#132035] border border-slate-200 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/30 rounded-xl p-3 transition-all h-full"
+                                className="group flex items-center gap-3 bg-white dark:bg-[#132035] border border-slate-200/80 dark:border-white/10 hover:border-[#8A6305] dark:hover:border-[#8A6305] rounded-xl p-2.5 sm:p-3 shadow-2xs hover:shadow-xs transition-all duration-200 h-full"
                             >
-                                {/* Product Image - Direct container */}
-                                <div className="w-[76px] h-[76px] shrink-0 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800/50 p-1 flex items-center justify-center">
+                                {/* Product Image */}
+                                <div className="w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] shrink-0 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800/50 p-1 flex items-center justify-center">
                                     <ResilientImage
                                         src={getFirstImage(product.images)}
                                         alt={product.name}
                                         sizes="76px"
-                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
                                         loading="lazy"
                                     />
                                 </div>
@@ -121,7 +121,7 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
                                     
                                     <div className="flex items-center gap-2">
                                         {isLockedForGuest ? (
-                                            <span className="text-[11px] font-bold text-[#8A6305] dark:text-[#E5B54A] flex items-center gap-1">
+                                            <span className="text-[10px] sm:text-[11px] font-bold text-[#8A6305] dark:text-[#E5B54A] flex items-center gap-1">
                                                 <span>🔒</span>
                                                 <span>{isArabic ? 'أسعار الجملة للتجار' : 'Wholesale (Login)'}</span>
                                             </span>
@@ -146,7 +146,7 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
                                     </div>
                                 </div>
 
-                                <div className="shrink-0 text-[#475569] group-hover:text-[#0B192C] dark:group-hover:text-white group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-all text-base">
+                                <div className="shrink-0 text-slate-400 group-hover:text-[#8A6305] group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-all text-sm pe-1">
                                     <span className={isArabic ? 'rotate-180 inline-block' : 'inline-block'}>→</span>
                                 </div>
                             </Link>
@@ -157,10 +157,10 @@ const TrendingWeekly = ({ products }: TrendingWeeklyProps) => {
 
             {/* Show More / Less Toggle Button */}
             {products.length > initialCount && (
-                <div className="flex justify-center mt-6">
+                <div className="flex justify-center mt-4 sm:mt-5">
                     <button
                         onClick={() => setShowAll(!showAll)}
-                        className="px-6 py-2 bg-[#0B192C] hover:bg-[#132035] dark:bg-white dark:text-[#0B192C] text-white rounded-lg font-bold text-xs transition-all active:scale-95 cursor-pointer"
+                        className="px-5 py-1.5 bg-[#FAF6EC] hover:bg-[#8A6305] text-[#0B192C] hover:text-white dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-[#8A6305] dark:hover:text-white border border-[#8A6305]/30 rounded-full font-bold text-xs transition-all active:scale-95 cursor-pointer shadow-2xs"
                     >
                         {showAll
                             ? (isArabic ? 'عرض أقل' : 'Show Less')

@@ -1,26 +1,49 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
         const mainCategories = await prisma.mainCategory.findMany({
             where: { isActive: true },
-            orderBy: { name: "asc" },
+            orderBy: [
+                { navOrder: "asc" },
+                { name: "asc" },
+            ],
             select: {
                 id: true,
                 name: true,
                 slug: true,
                 description: true,
                 image: true,
+                _count: {
+                    select: {
+                        products: {
+                            where: {
+                                stock: { gt: 0 },
+                                brand: { isActive: true },
+                            },
+                        },
+                    },
+                },
             },
         });
 
-        const response = NextResponse.json(mainCategories);
+        const formatted = mainCategories.map((mc) => ({
+            id: mc.id,
+            name: mc.name,
+            nameEn: mc.description || mc.name,
+            slug: mc.slug,
+            description: mc.description,
+            image: mc.image,
+            _count: mc._count,
+        }));
+
+        const response = NextResponse.json(formatted);
         response.headers.set(
             "Cache-Control",
-            "public, s-maxage=3600, stale-while-revalidate=86400"
+            "no-store, no-cache, must-revalidate, proxy-revalidate"
         );
         return response;
     } catch (error) {
@@ -31,3 +54,4 @@ export async function GET() {
         );
     }
 }
+

@@ -21,7 +21,7 @@ interface CustomerContextType {
     wishlistIds: string[];
     isFavorite: (productId: string) => boolean;
     toggleWishlist: (productId: string, productName?: string) => Promise<boolean>;
-    login: (phone: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    login: (phone: string, password: string) => Promise<{ success: boolean; isPending?: boolean; error?: string; shopName?: string; phone?: string }>;
     register: (formData: {
         shopName: string;
         ownerName: string;
@@ -30,7 +30,7 @@ interface CustomerContextType {
         address: string;
         password: string;
         notes?: string;
-    }) => Promise<{ success: boolean; error?: string }>;
+    }) => Promise<{ success: boolean; pendingApproval?: boolean; message?: string; error?: string }>;
     logout: () => Promise<void>;
     updateProfile: (data: Partial<CustomerData>) => Promise<{ success: boolean; error?: string }>;
     refetchCustomer: () => Promise<void>;
@@ -153,11 +153,19 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
                 await fetchSession();
                 toast.success(isArabic ? 'أهلاً بك مجدداً!' : 'Welcome back!');
                 return { success: true };
+            } else if (res.status === 403 && data.error === 'ACCOUNT_PENDING') {
+                return { 
+                    success: false, 
+                    isPending: true, 
+                    error: data.message || 'حسابك التجاري قيد المراجعة والتدقيق',
+                    shopName: data.shopName,
+                    phone: data.phone
+                };
             } else {
-                return { success: false, error: data.error || 'فشل تسجيل الدخول' };
+                return { success: false, error: data.error || (isArabic ? 'فشل تسجيل الدخول' : 'Login failed') };
             }
         } catch (err: any) {
-            return { success: false, error: err.message || 'حدث خطأ في الاتصال' };
+            return { success: false, error: err.message || (isArabic ? 'حدث خطأ في الاتصال' : 'Network error') };
         }
     };
 
@@ -178,15 +186,23 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             });
             const data = await res.json();
             if (res.ok && data.success) {
+                // If pending approval, we don't set customer session yet
+                if (data.pendingApproval) {
+                    return { 
+                        success: true, 
+                        pendingApproval: true, 
+                        message: data.message 
+                    };
+                }
                 setCustomer(data.customer);
                 await fetchSession();
                 toast.success(isArabic ? 'تم إنشاء حسابك التجاري بنجاح!' : 'Merchant account created!');
                 return { success: true };
             } else {
-                return { success: false, error: data.error || 'فشل إنشاء الحساب' };
+                return { success: false, error: data.error || (isArabic ? 'فشل إنشاء الحساب' : 'Registration failed') };
             }
         } catch (err: any) {
-            return { success: false, error: err.message || 'حدث خطأ في الاتصال' };
+            return { success: false, error: err.message || (isArabic ? 'حدث خطأ في الاتصال' : 'Network error') };
         }
     };
 

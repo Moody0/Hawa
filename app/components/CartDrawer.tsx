@@ -16,22 +16,49 @@ const CartDrawer = () => {
     const { formatPrice } = useCurrency();
     const [mounted, setMounted] = useState(false);
     const isLockedForGuest = !customer;
+    const drawerRef = React.useRef<HTMLDivElement>(null);
+    const closeBtnRef = React.useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    // Prevent body scroll when drawer is open
+    // Prevent body scroll and handle keyboard accessibility (Escape, Focus Trap)
     useEffect(() => {
         if (isDrawerOpen) {
             document.body.style.overflow = 'hidden';
+            closeBtnRef.current?.focus();
+
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') {
+                    closeDrawer();
+                } else if (e.key === 'Tab' && drawerRef.current) {
+                    const focusables = drawerRef.current.querySelectorAll<HTMLElement>(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    if (focusables.length > 0) {
+                        const first = focusables[0];
+                        const last = focusables[focusables.length - 1];
+                        if (e.shiftKey && document.activeElement === first) {
+                            last.focus();
+                            e.preventDefault();
+                        } else if (!e.shiftKey && document.activeElement === last) {
+                            first.focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            };
+
+            window.addEventListener('keydown', handleKeyDown);
+            return () => {
+                document.body.style.overflow = 'unset';
+                window.removeEventListener('keydown', handleKeyDown);
+            };
         } else {
             document.body.style.overflow = 'unset';
         }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isDrawerOpen]);
+    }, [isDrawerOpen, closeDrawer]);
 
     if (!mounted) return null;
 
@@ -51,6 +78,10 @@ const CartDrawer = () => {
 
             {/* Drawer Panel */}
             <div 
+                ref={drawerRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={language === 'ar' ? 'سلة التسوق' : 'Shopping Cart'}
                 className={`fixed top-0 bottom-0 z-[9999] w-full max-w-md bg-white dark:bg-zinc-900 shadow-2xl transition-transform duration-300 ease-out transform ${drawerTransform} ${
                     dir === 'rtl' ? 'left-0' : 'right-0'
                 } flex flex-col border-s border-gray-100 dark:border-white/10 ${!isDrawerOpen ? 'invisible pointer-events-none' : ''}`}
@@ -65,9 +96,10 @@ const CartDrawer = () => {
                         </span>
                     </h2>
                     <button 
+                        ref={closeBtnRef}
                         onClick={closeDrawer}
                         className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-gray-500 hover:text-black dark:hover:text-white"
-                        aria-label="Close drawer"
+                        aria-label={language === 'ar' ? 'إغلاق سلة التسوق' : 'Close drawer'}
                     >
                         <MdClose className="text-xl" />
                     </button>
@@ -147,7 +179,7 @@ const CartDrawer = () => {
                                                 <button 
                                                     onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedOption)}
                                                     className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-[#8A6305] transition-colors text-sm font-bold cursor-pointer"
-                                                    aria-label="Decrease quantity"
+                                                    aria-label={language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity'}
                                                 >-</button>
                                                 <span className="px-2 text-center text-xs font-bold text-[#0B192C] dark:text-white select-none whitespace-nowrap">
                                                     {item.quantity} {formatPackaging(item.packaging, language, { short: true })}
@@ -155,7 +187,7 @@ const CartDrawer = () => {
                                                 <button 
                                                     onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedOption)}
                                                     className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-[#8A6305] transition-colors text-sm font-bold cursor-pointer"
-                                                    aria-label="Increase quantity"
+                                                    aria-label={language === 'ar' ? 'زيادة الكمية' : 'Increase quantity'}
                                                 >+</button>
                                             </div>
                                         </div>
@@ -163,7 +195,7 @@ const CartDrawer = () => {
                                         <button 
                                             onClick={() => removeItem(item.id, item.selectedOption)}
                                             className="absolute top-3 end-3 text-gray-400 hover:text-red-500 transition-colors p-1.5 cursor-pointer"
-                                            aria-label="Remove item"
+                                            aria-label={language === 'ar' ? 'حذف المنتج من السلة' : 'Remove item'}
                                         >
                                             <MdDelete className="text-lg" />
                                         </button>

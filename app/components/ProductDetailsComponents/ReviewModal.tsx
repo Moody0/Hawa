@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MdClose, MdCloudUpload, MdStar, MdStarOutline } from 'react-icons/md';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { toast } from 'react-hot-toast';
@@ -15,7 +15,7 @@ interface ReviewModalProps {
 }
 
 export default function ReviewModal({ isOpen, onClose, productId, productName, productImage, initialRating }: ReviewModalProps) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     
     const [step, setStep] = useState(1);
     const [rating, setRating] = useState(initialRating || 5);
@@ -28,6 +28,15 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
 
     if (!isOpen) return null;
 
@@ -117,7 +126,12 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
             <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-            <div className="relative w-full sm:max-w-[420px] bg-white rounded-t-2xl sm:rounded-[10px] max-h-[90vh] overflow-y-auto">
+            <div 
+                role="dialog"
+                aria-modal="true"
+                aria-label={language === 'ar' ? 'كتابة تقييم' : 'Write a review'}
+                className="relative w-full sm:max-w-[420px] bg-white rounded-t-2xl sm:rounded-[10px] max-h-[90vh] overflow-y-auto"
+            >
 
                 {/* Header */}
                 <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-5 py-4 border-b border-gray-100">
@@ -130,7 +144,8 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 flex items-center justify-center rounded-full text-[#475569] hover:text-[#0B192C] hover:bg-gray-100 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-full text-[#475569] hover:text-[#0B192C] hover:bg-gray-100 transition-colors cursor-pointer"
+                        aria-label={language === 'ar' ? 'إغلاق نافذة التقييم' : 'Close review modal'}
                     >
                         <MdClose className="text-lg" />
                     </button>

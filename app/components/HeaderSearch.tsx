@@ -207,6 +207,7 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                         ref={inputRef}
                         id="HeaderSearchInput"
                         autoFocus={autoFocus}
+                        aria-label={isArabic ? "ابحث عن منتجات أو وكالات" : "Search products or brands"}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => {

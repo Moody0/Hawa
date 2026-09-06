@@ -7,14 +7,13 @@ import {
     getCategoryHighlightCardsData,
     getApprovedReviews,
     getBestSellerProducts,
-    getOnSaleProducts,
     getNewArrivalProducts,
     getSiteSettings,
     getTrendingWeeklyProducts,
     getFeaturedCategories,
 } from "../../lib/admin-actions";
 
-export const revalidate = 0; // Fresh dynamic data on request
+export const revalidate = 60; // Cache for 60s ISR
 
 export const metadata: Metadata = {
     title: "شركة حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد",
@@ -34,7 +33,6 @@ export default async function Home() {
         reviews,
         featuredBestSellers,
         featuredNewArrivals,
-        featuredBundles,
         settings,
         trendingWeekly,
         featuredCategories,
@@ -46,7 +44,6 @@ export default async function Home() {
         getApprovedReviews(),
         getBestSellerProducts(),
         getNewArrivalProducts(),
-        getOnSaleProducts(),
         getSiteSettings(),
         getTrendingWeeklyProducts(),
         getFeaturedCategories(),
@@ -67,7 +64,6 @@ export default async function Home() {
                     highlightCards={highlightCards}
                     reviews={reviews}
                     featuredNewArrivals={featuredNewArrivals}
-                    featuredBundles={featuredBundles}
                     featuredBestSellers={featuredBestSellers}
                     settings={settings}
                     trendingWeekly={trendingWeekly}

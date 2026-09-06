@@ -14,7 +14,7 @@ const CartPage = () => {
     }
 
     return (
-        <main className="grow w-full mx-auto container-custom py-4 lg:py-8">
+        <div className="grow w-full mx-auto container-custom py-4 lg:py-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 <CartItemsList
                     items={items}
@@ -26,7 +26,7 @@ const CartPage = () => {
                     <CartSummary subtotal={subtotal} />
                 </div>
             </div>
-        </main>
+        </div>
     );
 };
 

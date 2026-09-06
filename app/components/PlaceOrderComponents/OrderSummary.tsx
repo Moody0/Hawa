@@ -5,7 +5,7 @@ import { CartItem } from '@/app/context/CartContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useCustomer } from '@/app/context/CustomerContext';
-import { MdPayments, MdRefresh, MdCheckCircle, MdSupportAgent, MdLock } from 'react-icons/md';
+import { MdPayments, MdRefresh, MdCheckCircle, MdSupportAgent } from 'react-icons/md';
 import { getSafeImageUrl } from '@/lib/image-utils';
 import { formatPackaging } from '@/lib/packaging';
 
@@ -14,44 +14,13 @@ interface OrderSummaryProps {
     subtotal: number;
     total: number;
     loading: boolean;
-    discount?: number;
-    onApplyPromo?: (code: string) => Promise<{ success: boolean; message?: string }>;
 }
 
-const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPromo }: OrderSummaryProps) => {
+const OrderSummary = ({ items, subtotal, total, loading }: OrderSummaryProps) => {
     const { t, language } = useLanguage();
     const { formatPrice } = useCurrency();
     const { customer } = useCustomer();
     const isLockedForGuest = !customer;
-    const [promoCode, setPromoCode] = React.useState("");
-    const [promoMessage, setPromoMessage] = React.useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [isApplyingPromo, setIsApplyingPromo] = React.useState(false);
-
-    const handleApplyPromo = async () => {
-        if (!promoCode.trim() || !onApplyPromo) return;
-
-        setIsApplyingPromo(true);
-        setPromoMessage(null);
-        try {
-            const result = await onApplyPromo(promoCode);
-            if (result.success) {
-                setPromoMessage({ type: 'success', text: result.message || "Promo code applied!" });
-            } else {
-                setPromoMessage({ type: 'error', text: result.message || "Invalid promo code" });
-            }
-        } catch (error) {
-            setPromoMessage({ type: 'error', text: "Failed to apply code" });
-        } finally {
-            setIsApplyingPromo(false);
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleApplyPromo();
-        }
-    };
 
     return (
         <div className="sticky top-[150px] space-y-4">
@@ -97,35 +66,6 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                     )}
                 </div>
 
-                {/* Promo Code Input */}
-                {onApplyPromo && (
-                    <div className="mb-6">
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                value={promoCode}
-                                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                                onKeyDown={handleKeyDown}
-                                placeholder={t('checkout.promoCode')}
-                                className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 text-xs text-[#0B192C] dark:text-white focus:outline-none focus:border-[#8A6305] dark:focus:border-[#8A6305] focus:ring-1 focus:ring-[#8A6305] dark:focus:ring-[#8A6305] uppercase font-semibold placeholder:normal-case transition-all"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleApplyPromo}
-                                disabled={isApplyingPromo || !promoCode.trim()}
-                                className="px-5 py-2.5 bg-[#0B192C] hover:bg-[#0F172A] text-white text-xs font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
-                            >
-                                {isApplyingPromo ? '...' : t('common.apply')}
-                            </button>
-                        </div>
-                        {promoMessage && (
-                            <p className={`text-xs mt-2 font-bold ${promoMessage.type === 'success' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
-                                {promoMessage.text}
-                            </p>
-                        )}
-                    </div>
-                )}
-
                 {/* Costs breakdown */}
                 <div className="flex flex-col gap-3 mb-6 border-t border-b border-gray-200 dark:border-white/10 py-5">
                     <div className="flex justify-between text-[#475569] dark:text-gray-400 text-xs font-medium">
@@ -138,12 +78,6 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                             <span className="font-bold text-[#8A6305]">{language === 'ar' ? 'يحدد حسب الوكالة' : 'Agency Rate'}</span>
                         )}
                     </div>
-                    {discount > 0 && (
-                        <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold text-xs">
-                            <span>{t('checkout.discount')}</span>
-                            <span dir="ltr">-{formatPrice(discount)}</span>
-                        </div>
-                    )}
                     <div className="flex justify-between text-[#475569] dark:text-gray-400 text-xs font-medium">
                         <span>{t('cart.shipping')}</span>
                         <span className="font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide text-xs">{t('cart.freeShipping')}</span>
@@ -186,7 +120,7 @@ const OrderSummary = ({ items, subtotal, total, loading, discount = 0, onApplyPr
                         </>
                     )}
                 </button>
-                <p className="text-[10px] text-center text-gray-400 dark:text-gray-500 mt-4 uppercase tracking-widest font-bold">{t('checkout.secureCheckout')}</p>
+                <p className="text-[10px] text-center text-gray-400 dark:text-slate-400 mt-4 uppercase tracking-widest font-bold">{t('checkout.secureCheckout')}</p>
             </div>
 
             {/* Assistance Box */}

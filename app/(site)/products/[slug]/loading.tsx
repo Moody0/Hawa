@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function ProductLoadingSkeleton() {
     return (
-        <main className="grow w-full mx-auto container-custom py-4 lg:py-8 animate-fadeIn" aria-busy="true">
+        <div className="grow w-full mx-auto container-custom py-4 lg:py-8 animate-fadeIn" aria-busy="true">
             {/* Breadcrumb Skeleton */}
             <div className="flex items-center gap-2 mb-6">
                 <div className="w-16 h-3.5 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse" />
@@ -33,20 +33,20 @@ export default function ProductLoadingSkeleton() {
                 </div>
 
                 {/* Product Details Skeleton (Right) */}
-                <div className="w-full lg:w-[41.5%] flex flex-col gap-4">
-                    {/* Brand Pill */}
-                    <div className="w-24 h-4 bg-gray-200 dark:bg-zinc-800 rounded-full animate-pulse" />
+                <div className="w-full lg:w-[41.5%] flex flex-col gap-5 pt-2">
+                    {/* Brand Tag */}
+                    <div className="w-20 h-5 bg-gray-200 dark:bg-zinc-700 rounded-full animate-pulse" />
 
-                    {/* Product Title */}
-                    <div className="flex flex-col gap-2">
-                        <div className="w-full h-7 sm:h-8 bg-gray-200 dark:bg-zinc-800 rounded-lg animate-pulse" />
-                        <div className="w-2/3 h-7 sm:h-8 bg-gray-200 dark:bg-zinc-800 rounded-lg animate-pulse" />
+                    {/* Title Skeleton */}
+                    <div className="flex flex-col gap-2.5">
+                        <div className="w-3/4 h-8 bg-gray-200 dark:bg-zinc-700 rounded-lg animate-pulse" />
+                        <div className="w-1/2 h-8 bg-gray-200 dark:bg-zinc-700 rounded-lg animate-pulse" />
                     </div>
 
-                    {/* Rating / Stock Badge */}
-                    <div className="flex items-center gap-3 mt-1">
-                        <div className="w-28 h-4 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
-                        <div className="w-20 h-5 bg-green-100 dark:bg-green-950/40 rounded-full animate-pulse" />
+                    {/* Category & Status */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-28 h-4 bg-gray-200 dark:bg-zinc-700 rounded animate-pulse" />
+                        <div className="w-16 h-4 bg-gray-200 dark:bg-zinc-700 rounded animate-pulse" />
                     </div>
 
                     {/* Price Block */}
@@ -64,6 +64,6 @@ export default function ProductLoadingSkeleton() {
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

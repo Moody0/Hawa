@@ -20,8 +20,6 @@ interface User {
     canDeleteBanners: boolean;
     canManageOrders: boolean;
     canDeleteOrders: boolean;
-    canManagePromoCodes: boolean;
-    canDeletePromoCodes: boolean;
 }
 
 interface UserModalProps {
@@ -40,9 +38,7 @@ type PermissionKey =
     | "canManageBanners"
     | "canDeleteBanners"
     | "canManageOrders"
-    | "canDeleteOrders"
-    | "canManagePromoCodes"
-    | "canDeletePromoCodes";
+    | "canDeleteOrders";
 
 type UserFormData = {
     username: string;
@@ -67,8 +63,6 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
         canDeleteBanners: true,
         canManageOrders: true,
         canDeleteOrders: true,
-        canManagePromoCodes: true,
-        canDeletePromoCodes: true,
     });
 
     useEffect(() => {
@@ -87,8 +81,6 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                 canDeleteBanners: user.canDeleteBanners,
                 canManageOrders: user.canManageOrders,
                 canDeleteOrders: user.canDeleteOrders,
-                canManagePromoCodes: user.canManagePromoCodes,
-                canDeletePromoCodes: user.canDeletePromoCodes,
             });
         } else {
             setFormData({
@@ -105,8 +97,6 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                 canDeleteBanners: true,
                 canManageOrders: true,
                 canDeleteOrders: true,
-                canManagePromoCodes: true,
-                canDeletePromoCodes: true,
             });
         }
     }, [user, isOpen]);
@@ -141,6 +131,15 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
         }
     };
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     const PermissionCheckbox = ({ name, label, dependsOn }: { name: PermissionKey, label: string, dependsOn?: PermissionKey }) => {
@@ -156,7 +155,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                     checked={isChecked}
                     disabled={!isParentChecked}
                     onChange={(e) => setFormData({ ...formData, [name]: e.target.checked })}
-                    className="rounded border-gray-300 text-primary focus:ring-primary size-4"
+                    className="w-4 h-4 text-primary bg-background-light dark:bg-gray-800 border-black/[0.08] dark:border-white/[0.08] rounded focus:ring-primary focus:ring-offset-0 transition-all cursor-pointer"
                 />
                 <span className="text-sm font-medium">{label}</span>
             </label>
@@ -164,13 +163,18 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+        <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-modal-title"
+            className="fixed inset-0 z-100 flex items-center justify-center p-4"
+        >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
             <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
                 <div className="p-8 max-h-[90vh] overflow-y-auto">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-text-main dark:text-white">
+                            <h2 id="user-modal-title" className="text-2xl md:text-3xl font-bold tracking-tight text-text-main dark:text-white">
                                 {user ? t('admin.editUserPermissions') : t('admin.addNewSubAdmin')}
                             </h2>
                             <p className="text-text-sub dark:text-gray-400 text-sm mt-1">
@@ -179,6 +183,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                         </div>
                         <button 
                             onClick={onClose} 
+                            aria-label={dir === 'rtl' ? 'إغلاق' : 'Close'}
                             className="p-2 text-text-sub dark:text-gray-400 hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
                         >
                             <MdClose className="text-[24px]" />
@@ -244,39 +249,33 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-3">
-                                            <p className={`text-[10px] font-bold text-text-sub dark:text-gray-500 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.brands')}</p>
+                                            <p className={`text-[10px] font-bold text-text-sub dark:text-slate-400 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.brands')}</p>
                                             <PermissionCheckbox name="canManageBrands" label={t('admin.canCreateEdit').replace('{resource}', t('admin.brands'))} />
                                             <PermissionCheckbox name="canDeleteBrands" label={t('admin.canDelete').replace('{resource}', t('admin.brands'))} dependsOn="canManageBrands" />
                                         </div>
 
                                         <div className="space-y-3">
-                                            <p className={`text-[10px] font-bold text-text-sub dark:text-gray-500 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.products')}</p>
+                                            <p className={`text-[10px] font-bold text-text-sub dark:text-slate-400 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.products')}</p>
                                             <PermissionCheckbox name="canManageProducts" label={t('admin.canCreateEdit').replace('{resource}', t('admin.products'))} />
                                             <PermissionCheckbox name="canDeleteProducts" label={t('admin.canDelete').replace('{resource}', t('admin.products'))} dependsOn="canManageProducts" />
                                         </div>
 
                                         <div className="space-y-3">
-                                            <p className={`text-[10px] font-bold text-text-sub dark:text-gray-500 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.categories')}</p>
+                                            <p className={`text-[10px] font-bold text-text-sub dark:text-slate-400 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.categories')}</p>
                                             <PermissionCheckbox name="canManageCategories" label={t('admin.canCreateEdit').replace('{resource}', t('admin.categories'))} />
                                             <PermissionCheckbox name="canDeleteCategories" label={t('admin.canDelete').replace('{resource}', t('admin.categories'))} dependsOn="canManageCategories" />
                                         </div>
 
                                         <div className="space-y-3">
-                                            <p className={`text-[10px] font-bold text-text-sub dark:text-gray-500 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.banners')}</p>
+                                            <p className={`text-[10px] font-bold text-text-sub dark:text-slate-400 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.banners')}</p>
                                             <PermissionCheckbox name="canManageBanners" label={t('admin.canManage').replace('{resource}', t('admin.banners'))} />
                                             <PermissionCheckbox name="canDeleteBanners" label={t('admin.canDelete').replace('{resource}', t('admin.banners'))} dependsOn="canManageBanners" />
                                         </div>
 
                                         <div className="space-y-3">
-                                            <p className={`text-[10px] font-bold text-text-sub dark:text-gray-500 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.orders')}</p>
+                                            <p className={`text-[10px] font-bold text-text-sub dark:text-slate-400 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.orders')}</p>
                                             <PermissionCheckbox name="canManageOrders" label={t('admin.canViewProcess').replace('{resource}', t('admin.orders'))} />
                                             <PermissionCheckbox name="canDeleteOrders" label={t('admin.canDelete').replace('{resource}', t('admin.orders'))} dependsOn="canManageOrders" />
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            <p className={`text-[10px] font-bold text-text-sub dark:text-gray-500 uppercase tracking-widest ${dir === 'rtl' ? 'me-1' : 'ms-1'}`}>{t('admin.promoCodes')}</p>
-                                            <PermissionCheckbox name="canManagePromoCodes" label={t('admin.canManage').replace('{resource}', t('admin.promoCodes'))} />
-                                            <PermissionCheckbox name="canDeletePromoCodes" label={t('admin.canDelete').replace('{resource}', t('admin.promoCodes'))} dependsOn="canManagePromoCodes" />
                                         </div>
                                     </div>
                                 </div>

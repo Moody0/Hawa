@@ -949,7 +949,7 @@ export default function ProductsClient({
                                                             <span className="font-bold text-text-main dark:text-white text-xs sm:text-sm line-clamp-1">
                                                                 {product.nameAr && product.nameEn ? `${product.nameAr} (${product.nameEn})` : (product.nameAr || product.nameEn || product.name)}
                                                             </span>
-                                                            <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:text-xs text-text-sub dark:text-gray-500">
+                                                            <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:text-xs text-text-sub dark:text-slate-400">
                                                                 <span>{t('admin.sku')}: {product.sku || 'N/A'}</span>
                                                                 {product.options && <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">{product.options}</span>}
                                                                 {product.packaging && <span className="bg-[#FAF6EC] dark:bg-zinc-800 text-[#0B192C] dark:text-[#8A6305] border border-[#8A6305]/20 px-1.5 py-0.5 rounded text-[10px] font-bold">📦 {product.packaging}</span>}
@@ -1084,7 +1084,7 @@ export default function ProductsClient({
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={9} className="p-10 text-center text-text-sub dark:text-gray-500 italic">
+                                            <td colSpan={9} className="p-10 text-center text-text-sub dark:text-slate-400 italic">
                                                 {t('admin.noProductsMatch')}
                                             </td>
                                         </tr>
@@ -1131,7 +1131,7 @@ export default function ProductsClient({
                                     })}
                                     {totalPages > 3 && currentPage < totalPages - 1 && (
                                         <>
-                                            <span className="text-text-sub dark:text-gray-500 px-0.5 sm:px-1">...</span>
+                                            <span className="text-text-sub dark:text-slate-400 px-0.5 sm:px-1">...</span>
                                             <button
                                                 onClick={() => handlePageChange(totalPages)}
                                                 className={`size-8 sm:size-9 flex items-center justify-center rounded-lg border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] text-text-sub dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] text-xs sm:text-sm font-bold`}

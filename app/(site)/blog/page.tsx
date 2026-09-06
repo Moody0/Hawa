@@ -1,58 +1,71 @@
 import React from 'react';
-import Link from 'next/link';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import ResilientImage from '@/app/components/ResilientImage';
-import { MdAccessTime, MdCalendarToday, MdArrowForward } from 'react-icons/md';
+import BlogClient, { BlogPostItem } from './BlogClient';
+import { getSiteSettings } from '@/lib/admin-actions';
 
 export const revalidate = 60; // 1 minute revalidation
 
 export const metadata: Metadata = {
-    title: 'المدونة وأخبار الوكالات والتوزيع | Hawa Distribution & Trading',
-    description: 'أخبار شركة حوا للتوزيع، إطلاق المنتجات الجديدة، عروض الوكالات، نصائح لأصحاب المحلات والسوبرماركت، وأحدث مستجدات سوق الجملة في سوريا.',
+    title: 'المدونة والتقارير التجارية | شركة حوا للتوزيع والتجارة',
+    description: 'مركز معلومات وأخبار تجارة الجملة وتوزيع المواد الغذائية في سوريا: إطلاقات الوكالات، لوائح أسعار الطرود، نصائح إدارة المحلات والسوبرماركت، ومؤشرات السوق.',
     openGraph: {
-        title: 'المدونة وأخبار الوكالات | شركة حوا للتوزيع والتجارة',
-        description: 'آخر أخبار السلع والوكالات ونصائح تجار التجزئة من شركة حوا للتوزيع.',
+        title: 'المدونة وأخبار الوكالات | Hawa Distribution & Trading',
+        description: 'آخر تقارير السلع والوكالات الغذائية وإرشادات أصحاب المتاجر من شركة حوا للتوزيع.',
     },
 };
 
-// Default high-value B2B wholesale articles if database is still fresh
-const DEFAULT_POSTS = [
+// Rich, authentic B2B trade articles with 100% reliable local image assets
+const DEFAULT_POSTS: BlogPostItem[] = [
     {
         id: 'post-1',
-        title: 'كيف تختار أفضل تشكيلة بضائع لسوبرماركت ناجح؟ نصائح لتجار التجزئة',
+        title: 'دليل أصحاب السوبرماركت لرفع دوران المخزون وتفادي ركود السلع الغذائية',
         slug: 'retailer-guide-best-fmcg-inventory',
-        excerpt: 'دليل عملي لأصحاب المحلات لزيادة دوران المخزون، وتجنب ركود البضائع، واختيار الأصناف الأعلى طلباً من الوكالات المعتمدة.',
-        image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&q=80',
-        category: 'نصائح لأصحاب المتاجر',
+        excerpt: 'خطوات عملية لاختيار تشكيلة السلع الأساسية عالية الدوران، حساب فترات السحب الأسبوعية، وتقليل تجميد السيولة في التخزين الزائد.',
+        image: '/uploads/banners/hawa-food-agencies-banner.jpg',
+        category: 'نصائح وإدارة المحلات',
         createdAt: new Date('2026-08-20'),
+        readTime: '4 دقائق قراءة',
     },
     {
         id: 'post-2',
-        title: 'إطلاق تشكيلة منتجات جديدة من وكالة الريف بأسعار جملة تنافسية',
-        slug: 'alreef-agency-new-product-launches',
-        excerpt: 'يسر شركة حوا الإعلان عن توريد دفعات جديدة من زيوت ومكسرات الريف الأصلية بكافة الأحجام والعبوات المجهزة للمحلات.',
-        image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=800&q=80',
-        category: 'عروض الوكالات',
+        title: 'وصول دفعات جديدة من معكرونة دي سيكو وكراون الأصلية بأسعار الجملة المعتمدة',
+        slug: 'dececco-crown-pasta-wholesale-supply',
+        excerpt: 'يسر شركة حوا إتاحة كراتين وطرود معكرونة دي سيكو الإيطالية وكراون الفاخرة بجميع المقاسات والأشكال للمحلات والسوبرماركت مع تسليم مباشر لباب المحل.',
+        image: '/images/hawa_hero.jpg',
+        category: 'عروض الوكالات والمنتجات',
         createdAt: new Date('2026-08-15'),
+        readTime: '3 دقائق قراءة',
     },
     {
         id: 'post-3',
-        title: 'توسيع أسطول سيارات التوزيع لتغطية مناطق وأسواق جديدة بجداول يومية منتظمة',
+        title: 'توسيع شبكة سيارات التوزيع لتغطية أسواق جديدة بجداول يومية منتظمة',
         slug: 'fleet-expansion-scheduled-deliveries',
-        excerpt: 'في إطار التزامنا بتسليم طرود الجملة بسرعة وكفاءة، تم تعزيز أسطول النقل المبرد والمجهز لخدمة المحلات في كافة المحافظات.',
-        image: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&q=80',
-        category: 'أخبار الشركة',
+        excerpt: 'في إطار التزامنا بتسليم طرود الجملة بسرعة وكفاءة، تم تعزيز شبكة التوزيع وسيارات النقل المجهزة لخدمة المتاجر في المحافظات السورية بمواعيد تسليم دقيقة.',
+        image: '/images/hawa_wholesale_hub.jpg',
+        category: 'أخبار التوزيع والشركة',
         createdAt: new Date('2026-08-01'),
+        readTime: '3 دقائق قراءة',
     },
     {
         id: 'post-4',
-        title: 'حركة سوق المواد الغذائية والاستهلاكية: مؤشرات الطلب للأشهر القادمة',
+        title: 'تقرير حركة السلع الأساسية: مؤشرات العرض والطلب على الزيوت والبقوليات والمعلبات',
         slug: 'market-trends-wholesale-commodities',
-        excerpt: 'قراءة تحليلية لحركة العرض والطلب على السلع الأساسية (زيوت، أرز، سكر، معلبات) وكيف تؤمّن احتياجات متجرك مسبقاً.',
-        image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80',
-        category: 'أخبار السوق',
+        excerpt: 'قراءة تحليلية للمصادر وأسعار طرود الزيوت النباتية، الحبوب الجافة، وتونة الدرجة الأولى، لمساعدة التجار في جدولة مشترياتهم وتفادي نقص الأصناف.',
+        image: '/uploads/banners/hawa-canned-seafood-banner.jpg',
+        category: 'حركة ونبض السوق',
         createdAt: new Date('2026-07-25'),
+        readTime: '5 دقائق قراءة',
+    },
+    {
+        id: 'post-5',
+        title: 'كيف تُميز طرود المصنع الأصلية وتتجنب البضائع مقلدة المصدر وتواريخ الصلاحية؟',
+        slug: 'authenticity-guide-factory-sealed-cases',
+        excerpt: 'إرشادات فنية للتأكد من أختام كراتين المصنع، باركود الدفعات الأصلية، وأهمية الفواتير الرسمية في حماية نشاط متجرك التجاري.',
+        image: '/uploads/banners/hawa-detergents-hygiene-banner.jpg',
+        category: 'نصائح وإدارة المحلات',
+        createdAt: new Date('2026-07-15'),
+        readTime: '4 دقائق قراءة',
     },
 ];
 
@@ -64,98 +77,30 @@ export default async function BlogPage() {
             orderBy: { createdAt: 'desc' },
         });
     } catch (err) {
-        console.error('Error fetching blog posts:', err);
+        console.warn('Database offline or unreachable during blog fetch, using seed articles');
     }
 
-    const displayPosts = posts.length > 0 ? posts : DEFAULT_POSTS;
+    const displayPosts: BlogPostItem[] = posts.length > 0 
+        ? posts.map(p => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            excerpt: p.excerpt,
+            image: p.image || '/images/hawa_hero.jpg',
+            category: p.category,
+            createdAt: p.createdAt,
+        }))
+        : DEFAULT_POSTS;
+
+    const settings = await getSiteSettings();
+    const whatsappNumber = settings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901';
 
     return (
-        <main className="container-custom py-10 md:py-16">
-            {/* Header Banner */}
-            <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/25 text-[#8A6305] dark:text-[#8A6305] text-xs font-bold uppercase tracking-wider mb-3">
-                    <span>📰 المدونة ومركز الأخبار</span>
-                </div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight mb-4">
-                    أخبار الوكالات ونبض سوق التوزيع
-                </h1>
-                <p className="text-xs sm:text-sm text-[#475569] dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                    منصتك لمتابعة إطلاقات المنتجات الجديدة، عروض الجملة الحصرية، وأفضل النصائح المهنية لنمو أرباح متجرك وتجارتك.
-                </p>
-            </div>
-
-            {/* Articles Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                {displayPosts.map((post) => {
-                    const dateStr = new Date(post.createdAt).toLocaleDateString('ar-SY', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                    });
-
-                    return (
-                        <article
-                            key={post.id}
-                            className="group bg-white dark:bg-[#132035] rounded-3xl overflow-hidden border border-gray-200/80 dark:border-white/10 hover:border-[#8A6305]/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-                        >
-                            <div>
-                                {/* Image Container */}
-                                <div className="relative w-full aspect-[16/10] overflow-hidden bg-gray-100 dark:bg-white/5">
-                                    {post.image ? (
-                                        <ResilientImage
-                                            src={post.image}
-                                            alt={post.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-[#FAF6EC] to-gray-200">
-                                            📰
-                                        </div>
-                                    )}
-
-                                    {/* Category pill */}
-                                    <div className="absolute top-3.5 right-3.5 z-10">
-                                        <span className="bg-[#0B192C]/90 backdrop-blur-md text-[#8A6305] text-[11px] font-extrabold px-3 py-1 rounded-full border border-white/15 shadow-sm">
-                                            {post.category || 'أخبار الشركة'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Content */}
-                                <div className="p-6">
-                                    <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-gray-400 mb-2.5">
-                                        <MdCalendarToday className="text-sm text-[#8A6305]" />
-                                        <span>{dateStr}</span>
-                                    </div>
-
-                                    <h2 className="text-lg font-black text-[#0B192C] dark:text-white group-hover:text-[#8A6305] transition-colors line-clamp-2 leading-snug mb-3">
-                                        <Link href={`/blog/${post.slug}`}>
-                                            {post.title}
-                                        </Link>
-                                    </h2>
-
-                                    {post.excerpt && (
-                                        <p className="text-xs sm:text-sm text-[#475569] dark:text-gray-300 line-clamp-3 leading-relaxed">
-                                            {post.excerpt}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Card Footer */}
-                            <div className="p-6 pt-0">
-                                <Link
-                                    href={`/blog/${post.slug}`}
-                                    className="w-full py-2.5 px-4 rounded-xl bg-[#FAF6EC] hover:bg-[#0B192C] text-[#0B192C] hover:text-white dark:bg-white/5 dark:text-white dark:hover:bg-[#8A6305] dark:hover:text-black font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 border border-[#8A6305]/20"
-                                >
-                                    <span>قراءة المقال كاملاً</span>
-                                    <MdArrowForward className="text-base rtl:rotate-180" />
-                                </Link>
-                            </div>
-                        </article>
-                    );
-                })}
-            </div>
-        </main>
+        <div className="w-full bg-[#FCFBF8] dark:bg-[#070D18] min-h-screen text-[#0B192C] dark:text-slate-100 transition-colors">
+            <BlogClient 
+                initialPosts={displayPosts} 
+                whatsappNumber={whatsappNumber}
+            />
+        </div>
     );
 }

@@ -227,7 +227,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                 <button
                                     onClick={openDrawer}
                                     className="w-10 h-10 xl:w-11 xl:h-11 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-xl text-zinc-900 dark:text-white hover:bg-[#0B192C] hover:text-white dark:hover:bg-white dark:hover:text-black transition-all relative"
-                                    aria-label="Open Shopping Cart"
+                                    aria-label={isArabic ? 'سلة التسوق' : 'Shopping Cart'}
                                 >
                                     <MdOutlineShoppingBag />
                                     {totalItems > 0 && (
@@ -247,7 +247,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                     <button
                                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                                         className="w-11 h-11 flex items-center justify-center text-zinc-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                                        aria-label="Toggle Menu"
+                                        aria-label={isMobileMenuOpen ? (isArabic ? 'إغلاق القائمة' : 'Close Menu') : (isArabic ? 'فتح القائمة' : 'Open Menu')}
                                     >
                                         {isMobileMenuOpen ? (
                                              <MdClose className="text-2xl" />
@@ -281,7 +281,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                     <Link
                                         href="/account"
                                         className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-lg text-[#0B192C] dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                                        aria-label="Merchant Account"
+                                        aria-label={isArabic ? 'بوابة التجار' : 'Merchant Portal'}
                                         title={isArabic ? 'حساب تجاري' : 'Merchant Portal'}
                                     >
                                         <MdPerson className="text-xl text-[#8A6305]" />
@@ -289,7 +289,7 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                     <button
                                         onClick={openDrawer}
                                         className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-lg text-zinc-900 dark:text-white relative"
-                                        aria-label="Open Shopping Cart"
+                                        aria-label={isArabic ? 'سلة التسوق' : 'Shopping Cart'}
                                     >
                                         <MdOutlineShoppingBag />
                                         {totalItems > 0 && (
@@ -356,13 +356,6 @@ const Header = ({ initialCategories = [], initialNavData = [], dir }: HeaderProp
                                     className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
                                 >
                                     {isArabic ? 'المنتجات' : 'Products'}
-                                </Link>
-
-                                <Link
-                                    href="/services"
-                                    className="text-[13px] xl:text-[14px] font-bold text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors whitespace-nowrap py-1"
-                                >
-                                    {isArabic ? 'خدمات التوزيع' : 'Distribution Services'}
                                 </Link>
 
                                 <Link

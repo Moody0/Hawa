@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import ResilientImage from '@/app/components/ResilientImage';
-import { MdChevronRight } from 'react-icons/md';
 
 interface Category {
     id: string;
@@ -50,30 +49,30 @@ const FeaturedCategoriesGrid = ({ categories, language = 'ar', dir = 'rtl' }: Fe
     return (
         <section className="container-custom py-2 md:py-4">
             {/* Section Header */}
-            <div className="flex items-end justify-between mb-6 md:mb-8 border-b border-slate-200 dark:border-white/10 pb-4">
+            <div className="flex items-end justify-between mb-4 sm:mb-6 border-b border-slate-200 dark:border-white/10 pb-3">
                 <div>
-                    <div className="flex items-center gap-2 mb-1.5">
+                    <div className="flex items-center gap-2 mb-1">
                         <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
                         <span className="text-xs font-bold uppercase tracking-wider text-[#475569] dark:text-slate-400">
                             {isArabic ? 'كتالوج التوريد بالجملة' : 'Wholesale Product Lines'}
                         </span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight">
-                        {isArabic ? 'الأقسام والتصنيفات الرئيسية' : 'Key Categories'}
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-black text-[#0B192C] dark:text-white tracking-tight">
+                        {isArabic ? 'الأقسام والتصنيفات الرئيسية' : 'Key Wholesale Categories'}
                     </h2>
                 </div>
 
                 <Link
-                    href="/products"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#475569] dark:text-slate-300 hover:text-[#8A6305] transition-colors whitespace-nowrap"
+                    href="/categories"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#8A6305] hover:text-[#735204] dark:text-[#E5B54A] transition-colors whitespace-nowrap"
                 >
                     <span>{isArabic ? 'عرض كل الأقسام' : 'All Categories'}</span>
                     <span className={`text-sm ${isArabic ? 'rotate-180' : ''}`}>→</span>
                 </Link>
             </div>
 
-            {/* Symmetrical Grid: 2-Col Mobile, 3-Col Tablet, 6-Col Desktop */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+            {/* Clean Grid: 2-Col Mobile, 3-Col Tablet, 6-Col Desktop */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
                 {categories.map((category) => {
                     const brandName = getBrandName(category);
                     const displayName = getDisplayName(category);
@@ -81,12 +80,12 @@ const FeaturedCategoriesGrid = ({ categories, language = 'ar', dir = 'rtl' }: Fe
                     return (
                         <Link
                             key={category.id}
-                            href={`/categories/${category.slug}`}
-                            className="group flex flex-col p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#8A6305] dark:hover:border-[#8A6305] bg-white dark:bg-[#132035] transition-all"
+                            href={`/categories/${encodeURIComponent(category.slug)}`}
+                            className="group flex flex-col p-3 rounded-xl border border-slate-200/80 dark:border-white/10 hover:border-[#8A6305] dark:hover:border-[#8A6305] bg-white dark:bg-[#132035] shadow-2xs hover:shadow-xs transition-all duration-200"
                         >
-                            {/* Category Image - Direct single-layer container */}
-                            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800/40 mb-3 flex items-center justify-center">
-                                {category.image ? (
+                            {/* Category Image */}
+                            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800/60 mb-2.5 flex items-center justify-center">
+                                {category.image && category.image !== '/placeholder.svg' ? (
                                     <ResilientImage
                                         src={category.image}
                                         alt={displayName}
@@ -95,7 +94,10 @@ const FeaturedCategoriesGrid = ({ categories, language = 'ar', dir = 'rtl' }: Fe
                                         loading="lazy"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-slate-100 dark:bg-slate-800" />
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 p-2">
+                                        <span className="text-2xl mb-1">📦</span>
+                                        <span className="text-[10px] font-bold">{displayName}</span>
+                                    </div>
                                 )}
                             </div>
 

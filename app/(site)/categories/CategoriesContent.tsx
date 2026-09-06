@@ -34,7 +34,7 @@ export default function CategoriesContent({ categories, siteSettings }: Categori
     const ctaImage = siteSettings?.categoriesCtaImage || "https://lh3.googleusercontent.com/aida-public/AB6AXuC-S_GMsoebb73JIEWcxtvH2G-vVgkfypE8ysWpGMNiiiwyTno8rIbMCpHR-fsa76ZQL49aYswb7bGZh-kgwc6z9lv0VwUSUrStxNWz2qU3RuIb75ShOMAKZMRyrOXZHZjEBgtxfW7r97FEEshOkEd2MqgE6FpGYrmKa8msLtMOQxXBsmhr3ZGGEtL7jpzgMYbgrAXhiHcMfCspdvD5FRNuSbgFY9_xGqcJM9KbgG0MoC4Ie4WkkmCR4FsuavfglcnY13G2ADZxlK8F";
 
     return (
-        <main className="w-full pb-20">
+        <div className="w-full pb-20">
             <nav className="container-custom pt-8 pb-4">
                 <ul className="flex items-center gap-2 text-xs font-medium text-text-muted-light dark:text-text-muted-dark uppercase tracking-widest">
                     <li><Link className="hover-underline-animated transition-colors" href="/">{t('common.home')}</Link></li>
@@ -45,7 +45,7 @@ export default function CategoriesContent({ categories, siteSettings }: Categori
 
             <section className="container-custom mb-12">
                 <div className="border-l-4 border-zinc-900 dark:border-white pl-6 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-6">
-                    <h2 className="text-4xl md:text-5xl font-extrabold text-text-main-light dark:text-text-main-dark tracking-tight">{t('categoriesPage.title')}</h2>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-text-main-light dark:text-text-main-dark tracking-tight">{t('categoriesPage.title')}</h1>
                     <p className="mt-3 text-lg text-text-muted-light dark:text-text-muted-dark max-w-2xl">
                         {t('categoriesPage.description')}
                     </p>
@@ -59,7 +59,7 @@ export default function CategoriesContent({ categories, siteSettings }: Categori
             <section className="container-custom mt-24">
                 <div className="rounded-3xl bg-gray-50 dark:bg-zinc-900 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-gray-200 dark:border-white/10">
                     <div className="flex flex-col gap-4 text-center md:text-left rtl:md:text-right">
-                        <h4 className="text-3xl font-extrabold text-text-main-light dark:text-text-main-dark">{ctaTitle}</h4>
+                        <h2 className="text-3xl font-extrabold text-text-main-light dark:text-text-main-dark">{ctaTitle}</h2>
                         <p className="text-text-muted-light dark:text-text-muted-dark max-w-md">{ctaDesc}</p>
                         <div className="flex flex-wrap gap-4 mt-2 justify-center md:justify-start">
                             <Link href="/products" className="px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-full font-bold text-sm hover:bg-black dark:hover:bg-gray-200 transition-all">{t('categoriesPage.viewAllProducts')}</Link>
@@ -78,6 +78,6 @@ export default function CategoriesContent({ categories, siteSettings }: Categori
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

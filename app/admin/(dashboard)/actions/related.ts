@@ -1,9 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export async function getRelatedProducts(type: "brandId" | "mainCategoryId" | "categoryId", id: string, query: string) {
     try {
+        await requireAdminSession("canManageProducts");
         const products = await prisma.product.findMany({
             where: {
                 [type]: id,
@@ -22,6 +24,7 @@ export async function getRelatedProducts(type: "brandId" | "mainCategoryId" | "c
 
 export async function getRelatedCategories(type: "brandId" | "mainCategoryId", id: string, query: string) {
     try {
+        await requireAdminSession("canManageCategories");
         const categories = await prisma.category.findMany({
             where: {
                 [type]: id,
@@ -40,6 +43,7 @@ export async function getRelatedCategories(type: "brandId" | "mainCategoryId", i
 
 export async function getRelatedBrands(id: string, query: string) {
     try {
+        await requireAdminSession("canManageBrands");
         const brands = await prisma.brand.findMany({
             where: {
                 mainCategoryId: id,

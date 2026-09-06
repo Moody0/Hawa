@@ -1,20 +1,26 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyPassword, signToken, setCustomerAuthCookie } from '@/lib/customer-auth';
+import { 
+    verifyPassword, 
+    signToken, 
+    setCustomerAuthCookie, 
+    normalizeSyrianPhone 
+} from '@/lib/customer-auth';
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { phone, password } = body;
+        const rawPhone = String(body.phone || '').trim();
+        const rawPassword = typeof body.password === 'string' ? body.password : '';
 
-        if (!phone?.trim() || !password) {
+        if (!rawPhone || !rawPassword) {
             return NextResponse.json(
                 { error: 'يرجى إدخال رقم الهاتف وكلمة المرور.' },
                 { status: 400 }
             );
         }
 
-        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const cleanPhone = normalizeSyrianPhone(rawPhone);
 
         const customer = await prisma.customer.findUnique({
             where: { phone: cleanPhone },
@@ -27,18 +33,23 @@ export async function POST(req: Request) {
             );
         }
 
-        if (!customer.isActive) {
-            return NextResponse.json(
-                { error: 'هذا الحساب التجاري غير مفعل، يرجى التواصل مع إدارة الشركة.' },
-                { status: 403 }
-            );
-        }
-
-        const isMatch = await verifyPassword(password, customer.password);
+        const isMatch = await verifyPassword(rawPassword, customer.password);
         if (!isMatch) {
             return NextResponse.json(
                 { error: 'رقم الهاتف أو كلمة المرور غير صحيحة.' },
                 { status: 401 }
+            );
+        }
+
+        if (!customer.isActive) {
+            return NextResponse.json(
+                { 
+                    error: 'ACCOUNT_PENDING', 
+                    message: 'حسابك التجاري قيد المراجعة والتدقيق من قبل إدارة المبيعات. سيتم تفعيله قريباً أو يمكنك التواصل معنا مباشرة لتسريع التفعيل.',
+                    phone: customer.phone,
+                    shopName: customer.shopName
+                },
+                { status: 403 }
             );
         }
 

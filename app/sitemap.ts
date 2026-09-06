@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 export const revalidate = 3600; // Revalidate sitemap hourly
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zadland.com';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hawatrading.com';
 
     try {
         // 1. Static high-priority routes
@@ -32,6 +32,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 lastModified: new Date(),
                 changeFrequency: 'weekly',
                 priority: 0.8,
+            },
+            {
+                url: `${baseUrl}/blog`,
+                lastModified: new Date(),
+                changeFrequency: 'weekly',
+                priority: 0.7,
             },
             {
                 url: `${baseUrl}/about-us`,
@@ -75,7 +81,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
 
         const departmentRoutes: MetadataRoute.Sitemap = departments.map((dept) => ({
-            url: `${baseUrl}/department/${dept.slug}`,
+            url: `${baseUrl}/departments/${dept.slug}`,
             lastModified: dept.updatedAt,
             changeFrequency: 'weekly',
             priority: 0.85,
@@ -91,7 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
 
         const brandRoutes: MetadataRoute.Sitemap = brands.map((brand) => ({
-            url: `${baseUrl}/products?brand=${brand.slug}`,
+            url: `${baseUrl}/brands/${brand.slug}`,
             lastModified: brand.updatedAt,
             changeFrequency: 'weekly',
             priority: 0.8,
@@ -113,12 +119,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.75,
         }));
 
+        // 6. Fetch all published Blog Posts
+        const posts = await prisma.post.findMany({
+            where: { isPublished: true },
+            select: {
+                slug: true,
+                updatedAt: true,
+            },
+        });
+
+        const postRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
+            url: `${baseUrl}/blog/${post.slug}`,
+            lastModified: post.updatedAt,
+            changeFrequency: 'monthly',
+            priority: 0.7,
+        }));
+
         return [
             ...staticRoutes,
             ...departmentRoutes,
             ...productRoutes,
             ...brandRoutes,
             ...categoryRoutes,
+            ...postRoutes,
         ];
     } catch (error) {
         console.error('Failed to generate dynamic sitemap:', error);

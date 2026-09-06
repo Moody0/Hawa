@@ -36,11 +36,6 @@ const CategorySelector = ({
     const isRtl = dir === 'rtl';
     const isAllActive = !activeCategory && !activeMainCategory;
 
-    // If on a brand page and brand has 0 subcategories, hide rail
-    if (activeBrand && (!categories || categories.length === 0)) {
-        return null;
-    }
-
     const allHref = activeBrand ? `/brands/${activeBrand.slug}` : "/products";
     const brandShortName = activeBrand ? activeBrand.name.split('-')[0].trim() : '';
     const allLabel = activeBrand 
@@ -51,7 +46,7 @@ const CategorySelector = ({
         if (activeBrand) {
             return `/categories/${cat.slug}`;
         }
-        return `/department/${cat.slug}`;
+        return `/departments/${cat.slug}`;
     };
 
     const updateArrowVisibility = () => {
@@ -116,6 +111,11 @@ const CategorySelector = ({
             });
         }
     };
+
+    // If on a brand page and brand has 0 subcategories, hide rail after hooks run
+    if (activeBrand && (!categories || categories.length === 0)) {
+        return null;
+    }
 
     return (
         <div className="relative mb-6 group">

@@ -22,13 +22,25 @@ function getLocalizedValue(language: string, englishValue?: string | null, arabi
 }
 
 const Footer = async ({ t, language }: FooterProps) => {
-    const settings = await getSiteSettings();
-    const footerCategories = await getFooterCategories([
-        settings?.footerCategory1Id || "",
-        settings?.footerCategory2Id || "",
-        settings?.footerCategory3Id || "",
-        settings?.footerCategory4Id || "",
-    ]);
+    let settings = null;
+    let footerCategories: { id: string; name: string; slug: string; description?: string | null }[] = [];
+    
+    try {
+        settings = await getSiteSettings();
+    } catch (e) {
+        console.error("Footer: Failed to load site settings:", e);
+    }
+
+    try {
+        footerCategories = await getFooterCategories([
+            settings?.footerCategory1Id || "",
+            settings?.footerCategory2Id || "",
+            settings?.footerCategory3Id || "",
+            settings?.footerCategory4Id || "",
+        ]);
+    } catch (e) {
+        console.error("Footer: Failed to load footer categories:", e);
+    }
 
     const brandTitle = getLocalizedValue(language, settings?.footerBrandTitle, settings?.footerBrandTitleAr) || t('header.brandName');
     const brandDescription = getLocalizedValue(language, settings?.footerBrandDescription, settings?.footerBrandDescriptionAr) || t('footer.brandDescription');
@@ -107,8 +119,8 @@ const Footer = async ({ t, language }: FooterProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
                     {/* Brand Column */}
                     <div className="lg:col-span-2 flex flex-col gap-4">
-                        <Link href="/" className="inline-block mb-1 group">
-                            <h4 className="text-2xl font-extrabold text-[#8A6305] tracking-tight group-hover:text-white transition-colors">
+                        <Link href="/" className="inline-block mb-1">
+                            <h4 className="text-2xl font-extrabold text-[#8A6305] tracking-tight">
                                 {brandTitle}
                             </h4>
                         </Link>

@@ -3,6 +3,7 @@
 import { prisma } from "./prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { requireSuperAdminSession } from "./admin-auth";
 
 interface UserInput {
     username: string;
@@ -18,12 +19,13 @@ interface UserInput {
     canDeleteBanners: boolean;
     canManageOrders: boolean;
     canDeleteOrders: boolean;
-    canManagePromoCodes: boolean;
-    canDeletePromoCodes: boolean;
+    canManagePromoCodes?: boolean;
+    canDeletePromoCodes?: boolean;
 }
 
 export async function getUsers() {
     try {
+        await requireSuperAdminSession();
         const users = await prisma.user.findMany({
             orderBy: {
                 createdAt: 'desc'
@@ -41,6 +43,7 @@ export async function getUsers() {
 
 export async function createUser(data: UserInput) {
     try {
+        await requireSuperAdminSession();
         const hashedPassword = await bcrypt.hash(data.password || "", 10);
         await prisma.user.create({
             data: {
@@ -57,8 +60,8 @@ export async function createUser(data: UserInput) {
                 canDeleteBanners: data.canDeleteBanners,
                 canManageOrders: data.canManageOrders,
                 canDeleteOrders: data.canDeleteOrders,
-                canManagePromoCodes: data.canManagePromoCodes,
-                canDeletePromoCodes: data.canDeletePromoCodes,
+                canManagePromoCodes: data.canManagePromoCodes ?? false,
+                canDeletePromoCodes: data.canDeletePromoCodes ?? false,
             }
         });
         revalidatePath('/admin/users');
@@ -74,6 +77,7 @@ export async function createUser(data: UserInput) {
 
 export async function updateUser(id: string, data: UserInput) {
     try {
+        await requireSuperAdminSession();
         const updateData: Partial<UserInput> & { password?: string } = {
             username: data.username,
             role: data.role,
@@ -109,7 +113,11 @@ export async function updateUser(id: string, data: UserInput) {
 
 export async function deleteUser(id: string) {
     try {
-        // Prevent deleting the last super admin or yourself (we should ideally check this in UI too)
+        const session = await requireSuperAdminSession();
+        if (session.user.id === id) {
+            return { success: false, error: "Cannot delete your own account" };
+        }
+
         await prisma.user.delete({
             where: { id }
         });

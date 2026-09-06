@@ -1,23 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+function sanitizeString(val: unknown, maxLen = 300): string {
+    if (typeof val !== 'string') return '';
+    return val
+        .replace(/<[^>]*>?/gm, '') // Strip HTML tags
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Strip control chars
+        .trim()
+        .slice(0, maxLen);
+}
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { productId, rating, feedback, image, name, email } = body;
 
-        if (!productId || !rating || !name) {
+        const cleanName = sanitizeString(name, 100);
+        const cleanFeedback = sanitizeString(feedback, 1000);
+        const cleanEmail = email ? sanitizeString(email, 120) : null;
+        const numericRating = Math.max(1, Math.min(5, parseInt(rating) || 5));
+
+        if (!productId || typeof productId !== 'string' || !cleanName) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        // Validate image URL format to prevent javascript: or malformed payload injection
+        let cleanImage: string | null = null;
+        if (image && typeof image === 'string') {
+            const trimmedImage = image.trim();
+            if (/^(https?:\/\/|\/uploads\/)/i.test(trimmedImage)) {
+                cleanImage = trimmedImage.slice(0, 500);
+            }
         }
 
         const review = await prisma.review.create({
             data: {
-                productId,
-                rating,
-                feedback,
-                image,
-                name,
-                email,
+                productId: productId.trim(),
+                rating: numericRating,
+                feedback: cleanFeedback || null,
+                image: cleanImage,
+                name: cleanName,
+                email: cleanEmail,
                 isApproved: false, // Default to false
             }
         });

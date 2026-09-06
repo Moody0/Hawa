@@ -46,8 +46,8 @@ export default function CompanyServices() {
         {
             icon: MdLocalShipping,
             title: isArabic ? 'توزيع احترافي' : 'Professional Distribution',
-            desc: isArabic ? 'شبكة توزيع واسعة وأسطول نقل مجهز يغطي مختلف المناطق والأسواق بدقة ومواعيد منتظمة.' : 'Equipped transport fleet covering stores with scheduled, dependable delivery.',
-            tag: isArabic ? 'أسطول مجهز' : 'Scheduled Logistics',
+            desc: isArabic ? 'شبكة توزيع واسعة وسيارات مجهزة تغطي مختلف المناطق والأسواق بدقة ومواعيد منتظمة.' : 'Equipped delivery vehicles covering stores with scheduled, dependable delivery.',
+            tag: isArabic ? 'سيارات مجهزة' : 'Equipped Delivery',
             accent: 'border-amber-600/20 text-[#8A6305] dark:text-[#8A6305]',
         },
     ];

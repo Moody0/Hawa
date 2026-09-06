@@ -9,7 +9,6 @@ import {
     MdCategory, 
     MdViewCarousel, 
     MdInventory2, 
-    MdLocalOffer, 
     MdEditNote, 
     MdGroup, 
     MdSettings,
@@ -35,7 +34,6 @@ type PermissionKey =
     | "canManageCategories"
     | "canManageBanners"
     | "canManageOrders"
-    | "canManagePromoCodes"
     | "canManageReviews";
 
 interface NavItem {
@@ -80,7 +78,6 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             items: [
                 { href: "/admin/orders", icon: MdInventory2, label: t('admin.orders'), permission: "canManageOrders" },
                 { href: "/admin/customers", icon: MdPeople, label: t('admin.customers') || "Customers", permission: "canManageOrders" },
-                { href: "/admin/promocodes", icon: MdLocalOffer, label: t('admin.promoCodes'), permission: "canManagePromoCodes" },
                 { href: "/admin/reviews", icon: MdStar, label: t('admin.reviews'), permission: "canManageReviews" }
             ]
         },

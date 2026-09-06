@@ -1,18 +1,11 @@
 import React from 'react';
-import dynamic from 'next/dynamic';
 import type { HomeBrand, RailBrand } from '@/lib/admin-actions';
-import BrandsRail from './BrandsRail';
-
 import FeaturedCollection from './FeaturedCollection';
-import PromoBanner from './PromoBanner';
-import CountdownOffer from './CountdownOffer';
 import TrendingWeekly from './TrendingWeekly';
 import FeaturedCategoriesGrid from './FeaturedCategoriesGrid';
-import CategoryHighlightCards from './CategoryHighlightCards';
 import TestimonialsMasonry from './TestimonialsMasonry';
 import ScrollReveal from '../ScrollReveal';
 import { getI18n } from '@/lib/i18n';
-
 import HeroCarousel from './HeroCarousel';
 import AgenciesSlider from './AgenciesSlider';
 
@@ -76,7 +69,6 @@ interface MainProps {
     highlightCards: HighlightCard[];
     reviews: ReviewItem[];
     featuredNewArrivals: Product[];
-    featuredBundles: Product[];
     featuredBestSellers: Product[];
     trendingWeekly: Product[];
     featuredCategories: FeaturedCategory[];
@@ -90,7 +82,6 @@ const Main = async ({
     highlightCards,
     reviews,
     featuredNewArrivals,
-    featuredBundles,
     featuredBestSellers,
     trendingWeekly,
     featuredCategories,
@@ -99,18 +90,17 @@ const Main = async ({
     const { dir, language } = await getI18n();
 
     return (
-        <main className="w-full flex flex-col gap-y-6 md:gap-y-10 pb-12">
-            {/* 1. Hero Carousel */}
+        <div className="w-full flex flex-col gap-y-4 sm:gap-y-6 md:gap-y-8 pb-12">
+            {/* 1. Hero Carousel - 100% natural, bright photography with NO dark overlay */}
             <HeroCarousel banners={banners} />
 
-            {/* 2. Authorized Commercial Agencies Slider (Clean, high-density trade marks) */}
+            {/* 2. Authorized Commercial Agencies Rail (Clean, high-density trade marks) */}
             <AgenciesSlider brands={railBrands} />
 
             {/* 4. Best Sellers & New Arrivals (Product Rails with Carton Specs) */}
             <ScrollReveal>
                 <FeaturedCollection
                     newArrivals={featuredNewArrivals}
-                    bundles={featuredBundles}
                     bestSellers={featuredBestSellers}
                 />
             </ScrollReveal>
@@ -129,7 +119,7 @@ const Main = async ({
             <ScrollReveal>
                 <TestimonialsMasonry reviews={reviews} products={featuredBestSellers} />
             </ScrollReveal>
-        </main>
+        </div>
     );
 };
 

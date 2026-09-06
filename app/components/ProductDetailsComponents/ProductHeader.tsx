@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 interface ProductHeaderProps {
     name: string;
@@ -10,30 +9,14 @@ interface ProductHeaderProps {
     nameEn?: string | null;
     brandName?: string;
     categoryName?: string;
-    averageRating?: number;
-    totalReviews?: number;
 }
 
-const ProductHeader = ({ name, nameAr, nameEn, brandName, categoryName, averageRating = 0, totalReviews = 0 }: ProductHeaderProps) => {
+const ProductHeader = ({ name, nameAr, nameEn, brandName, categoryName }: ProductHeaderProps) => {
     const { language } = useLanguage();
 
     const displayName = language === 'ar'
         ? (nameAr || name)
         : (nameEn || name || nameAr);
-
-    const renderStars = () => {
-        const stars = [];
-        for (let i = 1; i <= 5; i++) {
-            if (averageRating >= i) {
-                stars.push(<FaStar key={i} />);
-            } else if (averageRating >= i - 0.5) {
-                stars.push(<FaStarHalfAlt key={i} />);
-            } else {
-                stars.push(<FaRegStar key={i} />);
-            }
-        }
-        return stars;
-    };
 
     return (
         <div className="mb-3">
@@ -43,21 +26,6 @@ const ProductHeader = ({ name, nameAr, nameEn, brandName, categoryName, averageR
             >
                 {displayName}
             </h1>
-
-            {/* Reviews Summary */}
-            <div 
-                className="flex items-center gap-2 mb-4 cursor-pointer group w-fit"
-                onClick={() => {
-                    document.getElementById('product-reviews')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-            >
-                <div className="flex text-[#8A6305] text-sm gap-0.5">
-                    {renderStars()}
-                </div>
-                <span className="text-xs text-[#475569] font-medium group-hover:text-[#0B192C] dark:group-hover:text-white transition-colors">
-                    {language === 'ar' ? `(${totalReviews} تقييم)` : `(${totalReviews} Reviews)`}
-                </span>
-            </div>
 
             {/* Brand and Category Badges */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs font-semibold">

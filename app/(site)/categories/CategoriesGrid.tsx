@@ -48,9 +48,9 @@ const CategoriesGrid = ({ categories }: CategoriesGridProps) => {
                             />
                         </div>
                         <div className="px-4 pb-4">
-                            <h3 className="text-2xl font-bold text-text-main-light dark:text-text-main-dark transition-colors group-hover:text-[#8A6305]">
+                            <h2 className="text-2xl font-bold text-text-main-light dark:text-text-main-dark transition-colors group-hover:text-[#8A6305]">
                                 <span className="group-hover-underline-animated">{category.name}</span>
-                            </h3>
+                            </h2>
                             <p className="text-sm text-text-muted-light dark:text-text-muted-dark mt-1 font-medium">{category.description || t('categoriesPage.premiumCollection')}</p>
                         </div>
                     </Link>

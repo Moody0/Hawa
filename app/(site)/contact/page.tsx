@@ -39,7 +39,7 @@ export default function ContactUsPage() {
     };
 
     return (
-        <main className="container-custom py-10 md:py-16">
+        <div className="container-custom py-10 md:py-16">
             {/* Header */}
             <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/25 text-[#8A6305] dark:text-[#8A6305] text-xs font-bold uppercase tracking-wider mb-3">
@@ -188,10 +188,11 @@ export default function ContactUsPage() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                                <label htmlFor="contact-name" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
                                     الاسم الكريم *
                                 </label>
                                 <input
+                                    id="contact-name"
                                     type="text"
                                     required
                                     value={formData.name}
@@ -202,10 +203,11 @@ export default function ContactUsPage() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                                <label htmlFor="contact-shopName" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
                                     اسم المحل أو الشركة
                                 </label>
                                 <input
+                                    id="contact-shopName"
                                     type="text"
                                     value={formData.shopName}
                                     onChange={(e) => setFormData(p => ({ ...p, shopName: e.target.value }))}
@@ -217,10 +219,11 @@ export default function ContactUsPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                                <label htmlFor="contact-phone" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
                                     رقم الموبايل / واتساب *
                                 </label>
                                 <input
+                                    id="contact-phone"
                                     type="tel"
                                     required
                                     dir="ltr"
@@ -232,10 +235,11 @@ export default function ContactUsPage() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                                <label htmlFor="contact-city" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
                                     المحافظة / المدينة
                                 </label>
                                 <input
+                                    id="contact-city"
                                     type="text"
                                     value={formData.city}
                                     onChange={(e) => setFormData(p => ({ ...p, city: e.target.value }))}
@@ -246,10 +250,11 @@ export default function ContactUsPage() {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                            <label htmlFor="contact-message" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
                                 نص الاستفسار أو الطلب
                             </label>
                             <textarea
+                                id="contact-message"
                                 rows={4}
                                 value={formData.message}
                                 onChange={(e) => setFormData(p => ({ ...p, message: e.target.value }))}
@@ -268,6 +273,6 @@ export default function ContactUsPage() {
                     </form>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

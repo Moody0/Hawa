@@ -102,7 +102,8 @@ const ProductGallery = ({ images, isTrending }: ProductGalleryProps) => {
                                     src={img}
                                     alt={`Product image ${index + 1}`}
                                     className="w-full h-full object-contain transition-opacity duration-500"
-                                    loading={index === 0 ? "eager" : "lazy"}
+                                    priority={index === 0}
+                                    sizes="(max-width: 1024px) 100vw, 60vw"
                                 />
                             </div>
                         </SwiperSlide>

@@ -6,10 +6,6 @@ import en from '@/app/locales/en.json';
 
 type Language = 'en' | 'ar';
 
-// Recursive type for nested translation objects
-type TranslationValue = string | string[] | { [key: string]: TranslationValue };
-type TranslationObject = { [key: string]: TranslationValue };
-
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
@@ -27,27 +23,25 @@ export function LanguageProvider({
     children: React.ReactNode;
     initialLanguage?: Language;
 }) {
-    const [language, setLanguageState] = useState<Language>(initialLanguage);
-    const [translations, setTranslations] = useState<TranslationObject>(() => initialLanguage === 'en' ? en : ar);
+    const [language] = useState<Language>(initialLanguage);
     const [mounted, setMounted] = useState(false);
+    const translations = language === 'en' ? en : ar;
 
     // Sync language on client mount if user had a saved preference that differs from server render
     useEffect(() => {
+        setMounted(true);
         const savedLang = localStorage.getItem('language') as Language;
         const currentDocLang = (document.documentElement.lang || 'ar') as Language;
         if (savedLang && (savedLang === 'en' || savedLang === 'ar') && savedLang !== currentDocLang) {
-            setLanguageState(savedLang);
             document.cookie = `language=${savedLang}; path=/; max-age=31536000`;
             document.documentElement.lang = savedLang;
             document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr';
             window.location.reload();
         }
-        setMounted(true);
     }, []);
 
-    // Load translations whenever language changes
+    // Sync document language & direction when language changes
     useEffect(() => {
-        setTranslations(language === 'ar' ? ar : en as any);
         document.documentElement.lang = language;
         document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     }, [language]);

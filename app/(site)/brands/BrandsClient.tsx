@@ -86,7 +86,7 @@ export default function BrandsClient({ brands, basePath = "/brands" }: BrandsCli
     };
 
     return (
-        <main className="container-custom py-6 md:py-10">
+        <div className="container-custom py-6 md:py-10">
             {/* Breadcrumbs Navigation */}
             <nav className="relative z-20 flex items-center flex-wrap gap-y-2 text-[11px] md:text-[12px] font-bold text-[#475569] dark:text-gray-400 uppercase tracking-wider mb-6" aria-label="Breadcrumb">
                 <Link 
@@ -143,6 +143,6 @@ export default function BrandsClient({ brands, basePath = "/brands" }: BrandsCli
                     {brands.map((brand) => renderBrandCard(brand))}
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

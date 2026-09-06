@@ -10,7 +10,6 @@ import ProductAccordions from '@/app/components/ProductDetailsComponents/Product
 import ProductShareButtons from '@/app/components/ProductDetailsComponents/ProductShareButtons';
 import RelatedProducts from '@/app/components/ProductDetailsComponents/RelatedProducts';
 import Breadcrumbs from '@/app/components/ProductDetailsComponents/Breadcrumbs';
-import ProductReviews from '@/app/components/ProductDetailsComponents/ProductReviews';
 import MobileStickyOrderBar from '@/app/components/ProductDetailsComponents/MobileStickyOrderBar';
 import { getI18n } from '@/lib/i18n';
 
@@ -47,7 +46,7 @@ export async function generateMetadata(
         ? `${product.name} من وكالة ${brandName}. متوفر للطلب والبيع بالجملة مع شحن موثوق عبر شركة حوا للتوزيع والتجارة. ${product.description.slice(0, 120)}`
         : `اشترِ ${product.name} من وكالة ${brandName} بأفضل أسعار الجملة المعتمدة من شركة حوا للتوزيع والتجارة.`;
 
-    const mainImage = (product.images as string).split(',').map((img: string) => img.trim()).filter(Boolean)[0] || '/logo.jpeg';
+    const mainImage = (product.images as string).split(',').map((img: string) => img.trim()).filter(Boolean)[0] || '/logo.png';
 
     return {
         title,
@@ -88,25 +87,15 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
         notFound();
     }
 
-    // Parallel fetch related products and review statistics
-    const [relatedProducts, reviewStats] = await Promise.all([
-        prisma.product.findMany({
-            where: {
-                categoryId: product.categoryId,
-                id: { not: product.id },
-                brand: { isActive: true },
-            },
-            take: 4,
-        }),
-        prisma.review.aggregate({
-            where: { productId: product.id, isApproved: true },
-            _avg: { rating: true },
-            _count: { id: true },
-        }),
-    ]);
-    
-    const averageRating = reviewStats._avg.rating || 0;
-    const totalReviews = reviewStats._count.id || 0;
+    // Parallel fetch related products
+    const relatedProducts = await prisma.product.findMany({
+        where: {
+            categoryId: product.categoryId,
+            id: { not: product.id },
+            brand: { isActive: true },
+        },
+        take: 4,
+    });
 
     const displayName = (language === 'ar' ? product.nameAr : product.nameEn) || product.name || product.nameAr || '';
     const mainImage = (product.images as string).split(',').map((img: string) => img.trim()).filter(Boolean)[0] || '';
@@ -131,20 +120,58 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
             "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             "itemCondition": "https://schema.org/NewCondition",
         },
-        ...(totalReviews > 0 ? {
-            "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": averageRating,
-                "reviewCount": totalReviews,
-            }
-        } : {})
+    };
+
+    // Schema.org BreadcrumbList Structured Data
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": language === "ar" ? "الرئيسية" : "Home",
+                "item": "https://hawatrading.com",
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": language === "ar" ? "المنتجات" : "Products",
+                "item": "https://hawatrading.com/products",
+            },
+            ...(product.category
+                ? [
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": product.category.name,
+                        "item": `https://hawatrading.com/categories/${product.category.slug}`,
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": displayName,
+                        "item": `https://hawatrading.com/products/${product.slug}`,
+                    },
+                ]
+                : [
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": displayName,
+                        "item": `https://hawatrading.com/products/${product.slug}`,
+                    },
+                ]),
+        ],
     };
 
     return (
-        <main className="grow w-full mx-auto container-custom py-4 lg:py-8">
+        <div className="grow w-full mx-auto container-custom py-4 lg:py-8">
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify([productSchema, breadcrumbSchema]).replace(/</g, '\\u003c')
+                }}
             />
 
             <Breadcrumbs
@@ -170,8 +197,6 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                         nameEn={product.nameEn}
                         brandName={product.brand?.name}
                         categoryName={product.category?.name}
-                        averageRating={averageRating}
-                        totalReviews={totalReviews}
                     />
 
                     <ProductPrice
@@ -215,8 +240,8 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                 </div>
             </div>
 
-            {/* Product Reviews Anchor */}
-            <div id="product-reviews" className="scroll-mt-32">
+            {/* Related Products Section */}
+            <div className="mt-8 lg:mt-12">
                 <RelatedProducts products={relatedProducts.map(p => ({
                     ...p,
                     price: Number(p.price),
@@ -226,12 +251,6 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                     createdAt: p.createdAt.toISOString(),
                     updatedAt: p.updatedAt.toISOString(),
                 }))} />
-
-                <ProductReviews
-                    productId={product.id}
-                    productName={product.name}
-                    productImage={mainImage}
-                />
             </div>
 
             <MobileStickyOrderBar
@@ -253,7 +272,7 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                     hidePrice: product.hidePrice,
                 }}
             />
-        </main>
+        </div>
     );
 }
 

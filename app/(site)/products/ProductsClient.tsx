@@ -89,11 +89,26 @@ const ProductsClient = ({
     const isArabic = language === "ar";
 
     const [products, setProducts] = useState<Product[]>(initialProducts);
+    const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [sort, setSort] = useState("best_sellers");
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [totalProducts, setTotalProducts] = useState(initialTotal);
     const [isInitialRender, setIsInitialRender] = useState(true);
+
+    // Sync initial props when navigating between different routes (e.g. brand or department pages)
+    useEffect(() => {
+        setCategories(initialCategories);
+        setProducts(initialProducts);
+        setTotalProducts(initialTotal);
+        setFilters({
+            brandIds: activeBrand ? [activeBrand.id] : [],
+            categoryIds: activeCategory ? [activeCategory.id] : [],
+            inStock: false,
+            onSale: false,
+            isTrending: false,
+        });
+    }, [initialCategories, initialProducts, initialTotal, activeBrand, activeCategory]);
 
     // View Density: 'grid' vs 'list' (Wholesale view)
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -116,6 +131,57 @@ const ProductsClient = ({
 
     const observerRef = useRef<HTMLDivElement>(null);
     const hasMore = products.length < totalProducts;
+
+    // Dynamically fetch and update categories/departments when brand filters change in sidebar
+    useEffect(() => {
+        if (isInitialRender) return;
+
+        let isMounted = true;
+        async function updateDynamicCategories() {
+            try {
+                if (filters.brandIds.length > 0) {
+                    const res = await fetch(`/api/categories?brandIds=${filters.brandIds.join(",")}`);
+                    if (res.ok && isMounted) {
+                        const data = await res.json();
+                        if (Array.isArray(data)) {
+                            setCategories(data);
+                            return;
+                        }
+                    }
+                } else if (activeMainCategory) {
+                    const res = await fetch(`/api/categories?mainCategoryId=${activeMainCategory.id}`);
+                    if (res.ok && isMounted) {
+                        const data = await res.json();
+                        if (Array.isArray(data)) {
+                            setCategories(data);
+                            return;
+                        }
+                    }
+                } else if (!activeBrand) {
+                    const res = await fetch(`/api/main-categories`);
+                    if (res.ok && isMounted) {
+                        const data = await res.json();
+                        if (Array.isArray(data)) {
+                            setCategories(data);
+                            return;
+                        }
+                    }
+                }
+                if (isMounted) {
+                    setCategories(initialCategories);
+                }
+            } catch (err) {
+                console.error("Failed to fetch dynamic categories:", err);
+                if (isMounted) setCategories(initialCategories);
+            }
+        }
+
+        updateDynamicCategories();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [filters.brandIds, activeMainCategory, activeBrand, isInitialRender, initialCategories]);
 
     // Debounce live search by 300ms
     useEffect(() => {
@@ -327,8 +393,8 @@ const ProductsClient = ({
     }, [initialBrands, filters.brandIds]);
 
     const selectedCategoryObjects = useMemo(() => {
-        return initialCategories.filter((c) => filters.categoryIds.includes(c.id));
-    }, [initialCategories, filters.categoryIds]);
+        return categories.filter((c) => filters.categoryIds.includes(c.id));
+    }, [categories, filters.categoryIds]);
 
     return (
         <div className="flex-1 container-custom py-4 md:py-6">
@@ -351,7 +417,7 @@ const ProductsClient = ({
                 {/* Faceted Filter Sidebar (Desktop & Mobile Drawer) */}
                 <ProductsSidebarFilter
                     brands={initialBrands}
-                    categories={initialCategories}
+                    categories={categories}
                     filters={filters}
                     onFiltersChange={setFilters}
                     onResetFilters={handleResetAllFilters}
@@ -600,6 +666,9 @@ const ProductsClient = ({
                     )}
 
                     {/* Products Display (Grid vs Wholesale List) */}
+                    <h2 className="sr-only">
+                        {isArabic ? "قائمة المنتجات وتوريد الطرود" : "Wholesale Products List"}
+                    </h2>
                     {viewMode === "grid" ? (
                         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
                             {products.map((product) => (

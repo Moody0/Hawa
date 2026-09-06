@@ -179,7 +179,7 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                         setIsQuickViewOpen(true);
                     }}
                     className="absolute z-20 top-3 left-3 sm:top-4 sm:left-4 w-7 h-7 sm:w-8 sm:h-8 bg-white/95 dark:bg-zinc-800/95 backdrop-blur-sm text-gray-700 dark:text-gray-200 rounded-lg flex items-center justify-center opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#0B192C] hover:text-white dark:hover:bg-white dark:hover:text-slate-900 border border-slate-200 dark:border-white/10"
-                    aria-label="Quick View"
+                    aria-label={language === 'ar' ? 'معاينة سريعة' : 'Quick View'}
                 >
                     <MdVisibility className="text-sm sm:text-base" />
                 </button>
@@ -290,7 +290,7 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                                 </span>
                             </div>
                         )}
-                        <span className="text-[9px] sm:text-[10px] font-semibold text-[#475569] dark:text-gray-500 shrink-0">
+                        <span className="text-[9px] sm:text-[10px] font-semibold text-[#475569] dark:text-slate-400 shrink-0">
                             {language === 'ar' 
                                 ? `أدنى طلب: ${product.minOrder && product.minOrder > 1 ? product.minOrder + ' ' : ''}${formatPackaging(product.packaging, 'ar')}`
                                 : `Min: ${product.minOrder || 1} ${formatPackaging(product.packaging, 'en', { short: true })}`}
@@ -326,7 +326,7 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                                 <button
                                     onClick={handleDecrease}
                                     className="w-8 h-8 rounded-lg bg-black/15 hover:bg-black/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation cursor-pointer"
-                                    aria-label="Decrease quantity"
+                                    aria-label={language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity'}
                                 >
                                     <MdRemove className="text-base" />
                                 </button>
@@ -344,7 +344,7 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                                 <button
                                     onClick={handleIncrease}
                                     className="w-8 h-8 rounded-lg bg-black/15 hover:bg-black/30 flex items-center justify-center transition-colors active:scale-90 touch-manipulation cursor-pointer"
-                                    aria-label="Increase quantity"
+                                    aria-label={language === 'ar' ? 'زيادة الكمية' : 'Increase quantity'}
                                 >
                                     <MdAdd className="text-base" />
                                 </button>

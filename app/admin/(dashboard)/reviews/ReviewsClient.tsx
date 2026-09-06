@@ -207,7 +207,7 @@ export default function ReviewsClient() {
                                                         {review.email && (
                                                             <span className="text-xs text-text-sub dark:text-gray-400">{review.email}</span>
                                                         )}
-                                                        <span className="text-xs text-text-sub dark:text-gray-500 mt-1">{new Date(review.createdAt).toLocaleDateString()}</span>
+                                                        <span className="text-xs text-text-sub dark:text-slate-400 mt-1">{new Date(review.createdAt).toLocaleDateString()}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-3 sm:p-5">
@@ -219,8 +219,8 @@ export default function ReviewsClient() {
                                                 <td className="p-3 sm:p-5">
                                                     <div className="flex flex-col gap-2">
                                                         <p className="text-text-main dark:text-gray-300 text-sm line-clamp-2 max-w-xs">{review.feedback || "-"}</p>
-                                                        {review.image && (
-                                                            <a href={review.image} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline bg-primary/5 px-2 py-1 rounded w-fit">
+                                                        {review.image && /^(https?:\/\/|\/uploads\/)/i.test(review.image) && (
+                                                            <a href={review.image} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline bg-primary/5 px-2 py-1 rounded w-fit">
                                                                 <MdImage className="text-sm" /> {t("products.reviewModal.uploadImage") || "View Image"}
                                                             </a>
                                                         )}

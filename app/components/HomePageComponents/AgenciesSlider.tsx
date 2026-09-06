@@ -46,17 +46,17 @@ const BRAND_LATIN_NAMES: Record<string, string> = {
 };
 
 const BRAND_SPECIALTIES: Record<string, { ar: string; en: string }> = {
-    'rocavera': { ar: 'منظفات ومستحضرات عناية شخصية', en: 'Hygiene & Personal Care' },
-    'buffalo': { ar: 'سوائل جلي ومنظفات استهلاكية', en: 'Detergents & Consumer FMCG' },
-    'alreef': { ar: 'زيوت وسمن وبقوليات أساسية', en: 'Cooking Oils, Ghee & Legumes' },
-    'monda': { ar: 'منتجات شوكولاتة وحلويات', en: 'Chocolates & Confectionery' },
-    'moria': { ar: 'منتجات شوكولاتة وحلويات', en: 'Chocolates & Confectionery' },
-    'zwan': { ar: 'لانشون ولحوم معلبة فاخرة', en: 'Premium Luncheon & Canned Meats' },
-    'haleebna': { ar: 'سمن بقري نقي وألبان مجففة', en: 'Pure Cow Ghee & Dairy' },
-    'sunbell': { ar: 'تونة ولحوم معلبة ممتازة', en: 'Corned Beef & Seafood' },
-    'silver-fish': { ar: 'تونة خفيفة وسردين بالزيت', en: 'Canned Sardines & Tuna' },
-    'al-maghrabi': { ar: 'سردين بالزيت وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
-    'almaghrabi': { ar: 'سردين بالزيت وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
+    'rocavera': { ar: 'منظفات وعناية شخصية', en: 'Hygiene & Personal Care' },
+    'buffalo': { ar: 'سوائل جلي ومنظفات', en: 'Detergents & FMCG' },
+    'alreef': { ar: 'زيوت وسمن وبقوليات', en: 'Cooking Oils, Ghee & Legumes' },
+    'monda': { ar: 'شوكولاتة وحلويات', en: 'Chocolates & Confectionery' },
+    'moria': { ar: 'شوكولاتة وحلويات', en: 'Chocolates & Confectionery' },
+    'zwan': { ar: 'لانشون ولحوم معلبة', en: 'Luncheon & Canned Meats' },
+    'haleebna': { ar: 'سمن بقري وألبان مجففة', en: 'Pure Cow Ghee & Dairy' },
+    'sunbell': { ar: 'تونة ولحوم معلبة', en: 'Corned Beef & Seafood' },
+    'silver-fish': { ar: 'تونة وسردين بالزيت', en: 'Canned Sardines & Tuna' },
+    'al-maghrabi': { ar: 'سردين وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
+    'almaghrabi': { ar: 'سردين وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
 };
 
 export default function AgenciesSlider({ brands = [], title, subtitle }: AgenciesSliderProps) {
@@ -93,87 +93,61 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
         return isArabic ? 'منتجات تجارية معتمدة' : 'Certified Agency Products';
     };
 
-    const sectionTitle = title || (isArabic ? 'علامات تجارية تثق بنا' : 'Brands That Trust Us');
+    const sectionTitle = title || (isArabic ? 'الوكالات والعلامات التجارية المعتمدة' : 'Authorized Commercial Agencies');
     const sectionSubtitle =
         subtitle ||
         (isArabic
-            ? 'نفخر بتمثيل وتوزيع مجموعة من أفضل العلامات التجارية المحلية والعالمية'
-            : 'Proud to represent and distribute a selection of the finest local and global brands');
+            ? 'توزيع مباشر وحصري من كبرى الشركات المحلية والعالمية لكافة المحلات والسوبرماركت'
+            : 'Direct wholesale distribution of leading FMCG brands for supermarkets and retailers');
 
     return (
-        <section className="w-full py-6 md:py-8 bg-[#FCFCFD] dark:bg-[#0B192C]">
-            {/* Inline CSS to guarantee multi-column layout prior to Swiper JS initialization */}
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .agencies-slider-swiper:not(.swiper-initialized) .swiper-wrapper {
-                    display: flex !important;
-                    gap: 16px !important;
-                    overflow: hidden !important;
-                    width: 100% !important;
-                }
-                .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
-                    flex: 0 0 calc((100% - 16px) / 2) !important;
-                    max-width: calc((100% - 16px) / 2) !important;
-                    width: calc((100% - 16px) / 2) !important;
-                    display: block !important;
-                }
-                @media (min-width: 640px) {
-                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
-                        flex: 0 0 calc((100% - 32px) / 3) !important;
-                        max-width: calc((100% - 32px) / 3) !important;
-                        width: calc((100% - 32px) / 3) !important;
-                    }
-                }
-                @media (min-width: 1024px) {
-                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
-                        flex: 0 0 calc((100% - 60px) / 4) !important;
-                        max-width: calc((100% - 60px) / 4) !important;
-                        width: calc((100% - 60px) / 4) !important;
-                    }
-                }
-                @media (min-width: 1280px) {
-                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
-                        flex: 0 0 calc((100% - 80px) / 5) !important;
-                        max-width: calc((100% - 80px) / 5) !important;
-                        width: calc((100% - 80px) / 5) !important;
-                    }
-                }
-            `}} />
+        <section className="w-full py-4 md:py-6">
             <div className="container-custom">
-                {/* Centered Ornamental Section Header with Golden Accent Lines */}
-                <div className="text-center mb-5 md:mb-6">
-                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2">
-                        <span className="w-8 sm:w-12 h-[2px] bg-[#8A6305] rounded-full" />
-                        <h2 className="text-xl sm:text-2xl md:text-[28px] font-black text-[#0B192C] dark:text-white tracking-tight">
+                {/* Header with Title and All Brands Link */}
+                <div className="flex items-end justify-between mb-4 sm:mb-6 border-b border-slate-200 dark:border-white/10 pb-3 sm:pb-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-[#475569] dark:text-slate-400">
+                                {isArabic ? 'وكالات رسمية معتمدة' : 'Official Brands'}
+                            </span>
+                        </div>
+                        <h2 className="text-lg sm:text-xl md:text-2xl font-black text-[#0B192C] dark:text-white tracking-tight">
                             {sectionTitle}
                         </h2>
-                        <span className="w-8 sm:w-12 h-[2px] bg-[#8A6305] rounded-full" />
                     </div>
-                    <p className="text-xs sm:text-sm text-[#475569] dark:text-slate-400 max-w-xl mx-auto font-normal">
-                        {sectionSubtitle}
-                    </p>
+
+                    <div className="flex items-center gap-3">
+                        {/* Desktop Navigation Chevrons */}
+                        <div className="hidden md:flex items-center gap-1.5 me-2 border-e border-slate-200 dark:border-white/10 pe-3">
+                            <button
+                                type="button"
+                                className="agency-nav-right w-8 h-8 rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 flex items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] transition cursor-pointer shadow-2xs disabled:opacity-30"
+                                aria-label={isArabic ? 'الوكالات التالية' : 'Next brands'}
+                            >
+                                <MdChevronRight className="text-xl" />
+                            </button>
+                            <button
+                                type="button"
+                                className="agency-nav-left w-8 h-8 rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 flex items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] transition cursor-pointer shadow-2xs disabled:opacity-30"
+                                aria-label={isArabic ? 'الوكالات السابقة' : 'Previous brands'}
+                            >
+                                <MdChevronLeft className="text-xl" />
+                            </button>
+                        </div>
+
+                        <Link
+                            href="/brands"
+                            className="text-xs font-bold text-[#8A6305] hover:text-[#735204] dark:text-[#E5B54A] flex items-center gap-1 transition-colors whitespace-nowrap"
+                        >
+                            <span>{isArabic ? 'كافة الوكالات' : 'View All'}</span>
+                            <span className={isArabic ? 'rotate-180 inline-block' : 'inline-block'}>→</span>
+                        </Link>
+                    </div>
                 </div>
 
-                {/* Swiper Slider with Floating Side Navigation Chevrons */}
-                <div className="relative w-full px-1 sm:px-2">
-                    {/* Floating Circular Prev Button (Left) */}
-                    <button
-                        type="button"
-                        className="agency-nav-left absolute -left-2 sm:-left-4 lg:-left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/15 shadow-[0_2px_10px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#8A6305] hover:text-[#735204] hover:bg-amber-50/50 dark:hover:bg-white/5 hover:border-[#8A6305]/60 hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-                        aria-label="Previous"
-                    >
-                        <MdChevronLeft className="text-xl sm:text-2xl" />
-                    </button>
-
-                    {/* Floating Circular Next Button (Right) */}
-                    <button
-                        type="button"
-                        className="agency-nav-right absolute -right-2 sm:-right-4 lg:-right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/15 shadow-[0_2px_10px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#8A6305] hover:text-[#735204] hover:bg-amber-50/50 dark:hover:bg-white/5 hover:border-[#8A6305]/60 hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-                        aria-label="Next"
-                    >
-                        <MdChevronRight className="text-xl sm:text-2xl" />
-                    </button>
-
+                {/* Swiper Slider */}
+                <div className="relative w-full">
                     <Swiper
                         modules={[Autoplay, Navigation]}
                         navigation={{
@@ -181,23 +155,22 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                             nextEl: isArabic ? '.agency-nav-left' : '.agency-nav-right',
                         }}
                         autoplay={{
-                            delay: 4000,
+                            delay: 4500,
                             disableOnInteraction: false,
                             pauseOnMouseEnter: true,
                         }}
                         observer={true}
                         observeParents={true}
-                        resizeObserver={true}
                         watchOverflow={true}
                         loop={brands.length > 5}
-                        spaceBetween={16}
+                        spaceBetween={12}
                         slidesPerView={2}
                         breakpoints={{
-                            640: { slidesPerView: 3, spaceBetween: 16 },
-                            1024: { slidesPerView: 4, spaceBetween: 20 },
-                            1280: { slidesPerView: 5, spaceBetween: 20 },
+                            640: { slidesPerView: 3, spaceBetween: 14 },
+                            1024: { slidesPerView: 4, spaceBetween: 16 },
+                            1280: { slidesPerView: 5, spaceBetween: 18 },
                         }}
-                        className="agencies-slider-swiper !py-3 !px-1"
+                        className="agencies-slider-swiper !py-1"
                     >
                         {brands.map((brand) => {
                             const displayName = isArabic ? brand.name : getBrandLatinName(brand);
@@ -207,44 +180,38 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                                 <SwiperSlide key={brand.id || brand.slug} className="h-auto">
                                     <Link
                                         href={`/products?brand=${brand.slug}`}
-                                        className="group h-[185px] sm:h-[195px] w-full flex flex-col items-center justify-between p-4 sm:p-4.5 rounded-xl bg-white dark:bg-[#132035] border border-slate-100 dark:border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 text-center"
+                                        className="group h-[160px] sm:h-[175px] w-full flex flex-col items-center justify-between p-3.5 sm:p-4 rounded-xl bg-white dark:bg-[#132035] border border-slate-200/80 dark:border-white/10 shadow-2xs hover:border-[#8A6305] dark:hover:border-[#8A6305] hover:shadow-sm transition-all duration-200 text-center"
                                     >
                                         {/* Brand Logo Container */}
-                                        <div className="relative w-full h-16 sm:h-20 flex items-center justify-center p-1">
+                                        <div className="relative w-full h-14 sm:h-16 flex items-center justify-center p-1">
                                             {brand.image ? (
                                                 <ResilientImage
                                                     src={brand.image}
                                                     alt={brand.name}
                                                     showSkeleton={false}
-                                                    className="w-full h-full object-contain filter group-hover:scale-105 transition-transform duration-300"
+                                                    className="w-full h-full object-contain filter group-hover:scale-105 transition-transform duration-200"
                                                 />
                                             ) : (
-                                                <span className="text-lg font-black text-[#0B192C] dark:text-white">
+                                                <span className="text-base font-black text-[#0B192C] dark:text-white">
                                                     {displayName}
                                                 </span>
                                             )}
                                         </div>
 
-                                        {/* Brand Typography (Name & Specialty) */}
+                                        {/* Brand Typography */}
                                         <div className="w-full flex flex-col items-center">
-                                            <h3 className="text-sm sm:text-base font-bold text-[#0B192C] dark:text-white group-hover:text-[#8A6305] transition-colors truncate max-w-full">
+                                            <h3 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white group-hover:text-[#8A6305] transition-colors truncate max-w-full">
                                                 {displayName}
                                             </h3>
-                                            <p className="text-xs text-[#475569] dark:text-slate-400 mt-0.5 line-clamp-1 font-normal">
+                                            <p className="text-[11px] text-[#475569] dark:text-slate-400 mt-0.5 line-clamp-1 font-normal">
                                                 {specialty}
                                             </p>
                                         </div>
 
                                         {/* Bottom Action Link */}
-                                        <div className="flex items-center justify-center gap-1.5 text-xs sm:text-[13px] font-bold text-[#8A6305] group-hover:text-[#735204] transition-colors mt-1">
+                                        <div className="flex items-center justify-center gap-1 text-[11px] sm:text-xs font-bold text-[#8A6305] group-hover:text-[#735204] transition-colors">
                                             <span>{isArabic ? 'عرض المنتجات' : 'View Products'}</span>
-                                            <span
-                                                className={`text-sm transition-transform duration-200 ${
-                                                    isArabic
-                                                        ? 'group-hover:-translate-x-1'
-                                                        : 'group-hover:translate-x-1'
-                                                }`}
-                                            >
+                                            <span className={isArabic ? 'group-hover:-translate-x-1 transition-transform' : 'group-hover:translate-x-1 transition-transform'}>
                                                 {isArabic ? '←' : '→'}
                                             </span>
                                         </div>
@@ -255,34 +222,6 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                     </Swiper>
                 </div>
             </div>
-
-            {/* Critical CSS for SSR / Pre-Hydration: prevents layout shift before Swiper JS initializes */}
-            <style jsx global>{`
-                .agencies-slider-swiper:not(.swiper-initialized) .swiper-wrapper {
-                    display: flex !important;
-                    gap: 16px !important;
-                    overflow: hidden !important;
-                }
-                .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
-                    width: calc((100% - 16px) / 2) !important;
-                    flex-shrink: 0 !important;
-                }
-                @media (min-width: 640px) {
-                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
-                        width: calc((100% - 32px) / 3) !important;
-                    }
-                }
-                @media (min-width: 1024px) {
-                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
-                        width: calc((100% - 60px) / 4) !important;
-                    }
-                }
-                @media (min-width: 1280px) {
-                    .agencies-slider-swiper:not(.swiper-initialized) .swiper-slide {
-                        width: calc((100% - 80px) / 5) !important;
-                    }
-                }
-            `}</style>
         </section>
     );
 }

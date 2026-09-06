@@ -111,14 +111,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico?v=2", sizes: "any" },
-      { url: "/favicon-32x32.png?v=2", type: "image/png", sizes: "32x32" },
-      { url: "/favicon-16x16.png?v=2", type: "image/png", sizes: "16x16" },
-      { url: "/icon.png?v=2", type: "image/png", sizes: "192x192" },
+      { url: "/favicon.ico?v=hawa_3", sizes: "any" },
+      { url: "/favicon-32x32.png?v=hawa_3", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png?v=hawa_3", type: "image/png", sizes: "16x16" },
+      { url: "/icon.png?v=hawa_3", type: "image/png", sizes: "192x192" },
     ],
-    shortcut: "/favicon.ico?v=2",
+    shortcut: "/favicon.ico?v=hawa_3",
     apple: [
-      { url: "/apple-touch-icon.png?v=2", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png?v=hawa_3", sizes: "180x180", type: "image/png" },
     ],
   },
   category: "food & beverage",
@@ -140,7 +140,7 @@ export default async function RootLayout({
     "@type": "WholesaleStore",
     "name": "Hawa Distribution & Trading - حوا للتوزيع والتجارة",
     "url": metadataBase,
-    "logo": `${metadataBase}/logo.jpeg`,
+    "logo": `${metadataBase}/logo.png`,
     "image": `${metadataBase}/og-image.jpg`,
     "description": "شركة حوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة.",
     "currenciesAccepted": "SYP, USD",
@@ -157,22 +157,33 @@ export default async function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }}
         />
         <script
           type="speculationrules"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              prerender: [
+              prefetch: [
                 {
                   where: {
                     and: [
-                      { href_matches: "/*" },
+                      {
+                        or: [
+                          { href_matches: "/products/*" },
+                          { href_matches: "/brands/*" },
+                          { href_matches: "/categories/*" },
+                          { href_matches: "/departments/*" },
+                        ],
+                      },
                       { not: { href_matches: "/admin/*" } },
                       { not: { href_matches: "/api/*" } },
+                      { not: { href_matches: "/account/*" } },
+                      { not: { href_matches: "/cart" } },
+                      { not: { href_matches: "/place-order" } },
+                      { not: { href_matches: "/complete-order" } },
                     ],
                   },
-                  eagerness: "moderate",
+                  eagerness: "conservative",
                 },
               ],
             }),
@@ -183,6 +194,12 @@ export default async function RootLayout({
         className={`${figtree.className} ${noto_sans_arabic.className} antialiased`}
         suppressHydrationWarning
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-[#0B192C] focus:text-white focus:rounded-xl focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#8A6305] font-bold text-sm"
+        >
+          {language === 'ar' ? 'تخطي إلى المحتوى الرئيسي' : 'Skip to main content'}
+        </a>
         <div id="app-shell">
           <Providers initialExchangeRate={exchangeRate} initialLanguage={language}>
             {children}

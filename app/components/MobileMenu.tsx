@@ -161,13 +161,6 @@ const MobileMenu = ({
                                     {language === 'ar' ? 'المنتجات' : 'Products'}
                                 </Link>
                                 <Link
-                                    href="/services"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"
-                                >
-                                    {language === 'ar' ? 'خدمات التوزيع' : 'Distribution Services'}
-                                </Link>
-                                <Link
                                     href="/blog"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className="py-3 px-4 font-bold text-sm text-[#0B192C] dark:text-white hover:text-[#8A6305] transition-colors"

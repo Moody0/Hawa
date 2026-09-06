@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { MdClose, MdPerson, MdLocationOn, MdInventory2, MdSync, MdDelete, MdStore, MdDescription } from "react-icons/md";
 import { FaWhatsapp } from "react-icons/fa";
@@ -42,6 +43,16 @@ interface OrderDetailsModalProps {
 
 export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, onDelete, isDeleting }: OrderDetailsModalProps) {
     const { t, dir, language } = useLanguage();
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen || !order) return null;
 
     const getStatusColor = (status: string) => {
@@ -58,14 +69,19 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
     const statusColor = getStatusColor(order.status);
 
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+        <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="order-details-title"
+            className="fixed inset-0 z-100 flex items-center justify-center p-4"
+        >
             <div className="absolute inset-0 bg-text-main/40 dark:bg-black/60 backdrop-blur-[2px]" onClick={onClose}></div>
             <div className="relative bg-white dark:bg-surface-dark w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
                 {/* Header */}
                 <div className="px-6 py-5 border-b border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/20">
                     <div>
-                        <h3 className="text-xl font-extrabold text-text-main dark:text-white tracking-tight">
+                        <h3 id="order-details-title" className="text-xl font-extrabold text-text-main dark:text-white tracking-tight">
                             {t('admin.orderDetails')}
                         </h3>
                         <p className="text-xs text-text-sub dark:text-gray-400 font-medium">
@@ -74,6 +90,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                     </div>
                     <button
                         onClick={onClose}
+                        aria-label={language === "ar" ? "إغلاق" : "Close"}
                         className="p-2 text-text-sub dark:text-gray-400 hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
                     >
                         <MdClose className="text-[24px]" />
@@ -86,7 +103,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                     {/* Status & Total */}
                     <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-background-light dark:bg-gray-800/50 border border-black/[0.04] dark:border-white/[0.04]">
                         <div className="space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-gray-500">{t('admin.currentStatus')}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-slate-400">{t('admin.currentStatus')}</p>
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${statusColor === "blue" ? "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50" :
                                 statusColor === "amber" ? "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50" :
                                     statusColor === "emerald" ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50" :
@@ -97,7 +114,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                             </span>
                         </div>
                         <div className={`space-y-1 ${dir === 'rtl' ? 'text-start' : 'text-end'}`}>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-gray-500">{t('admin.totalAmount')}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-slate-400">{t('admin.totalAmount')}</p>
                             {order.totalAmount > 0 ? (
                                 <p className="text-2xl font-black text-primary" dir="ltr">${order.totalAmount.toFixed(2)}</p>
                             ) : (
@@ -167,10 +184,10 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                             <table className="w-full text-start border-collapse">
                                 <thead>
                                     <tr className="bg-gray-50/50 dark:bg-gray-800/20 border-b border-black/[0.04] dark:border-white/[0.04]">
-                                        <th className={`p-3 text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-gray-500 ${dir === 'rtl' ? 'text-end' : 'text-start'}`}>{t('admin.product')}</th>
-                                        <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-gray-500 text-center">{t('admin.qty')}</th>
-                                        <th className={`p-3 text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-gray-500 ${dir === 'rtl' ? 'text-start' : 'text-end'}`}>{t('admin.price')}</th>
-                                        <th className={`p-3 text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-gray-500 ${dir === 'rtl' ? 'text-start' : 'text-end'}`}>{t('admin.total')}</th>
+                                        <th className={`p-3 text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-slate-400 ${dir === 'rtl' ? 'text-end' : 'text-start'}`}>{t('admin.product')}</th>
+                                        <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-slate-400 text-center">{t('admin.qty')}</th>
+                                        <th className={`p-3 text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-slate-400 ${dir === 'rtl' ? 'text-start' : 'text-end'}`}>{t('admin.price')}</th>
+                                        <th className={`p-3 text-[10px] font-bold uppercase tracking-wider text-text-sub dark:text-slate-400 ${dir === 'rtl' ? 'text-start' : 'text-end'}`}>{t('admin.total')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-black/[0.04] dark:divide-white/[0.04] dark:divide-gray-700">

@@ -57,7 +57,11 @@ const CompleteOrderContent = () => {
 
         const fetchOrder = async () => {
             try {
-                const response = await fetch(`/api/orders/${orderId}`);
+                const token = searchParams.get('token');
+                const fetchUrl = token
+                    ? `/api/orders/${orderId}?token=${encodeURIComponent(token)}`
+                    : `/api/orders/${orderId}`;
+                const response = await fetch(fetchUrl);
                 if (response.ok) {
                     const data = await response.json();
                     setOrder(data);
@@ -73,7 +77,7 @@ const CompleteOrderContent = () => {
         };
 
         fetchOrder();
-    }, [orderId, router]);
+    }, [orderId, router, searchParams]);
 
     if (loading) {
         return (
@@ -106,7 +110,7 @@ const CompleteOrderContent = () => {
     const whatsappUrl = buildWhatsAppUrl(targetNumber, waMessage);
 
     return (
-        <main className="flex-grow w-full max-w-4xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center">
+        <div className="flex-grow w-full max-w-4xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center">
             <OrderSuccessHeader />
 
             {/* Prominent WhatsApp Dispatch / Fallback Card */}
@@ -158,7 +162,7 @@ const CompleteOrderContent = () => {
             </div>
 
             <OrderSupportFooter />
-        </main>
+        </div>
     );
 };
 

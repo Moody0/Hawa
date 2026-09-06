@@ -69,6 +69,7 @@ model Category {
   @@index([brandId])
   @@index([mainCategoryId])
   @@index([isFeatured])
+  @@index([isFeatured, updatedAt])
 }
 
 model Product {
@@ -118,6 +119,9 @@ model Product {
   @@index([stock])
   @@index([categoryId, price])
   @@index([brandId, price])
+  @@index([updatedAt])
+  @@index([discountPrice])
+  @@index([isTrending, updatedAt])
 }
 
 model Brand {
@@ -182,6 +186,8 @@ model Banner {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([isActive, createdAt])
 }
 
 model PromoCode {
@@ -236,24 +242,24 @@ model Settings {
   shippingTitleAr           String?  @default("توزيع سريع وموثوق")
   standardShippingTime      String?  @default("1-3 Business Days")
   verificationDesc          String?  @default("Orders are verified and scheduled immediately with our logistics fleet.")
-  verificationDescAr        String?  @default("يتم التحقق من الطلبات وجدولتها فوراً مع أسطولنا اللوجستي.")
+  verificationDescAr        String?  @default("يتم التحقق من الطلبات وجدولتها فوراً للتوصيل المباشر لباب المحل.")
   verificationTitle         String?  @default("Verification Process")
   verificationTitleAr       String?  @default("عملية التحقق")
   hygieneDesc               String?  @default("Our temperature-controlled warehouses ensure optimal quality preservation.")
   hygieneDescAr             String?  @default("تضمن مستودعاتنا وشاحناتنا درجات حرارة وبيئة تخزين مثالية حتى نقطة التسليم.")
   hygieneTitle              String?  @default("Safety & Temperature Storage")
   hygieneTitleAr            String?  @default("بروتوكولات السلامة والتخزين")
-  shippingReturnsImage      String?  @default("https://lh3.googleusercontent.com/aida-public/AB6AXuC1GmfD6bueEsJqlHNPjDWHMlhsLZSm2Jmp21TUCLKvobkcd7oAPMMdwzfm8BOHC5XtR0EP6tLI7DT5hhyLxuijsbpX2kQf6iNlqROU-8k-DrqZAUqdc7-0lE4nxuCcLaEb0fEaXVBxc_yXkiUlyhfvaYJ1FfHZtngnoJbeanLgsf7rcxqON6rjkoC4BQv6FhlwLNKZrMbxjCugphq-bo5GCqBoLfmjjZSuH0N5eV-Kz33xFQTD5jSYCTsVYAwOkwhLQsQiPD_lnD9U")
-  aboutHeroImage            String?  @default("https://lh3.googleusercontent.com/aida-public/AB6AXuAz8qN2iAHz-UZeEQfqOY49U5OCZ5z4ejVm7ILFjFSl9S5xg_6UuBa61qOmrkMPrBa4CuXDzHa9EN3-LNyUxi5IDK5A9TvJWkNuG-tt_RRyvJH8LvynO1daOEkTk47KDtkW3Md2ugZYShZJdxolsjiJUtDdOOz4Q7-6TNrexIvyClP0ADf1TWdbCUk1kBn8bfzhTC1cn8s9jG3yt0tDDht7__J5YKKf690SmKN4WIJX_pc2LOj3x1CnYk5JuqEu0Bzp2vGwsrYLaJWb")
-  aboutHeroSubtitle         String?  @default("Your trusted partner for distributing top quality global goods and food products.")
-  aboutHeroSubtitleAr       String?  @default("شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.")
-  aboutHeroTitle            String?  @default("Our Story")
-  aboutHeroTitleAr          String?  @default("قصتنا")
-  aboutNarrativeDesc1       String?  @default("At Hawa Distribution, we bridge the gap between world-renowned international brands and local markets. We believe in providing retailers and businesses with seamless access to authentic, top-tier goods at competitive wholesale prices.")
-  aboutNarrativeDesc1Ar     String?  @default("في شركة حوا للتوزيع والتجارة، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية والأسواق المحلية.")
-  aboutNarrativeDesc2       String?  @default("With rigorous quality control, modern logistics, and a commitment to reliability, Hawa Distribution has established itself as the trusted partner for food and consumer goods distribution across all governorates.")
-  aboutNarrativeDesc2Ar     String?  @default("بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت شركة حوا مكانتها كشريك رائد وموثوق لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.")
-  aboutNarrativeImage       String?  @default("https://lh3.googleusercontent.com/aida-public/AB6AXuC4yp4c_LJLNPwaV2ay8DZ6xRHD0UF1WqXU8eDtrdDoiVjtq9oNRc9Cn6cnbqsNwOLO-y-99jnkiLnCsGLs2rQqthU8TPqhAh2Msisbst1UyfyrILBR5fRO7KYu90u1FEoeRRjGceGVbB5vz2SJAtjzUrLLtA6BmR8VN5a5Seo4MraBJj7i4Gs4QPEZbURtSN-F7wbJsu4WNj3pEaWlye2SuJvokQhYXJ27gnAoabHg5_0_4DZY49qyKnQuMHHL9atOIILRIMD3FkeZ")
+  shippingReturnsImage      String?  @default("/images/hawa_hero.jpg")
+  aboutHeroImage            String?  @default("/images/hawa_wholesale_hub.jpg")
+  aboutHeroSubtitle         String?  @default("Your trusted partner for distributing top quality wholesale FMCG and food products.")
+  aboutHeroSubtitleAr       String?  @default("شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات والمصانع.")
+  aboutHeroTitle            String?  @default("Our Story in Wholesale Distribution")
+  aboutHeroTitleAr          String?  @default("قصتنا في ريادة وتوزيع الجملة")
+  aboutNarrativeDesc1       String?  @default("At Hawa Distribution, we operate as the vital supply line for grocery retailers, supermarkets, and wholesalers. We partner directly with leading domestic and international food manufacturers to supply authentic, factory-sealed consumer goods at official wholesale rates.")
+  aboutNarrativeDesc1Ar     String?  @default("في شركة حوا للتوزيع والتجارة، نعمل كشريان إمداد رئيسي لأصحاب السوبرماركت والبقالات وتجار الجملة. نربط كبرى المصانع والشركات المنتجة للسلع الغذائية بنقاط البيع مباشرة.")
+  aboutNarrativeDesc2       String?  @default("With temperature-controlled central warehouses and a dedicated logistics fleet covering all Syrian governorates, we guarantee punctual deliveries, verified shelf-life, and transparent purchase invoicing.")
+  aboutNarrativeDesc2Ar     String?  @default("بفضل مستودعاتنا المركزية المجهزة وشبكة التوزيع المنظمة التي تغطي كافة المحافظات السورية، نضمن مواعيد تسليم دقيقة لباب المحل، مع مطابقة تامة للمواصفات وفواتير موثقة.")
+  aboutNarrativeImage       String?  @default("/images/hawa_hero.jpg")
   aboutNarrativeQuote       String?  @default("Connecting you with the world's finest brands.")
   aboutNarrativeQuoteAr     String?  @default("جودة مضمونة وخدمة توزيع موثوقة.")
   aboutNarrativeTitle       String?  @default("Our Mission for Quality Distribution")
@@ -267,9 +273,9 @@ model Settings {
   aboutValue2Title          String?  @default("100% Authentic")
   aboutValue2TitleAr        String?  @default("أصلي 100٪")
   aboutValue3Desc           String?  @default("Temperature-controlled logistics fleet covering all distribution channels.")
-  aboutValue3DescAr         String?  @default("أسطول سيارات وشاحنات مجهزة لنقل وتوزيع البضائع بدقة وكفاءة.")
+  aboutValue3DescAr         String?  @default("سيارات وشاحنات مجهزة لنقل وتوزيع البضائع بدقة وكفاءة لباب المحل.")
   aboutValue3Title          String?  @default("Reliable Fleet")
-  aboutValue3TitleAr        String?  @default("أسطول توزيع مجهز")
+  aboutValue3TitleAr        String?  @default("شبكة توزيع مجهزة")
   aboutValuesDesc           String?  @default("We are committed to transparency, reliability, and excellence in food distribution.")
   aboutValuesDescAr         String?  @default("نحن ملتزمون بالشفافية والموثوقية والتميز في توزيع البضائع والمواد الغذائية.")
   aboutValuesTitle          String?  @default("Our Core Values")
@@ -366,6 +372,7 @@ model Review {
 
   @@index([productId])
   @@index([productId, isApproved])
+  @@index([isApproved, createdAt])
 }
 
 model Customer {
@@ -377,7 +384,7 @@ model Customer {
   address      String
   password     String
   notes        String?
-  isActive     Boolean        @default(true)
+  isActive     Boolean        @default(false)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   orders       Order[]

@@ -296,10 +296,10 @@ const ProductsSidebarFilter: React.FC<ProductsSidebarFilterProps> = ({
                                             type="checkbox"
                                             checked={isChecked}
                                             onChange={() => handleToggleBrand(brand.id)}
-                                            className="sr-only"
+                                            className="sr-only peer"
                                         />
                                         <div
-                                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-[#8A6305] peer-focus-visible:ring-offset-1 ${
                                                 isChecked
                                                     ? "bg-[#8A6305] text-white border-[#8A6305]"
                                                     : "border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
@@ -323,7 +323,7 @@ const ProductsSidebarFilter: React.FC<ProductsSidebarFilterProps> = ({
                                     </div>
 
                                     {count !== undefined && (
-                                        <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500 shrink-0">
+                                        <span className="text-[10px] font-mono text-gray-400 dark:text-slate-400 shrink-0">
                                             ({count})
                                         </span>
                                     )}
@@ -380,10 +380,10 @@ const ProductsSidebarFilter: React.FC<ProductsSidebarFilterProps> = ({
                                             type="checkbox"
                                             checked={isChecked}
                                             onChange={() => handleToggleCategory(cat.id)}
-                                            className="sr-only"
+                                            className="sr-only peer"
                                         />
                                         <div
-                                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-[#8A6305] peer-focus-visible:ring-offset-1 ${
                                                 isChecked
                                                     ? "bg-[#8A6305] text-white border-[#8A6305]"
                                                     : "border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
@@ -396,7 +396,7 @@ const ProductsSidebarFilter: React.FC<ProductsSidebarFilterProps> = ({
                                     </div>
 
                                     {cat._count?.products !== undefined && (
-                                        <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500 shrink-0">
+                                        <span className="text-[10px] font-mono text-gray-400 dark:text-slate-400 shrink-0">
                                             ({cat._count.products})
                                         </span>
                                     )}

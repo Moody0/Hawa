@@ -22,7 +22,7 @@ export default function ProductShareButtons({
         if (typeof window !== 'undefined') {
             return `${window.location.origin}/products/${productSlug}`;
         }
-        return `https://zadland.com/products/${productSlug}`;
+        return `https://hawatrading.com/products/${productSlug}`;
     };
 
     const handleCopy = async () => {

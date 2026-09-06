@@ -154,7 +154,7 @@ export default function BrandShowcaseClient({
     };
 
     return (
-        <main className="flex-1 container-custom py-4 md:py-8">
+        <div className="flex-1 container-custom py-4 md:py-8">
             {/* Architectural Brand Masthead */}
             <BrandMasthead brand={brand} totalProducts={initialTotal} basePath={basePath} />
 
@@ -198,6 +198,9 @@ export default function BrandShowcaseClient({
             )}
 
             {/* Wholesale Product Grid */}
+            <h2 className="sr-only">
+                {isArabic ? `منتجات ${brand.name} بالجملة` : `${brand.name} Wholesale Products`}
+            </h2>
             {products.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                     {products.map((product) => (
@@ -218,6 +221,6 @@ export default function BrandShowcaseClient({
                     </div>
                 </div>
             )}
-        </main>
+        </div>
     );
 }

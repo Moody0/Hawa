@@ -46,7 +46,7 @@ const Categories = ({ categories, t, dir }: CategoriesProps) => {
                                     alt={category.name}
                                     fill
                                     sizes="(max-width: 768px) 50vw, 25vw"
-                                    className="object-contain transition-transform duration-500 group-hover:scale-110"
+                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
                             </div>
                             <div className="flex flex-col items-center text-center px-1">

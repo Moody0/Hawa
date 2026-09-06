@@ -232,7 +232,7 @@ export default function MerchantPortalPage() {
     }
 
     return (
-        <main className="container-custom py-8 md:py-12">
+        <div className="container-custom py-8 md:py-12">
             {/* Top Merchant Identity Banner */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0B192C] via-[#13233a] to-[#0F172A] text-white p-6 sm:p-8 md:p-10 mb-8 shadow-xl">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-[#8A6305]/15 rounded-full blur-3xl pointer-events-none" />
@@ -622,6 +622,6 @@ export default function MerchantPortalPage() {
                     </form>
                 </div>
             )}
-        </main>
+        </div>
     );
 }

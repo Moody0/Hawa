@@ -227,7 +227,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                      return (
                                          <li key={brand.id}>
                                              <Link 
-                                                 href={`/products?brand=${brand.slug}`} 
+                                                 href={`/brands/${brand.slug}`} 
                                                  onClick={onClose}
                                                  className="text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] leading-relaxed inline hover-underline-animated"
                                              >
@@ -236,7 +236,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                          </li>
                                      );
                                  }) : (
-                                     <li className="text-[15px] font-medium text-[#475569]/50 dark:text-gray-500">
+                                     <li className="text-[15px] font-medium text-slate-500 dark:text-slate-400">
                                          {language === "ar" ? "لا توجد ماركات" : "No brands yet"}
                                      </li>
                                  )}
@@ -252,7 +252,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                  {data.categories.length > 0 ? data.categories.map((cat) => (
                                      <li key={cat.id}>
                                          <Link 
-                                             href={`/department/${data.slug}?category=${cat.slug}`} 
+                                             href={`/departments/${data.slug}?category=${cat.slug}`} 
                                              onClick={onClose}
                                              className="text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] leading-relaxed inline hover-underline-animated"
                                          >
@@ -260,7 +260,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                          </Link>
                                      </li>
                                  )) : (
-                                     <li className="text-[15px] font-medium text-[#475569]/50 dark:text-gray-500">
+                                     <li className="text-[15px] font-medium text-slate-500 dark:text-slate-400">
                                          {language === "ar" ? "لا توجد أقسام" : "No categories yet"}
                                      </li>
                                  )}
@@ -284,14 +284,14 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                          </Link>
                                      </li>
                                  )) : (
-                                     <li className="text-[15px] font-medium text-[#475569]/50 dark:text-gray-500">
+                                     <li className="text-[15px] font-medium text-slate-500 dark:text-slate-400">
                                          {language === "ar" ? "لا توجد منتجات" : "No products yet"}
                                      </li>
                                  )}
                                  {data.topProducts.length > 0 && (
                                      <li className="mt-2">
                                          <Link 
-                                             href={`/department/${data.slug}`} 
+                                             href={`/departments/${data.slug}`} 
                                              onClick={onClose}
                                              className="text-[15px] font-bold text-[#0B192C] dark:text-white hover:text-[#8A6305] inline hover-underline-animated"
                                          >
@@ -318,7 +318,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-[15px] font-medium text-[#475569]/50 dark:text-gray-500">
+                                <p className="text-[15px] font-medium text-slate-500 dark:text-slate-400">
                                     {language === "ar" ? "لا توجد منتجات رائجة" : "No trending products"}
                                 </p>
                             )}

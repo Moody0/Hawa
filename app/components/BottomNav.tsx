@@ -48,7 +48,10 @@ const BottomNav = () => {
     ];
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-white/10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <nav 
+            aria-label={language === 'ar' ? 'التنقل السفلي للجوال' : 'Mobile bottom navigation'}
+            className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-white/10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"
+        >
             <div className="flex items-end justify-around px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
                 {navItems.map((item) => {
                     const Icon = item.icon;
@@ -59,6 +62,7 @@ const BottomNav = () => {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                aria-label={item.label}
                                 className="flex flex-col items-center -mt-5"
                             >
                                 <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all ${
@@ -81,6 +85,7 @@ const BottomNav = () => {
                         <Link
                             key={item.href}
                             href={item.href}
+                            aria-label={item.label}
                             className="flex flex-col items-center gap-0.5 py-1 relative"
                         >
                             <div className="relative">

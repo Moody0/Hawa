@@ -2,13 +2,29 @@ import React, { Suspense, cache } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ProductsClient from "../../products/ProductsClient";
-import { getCatalogInitialData } from "@/lib/catalog";
+import { getCatalogInitialData, getCatalogBrands } from "@/lib/catalog";
 
-export const revalidate = 3600; // Cache for 1 hour
+export const revalidate = 60; // Revalidate every 60 seconds
 
 const getDepartment = cache(async (slug: string) => {
-    return prisma.mainCategory.findUnique({
-        where: { slug },
+    let decodedSlug = slug;
+    try {
+        decodedSlug = decodeURIComponent(slug);
+    } catch {
+        decodedSlug = slug;
+    }
+    const cleanSlug = decodedSlug.trim();
+
+    return prisma.mainCategory.findFirst({
+        where: {
+            OR: [
+                { slug: cleanSlug },
+                { slug },
+                { slug: { equals: cleanSlug, mode: "insensitive" } },
+                { id: cleanSlug },
+                { name: { equals: cleanSlug, mode: "insensitive" } },
+            ],
+        },
     });
 });
 
@@ -60,17 +76,17 @@ export default async function DepartmentPage(props: { params: Promise<{ slug: st
         notFound();
     }
 
-    const { categories, products, totalProducts } = await getCatalogInitialData(
-        undefined,
-        undefined,
-        department.id
-    );
+    const [{ categories, products, totalProducts }, brands] = await Promise.all([
+        getCatalogInitialData(undefined, undefined, department.id),
+        getCatalogBrands(),
+    ]);
 
     return (
         <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
             <ProductsClient
                 key={`department-${department.id}`}
                 initialCategories={categories}
+                initialBrands={brands}
                 initialProducts={products}
                 initialTotal={totalProducts}
                 activeCategory={null}

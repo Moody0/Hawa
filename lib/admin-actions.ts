@@ -1,7 +1,8 @@
 "use server";
 
 import { prisma } from "./prisma";
-import { revalidatePath, unstable_cache } from "next/cache";
+import { requireAdminSession, requireSuperAdminSession } from "./admin-auth";
+import { revalidatePath, revalidateTag, updateTag, unstable_cache } from "next/cache";
 import { BrandGroup, OrderStatus } from "@prisma/client";
 import { generateUniqueCategorySlug } from "./category-utils";
 import { generateUniqueBrandSlug, getZadLandBrandId } from "./brand-utils";
@@ -11,7 +12,25 @@ function revalidateCatalogCache() {
         revalidatePath('/products');
         revalidatePath('/categories');
         revalidatePath('/brands');
+        revalidatePath('/department');
+        revalidatePath('/departments');
+        revalidatePath('/admin/products');
+        revalidatePath('/admin/categories');
+        revalidatePath('/admin/main-categories');
+        revalidatePath('/admin/brands');
         revalidatePath('/');
+
+        const tags = ['catalog', 'categories', 'main-categories', 'brands', 'products', 'navigation'];
+        for (const tag of tags) {
+            try {
+                if (typeof updateTag === 'function') {
+                    updateTag(tag);
+                }
+            } catch {}
+            try {
+                (revalidateTag as any)(tag, 'default');
+            } catch {}
+        }
     } catch {
         // Safe fallback
     }
@@ -183,6 +202,7 @@ export interface DashboardStats {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
     try {
+        await requireAdminSession();
         const fourteenDaysAgo = new Date();
         fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
         fourteenDaysAgo.setHours(0, 0, 0, 0);
@@ -507,6 +527,7 @@ function getStatusColor(status: string) {
 
 export async function getAdminBrands() {
     try {
+        await requireAdminSession("canManageBrands");
         const brands = await prisma.brand.findMany({
             orderBy: [
                 { isFeatured: "desc" },
@@ -541,6 +562,7 @@ export async function getAdminBrands() {
 
 export async function createBrand(data: BrandInput) {
     try {
+        await requireAdminSession("canManageBrands");
         const slug = await generateUniqueBrandSlug(data.name);
         const group = data.group === "MAIN" ? BrandGroup.MAIN : BrandGroup.DIFFERENT;
 
@@ -560,6 +582,7 @@ export async function createBrand(data: BrandInput) {
         revalidatePath("/");
         revalidatePath("/brands");
         revalidatePath("/admin/brands");
+        revalidateCatalogCache();
 
         return {
             success: true,
@@ -577,6 +600,7 @@ export async function createBrand(data: BrandInput) {
 
 export async function updateBrand(id: string, data: BrandInput) {
     try {
+        await requireAdminSession("canManageBrands");
         const slug = await generateUniqueBrandSlug(data.name, id);
         const group = data.group === "MAIN" ? BrandGroup.MAIN : BrandGroup.DIFFERENT;
 
@@ -600,6 +624,7 @@ export async function updateBrand(id: string, data: BrandInput) {
         revalidatePath("/admin/brands");
         revalidatePath("/admin/products");
         revalidatePath("/admin/categories");
+        revalidateCatalogCache();
 
         return {
             success: true,
@@ -617,6 +642,7 @@ export async function updateBrand(id: string, data: BrandInput) {
 
 export async function deleteBrand(id: string) {
     try {
+        await requireAdminSession("canDeleteBrands");
         const [productCount, categoryCount] = await Promise.all([
             prisma.product.count({ where: { brandId: id } }),
             prisma.category.count({ where: { brandId: id } }),
@@ -631,6 +657,7 @@ export async function deleteBrand(id: string) {
         revalidatePath("/");
         revalidatePath("/brands");
         revalidatePath("/admin/brands");
+        revalidateCatalogCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to delete brand:", error);
@@ -640,6 +667,7 @@ export async function deleteBrand(id: string) {
 
 export async function toggleBrandActive(id: string, isActive: boolean) {
     try {
+        await requireAdminSession("canManageBrands");
         await prisma.brand.update({
             where: { id },
             data: { isActive },
@@ -648,6 +676,7 @@ export async function toggleBrandActive(id: string, isActive: boolean) {
         revalidatePath("/");
         revalidatePath("/brands");
         revalidatePath("/admin/brands");
+        revalidateCatalogCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to toggle brand active status:", error);
@@ -657,6 +686,7 @@ export async function toggleBrandActive(id: string, isActive: boolean) {
 
 export async function toggleBrandFeatured(id: string, isFeatured: boolean) {
     try {
+        await requireAdminSession("canManageBrands");
         await prisma.brand.update({
             where: {
                 id,
@@ -668,6 +698,7 @@ export async function toggleBrandFeatured(id: string, isFeatured: boolean) {
         revalidatePath("/");
         revalidatePath("/brands");
         revalidatePath("/admin/brands");
+        revalidateCatalogCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to toggle brand featured status:", error);
@@ -689,6 +720,7 @@ interface MainCategoryInput {
 
 export async function getAdminMainCategories() {
     try {
+        await requireAdminSession("canManageCategories");
         const mainCategories = await prisma.mainCategory.findMany({
             orderBy: { navOrder: "asc" },
             include: {
@@ -732,6 +764,7 @@ function generateMainCategorySlug(name: string, description?: string | null, exi
 
 export async function createMainCategory(data: MainCategoryInput) {
     try {
+        await requireAdminSession("canManageCategories");
         let slug = generateMainCategorySlug(data.name, data.description);
 
         const existing = await prisma.mainCategory.findUnique({ where: { slug } });
@@ -754,6 +787,7 @@ export async function createMainCategory(data: MainCategoryInput) {
 
         revalidatePath("/");
         revalidatePath("/admin/main-categories");
+        revalidateCatalogCache();
         return {
             success: true,
             mainCategory: {
@@ -770,6 +804,7 @@ export async function createMainCategory(data: MainCategoryInput) {
 
 export async function updateMainCategory(id: string, data: MainCategoryInput) {
     try {
+        await requireAdminSession("canManageCategories");
         const current = await prisma.mainCategory.findUnique({ where: { id } });
         let slug = generateMainCategorySlug(data.name, data.description, current?.slug);
 
@@ -796,6 +831,7 @@ export async function updateMainCategory(id: string, data: MainCategoryInput) {
 
         revalidatePath("/");
         revalidatePath("/admin/main-categories");
+        revalidateCatalogCache();
         return {
             success: true,
             mainCategory: {
@@ -812,6 +848,7 @@ export async function updateMainCategory(id: string, data: MainCategoryInput) {
 
 export async function deleteMainCategory(id: string) {
     try {
+        await requireAdminSession("canDeleteCategories");
         const [brandCount, categoryCount, productCount] = await Promise.all([
             prisma.brand.count({ where: { mainCategoryId: id } }),
             prisma.category.count({ where: { mainCategoryId: id } }),
@@ -826,6 +863,7 @@ export async function deleteMainCategory(id: string) {
 
         revalidatePath("/");
         revalidatePath("/admin/main-categories");
+        revalidateCatalogCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to delete main category:", error);
@@ -835,6 +873,7 @@ export async function deleteMainCategory(id: string) {
 
 export async function toggleMainCategoryFeatured(id: string, isFeatured: boolean) {
     try {
+        await requireAdminSession("canManageCategories");
         await prisma.mainCategory.update({
             where: { id },
             data: { isFeatured },
@@ -842,6 +881,7 @@ export async function toggleMainCategoryFeatured(id: string, isFeatured: boolean
 
         revalidatePath("/");
         revalidatePath("/admin/main-categories");
+        revalidateCatalogCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to toggle main category featured status:", error);
@@ -851,6 +891,7 @@ export async function toggleMainCategoryFeatured(id: string, isFeatured: boolean
 
 export async function toggleMainCategoryActive(id: string, isActive: boolean) {
     try {
+        await requireAdminSession("canManageCategories");
         await prisma.mainCategory.update({
             where: { id },
             data: { isActive },
@@ -858,6 +899,7 @@ export async function toggleMainCategoryActive(id: string, isActive: boolean) {
 
         revalidatePath("/");
         revalidatePath("/admin/main-categories");
+        revalidateCatalogCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to toggle main category active status:", error);
@@ -867,6 +909,7 @@ export async function toggleMainCategoryActive(id: string, isActive: boolean) {
 
 export async function getAdminProducts() {
     try {
+        await requireAdminSession("canManageProducts");
         const products = await prisma.product.findMany({
             orderBy: {
                 createdAt: 'desc'
@@ -929,6 +972,7 @@ export async function getAdminProducts() {
 
 export async function getAdminCategories(page = 1, limit = 500) {
     try {
+        await requireAdminSession("canManageCategories");
         const skip = (page - 1) * limit;
         const [categories, total] = await Promise.all([
             prisma.category.findMany({
@@ -984,6 +1028,7 @@ export async function getAdminCategories(page = 1, limit = 500) {
 
 export async function getAdminOrders(page = 1, limit = 50) {
     try {
+        await requireAdminSession("canManageOrders");
         const skip = (page - 1) * limit;
         const [orders, total] = await Promise.all([
             prisma.order.findMany({
@@ -1064,6 +1109,7 @@ export async function getAdminOrders(page = 1, limit = 50) {
 
 export async function createProduct(data: ProductInput) {
     try {
+        await requireAdminSession("canManageProducts");
         const category = await prisma.category.findUnique({
             where: { id: data.categoryId },
             select: { brandId: true, mainCategoryId: true },
@@ -1078,7 +1124,7 @@ export async function createProduct(data: ProductInput) {
         if (!baseSlug || baseSlug.length < 2) {
             baseSlug = 'product';
         }
-        let slug = `${baseSlug}-${Math.random().toString(36).substring(2, 7)}`;
+        const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 7)}`;
 
         const product = await prisma.product.create({
             data: {
@@ -1151,6 +1197,7 @@ export async function createProduct(data: ProductInput) {
 
 export async function updateProduct(id: string, data: ProductInput & { isTrending?: boolean }) {
     try {
+        await requireAdminSession("canManageProducts");
         const category = await prisma.category.findUnique({
             where: { id: data.categoryId },
             select: { brandId: true, mainCategoryId: true },
@@ -1234,6 +1281,7 @@ export async function updateProduct(id: string, data: ProductInput & { isTrendin
 
 export async function deleteProduct(id: string) {
     try {
+        await requireAdminSession("canDeleteProducts");
         await prisma.product.delete({
             where: { id }
         });
@@ -1254,6 +1302,7 @@ export async function deleteProduct(id: string) {
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {
     try {
+        await requireAdminSession("canManageOrders");
         await prisma.$transaction(async (tx) => {
             // Get current order and its status
             const order = await tx.order.findUnique({
@@ -1310,6 +1359,7 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
 
 export async function deleteOrder(id: string) {
     try {
+        await requireAdminSession("canDeleteOrders");
         await prisma.order.delete({
             where: { id }
         });
@@ -1324,6 +1374,7 @@ export async function deleteOrder(id: string) {
 
 export async function createCategory(data: CategoryInput) {
     try {
+        await requireAdminSession("canManageCategories");
         const brandId = data.brandId || await getZadLandBrandId();
         const slug = await generateUniqueCategorySlug(data.name);
 
@@ -1343,6 +1394,7 @@ export async function createCategory(data: CategoryInput) {
         revalidatePath('/');
         revalidatePath('/categories');
         revalidatePath('/products');
+        revalidateCatalogCache();
 
         return {
             success: true,
@@ -1360,6 +1412,7 @@ export async function createCategory(data: CategoryInput) {
 
 export async function updateCategory(id: string, data: CategoryInput) {
     try {
+        await requireAdminSession("canManageCategories");
         const brandId = data.brandId || await getZadLandBrandId();
         const slug = await generateUniqueCategorySlug(data.name, id);
 
@@ -1380,6 +1433,7 @@ export async function updateCategory(id: string, data: CategoryInput) {
         revalidatePath('/');
         revalidatePath('/categories');
         revalidatePath('/products');
+        revalidateCatalogCache();
 
         return {
             success: true,
@@ -1397,6 +1451,7 @@ export async function updateCategory(id: string, data: CategoryInput) {
 
 export async function deleteCategory(id: string) {
     try {
+        await requireAdminSession("canDeleteCategories");
         const productsCount = await prisma.product.count({
             where: { categoryId: id }
         });
@@ -1414,6 +1469,7 @@ export async function deleteCategory(id: string) {
         revalidatePath('/');
         revalidatePath('/categories');
         revalidatePath('/products');
+        revalidateCatalogCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to delete category:", error);
@@ -1423,6 +1479,7 @@ export async function deleteCategory(id: string) {
 
 export async function toggleCategoryFeatured(id: string, isFeatured: boolean) {
     try {
+        await requireAdminSession("canManageCategories");
         await prisma.category.update({
             where: { id },
             data: { isFeatured }
@@ -1432,6 +1489,7 @@ export async function toggleCategoryFeatured(id: string, isFeatured: boolean) {
         revalidatePath('/admin/categories');
         revalidatePath('/categories');
         revalidatePath('/products');
+        revalidateCatalogCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to toggle category featured status:", error);
@@ -1927,6 +1985,7 @@ export async function getHomeCollectionSections(): Promise<HomeCollectionSection
 
 export async function toggleProductTrending(id: string, isTrending: boolean) {
     try {
+        await requireAdminSession("canManageProducts");
         await prisma.product.update({
             where: { id },
             data: { isTrending }
@@ -2211,6 +2270,7 @@ export const getTrendingWeeklyProducts = unstable_cache(
 
 export async function getCategoriesForCleanup() {
     try {
+        await requireAdminSession("canManageCategories");
         return await prisma.category.findMany({
             select: { id: true, name: true }
         });
@@ -2222,6 +2282,7 @@ export async function getCategoriesForCleanup() {
 
 export async function bulkFixCategoryNames(mapping: { id: string, newName: string }[]) {
     try {
+        await requireAdminSession("canManageCategories");
         await Promise.all(mapping.map(item => 
             prisma.category.update({
                 where: { id: item.id },
@@ -2239,7 +2300,9 @@ export async function bulkFixCategoryNames(mapping: { id: string, newName: strin
 
 export async function bulkCreateProducts(products: ProductImportRow[]) {
     try {
-        const zadLandBrandId = await getZadLandBrandId();
+        await requireAdminSession("canManageProducts");
+        // getZadLandBrandId call if needed
+        await getZadLandBrandId();
         
         // Cache main categories, brands, categories
         const mainCategories = await prisma.mainCategory.findMany();
@@ -2390,6 +2453,7 @@ export interface BannerInput {
 
 export async function getAdminBanners() {
     try {
+        await requireAdminSession("canManageBanners");
         const banners = await prisma.banner.findMany({
             orderBy: {
                 createdAt: 'desc'
@@ -2409,6 +2473,7 @@ export async function getAdminBanners() {
 
 export async function createBanner(data: BannerInput) {
     try {
+        await requireAdminSession("canManageBanners");
         const banner = await prisma.banner.create({
             data: {
                 title: data.title,
@@ -2444,6 +2509,7 @@ export async function createBanner(data: BannerInput) {
 
 export async function updateBanner(id: string, data: BannerInput) {
     try {
+        await requireAdminSession("canManageBanners");
         const banner = await prisma.banner.update({
             where: { id },
             data: {
@@ -2480,6 +2546,7 @@ export async function updateBanner(id: string, data: BannerInput) {
 
 export async function deleteBanner(id: string) {
     try {
+        await requireAdminSession("canDeleteBanners");
         await prisma.banner.delete({
             where: { id }
         });
@@ -2495,6 +2562,7 @@ export async function deleteBanner(id: string) {
 
 export async function toggleBannerStatus(id: string, isActive: boolean) {
     try {
+        await requireAdminSession("canManageBanners");
         await prisma.banner.update({
             where: { id },
             data: { isActive }
@@ -2544,6 +2612,7 @@ export interface PromoCodeInput {
 
 export async function getPromoCodes() {
     try {
+        await requireAdminSession("canManagePromoCodes");
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
@@ -2581,6 +2650,7 @@ export async function getPromoCodes() {
 
 export async function createPromoCode(data: PromoCodeInput) {
     try {
+        await requireAdminSession("canManagePromoCodes");
         const existing = await prisma.promoCode.findUnique({
             where: { code: data.code }
         });
@@ -2608,6 +2678,7 @@ export async function createPromoCode(data: PromoCodeInput) {
 
 export async function updatePromoCode(id: string, data: PromoCodeInput) {
     try {
+        await requireAdminSession("canManagePromoCodes");
         if (data.code) {
             const existing = await prisma.promoCode.findUnique({
                 where: { code: data.code }
@@ -2637,6 +2708,7 @@ export async function updatePromoCode(id: string, data: PromoCodeInput) {
 
 export async function deletePromoCode(id: string) {
     try {
+        await requireAdminSession("canDeletePromoCodes");
         await prisma.promoCode.delete({
             where: { id }
         });
@@ -2651,6 +2723,7 @@ export async function deletePromoCode(id: string) {
 
 export async function togglePromoCodeStatus(id: string, isActive: boolean) {
     try {
+        await requireAdminSession("canManagePromoCodes");
         await prisma.promoCode.update({
             where: { id },
             data: { isActive }
@@ -2666,16 +2739,23 @@ export async function togglePromoCodeStatus(id: string, isActive: boolean) {
 
 export async function validatePromoCode(code: string) {
     try {
+        if (!code || typeof code !== 'string') {
+            return { success: false, error: "رمز الخصم غير صالح" };
+        }
+        const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 30);
+        if (!cleanCode) {
+            return { success: false, error: "يرجى إدخال رمز الخصم" };
+        }
         const promoCode = await prisma.promoCode.findUnique({
-            where: { code: code.toUpperCase() }
+            where: { code: cleanCode }
         });
 
         if (!promoCode) {
-            return { success: false, error: "Invalid promo code" };
+            return { success: false, error: "رمز الخصم غير صحيح أو منتهي الصلاحية" };
         }
 
         if (!promoCode.isActive) {
-            return { success: false, error: "Promo code is inactive" };
+            return { success: false, error: "رمز الخصم غير مفعّل حالياً" };
         }
 
         return {
@@ -2688,7 +2768,7 @@ export async function validatePromoCode(code: string) {
         };
     } catch (error) {
         console.error("Failed to validate promo code:", error);
-        return { success: false, error: "Failed to validate promo code" };
+        return { success: false, error: "فشل التحقق من رمز الخصم" };
     }
 }
 
@@ -2696,7 +2776,11 @@ import bcrypt from "bcryptjs";
 
 export async function getAdminUser() {
     try {
-        const user = await prisma.user.findFirst();
+        const session = await requireAdminSession();
+        const userId = session.user.id;
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
         if (!user) {
             return null;
         }
@@ -2718,7 +2802,11 @@ export async function updateAdminCredentials(data: {
     newPassword?: string;
 }) {
     try {
-        const user = await prisma.user.findFirst();
+        const session = await requireAdminSession();
+        const userId = session.user.id;
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
         if (!user) {
             return { success: false, error: "Admin user not found" };
         }
@@ -2757,6 +2845,131 @@ export async function updateAdminCredentials(data: {
     }
 }
 
+const DEFAULT_SITE_SETTINGS = {
+    id: "site-settings",
+    categoriesCtaTitle: "Looking for specific wholesale brands?",
+    categoriesCtaDesc: "Our wholesale team is ready to provide custom pricing and scheduled deliveries for your business.",
+    categoriesCtaTitleAr: "تبحث عن شركات أو منتجات محددة؟",
+    categoriesCtaDescAr: "فريق المبيعات لدينا جاهز لتزويدكم بأفضل أسعار الجملة وجداول التوزيع المنتظمة.",
+    categoriesCtaImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC-S_GMsoebb73JIEWcxtvH2G-vVgkfypE8ysWpGMNiiiwyTno8rIbMCpHR-fsa76ZQL49aYswb7bGZh-kgwc6z9lv0VwUSUrStxNWz2qU3RuIb75ShOMAKZMRyrOXZHZjEBgtxfW7r97FEEshOkEd2MqgE6FpGYrmKa8msLtMOQxXBsmhr3ZGGEtL7jpzgMYbgrAXhiHcMfCspdvD5FRNuSbgFY9_xGqcJM9KbgG0MoC4Ie4WkkmCR4FsuavfglcnY13G2ADZxlK8F",
+    footerBrandTitle: "Hawa Distribution",
+    footerBrandTitleAr: "شركة حوا للتوزيع والتجارة",
+    footerBrandDescription: "Your trusted partner in wholesale food and consumer goods distribution from top international brands.",
+    footerBrandDescriptionAr: "شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.",
+    footerCopyright: "© 2026 Hawa Distribution. All rights reserved.",
+    footerCopyrightAr: "© 2026 شركة حوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
+    footerInstagramUrl: "#",
+    footerFacebookUrl: "#",
+    footerWhatsappUrl: "#",
+    whatsappNumber: "+963900000000",
+    footerShopTitle: "Shop",
+    footerShopTitleAr: "المتجر",
+    footerSupportTitle: "Support",
+    footerSupportTitleAr: "الدعم",
+    footerCompanyTitle: "Company",
+    footerCompanyTitleAr: "الشركة",
+    footerSupportLink1Label: "Help Center",
+    footerSupportLink1LabelAr: "مركز المساعدة",
+    footerSupportLink1Url: "#",
+    footerSupportLink2Label: "Shipping & Returns",
+    footerSupportLink2LabelAr: "التوزيع والتسليم",
+    footerSupportLink2Url: "/shipping-returns",
+    footerSupportLink3Label: "Contact Us",
+    footerSupportLink3LabelAr: "اتصل بنا",
+    footerSupportLink3Url: "#",
+    footerCompanyLink1Label: "About Us",
+    footerCompanyLink1LabelAr: "من نحن",
+    footerCompanyLink1Url: "/about-us",
+    footerCompanyLink2Label: "",
+    footerCompanyLink2LabelAr: "",
+    footerCompanyLink2Url: "",
+    footerCompanyLink3Label: "",
+    footerCompanyLink3LabelAr: "",
+    footerCompanyLink3Url: "",
+    footerCategory1Id: null,
+    footerCategory2Id: null,
+    footerCategory3Id: null,
+    footerCategory4Id: null,
+    shippingTitle: "Fast & Reliable Distribution",
+    shippingDesc: "We ensure wholesale goods reach your business in perfect condition.",
+    shippingTitleAr: "توزيع سريع وموثوق",
+    shippingDescAr: "نحن نضمن وصول بضائع الجملة إلى نشاطكم التجاري في أفضل حالة.",
+    verificationTitle: "Verification Process",
+    verificationDesc: "Orders are verified and scheduled immediately with our logistics fleet.",
+    verificationTitleAr: "عملية التحقق",
+    verificationDescAr: "يتم التحقق من الطلبات وجدولتها فوراً للتوصيل المباشر لباب المحل.",
+    standardShippingTime: "1-3 Business Days",
+    expressShippingTime: "24 Hours",
+    returnsTitle: "Wholesale Support",
+    returnsDesc: "We are committed to full satisfaction and verified shipment handling.",
+    returnsTitleAr: "دعم الجملة",
+    returnsDescAr: "نحن ملتزمون بالجودة والمطابقة التامة للشحنات.",
+    finalSaleTitle: "Wholesale Delivery Terms",
+    finalSaleDesc: "All goods are shipped in factory-sealed cases conforming to international standards.",
+    finalSaleTitleAr: "شروط تسليم الجملة",
+    finalSaleDescAr: "يتم تسليم البضائع في كراتين المصنع الأصلية والمطابقة للمواصفات القياسية.",
+    hygieneTitle: "Safety & Temperature Storage",
+    hygieneDesc: "Our temperature-controlled warehouses ensure optimal quality preservation.",
+    hygieneTitleAr: "بروتوكولات السلامة والتخزين",
+    hygieneDescAr: "تضمن مستودعاتنا وشاحناتنا درجات حرارة وبيئة تخزين مثالية حتى نقطة التسليم.",
+    shippingReturnsImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC1GmfD6bueEsJqlHNPjDWHMlhsLZSm2Jmp21TUCLKvobkcd7oAPMMdwzfm8BOHC5XtR0EP6tLI7DT5hhyLxuijsbpX2kQf6iNlqROU-8k-DrqZAUqdc7-0lE4nxuCcLaEb0fEaXVBxc_yXkiUlyhfvaYJ1FfHZtngnoJbeanLgsf7rcxqON6rjkoC4BQv6FhlwLNKZrMbxjCugphq-bo5GCqBoLfmjjZSuH0N5eV-Kz33xFQTD5jSYCTsVYAwOkwhLQsQiPD_lnD9U",
+    
+    aboutHeroTitle: "Our Story in Wholesale Food & FMCG Distribution",
+    aboutHeroTitleAr: "قصتنا في ريادة وتوريد السلع الغذائية والاستهلاكية",
+    aboutHeroSubtitle: "Hawa Distribution & Trading: Your certified trade partner bridging top food manufacturing brands with grocery retailers, supermarkets, and wholesalers across Syria.",
+    aboutHeroSubtitleAr: "شركة حوا للتوزيع والتجارة: شريككم المعتمد لربط كبرى مصانع المواد الغذائية والاستهلاكية بالمحلات والسوبرماركت وتجار الجملة في كافة المحافظات السورية.",
+    middleBanner1Image: "/images/hawa_hero.jpg",
+    middleBanner1Link: "/products",
+    middleBanner2Image: "/images/hawa_wholesale_hub.jpg",
+    middleBanner2Link: "/products",
+    middleBanner2Title: "Global & Local Food Brands",
+    middleBanner2TitleAr: "شركات ووكالات غذائية رائدة",
+    middleBanner2Subtitle: "Discover authentic wholesale food products, pasta, oils, and FMCG essentials.",
+    middleBanner2SubtitleAr: "اكتشف أفضل المنتجات الغذائية، المعكرونة، الزيوت، والبقوليات بأسعار الجملة الرسمية.",
+    middleBanner2ButtonText: "Explore Catalog",
+    middleBanner2ButtonTextAr: "تصفح كتالوج الجملة",
+    exchangeRate: 135,
+    statDeliveries: "+9000",
+    statBrands: "+100",
+    statProducts: "+500",
+    statClients: "+300",
+    aboutHeroImage: "/images/hawa_wholesale_hub.jpg",
+    
+    aboutNarrativeTitle: "Direct Sourcing, Strict Quality & Full Fleet Reach",
+    aboutNarrativeTitleAr: "توريد موثوق، جودة قياسية، وشبكة توزيع متكاملة",
+    aboutNarrativeFounded: "Leading Trade Hub",
+    aboutNarrativeFoundedAr: "ريادة في توزيع الجملة",
+    aboutNarrativeDesc1: "At Hawa Distribution, we operate as the vital supply line for grocery retailers, supermarkets, and wholesalers. We partner directly with leading domestic and international food manufacturers to supply authentic, factory-sealed consumer goods at official wholesale rates.",
+    aboutNarrativeDesc1Ar: "في شركة حوا للتوزيع والتجارة، نعمل كشريان إمداد رئيسي لأصحاب السوبرماركت والبقالات وتجار الجملة. نربط كبرى المصانع والشركات المنتجة للسلع الغذائية والاستهلاكية بنقاط البيع مباشرة وبأسعار الجملة المعتمدة.",
+    aboutNarrativeDesc2: "With temperature-controlled central warehouses and a dedicated logistics fleet covering all Syrian governorates, we guarantee punctual deliveries, verified shelf-life, and transparent purchase invoicing.",
+    aboutNarrativeDesc2Ar: "بفضل مستودعاتنا المركزية المجهزة وشبكة التوزيع المنظمة التي تغطي كافة المحافظات السورية، نضمن مواعيد تسليم دقيقة لباب المحل، مع مطابقة تامة للمواصفات وفواتير رسمية موثقة.",
+    aboutNarrativeQuote: "Authentic goods, official carton pricing, and reliable fleet delivery.",
+    aboutNarrativeQuoteAr: "بضائع أصلية، كروتة المصنع المعتمدة، وتوصيل منتظم لباب المحل.",
+    aboutNarrativeImage: "/images/hawa_hero.jpg",
+    
+    aboutValuesTitle: "Our Core Trade Pillars",
+    aboutValuesTitleAr: "ركائز العمل والتوريد المعتمد",
+    aboutValuesDesc: "We are committed to authenticity, transparent wholesale trade terms, and consistent supply chains.",
+    aboutValuesDescAr: "نلتزم بأعلى معايير المصداقية، شفافية الأسعار، واستمرارية سلاسل التوريد لقطاع التجزئة والجملة.",
+    
+    aboutValue1Title: "100% Certified Quality",
+    aboutValue1TitleAr: "جودة ومواصفات قياسية",
+    aboutValue1Desc: "All goods are factory-sealed in original packaging conforming to Syrian and international food safety standards.",
+    aboutValue1DescAr: "جميع البضائع والمنتجات الغذائية أصلية 100% وفي طرود وكراتين المصنع الأصلية مع ضمان الصلاحية والجودة.",
+    
+    aboutValue2Title: "Direct Factory Sourcing",
+    aboutValue2TitleAr: "توريد ووكالات حصرية",
+    aboutValue2Desc: "Direct trade partnerships with top food and consumer brands, eliminating middlemen and securing best wholesale rates.",
+    aboutValue2DescAr: "شراكات توريد مباشرة مع كبرى الشركات المصنعة لضمان توفر دائم للمنتجات وأسعار جملة منافسة بدون وسطاء.",
+    
+    aboutValue3Title: "Reliable Fleet Logistics",
+    aboutValue3TitleAr: "شبكة توزيع تغطي المحافظات",
+    aboutValue3Desc: "Regular scheduled delivery runs directly to your storefront across all 14 governorates.",
+    aboutValue3DescAr: "سيارات وشاحنات توزيع مجهزة تنطلق يومياً لخدمة كافة المحافظات بمواعيد تسليم منتظمة ودقيقة لباب المحل.",
+    
+    updatedAt: new Date(),
+};
+
 export const getSiteSettings = unstable_cache(
     async () => {
         try {
@@ -2765,145 +2978,22 @@ export const getSiteSettings = unstable_cache(
             });
             
             if (!settings) {
-                // Return default settings if not found
-                return {
-                    id: "site-settings",
-                    categoriesCtaTitle: "Looking for specific wholesale brands?",
-                    categoriesCtaDesc: "Our wholesale team is ready to provide custom pricing and scheduled deliveries for your business.",
-                    categoriesCtaTitleAr: "تبحث عن شركات أو منتجات محددة؟",
-                    categoriesCtaDescAr: "فريق المبيعات لدينا جاهز لتزويدكم بأفضل أسعار الجملة وجداول التوزيع المنتظمة.",
-                    categoriesCtaImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC-S_GMsoebb73JIEWcxtvH2G-vVgkfypE8ysWpGMNiiiwyTno8rIbMCpHR-fsa76ZQL49aYswb7bGZh-kgwc6z9lv0VwUSUrStxNWz2qU3RuIb75ShOMAKZMRyrOXZHZjEBgtxfW7r97FEEshOkEd2MqgE6FpGYrmKa8msLtMOQxXBsmhr3ZGGEtL7jpzgMYbgrAXhiHcMfCspdvD5FRNuSbgFY9_xGqcJM9KbgG0MoC4Ie4WkkmCR4FsuavfglcnY13G2ADZxlK8F",
-                    footerBrandTitle: "Hawa Distribution",
-                    footerBrandTitleAr: "شركة حوا للتوزيع والتجارة",
-                    footerBrandDescription: "Your trusted partner in wholesale food and consumer goods distribution from top international brands.",
-                    footerBrandDescriptionAr: "شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.",
-                    footerCopyright: "© 2026 Hawa Distribution. All rights reserved.",
-                    footerCopyrightAr: "© 2026 شركة حوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
-                    footerInstagramUrl: "#",
-                    footerFacebookUrl: "#",
-                    footerWhatsappUrl: "#",
-                    whatsappNumber: "+963900000000",
-                    footerShopTitle: "Shop",
-                    footerShopTitleAr: "المتجر",
-                    footerSupportTitle: "Support",
-                    footerSupportTitleAr: "الدعم",
-                    footerCompanyTitle: "Company",
-                    footerCompanyTitleAr: "الشركة",
-                    footerSupportLink1Label: "Help Center",
-                    footerSupportLink1LabelAr: "مركز المساعدة",
-                    footerSupportLink1Url: "#",
-                    footerSupportLink2Label: "Shipping & Returns",
-                    footerSupportLink2LabelAr: "التوزيع والتسليم",
-                    footerSupportLink2Url: "/shipping-returns",
-                    footerSupportLink3Label: "Contact Us",
-                    footerSupportLink3LabelAr: "اتصل بنا",
-                    footerSupportLink3Url: "#",
-                    footerCompanyLink1Label: "About Us",
-                    footerCompanyLink1LabelAr: "من نحن",
-                    footerCompanyLink1Url: "/about-us",
-                    footerCompanyLink2Label: "",
-                    footerCompanyLink2LabelAr: "",
-                    footerCompanyLink2Url: "",
-                    footerCompanyLink3Label: "",
-                    footerCompanyLink3LabelAr: "",
-                    footerCompanyLink3Url: "",
-                    footerCategory1Id: null,
-                    footerCategory2Id: null,
-                    footerCategory3Id: null,
-                    footerCategory4Id: null,
-                    shippingTitle: "Fast & Reliable Distribution",
-                    shippingDesc: "We ensure wholesale goods reach your business in perfect condition.",
-                    shippingTitleAr: "توزيع سريع وموثوق",
-                    shippingDescAr: "نحن نضمن وصول بضائع الجملة إلى نشاطكم التجاري في أفضل حالة.",
-                    verificationTitle: "Verification Process",
-                    verificationDesc: "Orders are verified and scheduled immediately with our logistics fleet.",
-                    verificationTitleAr: "عملية التحقق",
-                    verificationDescAr: "يتم التحقق من الطلبات وجدولتها فوراً مع أسطولنا اللوجستي.",
-                    standardShippingTime: "1-3 Business Days",
-                    expressShippingTime: "24 Hours",
-                    returnsTitle: "Wholesale Support",
-                    returnsDesc: "We are committed to full satisfaction and verified shipment handling.",
-                    returnsTitleAr: "دعم الجملة",
-                    returnsDescAr: "نحن ملتزمون بالجودة والمطابقة التامة للشحنات.",
-                    finalSaleTitle: "Wholesale Delivery Terms",
-                    finalSaleDesc: "All goods are shipped in factory-sealed cases conforming to international standards.",
-                    finalSaleTitleAr: "شروط تسليم الجملة",
-                    finalSaleDescAr: "يتم تسليم البضائع في كراتين المصنع الأصلية والمطابقة للمواصفات القياسية.",
-                    hygieneTitle: "Safety & Temperature Storage",
-                    hygieneDesc: "Our temperature-controlled warehouses ensure optimal quality preservation.",
-                    hygieneTitleAr: "بروتوكولات السلامة والتخزين",
-                    hygieneDescAr: "تضمن مستودعاتنا وشاحناتنا درجات حرارة وبيئة تخزين مثالية حتى نقطة التسليم.",
-                    shippingReturnsImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC1GmfD6bueEsJqlHNPjDWHMlhsLZSm2Jmp21TUCLKvobkcd7oAPMMdwzfm8BOHC5XtR0EP6tLI7DT5hhyLxuijsbpX2kQf6iNlqROU-8k-DrqZAUqdc7-0lE4nxuCcLaEb0fEaXVBxc_yXkiUlyhfvaYJ1FfHZtngnoJbeanLgsf7rcxqON6rjkoC4BQv6FhlwLNKZrMbxjCugphq-bo5GCqBoLfmjjZSuH0N5eV-Kz33xFQTD5jSYCTsVYAwOkwhLQsQiPD_lnD9U",
-                    
-                    aboutHeroTitle: "Our Story",
-                    aboutHeroTitleAr: "قصتنا",
-                    aboutHeroSubtitle: "Your trusted partner for distributing top quality global goods and food products.",
-                    aboutHeroSubtitleAr: "شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.",
-                    middleBanner1Image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281290?w=1200",
-                    middleBanner1Link: "/products",
-                    middleBanner2Image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=1200",
-                    middleBanner2Link: "/products",
-                    middleBanner2Title: "Global Brands",
-                    middleBanner2TitleAr: "شركات عالمية",
-                    middleBanner2Subtitle: "Discover the best products from around the world.",
-                    middleBanner2SubtitleAr: "اكتشف أفضل المنتجات من كبرى الشركات العالمية.",
-                    middleBanner2ButtonText: "Explore Catalog",
-                    middleBanner2ButtonTextAr: "تصفح الكتالوج",
-                    exchangeRate: 135,
-                    statDeliveries: "+9000",
-                    statBrands: "+100",
-                    statProducts: "+500",
-                    statClients: "+300",
-                    aboutHeroImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuAz8qN2iAHz-UZeEQfqOY49U5OCZ5z4ejVm7ILFjFSl9S5xg_6UuBa61qOmrkMPrBa4CuXDzHa9EN3-LNyUxi5IDK5A9TvJWkNuG-tt_RRyvJH8LvynO1daOEkTk47KDtkW3Md2ugZYShZJdxolsjiJUtDdOOz4Q7-6TNrexIvyClP0ADf1TWdbCUk1kBn8bfzhTC1cn8s9jG3yt0tDDht7__J5YKKf690SmKN4WIJX_pc2LOj3x1CnYk5JuqEu0Bzp2vGwsrYLaJWb",
-                    
-                    aboutNarrativeTitle: "Our Mission for Quality Distribution",
-                    aboutNarrativeTitleAr: "مهمتنا في التوزيع الموثوق",
-                    aboutNarrativeFounded: "Founded with Trust",
-                    aboutNarrativeFoundedAr: "تأسست على الثقة",
-                    aboutNarrativeDesc1: "At Hawa Distribution, we bridge the gap between world-renowned international brands and local markets. We believe in providing retailers and businesses with seamless access to authentic, top-tier goods at competitive wholesale prices.",
-                    aboutNarrativeDesc1Ar: "في شركة حوا للتوزيع والتجارة، نعمل كجسر موثوق يربط بين كبرى الشركات والعلامات التجارية والأسواق المحلية والمحلات التجارية.",
-                    aboutNarrativeDesc2: "With rigorous quality control, modern logistics, and a commitment to reliability, Hawa Distribution has established itself as the trusted partner for food and consumer goods distribution across all governorates.",
-                    aboutNarrativeDesc2Ar: "بفضل أسطول التوزيع المنظم والمستودعات المجهزة، أثبتت شركة حوا مكانتها كشريك رائد وموثوق لتوزيع البضائع الغذائية والاستهلاكية في جميع المحافظات.",
-                    aboutNarrativeQuote: "Connecting you with the world's finest brands.",
-                    aboutNarrativeQuoteAr: "جودة مضمونة وخدمة توزيع موثوقة.",
-                    aboutNarrativeImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuC4yp4c_LJLNPwaV2ay8DZ6xRHD0UF1WqXU8eDtrdDoiVjtq9oNRc9Cn6cnbqsNwOLO-y-99jnkiLnCsGLs2rQqthU8TPqhAh2Msisbst1UyfyrILBR5fRO7KYu90u1FEoeRRjGceGVbB5vz2SJAtjzUrLLtA6BmR8VN5a5Seo4MraBJj7i4Gs4QPEZbURtSN-F7wbJsu4WNj3pEaWlye2SuJvokQhYXJ27gnAoabHg5_0_4DZY49qyKnQuMHHL9atOIILRIMD3FkeZ",
-                    
-                    aboutValuesTitle: "Our Core Values",
-                    aboutValuesTitleAr: "قيمنا الجوهرية",
-                    aboutValuesDesc: "We are committed to transparency, sustainability, and ethical practices in everything we do.",
-                    aboutValuesDescAr: "نحن ملتزمون بالشفافية والاستدامة والممارسات الأخلاقية في كل ما نقوم به.",
-                    
-                    aboutValue1Title: "Cruelty-Free",
-                    aboutValue1TitleAr: "خالٍ من القسوة",
-                    aboutValue1Desc: "We never test on animals. Our products are certified cruelty-free by Leaping Bunny.",
-                    aboutValue1DescAr: "نحن لا نختبر أبدًا على الحيوانات. منتجاتنا معتمدة خالية من القسوة من قبل Leaping Bunny.",
-                    
-                    aboutValue2Title: "100% Vegan",
-                    aboutValue2TitleAr: "نباتي 100٪",
-                    aboutValue2Desc: "No animal-derived ingredients. Just pure, potent plant power.",
-                    aboutValue2DescAr: "لا توجد مكونات مشتقة من الحيوانات. فقط قوة نباتية نقية وفعالة.",
-                    
-                    aboutValue3Title: "Sustainable",
-                    aboutValue3TitleAr: "مستدام",
-                    aboutValue3Desc: "Eco-friendly packaging and responsibly sourced ingredients.",
-                    aboutValue3DescAr: "تغليف صديق للبيئة ومكونات من مصادر مسؤولة.",
-                    
-                    updatedAt: new Date(),
-                };
+                return DEFAULT_SITE_SETTINGS;
             }
             
             return {
+                ...DEFAULT_SITE_SETTINGS,
                 ...settings,
                 whatsappNumber: settings.whatsappNumber || "+963900000000",
-                exchangeRate: Number(settings.exchangeRate),
+                exchangeRate: Number(settings.exchangeRate || 135),
                 statDeliveries: settings.statDeliveries || "+9000",
                 statBrands: settings.statBrands || "+100",
                 statProducts: settings.statProducts || "+500",
                 statClients: settings.statClients || "+300",
             };
         } catch (error) {
-            console.error("Failed to fetch site settings:", error);
-            return null;
+            console.error("Failed to fetch site settings, using fallback default settings:", error);
+            return DEFAULT_SITE_SETTINGS;
         }
     },
     ["site-settings-v2"],
@@ -3010,6 +3100,7 @@ export async function updateSiteSettings(data: {
     statClients?: string;
 }) {
     try {
+        await requireSuperAdminSession();
         await prisma.settings.upsert({
             where: { id: "site-settings" },
             update: data,
@@ -3037,6 +3128,7 @@ export async function updateSiteSettings(data: {
 
 export async function bulkToggleTrending(ids: string[], isTrending: boolean) {
     try {
+        await requireAdminSession("canManageProducts");
         await prisma.product.updateMany({
             where: {
                 id: { in: ids }
@@ -3055,6 +3147,7 @@ export async function bulkToggleTrending(ids: string[], isTrending: boolean) {
 
 export async function bulkRemoveSale(ids: string[]) {
     try {
+        await requireAdminSession("canManageProducts");
         await prisma.product.updateMany({
             where: {
                 id: { in: ids }
@@ -3077,6 +3170,7 @@ export async function bulkRemoveSale(ids: string[]) {
 
 export async function bulkDeleteProducts(ids: string[]) {
     try {
+        await requireAdminSession("canDeleteProducts");
         // Find which products have orders
         const productsWithOrders = await prisma.product.findMany({
             where: {
@@ -3120,6 +3214,7 @@ export async function bulkDeleteProducts(ids: string[]) {
 
 export async function bulkDeleteCategories(ids: string[]) {
     try {
+        await requireAdminSession("canDeleteCategories");
         // Find which categories have products
         const categoriesWithProducts = await prisma.category.findMany({
             where: {
