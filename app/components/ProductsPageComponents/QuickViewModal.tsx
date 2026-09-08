@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import ResilientImage from '@/app/components/ResilientImage';
 import { useCurrency } from '@/app/context/CurrencyContext';
@@ -43,6 +44,7 @@ interface QuickViewModalProps {
 }
 
 const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
+    const [mounted, setMounted] = useState(false);
     const { language, dir } = useLanguage();
     const { formatPrice } = useCurrency();
     const { addItem } = useCart();
@@ -51,8 +53,41 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
     const [quantity, setQuantity] = useState(minQuantity);
 
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
         setQuantity(Math.max(1, Number(product.minOrder) || 1));
     }, [product.id, product.minOrder]);
+
+    // Lock body scroll and listen for Escape key when modal is open
+    useEffect(() => {
+        if (!isOpen || !mounted) return;
+
+        const originalOverflow = document.body.style.overflow;
+        const originalPaddingRight = document.body.style.paddingRight;
+
+        // Prevent layout shift from scrollbar disappearing
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        if (scrollBarWidth > 0) {
+            document.body.style.paddingRight = `${scrollBarWidth}px`;
+        }
+        document.body.style.overflow = 'hidden';
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+            document.body.style.paddingRight = originalPaddingRight;
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, mounted, onClose]);
 
     const isLockedForGuest = !customer;
 
@@ -61,7 +96,7 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
         : [];
     const [selectedOption, setSelectedOption] = useState<string>(parsedOptions[0] || "");
     
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
     const displayName = (language === 'ar' ? product.nameAr : product.nameEn) || product.name || product.nameAr || '';
 
@@ -92,35 +127,43 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
         onClose();
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+    const modalContent = (
+        <div 
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" 
+            onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+            aria-label={displayName}
+        >
             <div 
-                className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden w-full max-w-[800px] max-h-[90vh] overflow-y-auto flex flex-col md:flex-row relative border border-slate-200 dark:border-white/10"
+                className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden w-full max-w-[840px] max-h-[90vh] shadow-2xl flex flex-col md:flex-row relative border border-slate-200/90 dark:border-white/10"
                 onClick={e => e.stopPropagation()}
                 dir={dir}
             >
                 {/* Close Button */}
                 <button 
                     onClick={onClose}
-                    className="absolute top-3.5 end-3.5 z-50 p-2 rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-md text-slate-600 hover:text-black dark:text-gray-300 dark:hover:text-white border border-slate-200/60 dark:border-white/10 transition-colors cursor-pointer"
+                    className="absolute top-3.5 end-3.5 z-50 p-2 rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-md text-slate-600 hover:text-black dark:text-gray-300 dark:hover:text-white border border-slate-200/60 dark:border-white/10 shadow-sm transition-colors cursor-pointer"
                     aria-label="Close"
                 >
                     <X size={20} />
                 </button>
 
-                {/* Right side (Image) - Displayed first on mobile */}
-                <div className="w-full h-64 sm:h-72 md:h-auto md:flex-1 relative bg-gray-50 dark:bg-zinc-800/40 min-h-[260px] md:min-h-[400px] overflow-hidden order-1 md:order-2">
-                    <div className="absolute inset-0 p-4 sm:p-6 flex items-center justify-center">
+                {/* Media Column (Product Image) - Prominent and filling container */}
+                <div className="w-full h-72 sm:h-80 md:h-auto md:w-1/2 relative bg-gray-50/80 dark:bg-zinc-800/40 min-h-[280px] md:min-h-[460px] flex items-center justify-center p-4 sm:p-6 overflow-hidden order-1 md:order-2 border-b md:border-b-0 border-slate-200/60 dark:border-white/10">
+                    <div className="relative w-full h-full flex items-center justify-center">
                         <ResilientImage
                             src={primaryImage}
                             alt={displayName}
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-contain filter drop-shadow-sm transition-transform duration-300 hover:scale-105"
+                            priority
+                            sizes="(max-width: 768px) 100vw, 420px"
                         />
                     </div>
                 </div>
 
-                {/* Left side (Details) - Displayed second on mobile */}
-                <div className="flex-1 p-5 sm:p-6 md:p-8 flex flex-col justify-center order-2 md:order-1">
+                {/* Details Column - Displayed second on mobile */}
+                <div className="w-full md:w-1/2 p-5 sm:p-6 md:p-8 flex flex-col justify-between overflow-y-auto max-h-[calc(90vh-280px)] md:max-h-[90vh] order-2 md:order-1">
                     <h2 className={`text-xl md:text-2xl font-bold text-[#0B192C] dark:text-white mb-2 tracking-normal ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
                         {displayName}
                     </h2>
@@ -260,6 +303,8 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 };
 
 export default QuickViewModal;
