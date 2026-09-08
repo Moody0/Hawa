@@ -114,11 +114,11 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                 <div className="hidden xl:block w-full">
                     <div className="container-custom">
                         <div className={`flex items-center justify-between transition-[height] duration-300 ease-out ${isScrolled ? 'h-[60px]' : 'h-[72px]'}`}>
-                            {/* Start Side: Logo & Trade Badge */}
-                            <div className="relative flex items-center gap-3 shrink-0 h-full">
+                            {/* Start Side: Logo with Centered Integrated Curved Cradle */}
+                            <div className="relative flex items-center justify-center shrink-0 h-full">
                                 <Link
                                     href="/"
-                                    className="relative flex items-center group z-10 py-1"
+                                    className="relative flex items-center justify-center group z-10 py-1"
                                     aria-label="شركة حوا للتوزيع والتجارة - الصفحة الرئيسية"
                                 >
                                     <Image
@@ -128,23 +128,14 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                                         height={65}
                                         priority
                                         className={`w-auto object-contain transition-all duration-300 ease-out group-hover:scale-[1.03] ${
-                                            isScrolled ? 'h-11 translate-y-0' : 'h-[58px] translate-y-1'
+                                            isScrolled ? 'h-11 translate-y-0' : 'h-[62px] translate-y-1.5'
                                         }`}
                                     />
                                 </Link>
 
-                                <div className="h-6 w-[1px] bg-white/15 mx-1 hidden xl:block z-10" aria-hidden="true" />
-
-                                <div className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-[#E5B54A] z-10">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#E5B54A]" />
-                                    <span>{isArabic ? 'بوابة توريد الجملة' : 'B2B Wholesale Portal'}</span>
-                                </div>
-
-                                {/* Curved Logo Cradle Apron (Smoothly retracts on scroll down) */}
+                                {/* Curved Logo Cradle Apron - Centered on Logo and Seamlessly Fused with Header */}
                                 <div
-                                    className={`absolute top-full -mt-[1px] pointer-events-none transition-all duration-300 ease-out origin-top z-0 ${
-                                        isArabic ? '-end-8' : '-start-8'
-                                    } ${
+                                    className={`absolute top-full -mt-[2px] left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 ease-out origin-top z-0 ${
                                         isScrolled
                                             ? 'opacity-0 scale-y-0 -translate-y-2'
                                             : 'opacity-100 scale-y-100 translate-y-0'
@@ -152,19 +143,19 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                                     aria-hidden="true"
                                 >
                                     <svg
-                                        viewBox="0 0 250 28"
-                                        className={`w-[250px] h-[28px] block overflow-visible drop-shadow-[0_6px_10px_rgba(0,0,0,0.22)] ${
-                                            isArabic ? '' : '-scale-x-100'
-                                        }`}
+                                        viewBox="0 0 240 28"
+                                        className="w-[240px] h-[28px] block overflow-visible drop-shadow-[0_6px_12px_rgba(0,0,0,0.25)]"
                                         fill="none"
                                         xmlns="http://www.w3.org/2000/svg"
                                     >
+                                        {/* Overlaps 2px into header body so they fuse into one solid shape */}
                                         <path
-                                            d="M 0 0 L 30 0 C 75 0, 105 26, 155 26 C 195 26, 225 2, 250 0 Z"
+                                            d="M 0 -2 L 240 -2 L 240 0 L 220 0 C 175 0, 160 26, 120 26 C 80 26, 65 0, 20 0 L 0 0 Z"
                                             fill="#0B192C"
                                         />
+                                        {/* Golden accent border running along the curved bottom edge */}
                                         <path
-                                            d="M 0 0 L 30 0 C 75 0, 105 26, 155 26 C 195 26, 225 2, 250 0"
+                                            d="M 0 0 L 20 0 C 65 0, 80 26, 120 26 C 160 26, 175 0, 220 0 L 240 0"
                                             stroke="rgba(229, 181, 74, 0.45)"
                                             strokeWidth="1.5"
                                             fill="none"
@@ -248,11 +239,11 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                 {/* 2. Mobile & Tablet Header (below xl) */}
                 <div className="block xl:hidden w-full px-3 sm:px-6">
                     <div className="flex items-center justify-between h-16">
-                        {/* Start Side: Brand Logo */}
-                        <div className="relative flex items-center shrink-0 h-full">
+                        {/* Start Side: Brand Logo with Centered Integrated Curved Cradle */}
+                        <div className="relative flex items-center justify-center shrink-0 h-full">
                             <Link
                                 href="/"
-                                className="relative flex items-center group py-1 z-10"
+                                className="relative flex items-center justify-center group py-1 z-10"
                                 aria-label="شركة حوا للتوزيع والتجارة - الصفحة الرئيسية"
                             >
                                 <Image
@@ -262,16 +253,14 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                                     height={52}
                                     priority
                                     className={`w-auto object-contain transition-all duration-300 ease-out group-hover:scale-[1.03] ${
-                                        isScrolled ? 'h-10' : 'h-[48px] translate-y-0.5'
+                                        isScrolled ? 'h-10 translate-y-0' : 'h-[50px] translate-y-1'
                                     }`}
                                 />
                             </Link>
 
-                            {/* Mobile Curved Logo Cradle Apron */}
+                            {/* Mobile Curved Logo Cradle Apron - Centered & Seamlessly Aligned */}
                             <div
-                                className={`absolute top-full -mt-[1px] pointer-events-none transition-all duration-300 ease-out origin-top z-0 ${
-                                    isArabic ? '-end-5' : '-start-5'
-                                } ${
+                                className={`absolute top-full -mt-[2px] left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 ease-out origin-top z-0 ${
                                     isScrolled
                                         ? 'opacity-0 scale-y-0 -translate-y-2'
                                         : 'opacity-100 scale-y-100 translate-y-0'
@@ -280,18 +269,16 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                             >
                                 <svg
                                     viewBox="0 0 190 22"
-                                    className={`w-[190px] h-[22px] block overflow-visible drop-shadow-[0_4px_6px_rgba(0,0,0,0.18)] ${
-                                        isArabic ? '' : '-scale-x-100'
-                                    }`}
+                                    className="w-[190px] h-[22px] block overflow-visible drop-shadow-[0_4px_8px_rgba(0,0,0,0.2)]"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg"
                                 >
                                     <path
-                                        d="M 0 0 L 20 0 C 55 0, 80 20, 120 20 C 150 20, 170 2, 190 0 Z"
+                                        d="M 0 -2 L 190 -2 L 190 0 L 175 0 C 135 0, 120 20, 95 20 C 70 20, 55 0, 15 0 L 0 0 Z"
                                         fill="#0B192C"
                                     />
                                     <path
-                                        d="M 0 0 L 20 0 C 55 0, 80 20, 120 20 C 150 20, 170 2, 190 0"
+                                        d="M 0 0 L 15 0 C 55 0, 70 20, 95 20 C 120 20, 135 0, 175 0 L 190 0"
                                         stroke="rgba(229, 181, 74, 0.45)"
                                         strokeWidth="1.2"
                                         fill="none"
