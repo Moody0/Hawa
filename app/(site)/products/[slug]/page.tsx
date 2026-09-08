@@ -1,6 +1,7 @@
 import React, { cache } from 'react';
 import { prisma } from "@/lib/prisma";
 import { notFound } from 'next/navigation';
+import { unstable_cache } from 'next/cache';
 import { Metadata } from 'next';
 import ProductGallery from '@/app/components/ProductDetailsComponents/ProductGallery';
 import ProductHeader from '@/app/components/ProductDetailsComponents/ProductHeader';
@@ -16,18 +17,66 @@ import { canViewWholesalePrices, projectProductPrices, projectProductsPrices } f
 
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
-const getProduct = cache(async (slug: string) => {
-    return prisma.product.findFirst({
-        where: {
-            slug,
-            brand: { isActive: true },
+const getProduct = cache((slug: string) =>
+    unstable_cache(
+        () => prisma.product.findFirst({
+            where: {
+                slug,
+                brand: { isActive: true },
+            },
+            include: {
+                brand: true,
+                category: true,
+            },
+        }),
+        [`product-detail-v2-${encodeURIComponent(slug)}`],
+        { tags: ['products'], revalidate: 60 }
+    )()
+);
+
+const getRelatedProducts = cache((productId: string, categoryId: string, brandId: string) =>
+    unstable_cache(
+        async () => {
+            const categoryProducts = await prisma.product.findMany({
+                where: {
+                    categoryId,
+                    id: { not: productId },
+                    brand: { isActive: true },
+                },
+                include: {
+                    brand: true,
+                    category: true,
+                },
+                take: 12,
+            });
+
+            if (categoryProducts.length >= 12) {
+                return categoryProducts;
+            }
+
+            const existingIds = [productId, ...categoryProducts.map((product) => product.id)];
+            const additionalProducts = await prisma.product.findMany({
+                where: {
+                    id: { notIn: existingIds },
+                    brand: { isActive: true },
+                    OR: [
+                        { brandId },
+                        { isTrending: true },
+                    ],
+                },
+                include: {
+                    brand: true,
+                    category: true,
+                },
+                take: 12 - categoryProducts.length,
+            });
+
+            return [...categoryProducts, ...additionalProducts];
         },
-        include: {
-            brand: true,
-            category: true,
-        },
-    });
-});
+        [`related-products-v2-${productId}-${categoryId}-${brandId}`],
+        { tags: ['products'], revalidate: 60 }
+    )()
+);
 
 export async function generateMetadata(
     props: { params: Promise<{ slug: string }> }
@@ -80,9 +129,11 @@ export async function generateMetadata(
 
 const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
     const params = await props.params;
-    const { language } = await getI18n();
-
-    const product = await getProduct(params.slug);
+    const [{ language }, product, canViewPrices] = await Promise.all([
+        getI18n(),
+        getProduct(params.slug),
+        canViewWholesalePrices(),
+    ]);
 
     if (!product) {
         notFound();
@@ -92,43 +143,11 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let relatedProducts: any[] = [];
     try {
-        relatedProducts = await prisma.product.findMany({
-            where: {
-                categoryId: product.categoryId,
-                id: { not: product.id },
-                brand: { isActive: true },
-            },
-            include: {
-                brand: true,
-                category: true,
-            },
-            take: 12,
-        });
-
-        if (relatedProducts.length < 12) {
-            const existingIds = [product.id, ...relatedProducts.map(p => p.id)];
-            const additionalProducts = await prisma.product.findMany({
-                where: {
-                    id: { notIn: existingIds },
-                    brand: { isActive: true },
-                    OR: [
-                        { brandId: product.brandId },
-                        { isTrending: true },
-                    ],
-                },
-                include: {
-                    brand: true,
-                    category: true,
-                },
-                take: 12 - relatedProducts.length,
-            });
-            relatedProducts = [...relatedProducts, ...additionalProducts];
-        }
+        relatedProducts = await getRelatedProducts(product.id, product.categoryId, product.brandId);
     } catch (e) {
         console.error("Error fetching related products:", e);
     }
 
-    const canViewPrices = await canViewWholesalePrices();
     const safeProduct = projectProductPrices(product, canViewPrices);
     const safeRelatedProducts = projectProductsPrices(relatedProducts, canViewPrices);
 

@@ -4,7 +4,10 @@ const path = require('path');
 const crypto = require('crypto');
 
 const prisma = new PrismaClient();
-const CACHE_DIR = path.join(__dirname, '..', '.cache', 'image-proxy');
+const configuredMediaRoot = process.env.MEDIA_STORAGE_DIR;
+const CACHE_DIR = configuredMediaRoot && path.isAbsolute(configuredMediaRoot)
+    ? path.join(path.resolve(configuredMediaRoot), '.image-proxy-cache')
+    : path.join(__dirname, '..', '.cache', 'image-proxy');
 
 async function prewarmImages() {
     if (!fs.existsSync(CACHE_DIR)) {

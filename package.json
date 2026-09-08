@@ -15,6 +15,7 @@
     "test:smoke": "node scripts/smoke-test.js",
     "test:perf": "node scripts/performance-audit.js",
     "test:e2e": "playwright test",
+    "images:prewarm": "node scripts/prewarm-images.js",
     "quality-gate": "npm run typecheck && npm run lint && npm run test:run && npm run test:smoke",
     "ci": "npm run quality-gate && npm run test:e2e",
     "db:import": "node scripts/importData.js"

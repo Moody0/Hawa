@@ -48,6 +48,13 @@ const nextConfig: NextConfig = {
   },
   images: {
     unoptimized: false,
+    localPatterns: [
+      {
+        // Preserve the default behavior for existing local assets while also
+        // allowing the query-string based, allowlisted image proxy endpoint.
+        pathname: "/**",
+      },
+    ],
     minimumCacheTTL: 31536000,
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],

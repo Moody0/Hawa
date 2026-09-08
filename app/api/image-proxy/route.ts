@@ -22,7 +22,10 @@ const ALLOWED_MIME_TYPES = new Set([
 ]);
 
 const MAX_PROXY_BYTES = 5 * 1024 * 1024; // 5MB maximum proxy response
-const CACHE_DIR = path.join(process.cwd(), '.cache', 'image-proxy');
+const configuredMediaRoot = process.env.MEDIA_STORAGE_DIR;
+const CACHE_DIR = configuredMediaRoot && path.isAbsolute(configuredMediaRoot)
+    ? path.join(path.resolve(configuredMediaRoot), '.image-proxy-cache')
+    : path.join(process.cwd(), '.cache', 'image-proxy');
 
 // Ensure cache directory exists synchronously on module init
 try {
@@ -241,7 +244,16 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         console.error('Image proxy error for', imageUrl, ':', error);
         recordErrorEvent({ category: 'image_proxy_failure', route: '/api/image-proxy', message: error instanceof Error ? error.message : 'Image proxy failure', status: 502 });
-        return NextResponse.redirect(new URL('/placeholder.svg', req.url), 307);
+        // A redirect to the placeholder is still a successful image load in the
+        // browser, so ResilientImage never gets an error and cannot try its next
+        // candidate. Return a real error and let the component fall back.
+        return new NextResponse(null, {
+            status: 502,
+            headers: {
+                'Cache-Control': 'public, max-age=30, s-maxage=30',
+                'X-Content-Type-Options': 'nosniff',
+            },
+        });
     } finally {
         inFlightRequests.delete(cacheKey);
     }

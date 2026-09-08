@@ -941,8 +941,12 @@ const ProductsClient = ({
                     </h2>
                     {viewMode === "grid" ? (
                         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
-                            {products.map((product) => (
-                                <EditorialProductCard key={product.id} product={product} />
+                            {products.map((product, index) => (
+                                <EditorialProductCard
+                                    key={product.id}
+                                    product={product}
+                                    imagePriority={index < 4}
+                                />
                             ))}
                         </div>
                     ) : (

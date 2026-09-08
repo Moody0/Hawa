@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useMemo, useState } from "react";
@@ -77,7 +76,7 @@ const ResilientImageInner = ({
         : (isValidImageSrc(fallbackSrc) ? fallbackSrc : IMAGE_PLACEHOLDER_SRC);
 
     const isPriority = Boolean(imgProps.priority);
-    const { loading, priority, ...restImgProps } = imgProps;
+    const { loading, priority: _priority, ...restImgProps } = imgProps;
 
     return (
         <span className="relative block h-full w-full overflow-hidden">
@@ -101,7 +100,10 @@ const ResilientImageInner = ({
                 src={safeSrc}
                 fill
                 decoding={imgProps.decoding || "async"}
-                unoptimized={imgProps.unoptimized ?? (typeof safeSrc === 'string' && (safeSrc.startsWith('/api/image-proxy') || safeSrc.startsWith('http')))}
+                // Keep Next.js image optimization enabled for proxy and remote
+                // sources. The previous forced opt-out downloaded full-size
+                // originals (often hundreds of KB) even for small product cards.
+                unoptimized={imgProps.unoptimized}
                 sizes={imgProps.sizes || "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
                 className={`${className || ""} block relative z-10`}
                 onLoad={(event) => {

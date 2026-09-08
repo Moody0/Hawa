@@ -28,16 +28,13 @@ const isRemoteImageUrl = (url: string) => /^https?:\/\//i.test(url);
 
 export const getProxyImageUrl = (url: string) => `/api/image-proxy?url=${encodeURIComponent(url)}`;
 
-const appendRetryParam = (url: string, attempt: number) =>
-    `${url}${url.includes("?") ? "&" : "?"}retry=${attempt}`;
-
 const cleanUrl = (url: string): string => {
     let cleaned = url.trim();
     if (cleaned.includes('/api/image-proxy?url=')) {
         try {
             const urlParam = cleaned.split('url=')[1].split('&')[0];
             cleaned = decodeURIComponent(urlParam);
-        } catch (e) {
+        } catch {
             // ignore
         }
     }
@@ -82,8 +79,8 @@ export const getPrimaryImage = (images: string | null | undefined): string =>
 
 /**
  * Generates an ordered list of fallback candidates:
- * 1. Proxied URL via Zad Land's server (guaranteed to load in Syria, Egypt, etc.)
- * 2. Direct remote URL (in case proxy has issues)
+ * 1. Proxied URL via the application server
+ * 2. Direct remote URL (in case the proxy has a transient issue)
  * 3. Fallback placeholder SVG
  */
 export const getImageSourceCandidates = (
@@ -109,7 +106,6 @@ export const getImageSourceCandidates = (
     const candidates = [
         proxied,
         trimmedUrl,
-        appendRetryParam(trimmedUrl, 1),
         fallbackSrc,
     ];
 

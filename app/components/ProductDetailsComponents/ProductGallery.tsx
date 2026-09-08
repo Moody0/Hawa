@@ -155,10 +155,12 @@ const ProductGallery = ({ images, isTrending }: ProductGalleryProps) => {
                             className="relative max-w-6xl w-full h-full flex items-center justify-center"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <img
+                            <ResilientImage
                                 src={selectedImage}
                                 alt={isArabic ? 'صورة المنتج بحجم كبير' : 'Expanded product view'}
-                                className="max-w-full max-h-full object-contain rounded-[10px] border border-white/10 select-none"
+                                className="object-contain rounded-[10px] border border-white/10 select-none"
+                                sizes="95vw"
+                                priority
                             />
                         </motion.div>
                     </motion.div>

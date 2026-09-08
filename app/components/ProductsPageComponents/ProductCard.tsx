@@ -49,9 +49,10 @@ export interface ProductCardProps {
     badge?: string | null;
     showBadge?: boolean;
     isFeaturedSpan?: boolean;
+    imagePriority?: boolean;
 }
 
-const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => {
+const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }: ProductCardProps) => {
     const { language, dir } = useLanguage();
     const isArabic = language === 'ar';
     const { formatPrice } = useCurrency();
@@ -168,6 +169,7 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                 className="w-full h-full object-contain"
                                 loading="lazy"
+                                priority={imagePriority}
                             />
                         </div>
                         {secondaryImage && (
