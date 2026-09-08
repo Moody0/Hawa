@@ -145,10 +145,8 @@ export default function ProductsSidebarFilter({
         if (!isMobileDrawerOpen) return;
 
         const previousOverflow = document.body.style.overflow;
-        const previousTouchAction = document.body.style.touchAction;
 
         document.body.style.overflow = "hidden";
-        document.body.style.touchAction = "none";
 
         // Auto-focus close button when modal opens
         const focusTimer = setTimeout(() => {
@@ -183,7 +181,6 @@ export default function ProductsSidebarFilter({
 
         return () => {
             document.body.style.overflow = previousOverflow;
-            document.body.style.touchAction = previousTouchAction;
             clearTimeout(focusTimer);
             window.removeEventListener("keydown", handleKeyDown);
         };
@@ -245,11 +242,11 @@ export default function ProductsSidebarFilter({
 
     // Categories Section component
     const categoriesSection = categories.length > 0 && (
-        <div className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-white/10">
+        <section className="space-y-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-zinc-900 lg:rounded-none lg:border-0 lg:border-t lg:border-slate-100 lg:bg-transparent lg:p-0 lg:pt-2 lg:shadow-none lg:dark:border-white/10 lg:dark:bg-transparent">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                    <FolderTree className="text-[#8A6305] text-sm" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    <FolderTree className="h-4 w-4 text-[#8A6305]" />
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200 lg:text-[11px] lg:uppercase lg:tracking-wider lg:text-slate-700 lg:dark:text-slate-300">
                         {isArabic ? "الأقسام والتصنيفات" : "Departments"}
                     </span>
                 </div>
@@ -257,14 +254,14 @@ export default function ProductsSidebarFilter({
                     <button
                         type="button"
                         onClick={() => onFiltersChange({ ...filters, categoryIds: [] })}
-                        className="text-[10px] font-bold text-[#8A6305] hover:underline cursor-pointer"
+                        className="min-h-8 shrink-0 rounded-lg px-2 text-xs font-bold text-[#8A6305] transition-colors hover:bg-[#FAF6EC] lg:min-h-0 lg:p-0 lg:text-[10px] lg:hover:bg-transparent lg:hover:underline cursor-pointer"
                     >
                         {isArabic ? "إلغاء التحديد" : "Clear"}
                     </button>
                 )}
             </div>
 
-            <div className="max-h-52 overflow-y-auto space-y-1 pe-1 scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden overscroll-contain lg:max-h-none lg:overflow-visible">
+            <div className="space-y-1">
                 {categories.map((cat) => {
                     const isChecked = filters.categoryIds.includes(cat.id);
                     const displayName = isArabic ? cat.name : (cat.description || cat.nameEn || cat.name);
@@ -272,7 +269,7 @@ export default function ProductsSidebarFilter({
                     return (
                         <label
                             key={cat.id}
-                            className={`flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer select-none transition-colors ${
+                            className={`flex min-h-11 items-center justify-between gap-3 rounded-xl px-2.5 py-2 text-sm cursor-pointer select-none transition-colors lg:min-h-0 lg:text-xs ${
                                 isChecked
                                     ? "bg-[#FAF6EC] dark:bg-[#8A6305]/15 text-[#0B192C] dark:text-white font-bold"
                                     : "hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-600 dark:text-slate-300 active:bg-slate-100 dark:active:bg-zinc-800"
@@ -286,37 +283,37 @@ export default function ProductsSidebarFilter({
                                     className="sr-only peer"
                                 />
                                 <div
-                                    className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-[#8A6305] peer-focus-visible:ring-offset-1 ${
+                                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-[#8A6305] peer-focus-visible:ring-offset-1 lg:h-4 lg:w-4 lg:rounded ${
                                         isChecked
                                             ? "bg-[#8A6305] text-white border-[#8A6305]"
                                             : "border-slate-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
                                     }`}
                                 >
-                                    {isChecked && <Check className="text-xs" />}
+                                    {isChecked && <Check className="h-3.5 w-3.5 lg:h-3 lg:w-3" />}
                                 </div>
 
                                 <span className="truncate">{displayName}</span>
                             </div>
 
                             {cat._count?.products !== undefined && (
-                                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-400 shrink-0">
-                                    ({cat._count.products})
+                                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-slate-500 dark:bg-zinc-800 dark:text-slate-400 lg:bg-transparent lg:px-0 lg:py-0 lg:text-[10px] lg:font-mono">
+                                    {cat._count.products}
                                 </span>
                             )}
                         </label>
                     );
                 })}
             </div>
-        </div>
+        </section>
     );
 
     // Brands Section component
     const brandsSection = brands.length > 0 && (
-        <div className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-white/10">
+        <section className="space-y-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-zinc-900 lg:rounded-none lg:border-0 lg:border-t lg:border-slate-100 lg:bg-transparent lg:p-0 lg:pt-2 lg:shadow-none lg:dark:border-white/10 lg:dark:bg-transparent">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                    <Store className="text-[#8A6305] text-sm" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    <Store className="h-4 w-4 text-[#8A6305]" />
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200 lg:text-[11px] lg:uppercase lg:tracking-wider lg:text-slate-700 lg:dark:text-slate-300">
                         {isArabic ? "الوكالات والعلامات التجارية" : "Agencies & Brands"}
                     </span>
                 </div>
@@ -324,7 +321,7 @@ export default function ProductsSidebarFilter({
                     <button
                         type="button"
                         onClick={() => onFiltersChange({ ...filters, brandIds: [] })}
-                        className="text-[11px] font-bold text-[#8A6305] hover:underline cursor-pointer"
+                        className="min-h-8 shrink-0 rounded-lg px-2 text-xs font-bold text-[#8A6305] transition-colors hover:bg-[#FAF6EC] lg:min-h-0 lg:p-0 lg:text-[11px] lg:hover:bg-transparent lg:hover:underline cursor-pointer"
                     >
                         {isArabic ? "إلغاء التحديد" : "Clear"}
                     </button>
@@ -334,20 +331,20 @@ export default function ProductsSidebarFilter({
             {/* Brand Search Input */}
             {brands.length > 5 && (
                 <div className="relative">
-                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none" />
+                    <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                         type="text"
                         value={brandSearch}
                         onChange={(e) => setBrandSearch(e.target.value)}
                         aria-label={isArabic ? "البحث في الوكالات" : "Search agencies and brands"}
                         placeholder={isArabic ? "ابحث عن وكالة..." : "Search brands..."}
-                        className="w-full ps-8 pe-8 py-2 text-sm sm:text-xs bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-[#8A6305] text-[#0B192C] dark:text-white placeholder:text-slate-400 transition-colors"
+                        className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 ps-9 pe-9 py-2 text-sm text-[#0B192C] outline-none transition-colors placeholder:text-slate-400 focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/10 dark:border-white/10 dark:bg-zinc-800/80 dark:text-white lg:min-h-0 lg:text-xs"
                     />
                     {brandSearch && (
                         <button
                             type="button"
                             onClick={() => setBrandSearch("")}
-                            className="absolute end-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 cursor-pointer"
+                            className="absolute end-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200/70 hover:text-slate-600 dark:hover:bg-zinc-700 dark:hover:text-white cursor-pointer"
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>
@@ -356,7 +353,7 @@ export default function ProductsSidebarFilter({
             )}
 
             {/* Brand List */}
-            <div className="max-h-60 overflow-y-auto space-y-1 pe-1 scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden overscroll-contain lg:max-h-none lg:overflow-visible">
+            <div className="space-y-1">
                 {filteredBrands.map((brand) => {
                     const isChecked = filters.brandIds.includes(brand.id);
                     const count = brand._count?.products;
@@ -364,7 +361,7 @@ export default function ProductsSidebarFilter({
                     return (
                         <label
                             key={brand.id}
-                            className={`flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer select-none transition-colors ${
+                            className={`flex min-h-11 items-center justify-between gap-3 rounded-xl px-2.5 py-2 text-sm cursor-pointer select-none transition-colors lg:min-h-0 lg:text-xs ${
                                 isChecked
                                     ? "bg-[#FAF6EC] dark:bg-[#8A6305]/15 text-[#0B192C] dark:text-white font-bold"
                                     : "hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-600 dark:text-slate-300 active:bg-slate-100 dark:active:bg-zinc-800"
@@ -378,22 +375,22 @@ export default function ProductsSidebarFilter({
                                     className="sr-only peer"
                                 />
                                 <div
-                                    className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-[#8A6305] peer-focus-visible:ring-offset-1 ${
+                                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-[#8A6305] peer-focus-visible:ring-offset-1 lg:h-4 lg:w-4 lg:rounded ${
                                         isChecked
                                             ? "bg-[#8A6305] text-white border-[#8A6305]"
                                             : "border-slate-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
                                     }`}
                                 >
-                                    {isChecked && <Check className="text-xs" />}
+                                    {isChecked && <Check className="h-3.5 w-3.5 lg:h-3 lg:w-3" />}
                                 </div>
 
                                 {brand.image && (
-                                    <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-slate-100">
+                                    <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-100 bg-white lg:h-5 lg:w-5">
                                         <ResilientImage
                                             src={brand.image}
                                             alt={brand.name}
                                             className="object-contain p-0.5"
-                                            sizes="20px"
+                                            sizes="(max-width: 1023px) 28px, 20px"
                                             showSkeleton={false}
                                         />
                                     </span>
@@ -403,8 +400,8 @@ export default function ProductsSidebarFilter({
                             </div>
 
                             {count !== undefined && (
-                                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-400 shrink-0">
-                                    ({count})
+                                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-slate-500 dark:bg-zinc-800 dark:text-slate-400 lg:bg-transparent lg:px-0 lg:py-0 lg:text-[10px] lg:font-mono">
+                                    {count}
                                 </span>
                             )}
                         </label>
@@ -417,12 +414,12 @@ export default function ProductsSidebarFilter({
                     </p>
                 )}
             </div>
-        </div>
+        </section>
     );
 
     // The inner filter content rendered both on desktop sidebar and mobile drawer
     const filterContent = (
-        <div className="flex flex-col gap-4 text-[#0B192C] dark:text-gray-100">
+        <div className="flex flex-col gap-3 text-[#0B192C] dark:text-gray-100 lg:gap-4">
             {/* Desktop-only Header / Active Count */}
             <div className="hidden lg:flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
                 <div className="flex items-center gap-2">
@@ -452,25 +449,25 @@ export default function ProductsSidebarFilter({
             </div>
 
             {/* Quick Status Toggles (Wholesale Deals & Stock) */}
-            <div className="space-y-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <section className="space-y-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-zinc-900 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:dark:bg-transparent">
+                <span className="text-sm font-bold text-slate-800 dark:text-slate-200 lg:text-[11px] lg:uppercase lg:tracking-wider lg:text-slate-500 lg:dark:text-slate-400">
                     {isArabic ? "حالة التوفر والعروض" : "Availability & Deals"}
                 </span>
 
-                <div className="flex flex-col gap-1.5 pt-1">
+                <div className="flex flex-col gap-2 lg:gap-1.5 lg:pt-1">
                     {/* In Stock */}
                     <button
                         type="button"
                         onClick={handleToggleInStock}
                         aria-pressed={filters.inStock}
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-colors border cursor-pointer text-start ${
+                        className={`flex min-h-11 items-center gap-2.5 rounded-xl border px-3 py-2 text-start text-sm font-bold transition-colors cursor-pointer lg:min-h-0 lg:text-xs ${
                             filters.inStock
                                 ? "bg-[#FAF6EC] dark:bg-[#8A6305]/15 text-[#0B192C] dark:text-white border-[#8A6305]/40"
                                 : "bg-white dark:bg-zinc-900 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-white/10 hover:border-[#8A6305]"
                         }`}
                     >
                         <div
-                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors lg:h-4 lg:w-4 lg:rounded ${
                                 filters.inStock
                                     ? "bg-[#8A6305] text-white border-[#8A6305]"
                                     : "border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800"
@@ -491,14 +488,14 @@ export default function ProductsSidebarFilter({
                         type="button"
                         onClick={handleToggleOnSale}
                         aria-pressed={filters.onSale}
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-colors border cursor-pointer text-start ${
+                        className={`flex min-h-11 items-center gap-2.5 rounded-xl border px-3 py-2 text-start text-sm font-bold transition-colors cursor-pointer lg:min-h-0 lg:text-xs ${
                             filters.onSale
                                 ? "bg-[#FAF6EC] dark:bg-[#8A6305]/15 text-[#0B192C] dark:text-white border-[#8A6305]/40"
                                 : "bg-white dark:bg-zinc-900 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-white/10 hover:border-[#8A6305]"
                         }`}
                     >
                         <div
-                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors lg:h-4 lg:w-4 lg:rounded ${
                                 filters.onSale
                                     ? "bg-[#8A6305] text-white border-[#8A6305]"
                                     : "border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800"
@@ -519,14 +516,14 @@ export default function ProductsSidebarFilter({
                         type="button"
                         onClick={handleToggleTrending}
                         aria-pressed={filters.isTrending}
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-colors border cursor-pointer text-start ${
+                        className={`flex min-h-11 items-center gap-2.5 rounded-xl border px-3 py-2 text-start text-sm font-bold transition-colors cursor-pointer lg:min-h-0 lg:text-xs ${
                             filters.isTrending
                                 ? "bg-[#FAF6EC] dark:bg-[#8A6305]/15 text-[#0B192C] dark:text-white border-[#8A6305]/40"
                                 : "bg-white dark:bg-zinc-900 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-white/10 hover:border-[#8A6305]"
                         }`}
                     >
                         <div
-                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors lg:h-4 lg:w-4 lg:rounded ${
                                 filters.isTrending
                                     ? "bg-[#8A6305] text-white border-[#8A6305]"
                                     : "border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800"
@@ -542,7 +539,7 @@ export default function ProductsSidebarFilter({
                         <span className="truncate">{isArabic ? "الأكثر طلباً ورواجاً" : "Trending Products"}</span>
                     </button>
                 </div>
-            </div>
+            </section>
 
             {/* Stable filter sections order: Brands then Categories */}
             {brandsSection}
@@ -563,7 +560,6 @@ export default function ProductsSidebarFilter({
             {mounted && isMobileDrawerOpen && createPortal(
                 <div
                     className="fixed inset-0 z-[100] lg:hidden overflow-hidden"
-                    style={{ touchAction: "none" }}
                 >
                     {/* Backdrop Overlay (tap to close) */}
                     <div
@@ -579,35 +575,37 @@ export default function ProductsSidebarFilter({
                         aria-modal="true"
                         aria-labelledby="mobile-catalog-filters-title"
                         id="mobile-catalog-filters"
-                        className="absolute bottom-0 inset-x-0 bg-white dark:bg-zinc-900 rounded-t-3xl max-h-[88dvh] h-[85dvh] flex flex-col border-t border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden overscroll-contain animate-in slide-in-from-bottom duration-300 pointer-events-auto"
+                        className="absolute inset-x-0 bottom-0 flex h-[min(88dvh,760px)] max-h-[calc(100dvh-0.75rem)] flex-col overflow-hidden overscroll-contain rounded-t-3xl border-t border-slate-200 bg-slate-50 shadow-2xl animate-in slide-in-from-bottom duration-300 pointer-events-auto dark:border-white/10 dark:bg-zinc-950 sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-w-xl sm:rounded-3xl sm:border"
                         style={{ overscrollBehavior: "contain" }}
                     >
                         {/* Top Header & Grab Handle (non-scrolling, touch-none) */}
-                        <div className="shrink-0 px-5 pt-3 pb-3 border-b border-slate-100 dark:border-white/10 select-none touch-none bg-white dark:bg-zinc-900">
+                        <div className="shrink-0 border-b border-slate-100 bg-white px-4 pb-3 pt-2.5 select-none touch-none dark:border-white/10 dark:bg-zinc-900">
                             {/* Drawer Grab Bar */}
-                            <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mb-3" />
+                            <div className="mx-auto mb-2.5 h-1 w-10 rounded-full bg-slate-300 dark:bg-zinc-700" />
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-xl bg-[#FAF6EC] dark:bg-[#8A6305]/20 flex items-center justify-center text-[#8A6305]">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex min-w-0 items-center gap-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FAF6EC] text-[#8A6305] dark:bg-[#8A6305]/20">
                                         <Filter className="w-4 h-4" />
                                     </div>
-                                    <span id="mobile-catalog-filters-title" className="font-bold text-base text-[#0B192C] dark:text-white">
+                                    <div className="min-w-0">
+                                    <span id="mobile-catalog-filters-title" className="block truncate text-base font-bold text-[#0B192C] dark:text-white">
                                         {isArabic ? "تصفية المنتجات" : "Filter Catalog"}
                                     </span>
-                                    {activeFiltersCount > 0 && (
-                                        <span className="bg-[#8A6305] text-white text-xs font-bold px-2 py-0.5 rounded-full font-mono">
-                                            {activeFiltersCount}
-                                        </span>
-                                    )}
+                                        <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400" aria-live="polite">
+                                            {activeFiltersCount > 0
+                                                ? (isArabic ? `${activeFiltersCount} محدد` : `${activeFiltersCount} selected`)
+                                                : (isArabic ? "اختر ما يناسبك" : "Choose what fits")}
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex shrink-0 items-center gap-1">
                                     {activeFiltersCount > 0 && (
                                         <button
                                             type="button"
                                             onClick={onResetFilters}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                                            className="inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-xl px-2.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/30 dark:hover:text-red-400 cursor-pointer"
                                         >
                                             <RotateCw className="w-3.5 h-3.5" />
                                             <span>{isArabic ? "إعادة ضبط" : "Reset"}</span>
@@ -619,7 +617,7 @@ export default function ProductsSidebarFilter({
                                         type="button"
                                         onClick={onCloseMobileDrawer}
                                         aria-label={isArabic ? "إغلاق التصفية" : "Close filters"}
-                                        className="w-10 h-10 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white active:scale-95 transition-all cursor-pointer"
+                                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-all hover:bg-slate-200 hover:text-slate-800 active:scale-95 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:hover:text-white cursor-pointer"
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
@@ -629,7 +627,7 @@ export default function ProductsSidebarFilter({
 
                         {/* Scrollable Filter Options - Hidden Scrollbars & Overscroll Contained */}
                         <div
-                            className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden overscroll-contain"
+                            className="flex-1 overflow-y-auto px-3 py-3 scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden overscroll-contain sm:px-4"
                             style={{
                                 touchAction: "pan-y",
                                 overscrollBehavior: "contain",
@@ -640,16 +638,16 @@ export default function ProductsSidebarFilter({
                         </div>
 
                         {/* Sticky Apply Button with Safe-Area Inset */}
-                        <div className="shrink-0 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm">
+                        <div className="shrink-0 border-t border-slate-200/80 bg-white/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm dark:border-white/10 dark:bg-zinc-900/95 sm:px-4">
                             <button
                                 type="button"
                                 onClick={onCloseMobileDrawer}
-                                className="w-full py-3.5 bg-[#0B192C] hover:bg-[#132035] dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white font-bold rounded-2xl text-sm transition-all shadow-md active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
+                                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0B192C] px-4 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#132035] active:scale-[0.99] dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 cursor-pointer"
                             >
                                 <span>
                                     {isArabic
                                         ? `عرض النتائج (${totalResults} منتج)`
-                                        : `Apply Filters (${totalResults} results)`}
+                                        : `Show ${totalResults} results`}
                                 </span>
                             </button>
                         </div>
