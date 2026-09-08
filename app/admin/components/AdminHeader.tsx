@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { Menu, Globe, ExternalLink } from 'lucide-react';
+import { Menu, ExternalLink } from "lucide-react";
 
 interface AdminHeaderProps {
     title: string;
@@ -10,13 +10,11 @@ interface AdminHeaderProps {
 }
 
 export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
-    const { t, language, setLanguage } = useLanguage();
-    const isArabic = language === 'ar';
+    const { t } = useLanguage();
 
     return (
         <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-3.5 bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 shadow-2xs">
             <div className="flex items-center gap-4">
-                {/* Mobile Menu Button */}
                 <button
                     onClick={onMenuClick}
                     className="lg:hidden text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-xl transition-colors"
@@ -32,26 +30,25 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
             </div>
 
             <div className="flex items-center gap-3">
-                {/* Visit Live Storefront */}
                 <Link
                     href="/"
                     target="_blank"
                     className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#0B192C] dark:text-[#8A6305] hover:bg-[#FAF6EC] dark:hover:bg-white/5 rounded-xl border border-slate-200/80 dark:border-white/10 transition-all hover:border-[#8A6305]/40"
-                    title={isArabic ? "زيارة المتجر المباشر" : "Visit Live Storefront"}
+                    title={t("admin.visitStore") || "Visit Store"}
                 >
                     <ExternalLink className="text-[14px]" />
-                    <span>{t('admin.visitStore') || "Visit Store"}</span>
+                    <span>{t("admin.visitStore") || "Visit Store"}</span>
                 </Link>
 
-                {/* Language Switcher */}
-                <button
-                    onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-white/10 transition-all"
-                    title={language === 'en' ? 'Switch to Arabic' : 'Switch to English'}
+                <span
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 rounded-xl border border-slate-200/80 dark:border-white/10"
+                    title="Arabic"
+                    aria-label="Arabic language"
+                    role="status"
                 >
-                    <Globe className="text-[15px] text-[#8A6305]" />
-                    <span>{language === 'en' ? 'العربية' : 'English'}</span>
-                </button>
+                    <span aria-hidden="true" className="text-[15px] text-[#8A6305]">AR</span>
+                    <span>Arabic</span>
+                </span>
             </div>
         </header>
     );

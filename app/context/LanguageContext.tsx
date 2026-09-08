@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import ar from '@/app/locales/ar.json';
-import en from '@/app/locales/en.json';
 
 type Language = 'en' | 'ar';
 
@@ -18,49 +17,43 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({
     children,
-    initialLanguage = 'ar'
+    initialLanguage: _initialLanguage = 'ar'
 }: {
     children: React.ReactNode;
     initialLanguage?: Language;
 }) {
-    const [language] = useState<Language>(initialLanguage);
+    // Arabic is the single supported language. Keep the prop for backwards
+    // compatibility, but do not allow stale client preferences to override it.
+    const language: Language = 'ar';
     const [mounted, setMounted] = useState(false);
-    const translations = language === 'en' ? en : ar;
+    const translations = ar;
 
-    // Sync language on client mount if user had a saved preference that differs from server render
+    // Normalize preferences created by older bilingual builds without reloading.
+    // Reloading here could create a visible loop for users with an old `en` value.
     useEffect(() => {
         setMounted(true);
-        const savedLang = localStorage.getItem('language') as Language;
-        const currentDocLang = (document.documentElement.lang || 'ar') as Language;
-        if (savedLang && (savedLang === 'en' || savedLang === 'ar') && savedLang !== currentDocLang) {
-            document.cookie = `language=${savedLang}; path=/; max-age=31536000; SameSite=Lax`;
-            window.location.reload();
+        try {
+            localStorage.setItem('language', 'ar');
+            document.cookie = 'language=ar; path=/; max-age=31536000; SameSite=Lax';
+        } catch (e) {
+            console.warn('Could not normalize language preference', e);
         }
-    }, []);
-
-    // Sync document language & direction when language changes
-    useEffect(() => {
         document.documentElement.lang = language;
-        document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.dir = 'rtl';
     }, [language]);
 
-    const setLanguage = useCallback((lang: Language) => {
+    // Keep the public API stable for existing components, but always persist Arabic.
+    const setLanguage = useCallback((_lang: Language) => {
         try {
-            localStorage.setItem('language', lang);
-            document.cookie = `language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+            localStorage.setItem('language', 'ar');
+            document.cookie = 'language=ar; path=/; max-age=31536000; SameSite=Lax';
         } catch (e) {
             console.warn('Could not persist language immediately', e);
         }
 
         if (typeof window !== 'undefined') {
-            // Smoothly fade out pointer interactions during reload without premature layout/direction jumps
-            try {
-                document.body.style.pointerEvents = 'none';
-                document.body.style.transition = 'opacity 0.15s ease-out';
-                document.body.style.opacity = '0.7';
-            } catch {}
-            // Reload page so all server and client components render atomically in the new language and direction
-            window.location.reload();
+            document.documentElement.lang = 'ar';
+            document.documentElement.dir = 'rtl';
         }
     }, []);
 

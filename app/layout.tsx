@@ -4,7 +4,6 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { getI18n } from "@/lib/i18n";
 import { getSiteSettings } from "@/lib/public-queries";
-import { cookies, headers } from "next/headers";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -70,7 +69,6 @@ export const metadata: Metadata = {
     canonical: "/",
     languages: {
       "ar-SY": "/",
-      "en-US": "/?lang=en",
       "x-default": "/",
     },
   },
@@ -130,18 +128,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let requestLocale: 'en' | 'ar' = 'ar';
-  try {
-    const [headersList, cookiesList] = await Promise.all([headers(), cookies()]);
-    if (headersList.get('x-locale') === 'en') {
-      requestLocale = 'en';
-    } else if (cookiesList.get('language')?.value === 'en') {
-      requestLocale = 'en';
-    }
-  } catch {}
-
   const [{ language, dir }, settings] = await Promise.all([
-    getI18n(requestLocale),
+    getI18n('ar'),
     getSiteSettings(),
   ]);
   const exchangeRate = settings?.exchangeRate ? Number(settings.exchangeRate) : 135;

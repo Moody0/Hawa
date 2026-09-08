@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 interface RollingNumberProps {
@@ -22,16 +22,19 @@ const variants = {
 
 
 export default function RollingNumber({ value, className = "" }: RollingNumberProps) {
-    const [prevValue, setPrevValue] = useState(value);
-    const [direction, setDirection] = useState(1);
+    const [state, setState] = useState({ value, direction: 1 });
     const shouldReduceMotion = useReducedMotion();
 
-    useEffect(() => {
-        if (value !== prevValue) {
-            setDirection(value > prevValue ? 1 : -1);
-            setPrevValue(value);
-        }
-    }, [value, prevValue]);
+    let direction = state.direction;
+
+    // Calculate animation direction synchronously on value change to prevent first-click reversal
+    if (value !== state.value) {
+        direction = value > state.value ? 1 : -1;
+        setState({
+            value,
+            direction,
+        });
+    }
 
     if (shouldReduceMotion) {
         return (

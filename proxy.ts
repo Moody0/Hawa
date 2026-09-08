@@ -29,9 +29,9 @@ export async function proxy(req: NextRequest) {
   if (pathname === "/en" || pathname.startsWith("/en/")) {
     const url = new URL(pathname.replace(/^\/en/, "") || "/", req.url);
     url.search = search;
-    const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("x-locale", "en");
-    return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+    // Arabic is the only supported site language. Keep old /en links working
+    // by redirecting them to the canonical Arabic URL.
+    return NextResponse.redirect(url, 308);
   }
   return NextResponse.next();
 }
@@ -39,4 +39,3 @@ export async function proxy(req: NextRequest) {
 export const config = {
   matcher: ["/admin/:path*", "/api/admin/:path*", "/ar", "/ar/:path*", "/en", "/en/:path*"],
 };
-
