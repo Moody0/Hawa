@@ -21,15 +21,10 @@ if (process.env.NODE_ENV === 'production') {
 const port = process.env.PORT || '3000';
 const nextBin = path.join(__dirname, '..', 'node_modules', 'next', 'dist', 'bin', 'next');
 const prewarmScript = path.join(__dirname, 'prewarm-images.js');
-const child = spawn(process.execPath, [nextBin, 'start', '-p', port], {
-    stdio: 'inherit',
-    cwd: path.join(__dirname, '..'),
-    env: process.env,
-});
 
 // Populate the durable proxy cache in the background so a visitor is not the
 // first caller waiting on a slow third-party image host after a deployment.
-const prewarm = process.env.PREWARM_IMAGES_ON_START === 'false'
+const prewarm = (process.env.PREWARM_IMAGES_ON_START === 'false' || !fs.existsSync(prewarmScript))
     ? null
     : spawn(process.execPath, [prewarmScript], {
         stdio: 'inherit',
@@ -37,12 +32,40 @@ const prewarm = process.env.PREWARM_IMAGES_ON_START === 'false'
         env: process.env,
       });
 
-child.on('exit', (code) => process.exit(code || 0));
+let isShuttingDown = false;
+let currentChild = null;
+
+function startChild() {
+    if (isShuttingDown) return;
+    const child = spawn(process.execPath, [nextBin, 'start', '-p', port], {
+        stdio: 'inherit',
+        cwd: path.join(__dirname, '..'),
+        env: process.env,
+    });
+    currentChild = child;
+
+    child.on('exit', (code, signal) => {
+        if (isShuttingDown) {
+            process.exit(code || 0);
+            return;
+        }
+        console.warn(`[Server Supervisor] Next.js process exited (code=${code}, signal=${signal}). Restarting in 1s...`);
+        setTimeout(startChild, 1000);
+    });
+}
+
 process.on('SIGINT', () => {
+    isShuttingDown = true;
     prewarm?.kill('SIGINT');
-    child.kill('SIGINT');
+    if (currentChild) currentChild.kill('SIGINT');
+    process.exit(0);
 });
+
 process.on('SIGTERM', () => {
+    isShuttingDown = true;
     prewarm?.kill('SIGTERM');
-    child.kill('SIGTERM');
+    if (currentChild) currentChild.kill('SIGTERM');
+    process.exit(0);
 });
+
+startChild();

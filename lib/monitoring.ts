@@ -25,20 +25,28 @@ export interface ErrorEvent {
 }
 
 export function recordApiLatency(event: ApiLatencyEvent): void {
-  Sentry.captureEvent({
-    message: "api_latency",
-    level: "info",
-    tags: { endpoint: event.endpoint.split("?")[0], method: event.method, status: String(event.status), authClass: event.authClass || "guest" },
-    measurements: { duration_ms: { value: event.durationMs, unit: "millisecond" } },
-  });
+  try {
+    Sentry.captureEvent({
+      message: "api_latency",
+      level: "info",
+      tags: { endpoint: event.endpoint.split("?")[0], method: event.method, status: String(event.status), authClass: event.authClass || "guest" },
+      measurements: { duration_ms: { value: event.durationMs, unit: "millisecond" } },
+    });
+  } catch {
+    // Fail silently in monitoring
+  }
 }
 
 export function recordErrorEvent(event: ErrorEvent): void {
-  Sentry.captureEvent({
-    message: event.category,
-    level: event.status && event.status < 500 ? "warning" : "error",
-    tags: { category: event.category, route: event.route?.split("?")[0], status: event.status ? String(event.status) : undefined },
-    extra: { safeMessage: event.message.slice(0, 500), details: event.details },
-  });
+  try {
+    Sentry.captureEvent({
+      message: event.category,
+      level: event.status && event.status < 500 ? "warning" : "error",
+      tags: { category: event.category, route: event.route?.split("?")[0], status: event.status ? String(event.status) : undefined },
+      extra: { safeMessage: event.message.slice(0, 500), details: event.details },
+    });
+  } catch {
+    // Fail silently in monitoring
+  }
 }
 

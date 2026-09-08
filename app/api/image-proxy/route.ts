@@ -212,6 +212,8 @@ export async function GET(req: NextRequest) {
         let fetchPromise = inFlightRequests.get(cacheKey);
         if (!fetchPromise) {
             fetchPromise = fetchFromUpstream(imageUrl);
+            // Attach a silent catch handler to prevent unhandled rejection if client aborts/disconnects
+            fetchPromise.catch(() => {});
             inFlightRequests.set(cacheKey, fetchPromise);
         }
 
