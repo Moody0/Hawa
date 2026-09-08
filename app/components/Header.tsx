@@ -113,29 +113,63 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                 {/* 1. Desktop Header (xl and up) */}
                 <div className="hidden xl:block w-full">
                     <div className="container-custom">
-                        <div className={`flex items-center justify-between transition-[height] duration-250 ease-out ${isScrolled ? 'h-[60px]' : 'h-[72px]'}`}>
+                        <div className={`flex items-center justify-between transition-[height] duration-300 ease-out ${isScrolled ? 'h-[60px]' : 'h-[72px]'}`}>
                             {/* Start Side: Logo & Trade Badge */}
-                            <div className="flex items-center gap-3 shrink-0">
+                            <div className="relative flex items-center gap-3 shrink-0 h-full">
                                 <Link
                                     href="/"
-                                    className="flex items-center group py-1"
+                                    className="relative flex items-center group z-10 py-1"
                                     aria-label="شركة حوا للتوزيع والتجارة - الصفحة الرئيسية"
                                 >
                                     <Image
                                         src="/images/logo-header.webp"
                                         alt="Hawa Distribution & Trading - شركة حوا للتوزيع والتجارة"
-                                        width={110}
-                                        height={60}
+                                        width={120}
+                                        height={65}
                                         priority
-                                        className={`w-auto object-contain transition-[height,transform] duration-250 ease-out group-hover:scale-[1.03] ${isScrolled ? 'h-11' : 'h-[52px]'}`}
+                                        className={`w-auto object-contain transition-all duration-300 ease-out group-hover:scale-[1.03] ${
+                                            isScrolled ? 'h-11 translate-y-0' : 'h-[58px] translate-y-1'
+                                        }`}
                                     />
                                 </Link>
 
-                                <div className="h-6 w-[1px] bg-white/15 mx-1 hidden xl:block" aria-hidden="true" />
+                                <div className="h-6 w-[1px] bg-white/15 mx-1 hidden xl:block z-10" aria-hidden="true" />
 
-                                <div className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-[#E5B54A]">
+                                <div className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-[#E5B54A] z-10">
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#E5B54A]" />
                                     <span>{isArabic ? 'بوابة توريد الجملة' : 'B2B Wholesale Portal'}</span>
+                                </div>
+
+                                {/* Curved Logo Cradle Apron (Smoothly retracts on scroll down) */}
+                                <div
+                                    className={`absolute top-full -mt-[1px] pointer-events-none transition-all duration-300 ease-out origin-top z-0 ${
+                                        isArabic ? '-end-8' : '-start-8'
+                                    } ${
+                                        isScrolled
+                                            ? 'opacity-0 scale-y-0 -translate-y-2'
+                                            : 'opacity-100 scale-y-100 translate-y-0'
+                                    }`}
+                                    aria-hidden="true"
+                                >
+                                    <svg
+                                        viewBox="0 0 250 28"
+                                        className={`w-[250px] h-[28px] block overflow-visible drop-shadow-[0_6px_10px_rgba(0,0,0,0.22)] ${
+                                            isArabic ? '' : '-scale-x-100'
+                                        }`}
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M 0 0 L 30 0 C 75 0, 105 26, 155 26 C 195 26, 225 2, 250 0 Z"
+                                            fill="#0B192C"
+                                        />
+                                        <path
+                                            d="M 0 0 L 30 0 C 75 0, 105 26, 155 26 C 195 26, 225 2, 250 0"
+                                            stroke="rgba(229, 181, 74, 0.45)"
+                                            strokeWidth="1.5"
+                                            fill="none"
+                                        />
+                                    </svg>
                                 </div>
                             </div>
 
@@ -215,20 +249,56 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                 <div className="block xl:hidden w-full px-3 sm:px-6">
                     <div className="flex items-center justify-between h-16">
                         {/* Start Side: Brand Logo */}
-                        <Link
-                            href="/"
-                            className="flex items-center group py-1"
-                            aria-label="شركة حوا للتوزيع والتجارة - الصفحة الرئيسية"
-                        >
-                            <Image
-                                src="/images/logo-header.webp"
-                                alt="Hawa Distribution & Trading"
-                                width={95}
-                                height={50}
-                                priority
-                                className="h-11 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.03]"
-                            />
-                        </Link>
+                        <div className="relative flex items-center shrink-0 h-full">
+                            <Link
+                                href="/"
+                                className="relative flex items-center group py-1 z-10"
+                                aria-label="شركة حوا للتوزيع والتجارة - الصفحة الرئيسية"
+                            >
+                                <Image
+                                    src="/images/logo-header.webp"
+                                    alt="Hawa Distribution & Trading"
+                                    width={100}
+                                    height={52}
+                                    priority
+                                    className={`w-auto object-contain transition-all duration-300 ease-out group-hover:scale-[1.03] ${
+                                        isScrolled ? 'h-10' : 'h-[48px] translate-y-0.5'
+                                    }`}
+                                />
+                            </Link>
+
+                            {/* Mobile Curved Logo Cradle Apron */}
+                            <div
+                                className={`absolute top-full -mt-[1px] pointer-events-none transition-all duration-300 ease-out origin-top z-0 ${
+                                    isArabic ? '-end-5' : '-start-5'
+                                } ${
+                                    isScrolled
+                                        ? 'opacity-0 scale-y-0 -translate-y-2'
+                                        : 'opacity-100 scale-y-100 translate-y-0'
+                                }`}
+                                aria-hidden="true"
+                            >
+                                <svg
+                                    viewBox="0 0 190 22"
+                                    className={`w-[190px] h-[22px] block overflow-visible drop-shadow-[0_4px_6px_rgba(0,0,0,0.18)] ${
+                                        isArabic ? '' : '-scale-x-100'
+                                    }`}
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        d="M 0 0 L 20 0 C 55 0, 80 20, 120 20 C 150 20, 170 2, 190 0 Z"
+                                        fill="#0B192C"
+                                    />
+                                    <path
+                                        d="M 0 0 L 20 0 C 55 0, 80 20, 120 20 C 150 20, 170 2, 190 0"
+                                        stroke="rgba(229, 181, 74, 0.45)"
+                                        strokeWidth="1.2"
+                                        fill="none"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
 
                         {/* End Side: Mobile Controls */}
                         <div className="flex items-center gap-1 sm:gap-2">
