@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useMemo, useState } from "react";
@@ -76,14 +77,7 @@ const ResilientImageInner = ({
         : (isValidImageSrc(fallbackSrc) ? fallbackSrc : IMAGE_PLACEHOLDER_SRC);
 
     const isPriority = Boolean(imgProps.priority);
-    const {
-        loading,
-        priority: _priority,
-        preload: requestedPreload,
-        fetchPriority,
-        ...restImgProps
-    } = imgProps;
-    const shouldPreload = requestedPreload ?? isPriority;
+    const { loading, priority, ...restImgProps } = imgProps;
 
     return (
         <span className="relative block h-full w-full overflow-hidden">
@@ -101,17 +95,13 @@ const ResilientImageInner = ({
 
             <Image
                 {...restImgProps}
-                preload={shouldPreload}
-                fetchPriority={shouldPreload ? undefined : fetchPriority}
-                {...(isPriority ? {} : { loading: loading || "lazy" })}
+                priority={isPriority}
+                {...(isPriority ? { fetchPriority: "high" as const } : { loading: loading || "lazy" })}
                 alt={alt || ""}
                 src={safeSrc}
                 fill
                 decoding={imgProps.decoding || "async"}
-                // Keep Next.js image optimization enabled for proxy and remote
-                // sources. The previous forced opt-out downloaded full-size
-                // originals (often hundreds of KB) even for small product cards.
-                unoptimized={imgProps.unoptimized}
+                unoptimized={imgProps.unoptimized ?? true}
                 sizes={imgProps.sizes || "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
                 className={`${className || ""} block relative z-10`}
                 onLoad={(event) => {

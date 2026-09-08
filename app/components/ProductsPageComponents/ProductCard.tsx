@@ -168,12 +168,12 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                                 fill
                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                 className="w-full h-full object-contain"
-                                loading="lazy"
+                                loading={imagePriority ? 'eager' : 'lazy'}
                                 priority={imagePriority}
                             />
                         </div>
-                        {secondaryImage && (
-                            <div className={`absolute inset-0 p-3 transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        {secondaryImage && isHovered && (
+                            <div className="absolute inset-0 p-3 transition-opacity duration-200">
                                 <ResilientImage
                                     src={secondaryImage}
                                     alt={`${product.name} - alternate view`}
