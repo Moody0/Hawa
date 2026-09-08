@@ -1,17 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-    MdArticle, 
-    MdAdd, 
-    MdEdit, 
-    MdDelete, 
-    MdCheckCircle, 
-    MdClose, 
-    MdImage, 
-    MdRefresh,
-    MdVisibility
-} from 'react-icons/md';
+import { FileText, Plus, Pencil, Trash2, CheckCircle2, X, Image, RotateCw, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
@@ -159,7 +149,7 @@ export default function AdminBlogPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-black text-[#0B192C] dark:text-white flex items-center gap-2">
-                        <MdArticle className="text-[#8A6305]" />
+                        <FileText className="text-[#8A6305]" />
                         <span>إدارة المدونة والمقالات</span>
                     </h1>
                     <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
@@ -172,7 +162,7 @@ export default function AdminBlogPage() {
                         onClick={openCreateModal}
                         className="px-4 py-2.5 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white dark:text-black font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
                     >
-                        <MdAdd className="text-lg" />
+                        <Plus className="text-lg" />
                         <span>إضافة مقال جديد</span>
                     </button>
                     <button
@@ -180,7 +170,7 @@ export default function AdminBlogPage() {
                         className="p-2.5 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
                         title="تحديث"
                     >
-                        <MdRefresh className="text-xl" />
+                        <RotateCw className="text-xl" />
                     </button>
                 </div>
             </div>
@@ -239,7 +229,7 @@ export default function AdminBlogPage() {
                                                 className="p-1.5 rounded-lg text-slate-600 hover:text-[#8A6305] transition-colors inline-block"
                                                 title="عرض في الموقع"
                                             >
-                                                <MdVisibility className="text-lg" />
+                                                <Eye className="text-lg" />
                                             </Link>
                                         </td>
                                         <td className="p-3.5 text-center space-x-1 rtl:space-x-reverse">
@@ -248,14 +238,14 @@ export default function AdminBlogPage() {
                                                 className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
                                                 title="تعديل"
                                             >
-                                                <MdEdit className="text-lg" />
+                                                <Pencil className="text-lg" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(p.id)}
                                                 className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                                                 title="حذف"
                                             >
-                                                <MdDelete className="text-lg" />
+                                                <Trash2 className="text-lg" />
                                             </button>
                                         </td>
                                     </tr>
@@ -278,7 +268,7 @@ export default function AdminBlogPage() {
                                 onClick={() => setIsModalOpen(false)}
                                 className="p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500"
                             >
-                                <MdClose className="text-xl" />
+                                <X className="text-xl" />
                             </button>
                         </div>
 

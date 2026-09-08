@@ -2,7 +2,7 @@ import React from 'react';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import BlogClient, { BlogPostItem } from './BlogClient';
-import { getSiteSettings } from '@/lib/admin-actions';
+import { getSiteSettings } from '@/lib/public-queries';
 
 export const revalidate = 60; // 1 minute revalidation
 

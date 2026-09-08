@@ -2,21 +2,12 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { FaWhatsapp } from 'react-icons/fa';
 import { prisma } from '@/lib/prisma';
 import ResilientImage from '@/app/components/ResilientImage';
-import { 
-    MdCalendarToday, 
-    MdAccessTime, 
-    MdArrowBack, 
-    MdStorefront, 
-    MdCheckCircle,
-    MdOutlineArticle,
-    MdLocalShipping,
-    MdReceiptLong,
-    MdShare
-} from 'react-icons/md';
-import { FaWhatsapp } from 'react-icons/fa';
-import { getSiteSettings } from '@/lib/admin-actions';
+import { Calendar, Clock, ArrowLeft, Store, CheckCircle2, FileText, Truck, Receipt, Share2 } from 'lucide-react';
+import Breadcrumb from '@/app/components/Breadcrumb';
+import { getSiteSettings } from '@/lib/public-queries';
 
 export const revalidate = 60;
 
@@ -230,20 +221,18 @@ export default async function BlogPostPage(
     return (
         <div className="w-full bg-[#FCFBF8] dark:bg-[#070D18] min-h-screen text-[#0B192C] dark:text-slate-100 transition-colors py-10 md:py-16">
             <article className="container-custom max-w-4xl mx-auto">
-                {/* Breadcrumbs */}
-                <nav className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-6">
-                    <Link href="/" className="hover:text-[#8A6305] transition-colors">
-                        الرئيسية
-                    </Link>
-                    <span>/</span>
-                    <Link href="/blog" className="hover:text-[#8A6305] transition-colors">
-                        المدونة والتقارير
-                    </Link>
-                    <span>/</span>
-                    <span className="text-[#0B192C] dark:text-slate-200 font-bold truncate max-w-[200px] sm:max-w-xs">
-                        {post.title}
-                    </span>
-                </nav>
+                {/* Unified Breadcrumbs */}
+                <Breadcrumb
+                    items={[
+                        {
+                            label: 'المدونة والتقارير',
+                            href: '/blog',
+                        },
+                        {
+                            label: post.title,
+                        },
+                    ]}
+                />
 
                 {/* Back Button */}
                 <div className="mb-6">
@@ -251,7 +240,7 @@ export default async function BlogPostPage(
                         href="/blog"
                         className="inline-flex items-center gap-2 text-xs font-bold text-[#8A6305] dark:text-[#E5B54A] hover:opacity-80 transition-opacity"
                     >
-                        <MdArrowBack className="text-base rtl:rotate-180" />
+                        <ArrowLeft className="text-base rtl:rotate-180" />
                         <span>العودة إلى قائمة التقارير والمقالات</span>
                     </Link>
                 </div>
@@ -259,7 +248,7 @@ export default async function BlogPostPage(
                 {/* Article Header */}
                 <header className="mb-8 pb-8 border-b border-slate-200/80 dark:border-white/10">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-black uppercase tracking-wider mb-4">
-                        <MdOutlineArticle className="text-sm" />
+                        <FileText className="text-sm" />
                         <span>{post.category || 'أخبار الوكالات'}</span>
                     </div>
 
@@ -270,12 +259,12 @@ export default async function BlogPostPage(
                     <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
                         <div className="flex items-center gap-3">
                             <span className="flex items-center gap-1.5 font-medium">
-                                <MdCalendarToday className="text-sm text-[#8A6305]" />
+                                <Calendar className="text-sm text-[#8A6305]" />
                                 <span>{dateStr}</span>
                             </span>
                             <span>•</span>
                             <span className="flex items-center gap-1 font-medium">
-                                <MdAccessTime className="text-sm text-[#8A6305]" />
+                                <Clock className="text-sm text-[#8A6305]" />
                                 <span>{readTime}</span>
                             </span>
                             <span>•</span>
@@ -291,7 +280,7 @@ export default async function BlogPostPage(
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-bold transition-all text-xs"
                         >
-                            <MdShare className="text-sm text-[#8A6305]" />
+                            <Share2 className="text-sm text-[#8A6305]" />
                             <span>مشاركة المقال</span>
                         </a>
                     </div>
@@ -313,7 +302,7 @@ export default async function BlogPostPage(
                 {post.keyTakeaway && (
                     <div className="mb-10 p-5 sm:p-6 rounded-2xl bg-amber-50/80 dark:bg-white/[0.04] border border-[#8A6305]/30 flex items-start gap-4">
                         <div className="w-9 h-9 rounded-xl bg-[#8A6305] text-white flex items-center justify-center shrink-0 text-lg shadow-xs mt-0.5">
-                            <MdCheckCircle />
+                            <CheckCircle2 />
                         </div>
                         <div>
                             <h4 className="text-xs font-black text-[#8A6305] dark:text-[#E5B54A] uppercase tracking-wider mb-1">
@@ -398,7 +387,7 @@ export default async function BlogPostPage(
                                 href="/products"
                                 className="px-5 py-3 rounded-2xl bg-[#0B192C] hover:bg-[#132035] text-white dark:bg-white/10 dark:hover:bg-white/15 font-bold text-xs flex items-center gap-2 transition-all shadow-xs"
                             >
-                                <MdStorefront className="text-base text-[#E5B54A]" />
+                                <Store className="text-base text-[#E5B54A]" />
                                 <span>تصفح البضائع</span>
                             </Link>
                         </div>
@@ -437,7 +426,7 @@ export default async function BlogPostPage(
                                     </div>
                                     <div className="pt-3 mt-3 border-t border-slate-100 dark:border-white/5 text-xs font-bold text-[#8A6305] dark:text-[#E5B54A] flex items-center gap-1 group-hover:gap-2 transition-all">
                                         <span>قراءة المقال</span>
-                                        <MdArrowBack className="text-sm rtl:rotate-0 rotate-180" />
+                                        <ArrowLeft className="text-sm rtl:rotate-0 rotate-180" />
                                     </div>
                                 </Link>
                             ))}

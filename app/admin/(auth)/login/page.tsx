@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import LanguageToggle from "@/app/components/LanguageToggle";
-import { MdPerson, MdLock } from "react-icons/md";
+import { User, Lock } from 'lucide-react';
 
 export default function AdminLoginPage() {
     const router = useRouter();
@@ -97,7 +97,7 @@ export default function AdminLoginPage() {
                             </label>
                             <div className="relative group">
                                 <span className={`absolute inset-y-0 ${isRtl ? "end-0" : "start-0"} flex items-center ${isRtl ? "pe-4" : "ps-4"} text-gray-400 group-focus-within:text-primary transition-colors`}>
-                                    <MdPerson className="text-[20px]" />
+                                    <User className="text-[20px]" />
                                 </span>
                                 <input
                                     className={`w-full ${inputPadding} py-3.5 bg-gray-50/50 dark:bg-black/20 border border-black/[0.04] dark:border-white/[0.04] rounded-xl focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary text-text-main dark:text-white placeholder:text-gray-400 transition-all outline-none font-medium`}
@@ -123,7 +123,7 @@ export default function AdminLoginPage() {
                             </div>
                             <div className="relative group">
                                 <span className={`absolute inset-y-0 ${isRtl ? "end-0" : "start-0"} flex items-center ${isRtl ? "pe-4" : "ps-4"} text-gray-400 group-focus-within:text-primary transition-colors`}>
-                                    <MdLock className="text-[20px]" />
+                                    <Lock className="text-[20px]" />
                                 </span>
                                 <input
                                     className={`w-full ${inputPadding} py-3.5 bg-gray-50/50 dark:bg-black/20 border border-black/[0.04] dark:border-white/[0.04] rounded-xl focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary text-text-main dark:text-white placeholder:text-gray-400 transition-all outline-none font-medium`}

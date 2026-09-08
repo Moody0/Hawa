@@ -91,6 +91,7 @@ export const authOptions: AuthOptions = {
         async session({ session, token }) {
             if (session.user) {
                 session.user.id = token.id as string;
+                (session.user as any).iat = token.iat;
                 session.user.role = token.role as string;
                 session.user.canManageBrands = token.canManageBrands as boolean;
                 session.user.canDeleteBrands = token.canDeleteBrands as boolean;

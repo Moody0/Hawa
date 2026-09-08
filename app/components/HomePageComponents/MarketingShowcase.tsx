@@ -2,15 +2,7 @@
 
 import React from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { 
-    MdCampaign, 
-    MdShoppingBag, 
-    MdVideoLibrary, 
-    MdCameraAlt, 
-    MdShare, 
-    MdStore, 
-    MdTrendingUp 
-} from 'react-icons/md';
+import { Megaphone, ShoppingBag, Camera, Share2, Store, TrendingUp, Video } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 export default function MarketingShowcase() {
@@ -27,37 +19,37 @@ export default function MarketingShowcase() {
 
     const pillars = [
         {
-            icon: MdCampaign,
+            icon: Megaphone,
             title: isArabic ? 'إدارة الحملات الإعلانية' : 'Advertising Campaigns',
             desc: isArabic ? 'تخطيط وإطلاق حملات إعلانية موجهة للأسواق المستهدفة بدقة وفعالية.' : 'Targeted B2B & consumer advertising campaigns driving retail velocity.',
         },
         {
-            icon: MdShoppingBag,
+            icon: ShoppingBag,
             title: isArabic ? 'التسويق للمنتجات' : 'Product Marketing',
             desc: isArabic ? 'إبراز المزايا التنافسية وتجهيز خطط تسعير وتوزيع تعزز جاذبية المنتج.' : 'Positioning products with competitive wholesale strategies.',
         },
         {
-            icon: MdVideoLibrary,
+            icon: Video,
             title: isArabic ? 'صناعة المحتوى' : 'Content Creation',
             desc: isArabic ? 'إنتاج فيديوهات إعلانية وتصاميم بصرية تبرز جودة وأصالة علامتك التجارية.' : 'Creative production of visual stories and high-impact promo media.',
         },
         {
-            icon: MdCameraAlt,
+            icon: Camera,
             title: isArabic ? 'التصوير الاحترافي' : 'Professional Photography',
             desc: isArabic ? 'جلسات تصوير ستوديو عالية الدقة للمنتجات ومحتوى الطرود والعبوات.' : 'High-resolution commercial product and packshot photography.',
         },
         {
-            icon: MdShare,
+            icon: Share2,
             title: isArabic ? 'إدارة السوشال ميديا' : 'Social Media Management',
             desc: isArabic ? 'بناء مجتمع رقمي نشط والتفاعل المستمر مع التجار والمستهلكين.' : 'Building and engaging active brand communities across digital channels.',
         },
         {
-            icon: MdStore,
+            icon: Store,
             title: isArabic ? 'دعم نقاط البيع (POS)' : 'POS Retail Support',
             desc: isArabic ? 'توفير مواد العرض والستاندات والبروشورات الترويجية داخل المحلات.' : 'Promotional displays, branded stands, and in-store merchant materials.',
         },
         {
-            icon: MdTrendingUp,
+            icon: TrendingUp,
             title: isArabic ? 'زيادة انتشار العلامة' : 'Brand Penetration & Growth',
             desc: isArabic ? 'توسيع رقعة التواجد على رفوف كبرى المحلات والسوبرماركت.' : 'Expanding shelf presence across supermarkets, grocery stores, and distributors.',
         },

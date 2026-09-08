@@ -3,15 +3,7 @@
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { useState } from "react";
-import { 
-    MdAdd, 
-    MdSync, 
-    MdVisibility, 
-    MdVisibilityOff, 
-    MdEdit, 
-    MdDelete, 
-    MdViewCarousel 
-} from "react-icons/md";
+import { Plus, RefreshCw, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import BannerModal from "./BannerModal";
 import { deleteBanner, toggleBannerStatus } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
@@ -110,7 +102,7 @@ export default function BannersClient({ banners }: { banners: Banner[] }) {
                                 onClick={handleAdd}
                                 className="flex items-center gap-2 bg-[#0B192C] hover:bg-[#1e293b] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xs cursor-pointer"
                             >
-                                <MdAdd className="text-xl" />
+                                <Plus className="text-xl" />
                                 <span>{t('admin.addNewBanner')}</span>
                             </button>
                         )}
@@ -201,9 +193,9 @@ export default function BannersClient({ banners }: { banners: Banner[] }) {
                                                     }`}
                                             >
                                                 {loadingMap[banner.id] ? (
-                                                    <MdSync className="animate-spin text-base" />
+                                                    <RefreshCw className="animate-spin text-base" />
                                                 ) : (
-                                                    banner.isActive ? <MdVisibility className="text-base" /> : <MdVisibilityOff className="text-base" />
+                                                    banner.isActive ? <Eye className="text-base" /> : <EyeOff className="text-base" />
                                                 )}
                                                 {banner.isActive ? t('admin.active') : t('admin.hidden')}
                                             </button>
@@ -215,7 +207,7 @@ export default function BannersClient({ banners }: { banners: Banner[] }) {
                                                     className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
                                                     title={t('admin.editBanner')}
                                                 >
-                                                    <MdEdit className="text-xl" />
+                                                    <Pencil className="text-xl" />
                                                 </button>
                                             )}
                                             {canDelete && (
@@ -224,7 +216,7 @@ export default function BannersClient({ banners }: { banners: Banner[] }) {
                                                     className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors cursor-pointer"
                                                     title={t('admin.deleteBanner')}
                                                 >
-                                                    <MdDelete className="text-xl" />
+                                                    <Trash2 className="text-xl" />
                                                 </button>
                                             )}
                                         </div>

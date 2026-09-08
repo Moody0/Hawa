@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
-import { FaInstagram, FaFacebook, FaWhatsapp } from 'react-icons/fa';
-import { MdPhone, MdLocationOn } from 'react-icons/md';
-import { getFooterCategories } from '@/lib/catalog';
-import { getSiteSettings } from '@/lib/admin-actions';
+import { FaInstagram, FaFacebook, FaWhatsapp, FaLinkedin } from 'react-icons/fa';
+import { Phone, MapPin, Mail } from 'lucide-react';
+import { getSiteSettings } from '@/lib/public-queries';
+import FooterNewsletter from './FooterNewsletter';
 
 interface FooterProps {
     t: (key: string) => string;
@@ -25,23 +25,11 @@ function getLocalizedValue(language: string, englishValue?: string | null, arabi
 const Footer = async ({ t: _t, language }: FooterProps) => {
     const isArabic = language === 'ar';
     let settings = null;
-    let customCategories: { id: string; name: string; slug: string; description?: string | null }[] = [];
 
     try {
         settings = await getSiteSettings();
     } catch (e) {
         console.warn('Footer: DB offline, using default site settings');
-    }
-
-    try {
-        customCategories = await getFooterCategories([
-            settings?.footerCategory1Id || '',
-            settings?.footerCategory2Id || '',
-            settings?.footerCategory3Id || '',
-            settings?.footerCategory4Id || '',
-        ]);
-    } catch (e) {
-        console.warn('Footer: DB offline, using default footer categories');
     }
 
     const brandTitle =
@@ -51,109 +39,39 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
     const brandDescription =
         getLocalizedValue(language, settings?.footerBrandDescription, settings?.footerBrandDescriptionAr) ||
         (isArabic
-            ? 'الموزع المعتمد لكبرى شركات ومصانع الأغذية والاستهلاك في سورية. نوفر طلبيات المحلات والسوبرماركت وتجار التجزئة بأسعار الجملة الرسمية وتوصيل منتظم لكافة المحافظات.'
-            : 'Certified wholesale distributor for leading food and FMCG manufacturers across Syria. Direct factory carton supply for supermarkets and grocery retailers with scheduled delivery.');
+            ? 'شريككم الموثوق لتوزيع البضائع والمواد الغذائية والاستهلاكية من أفضل الشركات والعلامات التجارية المحلية والعالمية.'
+            : 'Your trusted partner for wholesale distribution of food and consumer goods from leading local and global brands.');
 
     const copyright =
         getLocalizedValue(language, settings?.footerCopyright, settings?.footerCopyrightAr) ||
         (isArabic
-            ? '© 2026 شركة حوا للتوزيع والتجارة. جميع الحقوق محفوظة.'
+            ? 'جميع الحقوق محفوظة © 2026 شركة حوا للتوزيع والتجارة'
             : '© 2026 Hawa Distribution & Trading. All rights reserved.');
 
-    const shopTitle =
-        getLocalizedValue(language, settings?.footerShopTitle, settings?.footerShopTitleAr) ||
-        (isArabic ? 'أقسام السلع بالجملة' : 'Wholesale Categories');
-
-    const supportTitle =
-        getLocalizedValue(language, settings?.footerSupportTitle, settings?.footerSupportTitleAr) ||
-        (isArabic ? 'اللوجستيات والتوريد' : 'Logistics & Supply');
-
-    const companyTitle =
-        getLocalizedValue(language, settings?.footerCompanyTitle, settings?.footerCompanyTitleAr) ||
-        (isArabic ? 'بوابة التاجر والشركة' : 'Merchant & Company');
-
-    // WhatsApp numbers & Contacts
+    // Direct Contacts
     const wholesalePhone = '+963 993 443 901';
-    const managementPhone = '+963 994 166 000';
+    const emailAddress = 'info@hawa-dist.com';
     const whatsappClean = '963993443901';
 
-    // Wholesale Category Links (combining custom if valid, otherwise curated top wholesale lines)
-    const defaultWholesaleCategories = [
-        { label: isArabic ? 'جميع منتجات الجملة' : 'All Wholesale Products', href: '/products' },
-        { label: isArabic ? 'الزيوت والمسليات النباتية' : 'Cooking Oils & Ghee', href: '/categories/alreef-smn-wzyt' },
-        { label: isArabic ? 'المعلبات والكونسروة الفاخرة' : 'Canned Goods & Preserves', href: '/categories/sunbell-malbat' },
-        { label: isArabic ? 'البقوليات والحبوب الجافة' : 'Legumes & Dry Grains', href: '/categories/alreef-bqwlyat' },
-        { label: isArabic ? 'الألبان والمواد التموينية' : 'Dairy & Staple Groceries', href: '/categories/haleebna-aam' },
-        { label: isArabic ? 'المنظفات ومواد العناية' : 'Detergents & Hygiene Care', href: '/departments/detergents' },
-    ];
-
-    const renderedCategories = customCategories.length > 0
-        ? [
-            { label: isArabic ? 'جميع منتجات الجملة' : 'All Wholesale Products', href: '/products' },
-            ...customCategories.map((c) => ({
-                label: isArabic ? c.name : (c.description || c.name),
-                href: `/categories/${c.slug}`,
-            })),
-        ]
-        : defaultWholesaleCategories;
-
-    // Logistics & Operations Links
-    const rawSupportLinks = [
-        {
-            label: getLocalizedValue(language, settings?.footerSupportLink1Label, settings?.footerSupportLink1LabelAr),
-            url: settings?.footerSupportLink1Url || '',
-        },
-        {
-            label: getLocalizedValue(language, settings?.footerSupportLink2Label, settings?.footerSupportLink2LabelAr),
-            url: settings?.footerSupportLink2Url || '',
-        },
-        {
-            label: getLocalizedValue(language, settings?.footerSupportLink3Label, settings?.footerSupportLink3LabelAr),
-            url: settings?.footerSupportLink3Url || '',
-        },
-    ].filter((l) => l.label && l.url && l.url !== '#');
-
-    const defaultSupportLinks = [
-        { label: isArabic ? 'الوكالات والعلامات المعتمدة' : 'Official Trade Brands', href: '/brands' },
-        { label: isArabic ? 'سياسة الشحن ومواعيد التوريد' : 'Shipping & Delivery Schedule', href: '/shipping-returns' },
-        { label: isArabic ? 'نشرة الأسعار وتقارير السوق' : 'Trade Journal & Market Rates', href: '/blog' },
-        { label: isArabic ? 'شروط استلام وتدقيق الكراتين' : 'Inspection & Acceptance Policy', href: '/shipping-returns' },
-        { label: isArabic ? 'فريق المبيعات والتواصل المباشر' : 'Contact Sales Team', href: '/contact' },
-    ];
-
-    const renderedSupportLinks = rawSupportLinks.length > 0
-        ? rawSupportLinks.map((l) => ({ label: l.label, href: l.url }))
-        : defaultSupportLinks;
-
-    // Company & Merchant Portal Links
-    const rawCompanyLinks = [
-        {
-            label: getLocalizedValue(language, settings?.footerCompanyLink1Label, settings?.footerCompanyLink1LabelAr),
-            url: settings?.footerCompanyLink1Url || '',
-        },
-        {
-            label: getLocalizedValue(language, settings?.footerCompanyLink2Label, settings?.footerCompanyLink2LabelAr),
-            url: settings?.footerCompanyLink2Url || '',
-        },
-        {
-            label: getLocalizedValue(language, settings?.footerCompanyLink3Label, settings?.footerCompanyLink3LabelAr),
-            url: settings?.footerCompanyLink3Url || '',
-        },
-    ].filter((l) => l.label && l.url && l.url !== '#');
-
-    const defaultCompanyLinks = [
-        { label: isArabic ? 'من نحن ورؤيتنا للتوزيع' : 'About Hawa Trading', href: '/about-us' },
-        { label: isArabic ? 'تسجيل / دخول حساب تاجر' : 'Merchant Account Login', href: '/account/login' },
+    // 1. Column 3: Wholesale Services Links (using real platform routes & names)
+    const servicesLinks = [
+        { label: isArabic ? 'الشحن والتوصيل للمحافظات' : 'Nationwide Freight & Delivery', href: '/shipping-returns' },
+        { label: isArabic ? 'نشرة الأسعار والمدونة' : 'Market Rates & Trade Blog', href: '/blog' },
         { label: isArabic ? 'طلب تمثيل وكالة تجارية' : 'Agency Partnership Inquiry', href: '/contact' },
-        { label: isArabic ? 'المستودعات ومراكز الإمداد' : 'Central Warehouses Hub', href: '/contact' },
-        { label: isArabic ? 'واتساب مبيعات الجملة المباشر' : 'WhatsApp Wholesale Desk', href: `https://wa.me/${whatsappClean}` },
+        { label: isArabic ? 'بوابة حسابات التجار' : 'Merchant Accounts Hub', href: '/account/login' },
     ];
 
-    const renderedCompanyLinks = rawCompanyLinks.length > 0
-        ? rawCompanyLinks.map((l) => ({ label: l.label, href: l.url }))
-        : defaultCompanyLinks;
+    // 2. Column 4: Quick Links (using real platform routes & names)
+    const quickLinks = [
+        { label: isArabic ? 'الرئيسية' : 'Home', href: '/' },
+        { label: isArabic ? 'من نحن' : 'About Us', href: '/about-us' },
+        { label: isArabic ? 'الوكالات والعلامات' : 'Official Brands', href: '/brands' },
+        { label: isArabic ? 'أقسام المنتجات' : 'Product Categories', href: '/categories' },
+        { label: isArabic ? 'كتالوج المنتجات' : 'Full Catalog', href: '/products' },
+        { label: isArabic ? 'اتصل بنا' : 'Contact Us', href: '/contact' },
+    ];
 
-    // Social Links
+    // 3. Social Media Links
     const socialLinks = [
         {
             href: `https://wa.me/${whatsappClean}?text=${encodeURIComponent(isArabic ? 'مرحباً شركة حوا للتوزيع، أود الاستفسار عن بضائع الجملة.' : 'Hello Hawa Distribution, I would like to inquire about wholesale goods.')}`,
@@ -170,146 +88,121 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
             icon: FaInstagram,
             label: 'Instagram',
         },
+        {
+            href: 'https://linkedin.com',
+            icon: FaLinkedin,
+            label: 'LinkedIn',
+        },
     ];
 
     const renderLink = (label: string, href: string) => {
-        if (isExternalUrl(href)) {
-            return (
-                <a
-                    className="text-slate-300 hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#E5B54A] rounded-xs"
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {label}
-                </a>
-            );
-        }
+        const isExt = isExternalUrl(href);
+        const Component = isExt ? 'a' : Link;
+        const extraProps = isExt ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 
         return (
-            <Link
-                className="text-slate-300 hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#E5B54A] rounded-xs"
+            <Component
                 href={href}
+                {...extraProps}
+                className="group flex items-center gap-2 text-xs sm:text-[13px] text-slate-300 hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
             >
-                {label}
-            </Link>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#8A6305] group-hover:bg-[#E5B54A] group-hover:scale-125 transition-all shrink-0" />
+                <span className="group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">{label}</span>
+            </Component>
         );
     };
 
     return (
-        <footer className="bg-[#0B192C] text-white border-t border-[#E5B54A]/30 pt-12 pb-8">
+        <footer className="bg-[#0B192C] text-white border-t border-[#8A6305]/30 pt-12 pb-8 relative overflow-hidden">
+            {/* Subtle background ambient gradient */}
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#8A6305]/40 to-transparent pointer-events-none" />
+
             <div className="container-custom">
-                {/* Main Footer Grid: 4 Balanced Columns (4 + 3 + 3 + 2 = 12 cols) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 mb-12">
-                    {/* Brand & Identity Column (lg:col-span-4) */}
-                    <div className="lg:col-span-4 flex flex-col gap-4">
+                {/* 5-Column Grid with Desktop Vertical Border Separators */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-0 mb-12">
+                    
+                    {/* Column 1: Brand & Identity (lg:col-span-3 lg:pe-6) */}
+                    <div className="lg:col-span-3 flex flex-col gap-4 lg:pe-6 lg:border-e lg:border-white/10">
                         <Link
                             href="/"
-                            className="inline-flex items-center gap-3 group focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#E5B54A] rounded-lg w-fit"
+                            className="inline-flex items-center gap-3 group focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A6305] rounded-xl w-fit"
                         >
-                            <Image
-                                src="/logo-bg.webp"
-                                alt={brandTitle}
-                                width={54}
-                                height={54}
-                                className="h-12 w-12 rounded-xl object-contain shadow-xs shrink-0 transition-transform duration-200 group-hover:scale-105"
-                            />
+                            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-white/5 border border-[#8A6305]/40 shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-105">
+                                <Image
+                                    src="/logo-bg.webp"
+                                    alt={brandTitle}
+                                    fill
+                                    sizes="48px"
+                                    className="object-cover"
+                                />
+                            </div>
                             <div className="flex flex-col">
-                                <span className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight group-hover:text-[#E5B54A] transition-colors">
+                                <span className="text-base sm:text-lg font-black text-white tracking-tight leading-tight group-hover:text-[#E5B54A] transition-colors">
                                     {brandTitle}
                                 </span>
-                                <span className="text-[10px] font-extrabold text-[#E5B54A] tracking-wider uppercase mt-0.5">
-                                    {isArabic ? 'توريد وتوزيع جملة — حمص، سورية' : 'Wholesale Distribution & Trading — Syria'}
+                                <span className="text-[10px] font-bold text-[#E5B54A] tracking-wider uppercase mt-0.5">
+                                    {isArabic ? 'توزيع وتجارة جملة — سورية' : 'Wholesale Distribution — Syria'}
                                 </span>
                             </div>
                         </Link>
 
-                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-sm">
+                        <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed max-w-sm">
                             {brandDescription}
                         </p>
+                    </div>
 
-                        {/* Direct Contacts */}
-                        <div className="flex flex-col gap-2.5 pt-1 text-xs text-slate-300">
-                            <div className="flex items-center gap-2">
-                                <MdPhone className="text-[#E5B54A] text-sm shrink-0" aria-hidden="true" />
-                                <span className="font-semibold text-slate-300">
-                                    {isArabic ? 'مبيعات الجملة:' : 'Wholesale Sales:'}
-                                </span>
-                                <a
-                                    href={`tel:${wholesalePhone.replace(/\s+/g, '')}`}
-                                    dir="ltr"
-                                    className="font-bold text-white hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs ms-1"
-                                >
-                                    {wholesalePhone}
-                                </a>
-                            </div>
+                    {/* Column 2: Contact & Working Hours (lg:col-span-3 lg:px-6) */}
+                    <div className="lg:col-span-3 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
+                        <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider flex items-center gap-2">
+                            <span>{isArabic ? 'تواصل معنا' : 'Contact Us'}</span>
+                        </h5>
 
-                            <div className="flex items-center gap-2">
-                                <MdPhone className="text-[#E5B54A] text-sm shrink-0" aria-hidden="true" />
-                                <span className="font-semibold text-slate-300">
-                                    {isArabic ? 'الإدارة العامة:' : 'Management:'}
-                                </span>
-                                <a
-                                    href={`tel:${managementPhone.replace(/\s+/g, '')}`}
-                                    dir="ltr"
-                                    className="font-bold text-white hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs ms-1"
-                                >
-                                    {managementPhone}
-                                </a>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <MdLocationOn className="text-[#E5B54A] text-sm shrink-0" aria-hidden="true" />
-                                <span className="font-semibold text-slate-300">
-                                    {isArabic ? 'المستودع الرئيسي:' : 'Central Hub:'}
-                                </span>
-                                <span className="text-slate-400 font-medium ms-1">
-                                    {isArabic ? 'حمص، المنطقة الصناعية' : 'Homs Industrial Zone'}
+                        <div className="flex flex-col gap-3 text-xs sm:text-[13px] text-slate-300">
+                            {/* Location */}
+                            <div className="flex items-start gap-2.5">
+                                <MapPin className="w-4 h-4 text-[#E5B54A] shrink-0 mt-0.5" aria-hidden="true" />
+                                <span className="leading-snug">
+                                    {isArabic ? 'حمص، المنطقة الصناعية — سورية' : 'Homs Industrial Zone, Syria'}
                                 </span>
                             </div>
-                        </div>
 
-                        {/* Social & Messaging Channels */}
-                        <div className="flex items-center gap-2 pt-1">
-                            {socialLinks.map((social) => {
-                                const Icon = social.icon;
-                                return (
+                            {/* Phone */}
+                            <div className="flex items-center gap-2.5">
+                                <Phone className="w-4 h-4 text-[#E5B54A] shrink-0" aria-hidden="true" />
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-slate-400 font-medium text-xs">
+                                        {isArabic ? 'مبيعات الجملة:' : 'Wholesale:'}
+                                    </span>
                                     <a
-                                        key={social.label}
-                                        className="w-8 h-8 rounded-lg bg-white/[0.06] text-slate-300 hover:bg-[#E5B54A] hover:text-[#0B192C] transition-all flex items-center justify-center text-sm border border-white/10 hover:border-[#E5B54A] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#E5B54A]"
-                                        href={social.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={social.label}
+                                        href={`tel:${wholesalePhone.replace(/\s+/g, '')}`}
+                                        dir="ltr"
+                                        className="font-bold text-white hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                                     >
-                                        <Icon aria-hidden="true" />
+                                        {wholesalePhone}
                                     </a>
-                                );
-                            })}
+                                </div>
+                            </div>
+
+                            {/* Email */}
+                            <div className="flex items-center gap-2.5">
+                                <Mail className="w-4 h-4 text-[#E5B54A] shrink-0" aria-hidden="true" />
+                                <a
+                                    href={`mailto:${emailAddress}`}
+                                    className="font-medium text-white hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
+                                >
+                                    {emailAddress}
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Column 2: Wholesale Commodity Categories (lg:col-span-3) */}
-                    <div className="lg:col-span-3 flex flex-col gap-3.5">
-                        <h5 className="font-extrabold text-xs text-[#E5B54A] uppercase tracking-wider">
-                            {shopTitle}
+                    {/* Column 3: Wholesale Services (lg:col-span-2 lg:px-6) */}
+                    <div className="lg:col-span-2 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
+                        <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
+                            {isArabic ? 'خدماتنا' : 'Our Services'}
                         </h5>
-                        <ul className="flex flex-col gap-2.5 text-xs sm:text-sm font-medium">
-                            {renderedCategories.map((cat, idx) => (
-                                <li key={idx}>
-                                    {renderLink(cat.label, cat.href)}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Column 3: Logistics & Supply Network (lg:col-span-3) */}
-                    <div className="lg:col-span-3 flex flex-col gap-3.5">
-                        <h5 className="font-extrabold text-xs text-[#E5B54A] uppercase tracking-wider">
-                            {supportTitle}
-                        </h5>
-                        <ul className="flex flex-col gap-2.5 text-xs sm:text-sm font-medium">
-                            {renderedSupportLinks.map((link, idx) => (
+                        <ul className="flex flex-col gap-2.5">
+                            {servicesLinks.map((link, idx) => (
                                 <li key={idx}>
                                     {renderLink(link.label, link.href)}
                                 </li>
@@ -317,54 +210,90 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                         </ul>
                     </div>
 
-                    {/* Column 4: Merchant Portal & Relations (lg:col-span-2) */}
-                    <div className="lg:col-span-2 flex flex-col gap-3.5">
-                        <h5 className="font-extrabold text-xs text-[#E5B54A] uppercase tracking-wider">
-                            {companyTitle}
+                    {/* Column 4: Quick Links (lg:col-span-2 lg:px-6) */}
+                    <div className="lg:col-span-2 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
+                        <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
+                            {isArabic ? 'روابط سريعة' : 'Quick Links'}
                         </h5>
-                        <ul className="flex flex-col gap-2.5 text-xs sm:text-sm font-medium">
-                            {renderedCompanyLinks.map((link, idx) => (
+                        <ul className="flex flex-col gap-2.5">
+                            {quickLinks.map((link, idx) => (
                                 <li key={idx}>
                                     {renderLink(link.label, link.href)}
                                 </li>
                             ))}
                         </ul>
                     </div>
+
+                    {/* Column 5: Newsletter & Community (lg:col-span-2 lg:ps-6) */}
+                    <div className="lg:col-span-2 flex flex-col gap-3.5 lg:ps-6">
+                        <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
+                            {isArabic ? 'النشرة البريدية' : 'Newsletter'}
+                        </h5>
+
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                            {isArabic
+                                ? 'اشترك ليصلك كل جديد عن المنتجات والعروض والأسعار.'
+                                : 'Subscribe to get the latest trade discounts, new arrivals & price lists.'}
+                        </p>
+
+                        {/* Interactive Newsletter Subscription */}
+                        <FooterNewsletter language={language} />
+
+                        {/* Social Channels */}
+                        <div className="flex flex-col gap-2 pt-2">
+                            <span className="text-[11px] font-semibold text-slate-400">
+                                {isArabic ? 'تابعنا على منصاتنا:' : 'Follow our channels:'}
+                            </span>
+                            <div className="flex items-center gap-2">
+                                {socialLinks.map((social) => {
+                                    const Icon = social.icon;
+                                    return (
+                                        <a
+                                            key={social.label}
+                                            className="w-8 h-8 rounded-lg bg-white/[0.06] text-slate-300 hover:bg-[#8A6305] hover:text-white transition-all duration-200 flex items-center justify-center text-sm border border-white/10 hover:border-[#8A6305] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A6305]"
+                                            href={social.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={social.label}
+                                        >
+                                            <Icon aria-hidden="true" />
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-                {/* 3. Bottom Utility & Copyright Bar */}
+                {/* Bottom Bar: Terms, Copyright */}
                 <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium text-slate-400">
-                    <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 text-center sm:text-start">
-                        <p>{copyright}</p>
-                        <span className="hidden sm:inline text-white/20">•</span>
-                        <p className="text-slate-400">
-                            {isArabic
-                                ? 'الجمهورية العربية السورية — حمص، تغطية شاملة لكافة المحافظات'
-                                : 'Syrian Arab Republic — Homs, Serving All Governorates'}
-                        </p>
-                    </div>
-
-                    <div className="flex items-center gap-3 sm:gap-4 text-xs">
+                    {/* Legal Links */}
+                    <div className="flex items-center gap-3">
                         <Link
                             href="/shipping-returns"
                             className="hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                         >
-                            {isArabic ? 'سياسة التوريد' : 'Supply Terms'}
+                            {isArabic ? 'الشروط والأحكام' : 'Terms & Conditions'}
                         </Link>
-                        <span className="text-white/20">|</span>
+                        <span className="text-white/20">•</span>
                         <Link
-                            href="/brands"
+                            href="/shipping-returns"
                             className="hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                         >
-                            {isArabic ? 'الوكالات المعتمدة' : 'Brands'}
+                            {isArabic ? 'سياسة الخصوصية' : 'Privacy Policy'}
                         </Link>
-                        <span className="text-white/20">|</span>
-                        <Link
-                            href="/contact"
-                            className="hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
-                        >
-                            {isArabic ? 'اتصل بنا' : 'Contact'}
-                        </Link>
+                    </div>
+
+                    {/* Copyright & Jurisdiction */}
+                    <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center">
+                        <p className="text-slate-300">{copyright}</p>
+                        <span className="hidden sm:inline text-white/20">•</span>
+                        <p className="text-slate-400 text-[11px]">
+                            {isArabic
+                                ? 'الجمهورية العربية السورية — حمص'
+                                : 'Syrian Arab Republic — Homs'}
+                        </p>
                     </div>
                 </div>
             </div>

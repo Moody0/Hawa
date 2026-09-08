@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { MdChevronRight } from "react-icons/md";
+import { ChevronRight } from 'lucide-react';
 import type { HomeCollectionSection } from "@/lib/admin-actions";
 import ProductCard from "../ProductsPageComponents/ProductCard";
 import ResilientImage from "@/app/components/ResilientImage";
@@ -57,7 +57,7 @@ const CollectionShowcase = ({ sections, t, dir, language }: CollectionShowcasePr
                                                     className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-8 py-3 text-xs font-bold text-white transition-all hover:bg-primary/90 text-sm"
                                                 >
                                                     {t("home.shopNow")}
-                                                    <MdChevronRight className={dir === "rtl" ? "rotate-180" : ""} />
+                                                    <ChevronRight className={dir === "rtl" ? "rotate-180" : ""} />
                                                 </Link>
                                                 <div className={`flex ${dir === "rtl" || reverseOnLarge ? "lg:justify-end" : "lg:justify-start"} justify-center sm:justify-start`}>
                                                     <span className="inline-flex rounded-full bg-black/5 px-3 py-1 text-sm font-medium text-text-muted-light dark:bg-white/10 dark:text-text-muted-dark">

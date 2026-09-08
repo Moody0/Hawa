@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FaWhatsapp, FaFacebook, FaTelegram, FaLink, FaCheck } from 'react-icons/fa';
+import { FaWhatsapp, FaFacebook, FaTelegram } from 'react-icons/fa';
+import { Link2, Check } from 'lucide-react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import toast from 'react-hot-toast';
 
@@ -57,7 +58,7 @@ export default function ProductShareButtons({
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 hover:bg-[#25D366] hover:text-white dark:hover:bg-[#25D366] dark:hover:text-white transition-all shadow-2xs"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 hover:bg-[#25D366] hover:text-white dark:hover:bg-[#25D366] dark:hover:text-white transition-colors"
                 title={isArabic ? 'مشاركة عبر واتساب' : 'Share via WhatsApp'}
                 aria-label="Share on WhatsApp"
             >
@@ -69,7 +70,7 @@ export default function ProductShareButtons({
                 href={telegramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400 hover:bg-[#0088cc] hover:text-white dark:hover:bg-[#0088cc] dark:hover:text-white transition-all shadow-2xs"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400 hover:bg-[#0088cc] hover:text-white dark:hover:bg-[#0088cc] dark:hover:text-white transition-colors"
                 title={isArabic ? 'مشاركة عبر تيلغرام' : 'Share via Telegram'}
                 aria-label="Share on Telegram"
             >
@@ -81,7 +82,7 @@ export default function ProductShareButtons({
                 href={facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 hover:bg-[#1877F2] hover:text-white dark:hover:bg-[#1877F2] dark:hover:text-white transition-all shadow-2xs"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 hover:bg-[#1877F2] hover:text-white dark:hover:bg-[#1877F2] dark:hover:text-white transition-colors"
                 title={isArabic ? 'مشاركة عبر فيسبوك' : 'Share via Facebook'}
                 aria-label="Share on Facebook"
             >
@@ -92,11 +93,11 @@ export default function ProductShareButtons({
             <button
                 type="button"
                 onClick={handleCopy}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300 hover:bg-[#8A6305] hover:text-white dark:hover:bg-[#8A6305] dark:hover:text-white transition-all shadow-2xs cursor-pointer"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-gray-300 hover:bg-[#8A6305] hover:text-white dark:hover:bg-[#8A6305] dark:hover:text-white transition-colors cursor-pointer"
                 title={isArabic ? 'نسخ الرابط' : 'Copy link'}
                 aria-label="Copy Link"
             >
-                {copied ? <FaCheck className="text-sm text-green-500" /> : <FaLink className="text-sm" />}
+                {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Link2 className="w-4 h-4" />}
             </button>
         </div>
     );

@@ -4,134 +4,153 @@ import React from 'react';
 import { CartItem } from '@/app/context/CartContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
-import { useCustomer } from '@/app/context/CustomerContext';
-import { MdPayments, MdRefresh, MdCheckCircle, MdSupportAgent } from 'react-icons/md';
+import { CreditCard, Headset, Truck } from 'lucide-react';
 import { getSafeImageUrl } from '@/lib/image-utils';
 import { formatPackaging } from '@/lib/packaging';
+import ResilientImage from '@/app/components/ResilientImage';
 
 interface OrderSummaryProps {
     items: CartItem[];
     subtotal: number;
     total: number;
-    loading: boolean;
+    isQuoteRequest: boolean;
 }
 
-const OrderSummary = ({ items, subtotal, total, loading }: OrderSummaryProps) => {
+const OrderSummary = ({ items, subtotal, total, isQuoteRequest }: OrderSummaryProps) => {
     const { t, language } = useLanguage();
     const { formatPrice } = useCurrency();
-    const { customer } = useCustomer();
-    const isLockedForGuest = !customer;
+    const isAr = language === 'ar';
 
     return (
-        <div className="sticky top-[150px] space-y-4">
-            <div className="bg-white dark:bg-zinc-900 p-6 md:p-8 rounded-2xl border border-gray-200 dark:border-white/10">
-                <h2 className="text-base font-extrabold mb-6 text-[#0B192C] dark:text-white uppercase tracking-wider">{t('cart.orderSummary')}</h2>
-                
-                {/* Items List */}
-                <div className="space-y-3 mb-6 max-h-[35vh] overflow-y-auto ltr:pr-2 rtl:pl-2 custom-scrollbar">
+        <aside className="space-y-4 lg:sticky lg:top-24" aria-label={isAr ? 'ملخص الطلب' : 'Order summary'}>
+            <div className="rounded-xl border border-slate-200 bg-white p-5 md:p-6 dark:border-white/10 dark:bg-zinc-900">
+                <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-base font-extrabold text-[#0B192C] dark:text-white">
+                        {isQuoteRequest
+                            ? (isAr ? 'ملخص طلب التوريد' : 'Supply Request Summary')
+                            : t('cart.orderSummary')}
+                    </h2>
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        {items.length} {isAr ? 'منتج' : items.length === 1 ? 'item' : 'items'}
+                    </span>
+                </div>
+
+                <div className="max-h-[34vh] divide-y divide-slate-200 overflow-y-auto border-y border-slate-200 dark:divide-white/10 dark:border-white/10">
                     {items.map((item) => {
                         const itemKey = `${item.id}:${item.selectedOption || ''}`;
                         return (
-                            <div key={itemKey} className="flex items-center gap-3 bg-gray-50 dark:bg-zinc-800/50 p-2.5 rounded-xl border border-gray-100 dark:border-white/5">
-                                <div className="relative w-12 h-12 bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden shrink-0">
-                                    <img
+                            <div key={itemKey} className="flex items-center gap-3 py-3">
+                                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-zinc-800">
+                                    <ResilientImage
                                         src={getSafeImageUrl(item.image.split(',')[0])}
                                         alt={item.name}
-                                        className="w-full h-full object-contain p-1"
+                                        sizes="48px"
+                                        className="object-contain p-1"
                                         loading="lazy"
                                     />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold truncate text-[#0B192C] dark:text-white" title={item.name}>{item.name}</p>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-xs font-bold text-[#0B192C] dark:text-white" title={item.name}>
+                                        {item.name}
+                                    </p>
                                     {item.selectedOption && (
-                                        <span className="inline-block text-[10px] font-bold text-[#8A6305] bg-[#8A6305]/10 border border-[#8A6305]/20 px-1.5 py-0.5 rounded">
+                                        <span className="mt-0.5 inline-block text-[10px] font-bold text-[#8A6305]">
                                             {item.selectedOption}
                                         </span>
                                     )}
-                                    <p className="text-xs font-medium text-[#475569] dark:text-gray-400 mt-0.5">
-                                        {t('cart.quantity')}: {item.quantity} {formatPackaging(item.packaging, language, { short: true })} • {isLockedForGuest ? (
-                                            <span className="text-[#8A6305] font-bold">🔒 {language === 'ar' ? 'للتجار المسجلين' : 'Wholesale (Login)'}</span>
-                                        ) : item.price > 0 ? (
-                                            <span className="text-[#0B192C] dark:text-white font-extrabold" dir="ltr">{formatPrice(item.price)}</span>
-                                        ) : (
-                                            <span className="text-[#8A6305] font-bold">{language === 'ar' ? 'السعر عند الطلب' : 'On Inquiry'}</span>
-                                        )}
+                                    <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                                        {t('cart.quantity')}: {item.quantity} {formatPackaging(item.packaging, language, { short: true })}
                                     </p>
+                                </div>
+                                <div className="shrink-0 text-end">
+                                    {isQuoteRequest ? (
+                                        <span className="text-[10px] font-bold text-[#8A6305]">
+                                            {isAr ? 'بعد المراجعة' : 'On review'}
+                                        </span>
+                                    ) : item.price > 0 ? (
+                                        <span className="text-xs font-extrabold text-[#0B192C] dark:text-white" dir="ltr">
+                                            {formatPrice(item.price * item.quantity)}
+                                        </span>
+                                    ) : (
+                                        <span className="text-[10px] font-bold text-[#8A6305]">
+                                            {isAr ? 'عند الطلب' : 'On inquiry'}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         );
                     })}
                     {items.length === 0 && (
-                        <p className="text-xs text-center py-4 text-gray-400">{t('cart.emptyCart')}</p>
+                        <p className="py-5 text-center text-xs text-slate-500">{t('cart.emptyCart')}</p>
                     )}
                 </div>
 
-                {/* Costs breakdown */}
-                <div className="flex flex-col gap-3 mb-6 border-t border-b border-gray-200 dark:border-white/10 py-5">
-                    <div className="flex justify-between text-[#475569] dark:text-gray-400 text-xs font-medium">
-                        <span>{t('cart.subtotal')}</span>
-                        {isLockedForGuest ? (
-                            <span className="font-bold text-[#8A6305]">🔒 {language === 'ar' ? 'يحدد بعد مراجعة الطلب' : 'Priced upon Review'}</span>
-                        ) : subtotal > 0 ? (
-                            <span className="font-bold text-[#0B192C] dark:text-white" dir="ltr">{formatPrice(subtotal)}</span>
-                        ) : (
-                            <span className="font-bold text-[#8A6305]">{language === 'ar' ? 'يحدد حسب الوكالة' : 'Agency Rate'}</span>
-                        )}
+                <dl className="space-y-3 border-b border-slate-200 py-4 text-xs dark:border-white/10">
+                    <div className="flex items-center justify-between gap-4">
+                        <dt className="font-medium text-slate-600 dark:text-slate-400">{t('cart.subtotal')}</dt>
+                        <dd className="text-end font-bold text-[#0B192C] dark:text-white">
+                            {isQuoteRequest
+                                ? (isAr ? 'يحدد بعد المراجعة' : 'Confirmed after review')
+                                : subtotal > 0
+                                    ? <span dir="ltr">{formatPrice(subtotal)}</span>
+                                    : (isAr ? 'يحدد حسب الوكالة' : 'Agency rate')}
+                        </dd>
                     </div>
-                    <div className="flex justify-between text-[#475569] dark:text-gray-400 text-xs font-medium">
-                        <span>{t('cart.shipping')}</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide text-xs">{t('cart.freeShipping')}</span>
+                    <div className="flex items-center justify-between gap-4">
+                        <dt className="font-medium text-slate-600 dark:text-slate-400">{t('cart.shipping')}</dt>
+                        <dd className="text-end font-bold text-[#8A6305]">
+                            {isAr ? 'يؤكد حسب المنطقة والطلب' : 'Confirmed by area and order'}
+                        </dd>
+                    </div>
+                </dl>
+
+                <div className="grid grid-cols-1 divide-y divide-slate-200 py-1 dark:divide-white/10 xl:grid-cols-2 xl:divide-x xl:divide-y-0 xl:rtl:divide-x-reverse">
+                    <div className="flex items-start gap-2.5 py-3 xl:pe-3">
+                        <Truck className="mt-0.5 h-4 w-4 shrink-0 text-[#8A6305]" aria-hidden="true" />
+                        <div>
+                            <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{isAr ? 'التوصيل' : 'Delivery'}</p>
+                            <p className="mt-0.5 text-xs font-bold text-[#0B192C] dark:text-white">
+                                {isAr ? 'يُجدول بعد المراجعة' : 'Scheduled after review'}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-2.5 py-3 xl:ps-3">
+                        <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-[#8A6305]" aria-hidden="true" />
+                        <div>
+                            <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                                {isQuoteRequest ? (isAr ? 'ترتيبات الدفع' : 'Payment terms') : t('checkout.paymentMethod')}
+                            </p>
+                            <p className="mt-0.5 text-xs font-bold text-[#0B192C] dark:text-white">
+                                {isQuoteRequest ? (isAr ? 'تؤكد مع قسم المبيعات' : 'Confirmed with sales') : t('checkout.cashOnDelivery')}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Payment Method Badge */}
-                <div className="bg-gray-50 dark:bg-zinc-800/60 rounded-xl p-4 mb-6 border border-gray-200 dark:border-white/10">
-                    <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('checkout.paymentMethod')}</span>
-                        <MdPayments className="text-[#0B192C] dark:text-[#8A6305] text-base" />
-                    </div>
-                    <p className="text-xs font-extrabold text-[#0B192C] dark:text-white">{t('checkout.cashOnDelivery')}</p>
-                </div>
-
-                {/* Total */}
-                <div className="flex justify-between items-end mb-6">
-                    <span className="text-base font-extrabold text-[#0B192C] dark:text-white uppercase tracking-wider">{t('cart.total')}</span>
-                    {isLockedForGuest ? (
-                        <span className="text-xs sm:text-sm font-extrabold text-[#8A6305]">🔒 {language === 'ar' ? 'يحدد بعد مراجعة الطلب' : 'Priced upon Review'}</span>
-                    ) : total > 0 ? (
-                        <span className="text-2xl sm:text-3xl font-extrabold text-[#0B192C] dark:text-white leading-none" dir="ltr">{formatPrice(total)}</span>
+                <div className="flex items-end justify-between gap-4 border-t border-slate-200 pt-5 dark:border-white/10">
+                    <span className="text-sm font-extrabold text-[#0B192C] dark:text-white">
+                        {isQuoteRequest ? (isAr ? 'القيمة النهائية' : 'Final value') : t('cart.total')}
+                    </span>
+                    {isQuoteRequest ? (
+                        <span className="text-end text-sm font-extrabold text-[#8A6305]">
+                            {isAr ? 'تُحدد بعد مراجعة الطلب' : 'Confirmed after order review'}
+                        </span>
                     ) : (
-                        <span className="text-sm sm:text-base font-extrabold text-[#8A6305]">{language === 'ar' ? 'يحدد حسب فواتير الوكالة' : 'Price on Inquiry'}</span>
+                        <span className="text-2xl font-extrabold leading-none text-[#0B192C] dark:text-white" dir="ltr">
+                            {formatPrice(total)}
+                        </span>
                     )}
                 </div>
-
-                {/* Submit Order Button */}
-                <button
-                    type="submit"
-                    disabled={loading || items.length === 0}
-                    className="w-full bg-[#0B192C] hover:bg-[#8A6305] text-white font-bold rounded-xl h-12 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-sm shadow-md dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white cursor-pointer"
-                >
-                    {loading ? (
-                        <MdRefresh className="animate-spin text-xl" />
-                    ) : (
-                        <>
-                            <span>{t('checkout.placeOrder')}</span>
-                            <MdCheckCircle className="text-base" />
-                        </>
-                    )}
-                </button>
-                <p className="text-[10px] text-center text-gray-400 dark:text-slate-400 mt-4 uppercase tracking-widest font-bold">{t('checkout.secureCheckout')}</p>
             </div>
 
-            {/* Assistance Box */}
-            <div className="bg-gray-50 dark:bg-zinc-800/60 p-4 rounded-xl border border-gray-200 dark:border-white/10 flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center border border-gray-200 dark:border-white/10 shrink-0">
-                    <MdSupportAgent className="text-[#0B192C] dark:text-[#8A6305] text-lg" />
+            <div className="flex items-center gap-3 border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-zinc-900">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 text-[#0B192C] dark:border-white/10 dark:text-[#E5B54A]">
+                    <Headset className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div>
-                    <p className="text-xs font-bold text-[#0B192C] dark:text-white mb-0.5">{t('checkout.needAssistance')}</p>
+                    <p className="text-xs font-bold text-[#0B192C] dark:text-white">{t('checkout.needAssistance')}</p>
                     <a
-                        className="text-xs font-semibold text-[#475569] hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors hover:underline"
+                        className="mt-0.5 text-xs font-medium text-slate-600 transition-colors hover:text-[#8A6305] hover:underline dark:text-slate-300"
                         href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901').replace(/[^0-9]/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -140,7 +159,7 @@ const OrderSummary = ({ items, subtotal, total, loading }: OrderSummaryProps) =>
                     </a>
                 </div>
             </div>
-        </div>
+        </aside>
     );
 };
 

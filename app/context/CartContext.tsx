@@ -18,12 +18,14 @@ export interface CartItem {
 
 interface CartContextType {
     items: CartItem[];
+    isHydrated: boolean;
     addItem: (item: CartItem) => void;
     removeItem: (id: string, selectedOption?: string) => void;
     updateQuantity: (id: string, quantity: number, selectedOption?: string) => void;
     clearCart: () => void;
     cartCount: number;
     totalItems: number;
+    totalQuantity: number;
     subtotal: number;
     isDrawerOpen: boolean;
     openDrawer: () => void;
@@ -35,49 +37,58 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-    const getItemKey = (item: { id: string; selectedOption?: string }) => 
-        `${item.id}:${item.selectedOption || ''}`;
+    const getItemKey = (item: { id: string; selectedOption?: string | null }) => 
+        `${item.id}:${(item.selectedOption || '').trim()}`;
 
     // Load from local storage on mount
     useEffect(() => {
-        const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-            try {
-                setItems(JSON.parse(savedCart));
-            } catch (error) {
-                console.error("Failed to parse cart from local storage", error);
+        try {
+            const savedCart = localStorage.getItem('cart');
+            if (savedCart) {
+                const parsed = JSON.parse(savedCart);
+                if (Array.isArray(parsed)) {
+                    setItems(parsed);
+                }
             }
+        } catch (error) {
+            console.error("Failed to parse cart from local storage", error);
+        } finally {
+            setIsHydrated(true);
         }
-        setIsLoaded(true);
     }, []);
 
     // Save to local storage on change
     useEffect(() => {
-        if (isLoaded) {
+        if (isHydrated) {
             localStorage.setItem('cart', JSON.stringify(items));
         }
-    }, [items, isLoaded]);
+    }, [items, isHydrated]);
 
     const addItem = (newItem: CartItem) => {
+        const cleanOption = (newItem.selectedOption || '').trim() || undefined;
+        const normalizedItem: CartItem = {
+            ...newItem,
+            selectedOption: cleanOption,
+        };
         setItems(prev => {
-            const targetKey = getItemKey(newItem);
+            const targetKey = getItemKey(normalizedItem);
             const existing = prev.find(item => getItemKey(item) === targetKey);
             if (existing) {
                 return prev.map(item =>
                     getItemKey(item) === targetKey
-                        ? { ...item, quantity: item.quantity + newItem.quantity }
+                        ? { ...item, quantity: item.quantity + normalizedItem.quantity }
                         : item
                 );
             }
-            return [...prev, newItem];
+            return [...prev, normalizedItem];
         });
     };
 
     const removeItem = (id: string, selectedOption?: string) => {
-        const targetKey = `${id}:${selectedOption || ''}`;
+        const targetKey = `${id}:${(selectedOption || '').trim()}`;
         setItems(prev => prev.filter(item => {
             if (selectedOption !== undefined) {
                 return getItemKey(item) !== targetKey;
@@ -88,7 +99,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const updateQuantity = (id: string, quantity: number, selectedOption?: string) => {
         if (quantity < 1) return;
-        const targetKey = `${id}:${selectedOption || ''}`;
+        const targetKey = `${id}:${(selectedOption || '').trim()}`;
         setItems(prev => prev.map(item => {
             if (selectedOption !== undefined) {
                 return getItemKey(item) === targetKey ? { ...item, quantity } : item;
@@ -105,11 +116,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const closeDrawer = () => setIsDrawerOpen(false);
     const toggleDrawer = () => setIsDrawerOpen(prev => !prev);
 
-    const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCount = items.length;
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     return (
-        <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, cartCount, totalItems: cartCount, subtotal, isDrawerOpen, openDrawer, closeDrawer, toggleDrawer }}>
+        <CartContext.Provider value={{ 
+            items, 
+            isHydrated,
+            addItem, 
+            removeItem, 
+            updateQuantity, 
+            clearCart, 
+            cartCount, 
+            totalItems: cartCount, 
+            totalQuantity,
+            subtotal, 
+            isDrawerOpen, 
+            openDrawer, 
+            closeDrawer, 
+            toggleDrawer 
+        }}>
             {children}
         </CartContext.Provider>
     );

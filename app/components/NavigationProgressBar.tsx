@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 export default function NavigationProgressBar() {
@@ -11,7 +11,7 @@ export default function NavigationProgressBar() {
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const safetyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const cleanup = () => {
+    const cleanup = useCallback(() => {
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
@@ -20,9 +20,9 @@ export default function NavigationProgressBar() {
             clearTimeout(safetyTimeoutRef.current);
             safetyTimeoutRef.current = null;
         }
-    };
+    }, []);
 
-    const finish = () => {
+    const finish = useCallback(() => {
         cleanup();
         setProgress(100);
         setStatus('completing');
@@ -30,9 +30,9 @@ export default function NavigationProgressBar() {
             setStatus('idle');
             setProgress(0);
         }, 300);
-    };
+    }, [cleanup]);
 
-    const start = () => {
+    const start = useCallback(() => {
         cleanup();
         setStatus('loading');
         setProgress(30);
@@ -48,12 +48,12 @@ export default function NavigationProgressBar() {
         safetyTimeoutRef.current = setTimeout(() => {
             finish();
         }, 2500);
-    };
+    }, [cleanup, finish]);
 
     // When pathname or searchParams change, finish the progress bar
     useEffect(() => {
         finish();
-    }, [pathname, searchParams]);
+    }, [pathname, searchParams, finish]);
 
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {

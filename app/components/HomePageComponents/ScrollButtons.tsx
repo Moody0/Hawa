@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ScrollButtonsProps {
     scrollRef: React.RefObject<HTMLDivElement | null>;
@@ -26,13 +26,13 @@ const ScrollButtons = ({ scrollRef, dir }: ScrollButtonsProps) => {
                 onClick={() => scroll('left')}
                 className="size-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-90"
             >
-                <MdChevronLeft className={`${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                <ChevronLeft className={`${dir === 'rtl' ? 'rotate-180' : ''}`} />
             </button>
             <button
                 onClick={() => scroll('right')}
                 className="size-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-90"
             >
-                <MdChevronRight className={`${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                <ChevronRight className={`${dir === 'rtl' ? 'rotate-180' : ''}`} />
             </button>
         </div>
     );

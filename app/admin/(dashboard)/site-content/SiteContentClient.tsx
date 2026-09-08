@@ -1,22 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { 
-    MdImage, 
-    MdImageNotSupported, 
-    MdSchedule, 
-    MdLocalShipping, 
-    MdWarning, 
-    MdCleanHands, 
-    MdAssignmentReturn, 
-    MdVerified,
-    MdCurrencyExchange,
-    MdViewCarousel,
-    MdInfoOutline,
-    MdSave,
-    MdStorefront,
-    MdTrendingUp
-} from "react-icons/md";
+import { Image, Clock, Truck, AlertTriangle, ShieldCheck, Info, Save, Store, TrendingUp, RefreshCw, GalleryHorizontal } from 'lucide-react';
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { updateSiteSettings } from "../../../../lib/admin-actions";
@@ -373,12 +358,12 @@ export default function SiteContentClient({
     };
 
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
-        { id: "currency", label: t('admin.tabCurrency') || "Currency & Rates", icon: <MdCurrencyExchange className="text-lg" /> },
-        { id: "stats", label: t('admin.companyStats') || (language === 'ar' ? "إحصائيات الشركة" : "Company Statistics"), icon: <MdTrendingUp className="text-lg" /> },
-        { id: "footer", label: t('admin.tabFooter') || "Footer & Social", icon: <MdStorefront className="text-lg" /> },
-        { id: "banners", label: t('admin.tabBanners') || "Promo Banners", icon: <MdViewCarousel className="text-lg" /> },
-        { id: "shipping", label: t('admin.tabShipping') || "Shipping & Policy", icon: <MdLocalShipping className="text-lg" /> },
-        { id: "about", label: t('admin.tabAbout') || "About Us Story", icon: <MdInfoOutline className="text-lg" /> },
+        { id: "currency", label: t('admin.tabCurrency') || "Currency & Rates", icon: <RefreshCw className="text-lg" /> },
+        { id: "stats", label: t('admin.companyStats') || (language === 'ar' ? "إحصائيات الشركة" : "Company Statistics"), icon: <TrendingUp className="text-lg" /> },
+        { id: "footer", label: t('admin.tabFooter') || "Footer & Social", icon: <Store className="text-lg" /> },
+        { id: "banners", label: t('admin.tabBanners') || "Promo Banners", icon: <GalleryHorizontal className="text-lg" /> },
+        { id: "shipping", label: t('admin.tabShipping') || "Shipping & Policy", icon: <Truck className="text-lg" /> },
+        { id: "about", label: t('admin.tabAbout') || "About Us Story", icon: <Info className="text-lg" /> },
     ];
 
     return (
@@ -409,7 +394,7 @@ export default function SiteContentClient({
                             </>
                         ) : (
                             <>
-                                <MdSave className="text-lg" />
+                                <Save className="text-lg" />
                                 <span>{t('admin.saveChanges')}</span>
                             </>
                         )}
@@ -446,7 +431,7 @@ export default function SiteContentClient({
                         <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
                             <div className="mb-6 flex items-start gap-4">
                                 <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-[#8A6305] dark:text-[#8A6305] rounded-xl">
-                                    <MdCurrencyExchange className="text-2xl" />
+                                    <RefreshCw className="text-2xl" />
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -489,7 +474,7 @@ export default function SiteContentClient({
                         <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
                             <div className="mb-6 flex items-start gap-4">
                                 <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-[#8A6305] dark:text-[#8A6305] rounded-xl">
-                                    <MdTrendingUp className="text-2xl" />
+                                    <TrendingUp className="text-2xl" />
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -629,7 +614,7 @@ export default function SiteContentClient({
                                                 {ctaImage ? (
                                                     <img src={ctaImage} alt="CTA Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
                                                 ) : (
-                                                    <MdImage className="text-2xl text-slate-400" />
+                                                    <Image className="text-2xl text-slate-400" />
                                                 )}
                                             </div>
                                         </div>

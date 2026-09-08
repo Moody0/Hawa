@@ -7,9 +7,9 @@ import { useCurrency } from '@/app/context/CurrencyContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCart } from '@/app/context/CartContext';
 import { useCustomer } from '@/app/context/CustomerContext';
-import toast from 'react-hot-toast';
-import { MdClose, MdLock } from 'react-icons/md';
+import { X, Lock } from 'lucide-react';
 import { formatPackaging, formatPackageItems } from '@/lib/packaging';
+import RollingNumber from '@/app/components/RollingNumber';
 
 interface Product {
     id: string;
@@ -20,7 +20,7 @@ interface Product {
     description: string | null;
     descriptionAr?: string | null;
     descriptionEn?: string | null;
-    price: string | number;
+    price: string | number | null;
     discountPrice?: string | number | null;
     images: string;
     categoryId?: string;
@@ -33,6 +33,7 @@ interface Product {
     brand?: {
         name: string;
     } | null;
+    [key: string]: any;
 }
 
 interface QuickViewModalProps {
@@ -83,24 +84,23 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
             itemsPerPackage: product.itemsPerPackage || null,
             minOrder: product.minOrder || 1,
         });
-        toast.success(language === 'ar' ? `تمت إضافة ${displayName} إلى السلة` : `Added ${displayName} to cart`);
         onClose();
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
             <div 
-                className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden w-full max-w-[800px] max-h-[90vh] overflow-y-auto flex flex-col md:flex-row relative border border-gray-100 dark:border-white/10 shadow-2xl"
+                className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden w-full max-w-[800px] max-h-[90vh] overflow-y-auto flex flex-col md:flex-row relative border border-slate-200 dark:border-white/10"
                 onClick={e => e.stopPropagation()}
                 dir={dir}
             >
                 {/* Close Button */}
                 <button 
                     onClick={onClose}
-                    className="absolute top-3.5 end-3.5 z-50 p-2 rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-md text-gray-600 hover:text-black dark:text-gray-300 dark:hover:text-white shadow-sm border border-gray-200/60 dark:border-white/10 transition-all hover:scale-105 cursor-pointer"
+                    className="absolute top-3.5 end-3.5 z-50 p-2 rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-md text-slate-600 hover:text-black dark:text-gray-300 dark:hover:text-white border border-slate-200/60 dark:border-white/10 transition-colors cursor-pointer"
                     aria-label="Close"
                 >
-                    <MdClose size={20} />
+                    <X size={20} />
                 </button>
 
                 {/* Right side (Image) - Displayed first on mobile */}
@@ -181,10 +181,20 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                                 <Link
                                     href="/account/login"
                                     onClick={onClose}
-                                    className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-[#8A6305] bg-[#FAF6EC] dark:bg-[#8A6305]/15 border border-[#8A6305]/30 px-3 py-1.5 rounded-lg hover:bg-[#8A6305] hover:text-white transition-all shadow-2xs"
+                                    className="group/lock inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#FAF6EC] dark:bg-[#8A6305]/15 border border-[#8A6305]/30 hover:border-[#8A6305] transition-colors"
+                                    title={language === 'ar' ? 'سجّل دخول التاجر لعرض سعر الجملة' : 'Login to view wholesale price'}
                                 >
-                                    <MdLock className="text-base" />
-                                    <span>{language === 'ar' ? 'أسعار الجملة بعد تسجيل دخول التجار' : 'Wholesale (Merchant Login)'}</span>
+                                    <span className="w-5 h-5 rounded-md bg-[#8A6305] text-white flex items-center justify-center shrink-0">
+                                        <Lock className="w-3 h-3" />
+                                    </span>
+                                    <div className="flex items-baseline gap-1.5 select-none">
+                                        <span className="text-base font-black text-slate-800 dark:text-slate-200 blur-[3.5px] opacity-60 tracking-wider">
+                                            88,500
+                                        </span>
+                                        <span className="text-xs font-bold text-[#8A6305] dark:text-[#E5B54A]">
+                                            {language === 'ar' ? 'سعر الجملة للتجار (سجّل الآن)' : 'Wholesale Rate (Login to view)'}
+                                        </span>
+                                    </div>
                                 </Link>
                             </div>
                         ) : !product.hidePrice && Number(product.price) > 0 ? (
@@ -210,19 +220,20 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                     <div className="flex items-center gap-3 sm:gap-4 mb-4">
                             <button 
                                 onClick={handleAddToCart}
-                                className="flex-1 bg-[#0B192C] hover:bg-[#8A6305] text-white py-3 rounded-xl font-bold transition-all text-xs sm:text-sm cursor-pointer shadow-md active:scale-[0.98] dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white"
+                                className="flex-1 bg-[#0B192C] hover:bg-[#8A6305] text-white py-3 rounded-xl font-bold transition-colors text-xs sm:text-sm cursor-pointer active:scale-[0.98] dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white"
                             >
                                 {language === 'ar' ? 'إضافة للسلة' : 'Add to Cart'}
                             </button>
                             
-                            <div className="flex items-center justify-between border border-gray-200 dark:border-white/10 rounded-xl px-2 py-1.5 w-32 sm:w-36 bg-gray-50 dark:bg-zinc-800">
+                            <div dir="ltr" className="flex items-center justify-between border border-gray-200 dark:border-white/10 rounded-xl px-2 py-1.5 w-32 sm:w-36 bg-gray-50 dark:bg-zinc-800">
                                 <button 
                                     onClick={() => setQuantity(Math.max(product.minOrder || 1, quantity - 1))} 
                                     className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 font-bold cursor-pointer text-base transition-colors"
                                     aria-label="Decrease quantity"
                                 >-</button>
-                                <span className="font-bold text-xs sm:text-sm text-[#0B192C] dark:text-white select-none whitespace-nowrap">
-                                    {quantity} {formatPackaging(product.packaging, language, { short: true })}
+                                <span className="font-bold text-xs sm:text-sm text-[#0B192C] dark:text-white select-none whitespace-nowrap flex items-center gap-1">
+                                    <RollingNumber value={quantity} />
+                                    <span>{formatPackaging(product.packaging, language, { short: true })}</span>
                                 </span>
                                 <button 
                                     onClick={() => setQuantity(quantity + 1)} 

@@ -7,9 +7,10 @@ import { useCurrency } from '@/app/context/CurrencyContext';
 interface OrderBasicInfoProps {
     orderId: string;
     totalAmount: number;
+    isQuoteRequest?: boolean;
 }
 
-const OrderBasicInfo = ({ orderId, totalAmount }: OrderBasicInfoProps) => {
+const OrderBasicInfo = ({ orderId, totalAmount, isQuoteRequest = false }: OrderBasicInfoProps) => {
     const { t, language } = useLanguage();
     const { formatPrice } = useCurrency();
 
@@ -20,18 +21,26 @@ const OrderBasicInfo = ({ orderId, totalAmount }: OrderBasicInfoProps) => {
                 <p className="text-base sm:text-lg font-bold text-[#0B192C] dark:text-[#8A6305] truncate"><span dir="ltr">#{orderId.slice(-8).toUpperCase()}</span></p>
             </div>
             <div className="flex flex-col gap-1 items-center md:items-start">
-                <span className="text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">{t('cart.total')}</span>
+                <span className="text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">
+                    {isQuoteRequest ? (language === 'ar' ? 'القيمة النهائية' : 'Final value') : t('cart.total')}
+                </span>
                 <p className="text-base sm:text-lg font-black text-[#0B192C] dark:text-white">
-                    {Number(totalAmount) > 0 ? (
+                    {!isQuoteRequest && Number(totalAmount) > 0 ? (
                         <span dir="ltr">{formatPrice(Number(totalAmount))}</span>
                     ) : (
-                        <span className="text-sm font-bold text-[#8A6305]">{language === 'ar' ? 'السعر يحدد حسب الوكالة' : 'Price on Inquiry'}</span>
+                        <span className="text-sm font-bold text-[#8A6305]">
+                            {language === 'ar' ? 'تُحدد بعد المراجعة' : 'Confirmed after review'}
+                        </span>
                     )}
                 </p>
             </div>
             <div className="flex flex-col gap-1 items-center md:items-start">
                 <span className="text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">{language === 'ar' ? 'التوصيل المتوقع' : 'Est. Delivery'}</span>
-                <p className="text-base sm:text-lg font-bold text-[#0B192C] dark:text-white">{language === 'ar' ? '24 - 48 ساعة' : '24-48 hours'}</p>
+                <p className="text-base sm:text-lg font-bold text-[#0B192C] dark:text-white">
+                    {isQuoteRequest
+                        ? (language === 'ar' ? 'يؤكد بعد المراجعة' : 'Confirmed after review')
+                        : (language === 'ar' ? '24 - 48 ساعة' : '24-48 hours')}
+                </p>
             </div>
         </div>
     );

@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
+import { SITE_ORIGIN } from '@/lib/site-config';
 
 export const revalidate = 3600; // Revalidate sitemap hourly
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hawatrading.com';
+    const baseUrl = SITE_ORIGIN;
 
     try {
         // 1. Static high-priority routes

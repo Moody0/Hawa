@@ -5,6 +5,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { getSafeImageUrl } from '@/lib/image-utils';
 import { formatPackaging, formatPackageItems } from '@/lib/packaging';
+import ResilientImage from '@/app/components/ResilientImage';
 
 interface OrderItem {
     id: string;
@@ -22,9 +23,10 @@ interface OrderItem {
 
 interface OrderItemsSelectionProps {
     items: OrderItem[];
+    showPrices?: boolean;
 }
 
-const OrderItemsSelection = ({ items }: OrderItemsSelectionProps) => {
+const OrderItemsSelection = ({ items, showPrices = true }: OrderItemsSelectionProps) => {
     const { language, dir } = useLanguage();
     const { formatPrice } = useCurrency();
     const isArabic = language === 'ar';
@@ -51,12 +53,12 @@ const OrderItemsSelection = ({ items }: OrderItemsSelectionProps) => {
                     return (
                         <div key={item.id} className="p-3 sm:p-4 flex items-center justify-between gap-3 sm:gap-4">
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-50 dark:bg-zinc-800 rounded-lg p-1 shrink-0 border border-gray-200/60 dark:border-white/10 flex items-center justify-center">
-                                    <img
+                                <div className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gray-50 dark:bg-zinc-800 rounded-lg p-1 shrink-0 border border-gray-200/60 dark:border-white/10 flex items-center justify-center overflow-hidden">
+                                    <ResilientImage
                                         src={getSafeImageUrl(primaryImage)}
                                         alt={title}
                                         className="w-full h-full object-contain"
-                                        loading="lazy"
+                                        sizes="56px"
                                     />
                                 </div>
                                 <div className="min-w-0">
@@ -82,13 +84,13 @@ const OrderItemsSelection = ({ items }: OrderItemsSelectionProps) => {
                             </div>
 
                             <div className="text-end shrink-0">
-                                {item.price !== undefined && item.price > 0 ? (
+                                {showPrices && item.price !== undefined && item.price > 0 ? (
                                     <p className="text-xs sm:text-sm font-extrabold text-[#0B192C] dark:text-white" dir="ltr">
                                         {formatPrice(item.price * item.quantity)}
                                     </p>
                                 ) : (
                                     <span className="text-[10px] sm:text-xs font-bold text-[#8A6305] bg-[#8A6305]/10 px-2 py-0.5 rounded border border-[#8A6305]/20 whitespace-nowrap">
-                                        {isArabic ? 'السعر عند الطلب' : 'On Inquiry'}
+                                        {isArabic ? 'السعر بعد المراجعة' : 'Price after review'}
                                     </span>
                                 )}
                             </div>

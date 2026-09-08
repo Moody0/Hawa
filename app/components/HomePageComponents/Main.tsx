@@ -1,13 +1,19 @@
-import React from 'react';
-import type { HomeBrand, RailBrand } from '@/lib/admin-actions';
+import dynamic from 'next/dynamic';
+import type { RailBrand } from '@/lib/public-queries';
 import FeaturedCollection from './FeaturedCollection';
 import TrendingWeekly from './TrendingWeekly';
 import FeaturedCategoriesGrid from './FeaturedCategoriesGrid';
-import TestimonialsMasonry from './TestimonialsMasonry';
 import ScrollReveal from '../ScrollReveal';
 import { getI18n } from '@/lib/i18n';
 import HeroCarousel from './HeroCarousel';
-import AgenciesSlider from './AgenciesSlider';
+import CompanyServices from './CompanyServices';
+
+const AgenciesSlider = dynamic(() => import('./AgenciesSlider'), {
+    loading: () => <div className="min-h-[140px]" />,
+});
+const TestimonialsMasonry = dynamic(() => import('./TestimonialsMasonry'), {
+    loading: () => <div className="min-h-[400px]" />,
+});
 
 interface Banner {
     id: string;
@@ -17,8 +23,10 @@ interface Banner {
     subtitleAr: string | null;
     image: string;
     buttonText: string | null;
+    buttonTextAr?: string | null;
     link: string | null;
     badge: string | null;
+    badgeAr?: string | null;
     isActive: boolean;
 }
 
@@ -32,24 +40,24 @@ interface Product {
     descriptionAr?: string | null;
     descriptionEn?: string | null;
     options?: string | null;
-    price: number;
+    price: number | null;
     discountPrice?: number | null;
     images: string;
     categoryId: string;
     stock: number;
     isTrending: boolean;
-    category: {
+    category?: {
         name: string;
-    } | null;
+    } | null | any;
     brand?: {
         id: string;
         name: string;
         slug: string;
         group?: string;
-    } | null;
+    } | null | any;
+    [key: string]: any;
 }
 
-import type { HighlightCard } from './CategoryHighlightCards';
 import type { ReviewItem } from './TestimonialsMasonry';
 
 interface FeaturedCategory {
@@ -64,59 +72,73 @@ interface FeaturedCategory {
 
 interface MainProps {
     banners: Banner[];
-    mainBrands: HomeBrand[];
     railBrands: RailBrand[];
-    highlightCards: HighlightCard[];
     reviews: ReviewItem[];
     featuredNewArrivals: Product[];
     featuredBestSellers: Product[];
     trendingWeekly: Product[];
     featuredCategories: FeaturedCategory[];
-    settings: any;
 }
 
 const Main = async ({
     banners,
-    mainBrands,
     railBrands,
-    highlightCards,
     reviews,
     featuredNewArrivals,
     featuredBestSellers,
     trendingWeekly,
     featuredCategories,
-    settings,
 }: MainProps) => {
     const { dir, language } = await getI18n();
 
     return (
-        <div className="w-full flex flex-col gap-y-4 sm:gap-y-6 md:gap-y-8 pb-12">
-            {/* 1. Hero Carousel - 100% natural, bright photography with NO dark overlay */}
+        <div className="w-full flex flex-col overflow-x-clip">
+            {/* 1. Editorial hero */}
             <HeroCarousel banners={banners} />
 
-            {/* 2. Authorized Commercial Agencies Rail (Clean, high-density trade marks) */}
-            <AgenciesSlider brands={railBrands} />
+            {/* 2. Compact agency trust rail */}
+            <ScrollReveal
+                className="bg-[#FAF7F0] dark:bg-[#101E32]"
+                variant="subtle"
+            >
+                <AgenciesSlider brands={railBrands} />
+            </ScrollReveal>
 
-            {/* 4. Best Sellers & New Arrivals (Product Rails with Carton Specs) */}
-            <ScrollReveal>
+            {/* 3–4. Category discovery followed by commercial proof */}
+            <ScrollReveal
+                className="bg-white dark:bg-[#0B192C]"
+            >
+                <FeaturedCategoriesGrid categories={featuredCategories} language={language} dir={dir} />
+            </ScrollReveal>
+
+            {/* 5. Best sellers and new arrivals; product cards remain unchanged */}
+            <ScrollReveal
+                className="bg-slate-50/70 dark:bg-[#0E1B2E]"
+            >
                 <FeaturedCollection
                     newArrivals={featuredNewArrivals}
                     bestSellers={featuredBestSellers}
                 />
             </ScrollReveal>
 
-            {/* 5. Key Wholesale Categories */}
-            <ScrollReveal>
-                <FeaturedCategoriesGrid categories={featuredCategories} language={language} dir={dir} />
-            </ScrollReveal>
-
-            {/* 6. Fast-Moving Weekly Demand */}
-            <ScrollReveal>
+            {/* 6. Weekly demand; product card design remains unchanged */}
+            <ScrollReveal
+                className="bg-white dark:bg-[#0B192C]"
+            >
                 <TrendingWeekly products={trendingWeekly} />
             </ScrollReveal>
 
-            {/* 7. Merchant Endorsements & Store Reviews */}
-            <ScrollReveal>
+            {/* 8. Corporate capabilities */}
+            <ScrollReveal
+                className="bg-[#FAF7F0] dark:bg-[#101E32]"
+            >
+                <CompanyServices />
+            </ScrollReveal>
+
+            {/* 9. Merchant endorsements */}
+            <ScrollReveal
+                className="bg-slate-50 dark:bg-[#0E1B2E]"
+            >
                 <TestimonialsMasonry reviews={reviews} products={featuredBestSellers} />
             </ScrollReveal>
         </div>

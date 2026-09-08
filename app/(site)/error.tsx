@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { MdRefresh, MdHome, MdErrorOutline } from "react-icons/md";
+import { RotateCw, Home, AlertCircle } from 'lucide-react';
 
 export default function SiteError({
     error,
@@ -20,7 +20,7 @@ export default function SiteError({
         <div className="min-h-[60vh] flex items-center justify-center p-6 text-center">
             <div className="max-w-md w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 rounded-2xl p-8 shadow-lg">
                 <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/40 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-200 dark:border-red-900/30">
-                    <MdErrorOutline className="text-3xl" />
+                    <AlertCircle className="text-3xl" />
                 </div>
                 <h1 className="text-xl font-bold text-[#0B192C] dark:text-white mb-2">
                     حدث خطأ غير متوقع
@@ -33,14 +33,14 @@ export default function SiteError({
                         onClick={() => reset()}
                         className="w-full sm:w-auto px-5 py-2.5 bg-[#0B192C] hover:bg-[#8A6305] text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                     >
-                        <MdRefresh className="text-base" />
+                        <RotateCw className="text-base" />
                         <span>إعادة المحاولة</span>
                     </button>
                     <Link
                         href="/"
                         className="w-full sm:w-auto px-5 py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-[#0B192C] dark:text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
                     >
-                        <MdHome className="text-base" />
+                        <Home className="text-base" />
                         <span>الرئيسية</span>
                     </Link>
                 </div>

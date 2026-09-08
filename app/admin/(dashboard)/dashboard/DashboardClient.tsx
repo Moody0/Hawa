@@ -8,23 +8,7 @@ import { useState, useMemo } from "react";
 import OrderDetailsModal from "../orders/OrderDetailsModal";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { DashboardStats } from "@/lib/admin-actions";
-import { 
-    MdAttachMoney, 
-    MdShoppingBag, 
-    MdInventory2, 
-    MdChevronRight, 
-    MdChevronLeft, 
-    MdTrendingUp, 
-    MdAdd, 
-    MdViewCarousel, 
-    MdStorefront, 
-    MdInbox, 
-    MdLocalShipping, 
-    MdWarningAmber, 
-    MdLocationOn, 
-    MdShowChart, 
-    MdOutlineCheckCircle
-} from "react-icons/md";
+import { DollarSign, ShoppingBag, Package, ChevronRight, ChevronLeft, TrendingUp, Plus, Store, Truck, AlertTriangle, MapPin, CheckCircle2, Inbox, GalleryHorizontal } from 'lucide-react';
 
 export default function DashboardClient({ stats }: { stats: DashboardStats }) {
     const { openSidebar } = useAdminSidebar();
@@ -134,7 +118,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                 href="/admin/products"
                                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
                             >
-                                <MdAdd className="text-base" />
+                                <Plus className="text-base" />
                                 <span>{t('admin.quickActionAddProduct')}</span>
                             </Link>
 
@@ -142,7 +126,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                 href="/admin/orders"
                                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] text-white text-xs font-bold transition-all shadow-sm active:scale-95"
                             >
-                                <MdInventory2 className="text-base text-[#8A6305]" />
+                                <Package className="text-base text-[#8A6305]" />
                                 <span>{t('admin.quickActionOrders')}</span>
                             </Link>
 
@@ -150,7 +134,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                 href="/admin/banners"
                                 className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all active:scale-95"
                             >
-                                <MdViewCarousel className="text-base text-[#8A6305]" />
+                                <GalleryHorizontal className="text-base text-[#8A6305]" />
                                 <span>{t('admin.quickActionBanners')}</span>
                             </Link>
                         </div>
@@ -181,7 +165,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                         {(stats.inventory.lowStockCount > 0 || stats.inventory.outOfStockCount > 0) && (
                             <div className="flex items-center justify-between gap-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 shadow-xs">
                                 <div className="flex items-center gap-2 min-w-0">
-                                    <MdWarningAmber className="text-lg sm:text-xl text-rose-600 dark:text-rose-400 shrink-0" />
+                                    <AlertTriangle className="text-lg sm:text-xl text-rose-600 dark:text-rose-400 shrink-0" />
                                     <p className="text-xs sm:text-sm font-bold text-rose-900 dark:text-rose-200 truncate">
                                         {t('admin.lowStockAlertRibbon').replace(
                                             '{count}', 
@@ -210,7 +194,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                         {t('admin.totalRevenue')}
                                     </p>
                                     <div className="p-1.5 sm:p-2.5 bg-emerald-50 dark:bg-emerald-950/50 rounded-lg sm:rounded-xl text-emerald-600 dark:text-emerald-400 shrink-0">
-                                        <MdAttachMoney className="text-lg sm:text-2xl" />
+                                        <DollarSign className="text-lg sm:text-2xl" />
                                     </div>
                                 </div>
                                 <div className="mt-1 sm:mt-2">
@@ -224,7 +208,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                     {t('admin.allTime')}
                                 </span>
                                 <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 shrink-0">
-                                    <MdTrendingUp className="text-xs sm:text-sm" />
+                                    <TrendingUp className="text-xs sm:text-sm" />
                                     {stats.deliveredOrdersCount} {t('admin.delivered')}
                                 </span>
                             </div>
@@ -238,7 +222,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                         {t('admin.totalOrders')}
                                     </p>
                                     <div className="p-1.5 sm:p-2.5 bg-sky-50 dark:bg-sky-950/50 rounded-lg sm:rounded-xl text-[#0B192C] dark:text-sky-300 shrink-0">
-                                        <MdInventory2 className="text-lg sm:text-2xl" />
+                                        <Package className="text-lg sm:text-2xl" />
                                     </div>
                                 </div>
                                 <div className="mt-1 sm:mt-2">
@@ -265,7 +249,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                         {t('admin.averageOrderValue')}
                                     </p>
                                     <div className="p-1.5 sm:p-2.5 bg-amber-50 dark:bg-amber-950/50 rounded-lg sm:rounded-xl text-amber-600 dark:text-amber-400 shrink-0">
-                                        <MdTrendingUp className="text-lg sm:text-2xl" />
+                                        <TrendingUp className="text-lg sm:text-2xl" />
                                     </div>
                                 </div>
                                 <div className="mt-1 sm:mt-2">
@@ -296,7 +280,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                             ? "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400"
                                             : "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400"
                                     }`}>
-                                        <MdStorefront className="text-lg sm:text-2xl" />
+                                        <Store className="text-lg sm:text-2xl" />
                                     </div>
                                 </div>
                                 <div className="mt-1 sm:mt-2">
@@ -313,7 +297,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                         </span>
                                     ) : (
                                         <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                                            <MdOutlineCheckCircle /> {t('admin.inStock')}
+                                            <CheckCircle2 /> {t('admin.inStock')}
                                         </span>
                                     )}
                                 </span>
@@ -335,7 +319,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <MdShowChart className="text-xl text-emerald-600" />
+                                            <TrendingUp className="text-xl text-emerald-600" />
                                             <h3 className="text-slate-900 dark:text-white text-base sm:text-lg font-bold tracking-tight">
                                                 {t('admin.salesVelocity')}
                                             </h3>
@@ -528,7 +512,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-                                        <MdShowChart className="text-4xl mb-2 text-slate-300" />
+                                        <TrendingUp className="text-4xl mb-2 text-slate-300" />
                                         <p className="text-xs font-medium">{t('admin.noSalesYet')}</p>
                                     </div>
                                 )}
@@ -558,7 +542,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                             <div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <MdLocalShipping className="text-xl text-sky-600" />
+                                        <Truck className="text-xl text-sky-600" />
                                         <h3 className="text-slate-900 dark:text-white text-base sm:text-lg font-bold tracking-tight">
                                             {t('admin.orderPipeline')}
                                         </h3>
@@ -692,7 +676,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                             <div className="flex items-center justify-between mb-4">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <MdShoppingBag className="text-xl text-[#8A6305]" />
+                                        <ShoppingBag className="text-xl text-[#8A6305]" />
                                         <h3 className="text-slate-900 dark:text-white text-base sm:text-lg font-bold tracking-tight">
                                             {t('admin.topSellingProducts')}
                                         </h3>
@@ -741,7 +725,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                             sizes="40px"
                                                         />
                                                     ) : (
-                                                        <MdStorefront className="text-slate-400 text-lg" />
+                                                        <Store className="text-slate-400 text-lg" />
                                                     )}
                                                 </div>
 
@@ -770,7 +754,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
                                         <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-                                            <MdShoppingBag className="text-2xl" />
+                                            <ShoppingBag className="text-2xl" />
                                         </div>
                                         <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
                                             {t('admin.noSalesYet')}
@@ -790,7 +774,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                             <div className="flex flex-col rounded-2xl p-6 bg-white dark:bg-[#0f172a] border border-slate-200/80 dark:border-white/10 shadow-xs">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                        <MdWarningAmber className="text-xl text-rose-500" />
+                                        <AlertTriangle className="text-xl text-rose-500" />
                                         <h3 className="text-slate-900 dark:text-white text-base font-bold tracking-tight">
                                             {t('admin.restockWatchlist')}
                                         </h3>
@@ -824,7 +808,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                                 sizes="32px"
                                                             />
                                                         ) : (
-                                                            <MdStorefront className="text-slate-400 text-sm m-auto" />
+                                                            <Store className="text-slate-400 text-sm m-auto" />
                                                         )}
                                                     </div>
                                                     <div className="min-w-0">
@@ -850,7 +834,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                         ))
                                     ) : (
                                         <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-200 text-xs font-bold">
-                                            <MdOutlineCheckCircle className="text-lg text-emerald-600 shrink-0" />
+                                            <CheckCircle2 className="text-lg text-emerald-600 shrink-0" />
                                             <span>{t('admin.allStockHealthy')}</span>
                                         </div>
                                     )}
@@ -860,7 +844,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                             {/* Top Regional Demand */}
                             <div className="flex flex-col rounded-2xl p-5 bg-white dark:bg-[#0f172a] border border-slate-200/80 dark:border-white/10 shadow-xs">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <MdLocationOn className="text-lg text-indigo-600" />
+                                    <MapPin className="text-lg text-indigo-600" />
                                     <h3 className="text-slate-900 dark:text-white text-sm font-bold tracking-tight">
                                         {t('admin.topCitiesDemand')}
                                     </h3>
@@ -900,7 +884,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between px-1">
                             <div className="flex items-center gap-2">
-                                <MdInventory2 className="text-lg text-[#0B192C] dark:text-[#8A6305]" />
+                                <Package className="text-lg text-[#0B192C] dark:text-[#8A6305]" />
                                 <h3 className="text-slate-900 dark:text-white text-lg font-bold tracking-tight">
                                     {t('admin.recentOrders')}
                                 </h3>
@@ -910,7 +894,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                 className="text-[#8A6305] dark:text-[#8A6305] hover:underline text-xs font-bold transition-all flex items-center gap-1"
                             >
                                 <span>{t('admin.viewAll')}</span>
-                                {dir === 'rtl' ? <MdChevronLeft /> : <MdChevronRight />}
+                                {dir === 'rtl' ? <ChevronLeft /> : <ChevronRight />}
                             </Link>
                         </div>
 
@@ -997,7 +981,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                             className={`flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-all ${dir === 'rtl' ? 'me-auto' : 'ms-auto'}`}
                                                             title={t('admin.details')}
                                                         >
-                                                            {dir === 'rtl' ? <MdChevronLeft className="text-xl" /> : <MdChevronRight className="text-xl" />}
+                                                            {dir === 'rtl' ? <ChevronLeft className="text-xl" /> : <ChevronRight className="text-xl" />}
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -1007,7 +991,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                 <td colSpan={7} className="px-6 py-16 text-center">
                                                     <div className="flex flex-col items-center justify-center gap-3">
                                                         <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-                                                            <MdInbox className="text-2xl" />
+                                                            <Inbox className="text-2xl" />
                                                         </div>
                                                         <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
                                                             {t('admin.noRecentOrders')}

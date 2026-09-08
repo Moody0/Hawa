@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
-
-        if (!session || (!session.user.canManageReviews && session.user.role !== "SUPER_ADMIN")) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        await requireAdminSession("canManageReviews");
+    } catch (authError: any) {
+        return NextResponse.json({ error: authError?.message || "Unauthorized" }, { status: 401 });
+    }
+    try {
 
         const reviews = await prisma.review.findMany({
             include: {

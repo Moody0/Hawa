@@ -2,19 +2,7 @@
 
 import React from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { 
-    MdLocalShipping, 
-    MdAssignmentReturn, 
-    MdVerifiedUser, 
-    MdCheckCircle, 
-    MdPhone, 
-    MdSchedule, 
-    MdStorefront, 
-    MdReceiptLong, 
-    MdAcUnit, 
-    MdShield, 
-    MdErrorOutline
-} from "react-icons/md";
+import { Truck, UserCheck, CheckCircle2, Phone, Clock, Store, Receipt, Snowflake, Shield, AlertCircle, RotateCcw } from 'lucide-react';
 import { FaWhatsapp } from "react-icons/fa";
 import { Settings } from "@prisma/client";
 
@@ -45,7 +33,7 @@ export default function ShippingReturnsContent({ siteSettings }: ShippingReturns
                 {/* Header: Clean & Informative */}
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-bold uppercase tracking-wider mb-3">
-                        <MdLocalShipping className="text-sm" />
+                        <Truck className="text-sm" />
                         <span>{isAr ? 'تعليمات التوزيع وسياسة التوريد' : 'Wholesale Delivery & Shipping Rules'}</span>
                     </div>
                     <h1 className="text-3xl sm:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight mb-3">
@@ -64,7 +52,7 @@ export default function ShippingReturnsContent({ siteSettings }: ShippingReturns
                     <div className="bg-white dark:bg-[#132035] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 sm:p-8 shadow-xs">
                         <div className="flex items-center gap-3 pb-5 border-b border-slate-100 dark:border-white/5 mb-6">
                             <div className="w-10 h-10 rounded-xl bg-[#8A6305]/10 text-[#8A6305] dark:text-[#E5B54A] flex items-center justify-center text-xl shrink-0">
-                                <MdLocalShipping />
+                                <Truck />
                             </div>
                             <div>
                                 <h2 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white">
@@ -173,7 +161,7 @@ export default function ShippingReturnsContent({ siteSettings }: ShippingReturns
                     <div className="bg-white dark:bg-[#132035] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 sm:p-8 shadow-xs">
                         <div className="flex items-center gap-3 pb-5 border-b border-slate-100 dark:border-white/5 mb-6">
                             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0">
-                                <MdAssignmentReturn />
+                                <RotateCcw />
                             </div>
                             <div>
                                 <h2 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white">
@@ -236,11 +224,11 @@ export default function ShippingReturnsContent({ siteSettings }: ShippingReturns
                                     </p>
                                     <div className="bg-slate-50 dark:bg-white/[0.02] rounded-xl p-3.5 border border-slate-200/60 dark:border-white/5 space-y-2 text-xs text-slate-700 dark:text-slate-300">
                                         <div className="flex items-center gap-2">
-                                            <MdCheckCircle className="text-emerald-500 text-sm shrink-0" />
+                                            <CheckCircle2 className="text-emerald-500 text-sm shrink-0" />
                                             <span>{isAr ? 'تصوير الكرتونة المصابة ورقم الوجبة (Batch Number).' : 'Photograph the affected case and batch number.'}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <MdCheckCircle className="text-emerald-500 text-sm shrink-0" />
+                                            <CheckCircle2 className="text-emerald-500 text-sm shrink-0" />
                                             <span>{isAr ? 'إرسال الصور مع صورة الفاتورة إلى واتساب إدارة الحركة لمعالجة الاستبدال في الشحنة التالية.' : 'Send photos with invoice copy to WhatsApp Dispatch for instant resolution.'}</span>
                                         </div>
                                     </div>
@@ -299,7 +287,7 @@ export default function ShippingReturnsContent({ siteSettings }: ShippingReturns
                                 href={`tel:${cleanWaNumber}`}
                                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white dark:bg-[#132035] border border-slate-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-slate-50 text-xs font-bold transition-all shadow-xs"
                             >
-                                <MdPhone className="text-sm" />
+                                <Phone className="text-sm" />
                                 <span dir="ltr">+963 993 443 901</span>
                             </a>
                         </div>

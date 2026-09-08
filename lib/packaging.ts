@@ -112,7 +112,9 @@ export function formatPackageItems(
 
     // Factory specifications (حسب مواصفات المصنع)
     if (str.includes('مواصفات المصنع')) {
-        if (isAr) return 'حسب مواصفات المصنع';
+        if (isAr) {
+            return mode === 'full' ? 'حسب مواصفات المصنع' : 'مواصفات المصنع';
+        }
         if (mode === 'cart' || mode === 'badge') {
             return 'Factory Specs';
         }

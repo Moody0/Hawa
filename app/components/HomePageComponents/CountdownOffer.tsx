@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { MdChevronRight } from 'react-icons/md';
+import { ChevronRight } from 'lucide-react';
 
 interface TimeLeft {
     days: number;
@@ -127,7 +127,7 @@ const CountdownOffer = () => {
                             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full bg-[#8A6305] hover:bg-[#725204] text-white font-bold text-xs sm:text-sm md:text-base transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md whitespace-nowrap group cursor-pointer"
                         >
                             <span>{isArabic ? 'استكشف عروض التوريد' : 'Explore Bulk Deals'}</span>
-                            <MdChevronRight className={`text-lg transition-transform group-hover:translate-x-0.5 ${isArabic ? 'rotate-180 group-hover:-translate-x-0.5' : ''}`} />
+                            <ChevronRight className={`text-lg transition-transform group-hover:translate-x-0.5 ${isArabic ? 'rotate-180 group-hover:-translate-x-0.5' : ''}`} />
                         </Link>
                     </div>
 

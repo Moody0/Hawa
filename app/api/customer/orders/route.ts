@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAuthenticatedCustomer } from '@/lib/customer-auth';
+import { projectOrdersPrices } from '@/lib/price-visibility';
 
 export async function GET() {
     try {
@@ -11,10 +12,7 @@ export async function GET() {
 
         const orders = await prisma.order.findMany({
             where: {
-                OR: [
-                    { customerId: customer.id },
-                    { phone: customer.phone },
-                ],
+                customerId: customer.id,
             },
             orderBy: { createdAt: 'desc' },
             include: {
@@ -46,7 +44,9 @@ export async function GET() {
             },
         });
 
-        return NextResponse.json({ success: true, orders });
+        const canViewPrices = Boolean(customer?.isActive);
+        const safeOrders = projectOrdersPrices(orders, canViewPrices);
+        return NextResponse.json({ success: true, orders: safeOrders });
     } catch (error) {
         console.error('Customer orders error:', error);
         return NextResponse.json({ error: 'فشل جلب الطلبات' }, { status: 500 });

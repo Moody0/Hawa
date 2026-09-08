@@ -13,7 +13,7 @@ export default function BrandLoadingSkeleton() {
             </div>
 
             {/* Brand Masthead Card Skeleton */}
-            <div className="relative rounded-2xl md:rounded-3xl bg-white dark:bg-[#0C1821] border border-slate-200/80 dark:border-white/10 shadow-xs p-6 sm:p-8 mb-8 overflow-hidden">
+            <div className="relative rounded-2xl md:rounded-3xl bg-white dark:bg-[#0C1821] border border-slate-200/80 dark:border-white/10 p-6 sm:p-8 mb-8 overflow-hidden">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                     <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-100 dark:bg-zinc-800 border border-slate-200/80 dark:border-white/10 shrink-0 relative overflow-hidden">
                         <div className="image-shimmer absolute inset-0" />

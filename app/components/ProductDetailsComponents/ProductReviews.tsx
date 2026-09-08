@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { MdStar, MdStarOutline, MdKeyboardArrowDown } from 'react-icons/md';
+import { Star, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import ReviewModal from './ReviewModal';
 import ResilientImage from '@/app/components/ResilientImage';
@@ -108,8 +108,8 @@ export default function ProductReviews({ productId, productName, productImage }:
                                 <div className="flex items-center gap-px">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         star <= Math.round(Number(averageRating))
-                                            ? <MdStar key={star} className="text-[#8A6305] text-base" />
-                                            : <MdStarOutline key={star} className="text-gray-300 dark:text-zinc-600 text-base" />
+                                            ? <Star key={star} className="text-[#8A6305] text-base" />
+                                            : <Star key={star} className="text-gray-300 dark:text-zinc-600 text-base" />
                                     ))}
                                 </div>
                                 <span className="text-xs text-[#475569] dark:text-gray-400">{t('products.basedOn')} {reviews.length} {t('products.reviews').toLowerCase()}</span>
@@ -151,8 +151,8 @@ export default function ProductReviews({ productId, productName, productImage }:
                                         className="focus:outline-none transition-transform hover:scale-110"
                                     >
                                         {star <= hoveredRating
-                                            ? <MdStar className="text-2xl text-[#8A6305] transition-colors" />
-                                            : <MdStarOutline className="text-2xl text-gray-300 dark:text-zinc-600 transition-colors" />
+                                            ? <Star className="text-2xl text-[#8A6305] transition-colors" />
+                                            : <Star className="text-2xl text-gray-300 dark:text-zinc-600 transition-colors" />
                                         }
                                     </button>
                                 ))}
@@ -171,7 +171,7 @@ export default function ProductReviews({ productId, productName, productImage }:
                         <div className="flex flex-col items-center justify-center py-16 text-center">
                             <div className="flex items-center gap-1 mb-4">
                                 {[1, 2, 3, 4, 5].map(s => (
-                                    <MdStarOutline key={s} className="text-2xl text-gray-200 dark:text-zinc-700" />
+                                    <Star key={s} className="text-2xl text-gray-200 dark:text-zinc-700" />
                                 ))}
                             </div>
                             <p className="text-sm text-[#475569]">{t('products.noReviews')}</p>
@@ -199,8 +199,8 @@ export default function ProductReviews({ productId, productName, productImage }:
                                         <div className="flex items-center gap-px shrink-0">
                                             {[1, 2, 3, 4, 5].map((star) => (
                                                 star <= review.rating
-                                                    ? <MdStar key={star} className="text-sm text-[#8A6305]" />
-                                                    : <MdStarOutline key={star} className="text-sm text-gray-300 dark:text-zinc-600" />
+                                                    ? <Star key={star} className="text-sm text-[#8A6305]" />
+                                                    : <Star key={star} className="text-sm text-gray-300 dark:text-zinc-600" />
                                             ))}
                                         </div>
                                     </div>
@@ -228,7 +228,7 @@ export default function ProductReviews({ productId, productName, productImage }:
                                     className="flex items-center gap-1 text-sm font-semibold text-[#0B192C] dark:text-white pt-4 hover:text-[#8A6305] transition-colors"
                                 >
                                     {language === 'ar' ? 'عرض كل التقييمات' : 'Show all reviews'}
-                                    <MdKeyboardArrowDown className="text-lg" />
+                                    <ChevronDown className="text-lg" />
                                 </button>
                             )}
                         </div>

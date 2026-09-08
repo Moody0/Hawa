@@ -22,68 +22,130 @@ interface CategoryHighlightCardsProps {
     language?: 'en' | 'ar';
 }
 
+const FALLBACK_HIGHLIGHT_CARDS: HighlightCard[] = [
+    {
+        id: 'food',
+        slug: 'food-commodities',
+        subheadingAr: 'المواد الغذائية والمعلبات',
+        subheadingEn: 'Food & Canned Goods',
+        headingAr: 'زوان والريف',
+        headingEn: 'Zwan & Alreef',
+        productNameAr: 'لحوم ولانشون معلب',
+        productNameEn: 'Canned Meats & Goods',
+        priceText: '',
+        heroImage: '/uploads/categories/cat-328006c06c.webp',
+        productThumb: '/uploads/categories/cat-328006c06c.webp',
+    },
+    {
+        id: 'detergents',
+        slug: 'detergents-cleaning',
+        subheadingAr: 'المنظفات ومواد العناية',
+        subheadingEn: 'Detergents & Care',
+        headingAr: 'روكافيرا وبوفالو',
+        headingEn: 'Rocavira & Buffalo',
+        productNameAr: 'سوائل جلي ومعقمات',
+        productNameEn: 'Detergents & Sanitisers',
+        priceText: '',
+        heroImage: '/uploads/categories/cat-173332ecce.webp',
+        productThumb: '/uploads/categories/cat-173332ecce.webp',
+    },
+    {
+        id: 'dairy-oils',
+        slug: 'oils-ghee',
+        subheadingAr: 'الزيوت والسمن والألبان',
+        subheadingEn: 'Oils, Ghee & Dairy',
+        headingAr: 'الريف وحليبنا',
+        headingEn: 'Alreef & Haleebna',
+        productNameAr: 'سمن بقري وزيوت طعام',
+        productNameEn: 'Ghee & Vegetable Oils',
+        priceText: '',
+        heroImage: '/uploads/categories/cat-c4b2e6c6c2.webp',
+        productThumb: '/uploads/categories/cat-c4b2e6c6c2.webp',
+    },
+    {
+        id: 'seafood',
+        slug: 'seafood-fish',
+        subheadingAr: 'الأسماك والبحريات المعلبة',
+        subheadingEn: 'Canned Seafood & Tuna',
+        headingAr: 'صن بل وسيلفر فيش',
+        headingEn: 'Sunbell & Silver Fish',
+        productNameAr: 'تونة وسردين فاخر',
+        productNameEn: 'Premium Tuna & Sardines',
+        priceText: '',
+        heroImage: '/uploads/categories/cat-f10c952ab5.webp',
+        productThumb: '/uploads/categories/cat-f10c952ab5.webp',
+    },
+];
+
 const CategoryHighlightCards = ({ cards = [], language = 'ar' }: CategoryHighlightCardsProps) => {
-    if (!cards || cards.length === 0) {
-        return null;
+    const combinedCards = [...cards];
+    if (combinedCards.length < 4) {
+        for (const fb of FALLBACK_HIGHLIGHT_CARDS) {
+            if (!combinedCards.some(c => c.slug === fb.slug || c.id === fb.id)) {
+                combinedCards.push(fb);
+            }
+            if (combinedCards.length >= 4) break;
+        }
     }
 
+    const displayCards = combinedCards.length > 0 ? combinedCards : FALLBACK_HIGHLIGHT_CARDS;
+
     return (
-        <section className="container-custom">
-            {/* Section Title */}
-            <div className="flex justify-center mb-6 md:mb-8 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                <h2 className="text-xl md:text-2xl lg:text-[28px] font-extrabold text-[#0B192C] dark:text-white tracking-tight">
-                    {language === 'ar' ? 'أقسام التوريد بالجملة' : 'Wholesale Supply Departments'}
-                </h2>
+        <section className="container-custom py-4 sm:py-6">
+            {/* Centered Section Header with Decorative Flanking Lines */}
+            <div className="text-center mb-5 sm:mb-7">
+                <div className="flex items-center justify-center gap-3 mb-1.5">
+                    <span className="w-8 sm:w-12 h-0.5 bg-[#8A6305]/60 dark:bg-[#E5B54A]/60 rounded-full" />
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight">
+                        {language === 'ar' ? 'أقسام التوريد بالجملة' : 'Wholesale Supply Departments'}
+                    </h2>
+                    <span className="w-8 sm:w-12 h-0.5 bg-[#8A6305]/60 dark:bg-[#E5B54A]/60 rounded-full" />
+                </div>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+                    {language === 'ar' ? 'اختر القسم لاستعراض الأصناف والطرود والوكالات المتوفرة' : 'Select a department to view available cartons and brands'}
+                </p>
             </div>
 
-            <div className="flex gap-4 md:gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible">
-                {cards.map((card) => {
+            {/* Modern Clean Media Grid (Single container, zero nested mud) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                {displayCards.slice(0, 4).map((card) => {
                     const categoryName = language === 'ar' ? card.subheadingAr : card.subheadingEn;
-                    const heroImage = card.heroImage || '/placeholder.svg';
+                    const brandsText = language === 'ar' ? card.headingAr : card.headingEn;
 
                     return (
-                        <div
+                        <Link
                             key={card.id || card.slug}
-                            className="flex-none w-[170px] sm:w-[190px] md:flex-1 min-w-0 snap-start"
+                            href={`/departments/${card.slug}`}
+                            className="group relative flex flex-col rounded-2xl bg-[#F4F5F7] dark:bg-zinc-800/60 p-3 sm:p-4 hover:bg-[#ECEEF2] dark:hover:bg-zinc-800 transition-colors duration-200"
                         >
-                            <Link
-                                href={`/departments/${card.slug}`}
-                                className="group relative flex flex-col h-full bg-[#FAF9F5] dark:bg-[#1E1E16] rounded-2xl overflow-hidden border border-[#8A6305]/15 hover:border-[#8A6305]/50 transition-all duration-300 hover:shadow-md p-2.5 sm:p-3.5"
-                            >
-                                {/* Image Container (Structured with inner rounded frame) */}
-                                <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-white/5 mb-2.5 flex items-center justify-center">
-                                    <ResilientImage
-                                        src={heroImage}
-                                        alt={categoryName}
-                                        showSkeleton={false}
-                                        sizes="(max-width: 768px) 190px, 300px"
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        loading="lazy"
-                                    />
-                                </div>
+                            {/* Image Container with clean display */}
+                            <div className="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-white dark:bg-zinc-900/50 mb-3 flex items-center justify-center p-2">
+                                <ResilientImage
+                                    src={card.heroImage}
+                                    alt={categoryName}
+                                    fill
+                                    sizes="(max-width: 768px) 50vw, 25vw"
+                                    className="w-full h-full object-contain"
+                                    loading="lazy"
+                                />
+                            </div>
 
-                                {/* Text Content */}
-                                <div className="flex flex-col flex-1 justify-between px-1 pb-1">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <div className="flex flex-col min-w-0">
-                                            <h3 className="text-[13px] sm:text-[14px] md:text-[16px] font-bold text-[#0B192C] dark:text-white leading-tight group-hover:text-[#8A6305] transition-colors truncate">
-                                                {categoryName}
-                                            </h3>
-                                            <p className="text-[10px] md:text-xs text-[#8A6305] dark:text-[#E5B54A] font-bold mt-0.5">
-                                                {language === 'ar' ? 'تسوق الآن' : 'Shop Now'}
-                                            </p>
-                                        </div>
-
-                                        {/* Outline Icon */}
-                                        <div className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-zinc-800 border border-gray-200/80 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-300 transition-all duration-300 group-hover:border-[#8A6305] group-hover:bg-[#8A6305] group-hover:text-white shadow-2xs">
-                                            <svg className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${language === 'ar' ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
-                                        </div>
-                                    </div>
+                            {/* Text Info */}
+                            <div className="flex flex-col flex-1 justify-between">
+                                <div>
+                                    <span className="text-[10px] font-bold text-[#8A6305] dark:text-[#E5B54A] block mb-0.5">
+                                        {brandsText}
+                                    </span>
+                                    <h3 className="text-xs sm:text-sm font-black text-[#0B192C] dark:text-white line-clamp-1">
+                                        {categoryName}
+                                    </h3>
                                 </div>
-                            </Link>
-                        </div>
+                                <span className="text-[11px] font-bold text-slate-500 mt-2 flex items-center gap-1">
+                                    <span>{language === 'ar' ? 'تصفح الكتالوج' : 'Explore'}</span>
+                                    <span className={language === 'ar' ? 'rotate-180 inline-block' : 'inline-block'}>→</span>
+                                </span>
+                            </div>
+                        </Link>
                     );
                 })}
             </div>

@@ -1,5 +1,6 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { CONTACT_CONFIG, getWhatsAppChatUrl } from "@/lib/site-config";
 
 export async function GET() {
     try {
@@ -7,17 +8,19 @@ export async function GET() {
             where: { id: "site-settings" }
         });
 
+        const activeNumber = settings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || CONTACT_CONFIG.salesWhatsApp;
+
         return NextResponse.json({
-            whatsappNumber: settings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+963900000000",
-            footerWhatsappUrl: settings?.footerWhatsappUrl || `https://wa.me/${(settings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "963900000000").replace(/[^0-9]/g, '')}`,
+            whatsappNumber: activeNumber,
+            footerWhatsappUrl: settings?.footerWhatsappUrl || getWhatsAppChatUrl(activeNumber),
             footerBrandTitle: settings?.footerBrandTitle || "Hawa Distribution",
             footerBrandTitleAr: settings?.footerBrandTitleAr || "شركة حوا للتوزيع والتجارة",
         });
     } catch (error) {
         console.error("Fetch settings error:", error);
         return NextResponse.json({
-            whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+963900000000",
-            footerWhatsappUrl: `https://wa.me/963900000000`,
+            whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || CONTACT_CONFIG.salesWhatsApp,
+            footerWhatsappUrl: getWhatsAppChatUrl(CONTACT_CONFIG.salesWhatsApp),
             footerBrandTitle: "Hawa Distribution",
             footerBrandTitleAr: "شركة حوا للتوزيع والتجارة",
         });

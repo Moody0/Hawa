@@ -2,12 +2,18 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useCustomer } from '@/app/context/CustomerContext';
 import ResilientImage from './ResilientImage';
 import { getPrimaryImage } from '@/lib/image-utils';
-import { MdArrowForward, MdSearch } from 'react-icons/md';
+import {
+    getCategorySuggestionUrl,
+    getProductSuggestionUrl,
+    getSearchSubmitUrl,
+} from '@/lib/suggestion-routing';
+import { ArrowRight, Search } from 'lucide-react';
 
 interface HeaderSearchProps {
     onSearchSelect?: () => void;
@@ -53,6 +59,7 @@ const dynamicItemsEn = [
 ];
 
 const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false, locale }: HeaderSearchProps) => {
+    const router = useRouter();
     const { t, dir, language } = useLanguage();
     const { formatPrice } = useCurrency();
     const { customer } = useCustomer();
@@ -65,9 +72,12 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
     const [loading, setLoading] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const [activeIndex, setActiveIndex] = useState<number>(-1);
     const [dynamicText, setDynamicText] = useState("");
     const searchRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const searchRequestIdRef = useRef(0);
 
     const isArabic = currentLocale === 'ar';
     const staticPrefix = isArabic ? "ابحث عن: " : "Search: ";
@@ -118,49 +128,85 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
         const handleClickOutside = (event: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
                 setShowResults(false);
+                setActiveIndex(-1);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Debounced search
+    // Debounced search with minimum query length and abort controller
     useEffect(() => {
-        const timeoutId = setTimeout(async () => {
-            if (query.trim().length > 0) {
-                setLoading(true);
-                try {
-                    const res = await fetch(`/api/products?search=${encodeURIComponent(query)}&limit=3&lang=${currentLocale}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        setResults(data.products || []);
-                        setTotalCount(data.total || data.products?.length || 0);
-                        setShowResults(true);
+        const trimmed = query.trim();
 
-                        setSuggestions(isArabic ? foodSuggestionsAr.slice(0, 4) : foodSuggestionsEn.slice(0, 4));
-                        setCategories(isArabic ? quickCategoriesAr : quickCategoriesEn);
-                    }
-                } catch (error) {
-                    console.error("Search failed", error);
-                } finally {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        if (trimmed.length < 2) {
+            setResults([]);
+            setSuggestions([]);
+            setCategories([]);
+            setShowResults(false);
+            setTotalCount(0);
+            setLoading(false);
+            setActiveIndex(-1);
+            return;
+        }
+
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        const currentReqId = ++searchRequestIdRef.current;
+        setLoading(true);
+
+        const timeoutId = setTimeout(async () => {
+            try {
+                const res = await fetch(
+                    `/api/products?search=${encodeURIComponent(trimmed)}&limit=3&lang=${currentLocale}`,
+                    { signal: controller.signal }
+                );
+                if (res.ok && currentReqId === searchRequestIdRef.current) {
+                    const data = await res.json();
+                    if (currentReqId !== searchRequestIdRef.current) return;
+                    setResults(data.products || []);
+                    setTotalCount(data.total || data.products?.length || 0);
+                    setShowResults(true);
+                    setActiveIndex(-1);
+
+                    setSuggestions(isArabic ? foodSuggestionsAr.slice(0, 4) : foodSuggestionsEn.slice(0, 4));
+                    setCategories(isArabic ? quickCategoriesAr : quickCategoriesEn);
+                }
+            } catch (error: unknown) {
+                if (error instanceof Error && error.name === 'AbortError') return;
+                console.error("Search failed", error);
+            } finally {
+                if (!controller.signal.aborted && currentReqId === searchRequestIdRef.current) {
                     setLoading(false);
                 }
-            } else {
-                setResults([]);
-                setSuggestions([]);
-                setCategories([]);
-                setShowResults(false);
-                setTotalCount(0);
             }
         }, 250);
-        return () => clearTimeout(timeoutId);
+
+        return () => {
+            clearTimeout(timeoutId);
+            controller.abort();
+        };
     }, [query, currentLocale, isArabic]);
 
-    const handleProductClick = () => {
+    const totalSelectable = suggestions.length + categories.length + results.length;
+
+    const handleClose = () => {
         setShowResults(false);
-        setQuery("");
+        setActiveIndex(-1);
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
         if (onSearchSelect) onSearchSelect();
         if (onClose) onClose();
+    };
+
+    const handleProductClick = () => {
+        handleClose();
+        setQuery("");
     };
 
     const handleReset = () => {
@@ -170,28 +216,85 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
         setCategories([]);
         setShowResults(false);
         setTotalCount(0);
+        setActiveIndex(-1);
         inputRef.current?.focus();
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (query.trim()) {
-            window.location.href = `/products?search=${encodeURIComponent(query.trim())}`;
+        const cleanQuery = query.trim();
+        if (cleanQuery) {
+            handleClose();
+            router.push(getSearchSubmitUrl(cleanQuery));
         }
     };
 
     const handleSuggestionClick = (suggestion: string) => {
         setQuery(suggestion);
+        handleClose();
+        router.push(getSearchSubmitUrl(suggestion));
     };
 
     const handleViewAll = () => {
-        if (query.trim()) {
-            window.location.href = `/products?search=${encodeURIComponent(query.trim())}`;
+        const cleanQuery = query.trim();
+        if (cleanQuery) {
+            handleClose();
+            router.push(getSearchSubmitUrl(cleanQuery));
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!showResults || totalSelectable === 0) {
+            if (e.key === 'Escape') {
+                setShowResults(false);
+                setActiveIndex(-1);
+            }
+            return;
+        }
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveIndex((prev) => (prev + 1) % totalSelectable);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveIndex((prev) => (prev <= 0 ? totalSelectable - 1 : prev - 1));
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            setShowResults(false);
+            setActiveIndex(-1);
+            inputRef.current?.focus();
+        } else if (e.key === 'Enter') {
+            if (activeIndex >= 0) {
+                e.preventDefault();
+                if (activeIndex < suggestions.length) {
+                    const suggestion = suggestions[activeIndex];
+                    handleSuggestionClick(suggestion);
+                } else if (activeIndex < suggestions.length + categories.length) {
+                    const cat = categories[activeIndex - suggestions.length];
+                    handleClose();
+                    router.push(getCategorySuggestionUrl(cat.slug));
+                } else {
+                    const prod = results[activeIndex - suggestions.length - categories.length];
+                    handleClose();
+                    router.push(getProductSuggestionUrl(prod.slug));
+                }
+            }
         }
     };
 
     return (
         <div className="header-search-wrapper w-full relative" ref={searchRef}>
+            {/* Screen Reader Announcement Live Region */}
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {loading
+                    ? (isArabic ? "جاري البحث..." : "Searching...")
+                    : showResults
+                    ? totalCount > 0
+                        ? (isArabic ? `تم العثور على ${totalCount} نتيجة` : `${totalCount} results found`)
+                        : (isArabic ? "لم يتم العثور على نتائج" : "No results found")
+                    : ""}
+            </div>
+
             {/* Search Form */}
             <form
                 action="/products"
@@ -210,10 +313,11 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                         aria-label={isArabic ? "ابحث عن منتجات أو وكالات" : "Search products or brands"}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         onFocus={() => {
-                            if (query.trim().length > 0) setShowResults(true);
+                            if (query.trim().length >= 2) setShowResults(true);
                         }}
-                        className="w-full bg-[#EDEDED] dark:bg-white/5 border border-transparent rounded-full text-[15px] font-medium text-[#1a1a1a] dark:text-white placeholder-[#888] dark:placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/15 focus:placeholder-gray-400 transition-all h-12 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
+                        className="w-full bg-[#EDEDED] dark:bg-white/5 border border-transparent rounded-full text-[15px] font-medium text-[#1a1a1a] dark:text-white placeholder-[#888] dark:placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-[#8A6305] focus:ring-0 focus:placeholder-gray-400 transition-all h-12 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
                         style={{
                             padding: isArabic ? '0 16px 0 80px' : '0 80px 0 16px',
                             direction: dir,
@@ -223,6 +327,9 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                         name="q"
                         role="combobox"
                         aria-expanded={showResults ? "true" : "false"}
+                        aria-autocomplete="list"
+                        aria-controls="header-search-results"
+                        aria-activedescendant={activeIndex >= 0 ? `search-item-${activeIndex}` : undefined}
                         autoComplete="off"
                         spellCheck="false"
                     />
@@ -251,7 +358,7 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                         }}
                         aria-label={isArabic ? "بحث" : "Search"}
                     >
-                        <MdSearch />
+                        <Search />
                     </button>
                 </div>
             </form>
@@ -259,6 +366,9 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
             {/* ========== Predictive Search Results Dropdown ========== */}
             {showResults && (
                 <div
+                    id="header-search-results"
+                    role="listbox"
+                    aria-label={isArabic ? "نتائج البحث المقترحة" : "Search suggestions"}
                     className="absolute top-full mt-1 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-gray-100 dark:border-white/10 z-50 overflow-y-auto max-h-[70vh] md:max-h-[unset] md:overflow-visible"
                     style={{
                         width: '100%',
@@ -287,19 +397,27 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                                             </span>
                                             <div className="h-px bg-gray-100 dark:bg-white/5 flex-1"></div>
                                         </div>
-                                        <ul className="space-y-2.5">
-                                            {suggestions.map((suggestion, i) => (
-                                                <li
-                                                    key={i}
-                                                    onClick={() => handleSuggestionClick(suggestion)}
-                                                    className="text-[13px] text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white cursor-pointer transition-colors"
-                                                    style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
-                                                    role="button"
-                                                    tabIndex={0}
-                                                >
-                                                    {suggestion}
-                                                </li>
-                                            ))}
+                                        <ul className="space-y-1">
+                                            {suggestions.map((suggestion, i) => {
+                                                const isSelected = activeIndex === i;
+                                                return (
+                                                    <li
+                                                        key={i}
+                                                        id={`search-item-${i}`}
+                                                        role="option"
+                                                        aria-selected={isSelected}
+                                                        onClick={() => handleSuggestionClick(suggestion)}
+                                                        className={`text-[13px] rounded-lg px-2 py-1 transition-colors cursor-pointer ${
+                                                            isSelected
+                                                                ? "bg-[#8A6305]/15 text-[#8A6305] font-bold dark:text-amber-400"
+                                                                : "text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white"
+                                                        }`}
+                                                        style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
+                                                    >
+                                                        {suggestion}
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                     </div>
                                 )}
@@ -313,27 +431,39 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                                             </span>
                                             <div className="h-px bg-gray-100 dark:bg-white/5 flex-1"></div>
                                         </div>
-                                        <ul className="space-y-2.5 mb-3">
-                                            {categories.map((cat) => (
-                                                <li key={cat.id}>
-                                                    <Link
-                                                        href={`/products?brand=${cat.slug}`}
-                                                        onClick={handleProductClick}
-                                                        className="text-[13px] text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors block"
-                                                        style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
-                                                    >
-                                                        {cat.name}
-                                                    </Link>
-                                                </li>
-                                            ))}
+                                        <ul className="space-y-1 mb-3">
+                                            {categories.map((cat, idx) => {
+                                                const itemIndex = suggestions.length + idx;
+                                                const isSelected = activeIndex === itemIndex;
+                                                return (
+                                                    <li key={cat.id}>
+                                                        <Link
+                                                            id={`search-item-${itemIndex}`}
+                                                            role="option"
+                                                            aria-selected={isSelected}
+                                                            href={getCategorySuggestionUrl(cat.slug)}
+                                                            onClick={handleProductClick}
+                                                            className={`text-[13px] rounded-lg px-2 py-1 transition-colors block ${
+                                                                isSelected
+                                                                    ? "bg-[#8A6305]/15 text-[#8A6305] font-bold dark:text-amber-400"
+                                                                    : "text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white"
+                                                            }`}
+                                                            style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}
+                                                        >
+                                                            {cat.name}
+                                                        </Link>
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                         
                                         <button
+                                            type="button"
                                             onClick={handleViewAll}
-                                            className="flex items-center justify-end md:justify-start gap-2 text-[13px] font-bold text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors mt-2 w-full"
+                                            className="flex items-center justify-end md:justify-start gap-2 text-[13px] font-bold text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors mt-2 w-full cursor-pointer"
                                         >
                                             <span>{isArabic ? "عرض المزيد" : "View More"}</span>
-                                            <MdArrowForward className={`text-base ${isArabic ? 'rotate-180' : ''}`} />
+                                            <ArrowRight className={`text-base ${isArabic ? 'rotate-180' : ''}`} />
                                         </button>
                                     </div>
                                 )}
@@ -349,54 +479,64 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-8">
-                                    {results.map((product) => (
-                                        <Link
-                                            key={product.id}
-                                            href={`/products/${product.slug}`}
-                                            onClick={handleProductClick}
-                                            className="flex flex-col items-center group text-center"
-                                        >
-                                            <div className="w-24 h-24 mb-4 relative flex items-center justify-center">
-                                                <ResilientImage
-                                                    src={getPrimaryImage(product.images)}
-                                                    alt={product.name}
-                                                    className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-transform duration-300 group-hover:scale-105"
-                                                />
-                                            </div>
-                                            
-                                            <span className="text-[10px] text-[#888] dark:text-gray-400 uppercase tracking-[0.1em] mb-1.5 font-medium line-clamp-1">
-                                                {product.brand?.name || 'HAWA'}
-                                            </span>
-                                            
-                                            <h4 dir="ltr" className="text-[13px] font-medium text-[#333] dark:text-gray-200 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors leading-tight mb-1.5 line-clamp-2 px-2 font-sans tracking-normal">
-                                                {product.name}
-                                            </h4>
-                                            
-                                            <div className="text-[12px] font-extrabold text-zinc-900 dark:text-white" dir="ltr">
-                                                {isLockedForGuest ? (
-                                                    <span className="text-[11px] font-bold text-[#8A6305]">
-                                                        🔒 {isArabic ? 'أسعار الجملة للتجار' : 'Wholesale (Login)'}
-                                                    </span>
-                                                ) : (
-                                                    formatPrice(Number(product.discountPrice || product.price))
-                                                )}
-                                            </div>
-                                        </Link>
-                                    ))}
+                                    {results.map((product, idx) => {
+                                        const itemIndex = suggestions.length + categories.length + idx;
+                                        const isSelected = activeIndex === itemIndex;
+                                        return (
+                                            <Link
+                                                key={product.id}
+                                                id={`search-item-${itemIndex}`}
+                                                role="option"
+                                                aria-selected={isSelected}
+                                                href={getProductSuggestionUrl(product.slug)}
+                                                onClick={handleProductClick}
+                                                className={`flex flex-col items-center group text-center p-2 rounded-xl transition-all ${
+                                                    isSelected ? "ring-2 ring-[#8A6305] bg-[#FAF6EC] dark:bg-zinc-800" : ""
+                                                }`}
+                                            >
+                                                <div className="w-24 h-24 mb-4 relative flex items-center justify-center">
+                                                    <ResilientImage
+                                                        src={getPrimaryImage(product.images)}
+                                                        alt={product.name}
+                                                        className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-transform duration-300 group-hover:scale-105"
+                                                    />
+                                                </div>
+                                                
+                                                <span className="text-[10px] text-[#888] dark:text-gray-400 uppercase tracking-[0.1em] mb-1.5 font-medium line-clamp-1">
+                                                    {product.brand?.name || 'HAWA'}
+                                                </span>
+                                                
+                                                <h4 dir="ltr" className="text-[13px] font-medium text-[#333] dark:text-gray-200 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors leading-tight mb-1.5 line-clamp-2 px-2 font-sans tracking-normal">
+                                                    {product.name}
+                                                </h4>
+                                                
+                                                <div className="text-[12px] font-extrabold text-zinc-900 dark:text-white" dir="ltr">
+                                                    {isLockedForGuest ? (
+                                                        <span className="text-[11px] font-bold text-[#8A6305]">
+                                                            🔒 {isArabic ? 'أسعار الجملة للتجار' : 'Wholesale (Login)'}
+                                                        </span>
+                                                    ) : (
+                                                        formatPrice(Number(product.discountPrice || product.price))
+                                                    )}
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
 
                                 {totalCount > 0 && (
                                     <div className="mt-8 flex justify-center">
                                         <button
+                                            type="button"
                                             onClick={handleViewAll}
-                                            className="flex items-center gap-2 text-sm font-bold text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+                                            className="flex items-center gap-2 text-sm font-bold text-[#444] dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
                                         >
                                             <span>
                                                 {isArabic
                                                     ? `عرض كل ${totalCount} العناصر`
                                                     : `View all ${totalCount} items`}
                                             </span>
-                                            <MdArrowForward className={`text-lg ${isArabic ? 'rotate-180' : ''}`} />
+                                            <ArrowRight className={`text-lg ${isArabic ? 'rotate-180' : ''}`} />
                                         </button>
                                     </div>
                                 )}

@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import ProductGallery from '@/app/components/ProductDetailsComponents/ProductGallery';
 import ProductHeader from '@/app/components/ProductDetailsComponents/ProductHeader';
-import ProductPrice from '@/app/components/ProductDetailsComponents/ProductPrice';
 import ProductActions from '@/app/components/ProductDetailsComponents/ProductActions';
 import ProductAccordions from '@/app/components/ProductDetailsComponents/ProductAccordions';
 import RelatedProducts from '@/app/components/ProductDetailsComponents/RelatedProducts';
@@ -69,23 +68,23 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                         )}
                     </div>
                     
-                    <ProductPrice
-                        price={product.price.toString()}
-                        discountPrice={product.discountPrice?.toString()}
-                    />
-
                     <ProductActions product={{
                         id: product.id,
                         name: product.name,
                         nameAr: product.nameAr,
                         nameEn: product.nameEn,
-                        price: Number(product.discountPrice || product.price),
+                        price: Number(product.price),
+                        discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+                        hidePrice: product.hidePrice,
                         image: product.images.split(',')[0],
                         slug: product.slug,
                         options: product.options,
                         description: product.description,
                         descriptionAr: product.descriptionAr,
                         descriptionEn: product.descriptionEn,
+                        packaging: product.packaging,
+                        itemsPerPackage: product.itemsPerPackage,
+                        minOrder: product.minOrder,
                     }} stock={product.stock} />
 
                     <ProductAccordions 

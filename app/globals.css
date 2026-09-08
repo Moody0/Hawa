@@ -61,7 +61,13 @@
 */
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:focus-within {
+      scroll-behavior: smooth;
+    }
   }
 
   *,
@@ -417,8 +423,42 @@
   display: block !important;
 }
 
-/* WCAG 2.2 AA Global Focus Rings */
-:focus-visible {
-  outline: 2px solid #8A6305 !important;
-  outline-offset: 2px !important;
+/* ==========================================================================
+   Global Form Controls & Focus Reset
+   Eliminates double borders, halo rings, and outline-offset gap across all browsers
+   ========================================================================== */
+@layer base {
+  input,
+  textarea,
+  select {
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input:focus,
+  input:focus-visible,
+  textarea:focus,
+  textarea:focus-visible,
+  select:focus,
+  select:focus-visible {
+    outline: none !important;
+    outline-offset: 0 !important;
+  }
+
+  /* Remove search cancel/decoration quirks in WebKit */
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+}
+
+/* WCAG Accessible Keyboard Focus Rings for Interactive Controls (Links & Buttons only) */
+a:focus-visible,
+button:focus-visible:not(:disabled),
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible {
+  outline: 2px solid #8A6305;
+  outline-offset: 2px;
 }

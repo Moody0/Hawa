@@ -4,22 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLanguage } from '@/app/context/LanguageContext';
-import {
-    MdClose,
-    MdHome,
-    MdShoppingBag,
-    MdStorefront,
-    MdInfoOutline,
-    MdArticle,
-    MdHeadsetMic,
-    MdChevronLeft,
-    MdChevronRight,
-    MdAdd,
-    MdRemove,
-    MdCategory,
-    MdArrowForward,
-    MdArrowBack
-} from 'react-icons/md';
+import { X, Home, ShoppingBag, Store, Info, FileText, Headphones, ChevronLeft, ChevronRight, Plus, Minus, FolderTree, ArrowRight, ArrowLeft } from 'lucide-react';
 import { FaInstagram, FaFacebook, FaWhatsapp } from 'react-icons/fa';
 
 interface MobileCategory {
@@ -79,7 +64,34 @@ const MobileMenu = ({
     const isMobileMenuOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
     const setIsMobileMenuOpen = externalSetIsOpen !== undefined ? externalSetIsOpen : setInternalIsOpen;
 
-    const navData = incomingNavData || [];
+    const [navData, setNavData] = useState<NavMainCategory[]>(incomingNavData || []);
+    const [isLoadingNav, setIsLoadingNav] = useState(false);
+
+    useEffect(() => {
+        if (incomingNavData && incomingNavData.length > 0) {
+            setNavData(incomingNavData);
+        }
+    }, [incomingNavData]);
+
+    useEffect(() => {
+        if (isMobileMenuOpen && navData.length === 0 && !isLoadingNav) {
+            setIsLoadingNav(true);
+            fetch('/api/navigation')
+                .then((res) => (res.ok ? res.json() : []))
+                .then((data) => {
+                    if (Array.isArray(data) && data.length > 0) {
+                        setNavData(data);
+                    }
+                })
+                .catch((err) => {
+                    console.error('Failed to load navigation data in MobileMenu:', err);
+                })
+                .finally(() => {
+                    setIsLoadingNav(false);
+                });
+        }
+    }, [isMobileMenuOpen, navData.length, isLoadingNav]);
+
     const [activeMainCatSlug, setActiveMainCatSlug] = useState<string | null>(null);
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
     const [shouldRender, setShouldRender] = useState(isMobileMenuOpen);
@@ -135,39 +147,39 @@ const MobileMenu = ({
         {
             href: '/',
             label: isRtl ? 'الرئيسية' : 'Home',
-            icon: MdHome,
+            icon: Home,
         },
         {
             href: '/products',
             label: isRtl ? 'جميع المنتجات' : 'All Products',
             badge: isRtl ? 'الكتالوج' : 'Catalog',
-            icon: MdShoppingBag,
+            icon: ShoppingBag,
         },
         {
             href: '/brands',
             label: isRtl ? 'وكالاتنا الحصرية' : 'Exclusive Brands',
             badge: isRtl ? 'معتمدة' : 'Official',
-            icon: MdStorefront,
+            icon: Store,
         },
         {
             href: '/about-us',
             label: isRtl ? 'من نحن' : 'About Us',
-            icon: MdInfoOutline,
+            icon: Info,
         },
         {
             href: '/blog',
             label: isRtl ? 'المدونة' : 'Blog',
-            icon: MdArticle,
+            icon: FileText,
         },
         {
             href: '/contact',
             label: isRtl ? 'تواصل معنا' : 'Contact Us',
-            icon: MdHeadsetMic,
+            icon: Headphones,
         },
     ];
 
     return (
-        <div className="fixed inset-0 z-[60] md:hidden overflow-hidden" suppressHydrationWarning>
+        <div className="fixed inset-0 z-[60] lg:hidden overflow-hidden" suppressHydrationWarning>
             {/* Backdrop with Blur */}
             <div
                 className={`fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 ease-out ${
@@ -177,12 +189,12 @@ const MobileMenu = ({
                 aria-hidden="true"
             />
 
-            {/* Modal Drawer (Starts opening from the menu icon side: Right in RTL, Left in LTR) */}
+            {/* Fullscreen Mobile Menu Drawer */}
             <div
-                className={`fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-[61] w-[88vw] max-w-[360px] bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+                className={`fixed inset-0 z-[61] w-full bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
                     isRtl
-                        ? (isAnimating ? 'translate-x-0' : 'translate-x-full')
-                        : (isAnimating ? 'translate-x-0' : '-translate-x-full')
+                        ? (isAnimating ? 'translate-x-0' : '-translate-x-full')
+                        : (isAnimating ? 'translate-x-0' : 'translate-x-full')
                 } overflow-hidden`}
                 role="dialog"
                 aria-modal="true"
@@ -217,7 +229,7 @@ const MobileMenu = ({
                         className="w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-gray-200/80 dark:border-white/10 flex items-center justify-center text-[#0B192C] dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors shadow-2xs active:scale-95"
                         aria-label={isRtl ? 'إغلاق القائمة' : 'Close Menu'}
                     >
-                        <MdClose className="text-xl" />
+                        <X className="text-xl" />
                     </button>
                 </div>
 
@@ -243,7 +255,7 @@ const MobileMenu = ({
                                 <div className="flex items-center justify-between gap-3 relative z-10">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-xl bg-[#8A6305]/25 border border-[#8A6305]/40 flex items-center justify-center text-[#FAF6EC] shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-                                            <MdStorefront className="text-xl text-[#FAF6EC]" />
+                                            <Store className="text-xl text-[#FAF6EC]" />
                                         </div>
                                         <div className="flex flex-col text-start">
                                             <div className="flex items-center gap-1.5">
@@ -261,7 +273,7 @@ const MobileMenu = ({
                                     </div>
                                     
                                     <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 group-hover:bg-[#8A6305] group-hover:text-white transition-colors shrink-0">
-                                        {isRtl ? <MdChevronLeft className="text-lg" /> : <MdChevronRight className="text-lg" />}
+                                        {isRtl ? <ChevronLeft className="text-lg" /> : <ChevronRight className="text-lg" />}
                                     </div>
                                 </div>
                             </Link>
@@ -312,7 +324,7 @@ const MobileMenu = ({
                                             >
                                                 <div className="flex items-center gap-2.5">
                                                     <div className="w-7 h-7 rounded-lg bg-[#8A6305]/10 dark:bg-[#8A6305]/20 flex items-center justify-center text-[#8A6305] shrink-0">
-                                                        <MdCategory className="text-sm" />
+                                                        <FolderTree className="text-sm" />
                                                     </div>
                                                     <span className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white group-hover:text-[#8A6305] transition-colors">
                                                         {mc.name}
@@ -323,9 +335,9 @@ const MobileMenu = ({
                                                         {(mc.brands?.length || 0) + (mc.categories?.length || 0)}
                                                     </span>
                                                     {isRtl ? (
-                                                        <MdChevronLeft className="text-lg" />
+                                                        <ChevronLeft className="text-lg" />
                                                     ) : (
-                                                        <MdChevronRight className="text-lg" />
+                                                        <ChevronRight className="text-lg" />
                                                     )}
                                                 </div>
                                             </button>
@@ -356,7 +368,7 @@ const MobileMenu = ({
                                         </span>
                                     </div>
                                 </div>
-                                {isRtl ? <MdChevronLeft className="text-lg shrink-0" /> : <MdChevronRight className="text-lg shrink-0" />}
+                                {isRtl ? <ChevronLeft className="text-lg shrink-0" /> : <ChevronRight className="text-lg shrink-0" />}
                             </a>
                         </div>
 
@@ -414,7 +426,7 @@ const MobileMenu = ({
                                         }}
                                         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold text-[#0B192C] dark:text-white hover:bg-white dark:hover:bg-zinc-700 transition-colors"
                                     >
-                                        {isRtl ? <MdArrowForward className="text-base" /> : <MdArrowBack className="text-base" />}
+                                        {isRtl ? <ArrowRight className="text-base" /> : <ArrowLeft className="text-base" />}
                                         <span>{isRtl ? 'العودة للقائمة الرئيسية' : 'Back to Main Menu'}</span>
                                     </button>
 
@@ -431,7 +443,7 @@ const MobileMenu = ({
                                         className="w-full py-2.5 px-3.5 rounded-xl bg-[#0B192C] hover:bg-[#8A6305] text-white flex items-center justify-between text-xs font-bold transition-colors shadow-xs"
                                     >
                                         <span>{isRtl ? `عرض جميع منتجات ${activeMainCat.name}` : `View all in ${activeMainCat.name}`}</span>
-                                        {isRtl ? <MdChevronLeft className="text-lg" /> : <MdChevronRight className="text-lg" />}
+                                        {isRtl ? <ChevronLeft className="text-lg" /> : <ChevronRight className="text-lg" />}
                                     </Link>
 
                                     {/* Brands Section */}
@@ -442,16 +454,16 @@ const MobileMenu = ({
                                                 className="w-full flex items-center justify-between p-3.5 bg-white dark:bg-zinc-800/80 font-bold text-xs text-[#0B192C] dark:text-white"
                                             >
                                                 <div className="flex items-center gap-2">
-                                                    <MdStorefront className="text-base text-[#8A6305]" />
+                                                    <Store className="text-base text-[#8A6305]" />
                                                     <span>{isRtl ? 'الماركات والوكالات' : 'Brands & Agencies'}</span>
                                                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300">
                                                         {activeMainCat.brands.length}
                                                     </span>
                                                 </div>
                                                 {expandedSection === 'brands' ? (
-                                                    <MdRemove className="text-lg text-[#8A6305]" />
+                                                    <Minus className="text-lg text-[#8A6305]" />
                                                 ) : (
-                                                    <MdAdd className="text-lg text-gray-400" />
+                                                    <Plus className="text-lg text-gray-400" />
                                                 )}
                                             </button>
 
@@ -469,7 +481,7 @@ const MobileMenu = ({
                                                             className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-zinc-700 hover:text-[#8A6305] transition-colors"
                                                         >
                                                             <span>{brand.name}</span>
-                                                            {isRtl ? <MdChevronLeft className="text-sm text-gray-400" /> : <MdChevronRight className="text-sm text-gray-400" />}
+                                                            {isRtl ? <ChevronLeft className="text-sm text-gray-400" /> : <ChevronRight className="text-sm text-gray-400" />}
                                                         </Link>
                                                     ))}
                                                 </div>
@@ -485,16 +497,16 @@ const MobileMenu = ({
                                                 className="w-full flex items-center justify-between p-3.5 bg-white dark:bg-zinc-800/80 font-bold text-xs text-[#0B192C] dark:text-white"
                                             >
                                                 <div className="flex items-center gap-2">
-                                                    <MdCategory className="text-base text-[#8A6305]" />
+                                                    <FolderTree className="text-base text-[#8A6305]" />
                                                     <span>{isRtl ? 'الأقسام والتصنيفات الفرعية' : 'Sub-categories'}</span>
                                                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300">
                                                         {activeMainCat.categories.length}
                                                     </span>
                                                 </div>
                                                 {expandedSection === 'categories' ? (
-                                                    <MdRemove className="text-lg text-[#8A6305]" />
+                                                    <Minus className="text-lg text-[#8A6305]" />
                                                 ) : (
-                                                    <MdAdd className="text-lg text-gray-400" />
+                                                    <Plus className="text-lg text-gray-400" />
                                                 )}
                                             </button>
 
@@ -512,7 +524,7 @@ const MobileMenu = ({
                                                             className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-zinc-700 hover:text-[#8A6305] transition-colors"
                                                         >
                                                             <span>{cat.name}</span>
-                                                            {isRtl ? <MdChevronLeft className="text-sm text-gray-400" /> : <MdChevronRight className="text-sm text-gray-400" />}
+                                                            {isRtl ? <ChevronLeft className="text-sm text-gray-400" /> : <ChevronRight className="text-sm text-gray-400" />}
                                                         </Link>
                                                     ))}
                                                 </div>

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from "next/link";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ResilientImage from "@/app/components/ResilientImage";
 import type { HomeBrand } from "@/lib/admin-actions";
 import { useProductRail } from './useProductRail';
@@ -30,7 +30,7 @@ export default function MainBrands({ brands }: MainBrandsProps) {
                     </h2>
                 </div>
                 <Link className="flex items-center gap-1 text-sm font-medium text-primary" href="/brands">
-                    {t("common.viewAll")} <MdChevronRight className={`text-sm ${dir === "rtl" ? "rotate-180" : ""}`} />
+                    {t("common.viewAll")} <ChevronRight className={`text-sm ${dir === "rtl" ? "rotate-180" : ""}`} />
                 </Link>
             </div>
 
@@ -73,7 +73,7 @@ export default function MainBrands({ brands }: MainBrandsProps) {
                         onClick={scrollForward}
                         type="button"
                     >
-                        {dir === 'rtl' ? <MdChevronLeft className="text-2xl" /> : <MdChevronRight className="text-2xl" />}
+                        {dir === 'rtl' ? <ChevronLeft className="text-2xl" /> : <ChevronRight className="text-2xl" />}
                     </button>
                 )}
                 {canScrollBackward && (
@@ -83,12 +83,11 @@ export default function MainBrands({ brands }: MainBrandsProps) {
                         onClick={scrollBackward}
                         type="button"
                     >
-                        {dir === 'rtl' ? <MdChevronRight className="text-2xl" /> : <MdChevronLeft className="text-2xl" />}
+                        {dir === 'rtl' ? <ChevronRight className="text-2xl" /> : <ChevronLeft className="text-2xl" />}
                     </button>
                 )}
             </div>
         </section>
     );
 }
-
 

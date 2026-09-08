@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { MdCloudUpload, MdLink, MdClose, MdSync, MdImage } from "react-icons/md";
+import { UploadCloud, Link, X, RefreshCw, Image } from 'lucide-react';
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 
@@ -104,7 +104,7 @@ export default function ImageUploadField({
                                 : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
                         }`}
                     >
-                        <MdCloudUpload className="text-sm" />
+                        <UploadCloud className="text-sm" />
                         <span>{isArabic ? "رفع من الجهاز" : "From PC"}</span>
                     </button>
                     <button
@@ -116,7 +116,7 @@ export default function ImageUploadField({
                                 : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
                         }`}
                     >
-                        <MdLink className="text-sm" />
+                        <Link className="text-sm" />
                         <span>{isArabic ? "رابط خارجي" : "URL Link"}</span>
                     </button>
                 </div>
@@ -175,7 +175,7 @@ export default function ImageUploadField({
                 >
                     {isUploading ? (
                         <>
-                            <MdSync className="text-3xl text-[#0B192C] dark:text-[#8A6305] animate-spin" />
+                            <RefreshCw className="text-3xl text-[#0B192C] dark:text-[#8A6305] animate-spin" />
                             <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
                                 {isArabic ? "جاري رفع الصورة..." : "Uploading image..."}
                             </p>
@@ -183,7 +183,7 @@ export default function ImageUploadField({
                     ) : (
                         <>
                             <div className="size-10 rounded-full bg-[#0B192C]/5 dark:bg-white/5 flex items-center justify-center text-[#0B192C] dark:text-[#8A6305]">
-                                <MdCloudUpload className="text-xl" />
+                                <UploadCloud className="text-xl" />
                             </div>
                             <div>
                                 <p className="text-xs font-bold text-slate-800 dark:text-white">

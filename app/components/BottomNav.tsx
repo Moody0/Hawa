@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { MdHome, MdShoppingCart, MdCategory, MdFavoriteBorder, MdPerson } from 'react-icons/md';
+import { Home, ShoppingCart, LayoutGrid, Heart, User } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
 
 const BottomNav = () => {
@@ -16,33 +16,33 @@ const BottomNav = () => {
         {
             href: '/',
             label: t('common.home'),
-            icon: MdHome,
+            icon: Home,
             isActive: pathname === '/',
         },
         {
             href: '/cart',
             label: t('common.cart'),
-            icon: MdShoppingCart,
+            icon: ShoppingCart,
             isActive: pathname === '/cart',
             badge: totalItems > 0 ? totalItems : null,
         },
         {
             href: '/categories',
             label: t('nav.categories'),
-            icon: MdCategory,
+            icon: LayoutGrid,
             isActive: pathname === '/categories' || pathname.startsWith('/categories/'),
             isCenter: true,
         },
         {
             href: '/products?favorites=true',
             label: t('nav.favorites'),
-            icon: MdFavoriteBorder,
+            icon: Heart,
             isActive: false,
         },
         {
             href: '/account',
             label: language === 'ar' ? 'حسابي' : 'Account',
-            icon: MdPerson,
+            icon: User,
             isActive: pathname.startsWith('/account'),
         },
     ];

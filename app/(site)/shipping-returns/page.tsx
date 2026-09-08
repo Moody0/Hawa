@@ -1,5 +1,5 @@
 import React from "react";
-import { getSiteSettings } from "@/lib/admin-actions";
+import { getSiteSettings } from "@/lib/public-queries";
 import ShippingReturnsContent from "./ShippingReturnsContent";
 import { Metadata } from "next";
 

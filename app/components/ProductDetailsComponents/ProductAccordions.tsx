@@ -2,30 +2,30 @@
 
 import React, { useState } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { MdAdd, MdRemove } from "react-icons/md";
+import { ChevronDown } from 'lucide-react';
 
-const AccordionItem = ({ title, content, isOpen, onClick, isRTL }: { title: string, content: React.ReactNode, isOpen: boolean, onClick: () => void, isRTL: boolean }) => {
+const AccordionItem = ({ title, content, isOpen, onClick, panelId }: { title: string, content: React.ReactNode, isOpen: boolean, onClick: () => void, panelId: string }) => {
     return (
-        <div className="border-b border-[#D5D5D5] dark:border-white/5">
+        <div className="border-b border-slate-200 dark:border-white/10">
             <button
+                type="button"
                 onClick={onClick}
-                className="w-full flex items-center py-4 focus:outline-none group"
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                className="w-full flex items-center justify-between py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305]/50 focus-visible:ring-offset-2 rounded-sm group cursor-pointer"
             >
-                <span className={`text-[15px] text-[#0B192C] dark:text-white font-bold group-hover:text-[#8A6305] transition-colors ${isRTL ? 'ml-auto' : 'mr-auto'} order-2`}>
+                <span className="text-sm text-[#0B192C] dark:text-white font-bold group-hover:text-[#8A6305] transition-colors">
                     {title}
                 </span>
-                <span className="order-1">
-                    {isOpen ? (
-                        <MdRemove className="text-[25px] text-[#0B192C] dark:text-gray-300" />
-                    ) : (
-                        <MdAdd className="text-[22px] text-[#0B192C] dark:text-gray-300" />
-                    )}
+                <span className={`w-6 h-6 flex items-center justify-center text-slate-500 group-hover:text-[#8A6305] transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#8A6305]' : ''}`}>
+                    <ChevronDown size={18} />
                 </span>
             </button>
             <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[1000px] pb-6 opacity-100' : 'max-h-0 opacity-0'}`}
+                id={panelId}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[1000px] pb-4 opacity-100' : 'max-h-0 opacity-0'}`}
             >
-                <div className="text-[15px] text-[#475569] dark:text-gray-400 leading-relaxed px-1">
+                <div className="text-xs sm:text-sm text-slate-600 dark:text-gray-300 leading-relaxed px-0.5">
                     {content}
                 </div>
             </div>
@@ -54,13 +54,17 @@ const ProductAccordions = ({ description, descriptionAr, descriptionEn, options 
         : (descriptionEn || description || descriptionAr);
 
     return (
-        <div className="flex flex-col w-full mt-1 md:border-t border-[#D5D5D5] dark:border-white/5">
+        <div className="flex flex-col w-full mt-2 border-t border-slate-200 dark:border-white/10">
             <AccordionItem
                 title={isRTL ? 'تفاصيل ومواصفات المنتج' : 'Product Details & Specs'}
-                content={<div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line leading-relaxed">{activeDescription || (isRTL ? 'منتج أصلي عالي الجودة من شركة حوا للتوزيع والتجارة' : 'Authentic high quality product from Hawa Distribution & Trading')}</div>}
+                content={
+                    <div className="whitespace-pre-line leading-relaxed text-slate-600 dark:text-gray-300">
+                        {activeDescription || (isRTL ? 'منتج أصلي عالي الجودة متوفر للتوزيع التجاري لدى شركة حوا للتوزيع والتجارة.' : 'Authentic high quality product available for commercial distribution by Hawa Distribution & Trading.')}
+                    </div>
+                }
                 isOpen={openIndex === 0}
                 onClick={() => toggleAccordion(0)}
-                isRTL={isRTL}
+                panelId="product-description-panel"
             />
             {options && (
                 <AccordionItem
@@ -68,7 +72,7 @@ const ProductAccordions = ({ description, descriptionAr, descriptionEn, options 
                     content={<p className="font-semibold text-[#0B192C] dark:text-zinc-200">{options}</p>}
                     isOpen={openIndex === 1}
                     onClick={() => toggleAccordion(1)}
-                    isRTL={isRTL}
+                    panelId="product-options-panel"
                 />
             )}
         </div>

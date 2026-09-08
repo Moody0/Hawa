@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MdWarning, MdStorefront } from "react-icons/md";
+import { AlertTriangle, Store } from 'lucide-react';
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { updateAdminCredentials } from "../../../../lib/admin-actions";
@@ -112,7 +112,7 @@ export default function SettingsClient({
                     <div className="mb-6 p-5 rounded-2xl bg-[#FAF6EC] dark:bg-zinc-800/80 border border-[#8A6305]/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
                         <div className="flex items-center gap-3.5">
                             <div className="p-3 rounded-xl bg-[#0B192C] text-[#8A6305] shadow-xs">
-                                <MdStorefront className="text-2xl" />
+                                <Store className="text-2xl" />
                             </div>
                             <div>
                                 <h3 className="text-sm font-extrabold text-[#0B192C] dark:text-[#8A6305]">
@@ -234,7 +234,7 @@ export default function SettingsClient({
                             {newPassword && (
                                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
                                     <div className="flex gap-3">
-                                        <MdWarning className="text-amber-600 dark:text-amber-400 text-xl" />
+                                        <AlertTriangle className="text-amber-600 dark:text-amber-400 text-xl" />
                                         <div>
                                             <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
                                                 {t('admin.passwordChangeNotice')}

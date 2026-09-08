@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MdCheckCircle, MdCancel, MdDelete, MdStar, MdImage, MdChevronRight, MdSearch, MdExpandMore } from "react-icons/md";
+import { CheckCircle2, XCircle, Trash2, Star, Image, ChevronRight, Search, ChevronDown } from 'lucide-react';
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import AdminHeader from "../../components/AdminHeader";
@@ -117,7 +117,7 @@ export default function ReviewsClient() {
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2 text-sm text-text-sub dark:text-gray-400 mb-1">
                                 <Link href="/admin/dashboard" className="hover:text-primary cursor-pointer transition-colors">{t('admin.dashboard')}</Link>
-                                <MdChevronRight className={`text-[12px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                                <ChevronRight className={`text-[12px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                                 <span className="text-text-main dark:text-white font-medium">{t('admin.reviews') || "Reviews"}</span>
                             </div>
                             <h2 className="text-3xl font-extrabold text-text-main dark:text-white tracking-tight">{t('admin.reviews') || "Reviews"}</h2>
@@ -147,7 +147,7 @@ export default function ReviewsClient() {
                         <div className="p-5 border-b border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
                             <div className="relative w-full sm:w-80">
                                 <span className={`absolute inset-y-0 ${dir === 'rtl' ? 'end-0 pe-3' : 'start-0 ps-3'} flex items-center pointer-events-none`}>
-                                    <MdSearch className="text-slate-400 text-[20px]" />
+                                    <Search className="text-slate-400 text-[20px]" />
                                 </span>
                                 <input
                                     className={`block w-full ${dir === 'rtl' ? 'pe-10 ps-3' : 'ps-10 pe-3'} py-2.5 border border-slate-200/80 dark:border-white/10 rounded-xl bg-slate-50 dark:bg-gray-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:ring-1 focus:ring-[#0B192C] focus:border-[#0B192C] transition-all outline-none`}
@@ -169,7 +169,7 @@ export default function ReviewsClient() {
                                     <option value="PENDING">{t('admin.pendingReviews') || "Pending"}</option>
                                 </select>
                                 <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'start-0 ps-2' : 'end-0 pe-2'} flex items-center pointer-events-none text-slate-400`}>
-                                    <MdExpandMore className="text-[20px]" />
+                                    <ChevronDown className="text-[20px]" />
                                 </div>
                             </div>
                         </div>
@@ -213,7 +213,7 @@ export default function ReviewsClient() {
                                                 <td className="p-3 sm:p-5">
                                                     <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-lg w-fit border border-amber-100 dark:border-amber-800/30">
                                                         <span className="font-bold text-amber-600 dark:text-amber-500 text-sm">{review.rating}</span>
-                                                        <MdStar className="text-amber-500 text-sm" />
+                                                        <Star className="text-amber-500 text-sm" />
                                                     </div>
                                                 </td>
                                                 <td className="p-3 sm:p-5">
@@ -221,7 +221,7 @@ export default function ReviewsClient() {
                                                         <p className="text-text-main dark:text-gray-300 text-sm line-clamp-2 max-w-xs">{review.feedback || "-"}</p>
                                                         {review.image && /^(https?:\/\/|\/uploads\/)/i.test(review.image) && (
                                                             <a href={review.image} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline bg-primary/5 px-2 py-1 rounded w-fit">
-                                                                <MdImage className="text-sm" /> {t("products.reviewModal.uploadImage") || "View Image"}
+                                                                <Image className="text-sm" /> {t("products.reviewModal.uploadImage") || "View Image"}
                                                             </a>
                                                         )}
                                                     </div>
@@ -250,14 +250,14 @@ export default function ReviewsClient() {
                                                             }`}
                                                             title={review.isApproved ? t("admin.unapprove") || "Unapprove" : t("admin.approve") || "Approve"}
                                                         >
-                                                            {review.isApproved ? <MdCancel className="text-[20px]" /> : <MdCheckCircle className="text-[20px]" />}
+                                                            {review.isApproved ? <XCircle className="text-[20px]" /> : <CheckCircle2 className="text-[20px]" />}
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(review.id)}
                                                             className="rounded-xl p-2 text-red-500 hover:bg-red-50 transition-colors dark:hover:bg-red-900/20"
                                                             title={t("admin.deleteReview") || "Delete"}
                                                         >
-                                                            <MdDelete className="text-[20px]" />
+                                                            <Trash2 className="text-[20px]" />
                                                         </button>
                                                     </div>
                                                 </td>

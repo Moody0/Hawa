@@ -5,23 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCustomer } from '@/app/context/CustomerContext';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { 
-    MdStore, 
-    MdPerson, 
-    MdPhone, 
-    MdLocationOn, 
-    MdLock, 
-    MdVisibility, 
-    MdVisibilityOff, 
-    MdArrowForward,
-    MdCheckCircle,
-    MdSupportAgent,
-    MdExpandMore,
-    MdHourglassTop,
-    MdShoppingBag,
-    MdHome
-} from 'react-icons/md';
+import { Store, User, Phone, MapPin, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, Headset, ChevronDown, ShoppingBag, Home, Hourglass } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
+import { convertArabicToEnglishDigits, isValidSyrianPhone, normalizeSyrianPhone } from '@/lib/order-validation';
 
 const SYRIAN_CITIES = [
     'حمص',
@@ -53,6 +39,7 @@ export default function MerchantRegisterPage() {
         city: 'حمص',
         address: '',
         password: '',
+        confirmPassword: '',
         notes: '',
     });
 
@@ -74,20 +61,11 @@ export default function MerchantRegisterPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         if (name === 'phone') {
-            // Keep digits and leading + if pasted
-            const numeric = value.replace(/[^0-9+]/g, '');
+            const numeric = convertArabicToEnglishDigits(value).replace(/[^0-9+]/g, '').slice(0, 15);
             setFormData((prev) => ({ ...prev, [name]: numeric }));
             return;
         }
         setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const validatePhone = (rawPhone: string) => {
-        let digits = rawPhone.replace(/[^0-9]/g, '');
-        if (digits.startsWith('00963')) digits = '0' + digits.slice(5);
-        else if (digits.startsWith('963')) digits = '0' + digits.slice(3);
-        else if (digits.length === 9 && digits.startsWith('9')) digits = '0' + digits;
-        return /^09[0-9]{8}$/.test(digits);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -98,7 +76,7 @@ export default function MerchantRegisterPage() {
         const cleanOwner = formData.ownerName.trim();
         const cleanAddress = formData.address.trim();
 
-        if (!cleanShop || !cleanOwner || !formData.phone.trim() || !formData.city.trim() || !cleanAddress || !formData.password) {
+        if (!cleanShop || !cleanOwner || !formData.phone.trim() || !formData.city.trim() || !cleanAddress || !formData.password || !formData.confirmPassword) {
             setError(isArabic ? 'يرجى تعبئة جميع الحقول المطلوبة' : 'Please fill in all required fields');
             return;
         }
@@ -113,7 +91,7 @@ export default function MerchantRegisterPage() {
             return;
         }
 
-        if (!validatePhone(formData.phone)) {
+        if (!isValidSyrianPhone(formData.phone)) {
             setError(isArabic ? 'يرجى إدخال رقم هاتف محمول سوري صالح (مثال: 0993443901 أو 09xxxxxxxx)' : 'Please enter a valid Syrian mobile number (e.g. 0993443901)');
             return;
         }
@@ -128,8 +106,22 @@ export default function MerchantRegisterPage() {
             return;
         }
 
+        if (formData.password !== formData.confirmPassword) {
+            setError(isArabic ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match');
+            return;
+        }
+
         setLoading(true);
-        const res = await register(formData);
+        const registrationData = {
+            shopName: cleanShop,
+            ownerName: cleanOwner,
+            phone: normalizeSyrianPhone(formData.phone),
+            city: formData.city,
+            address: cleanAddress,
+            password: formData.password,
+            notes: formData.notes.trim(),
+        };
+        const res = await register(registrationData);
         setLoading(false);
 
         if (res.success) {
@@ -137,7 +129,7 @@ export default function MerchantRegisterPage() {
                 setSubmittedData({
                     shopName: cleanShop,
                     ownerName: cleanOwner,
-                    phone: formData.phone,
+                    phone: registrationData.phone,
                     city: formData.city,
                 });
                 setIsSubmitted(true);
@@ -156,17 +148,17 @@ export default function MerchantRegisterPage() {
         );
 
         return (
-            <div className="w-full min-h-[calc(100vh-140px)] flex items-center justify-center py-10 md:py-16 bg-slate-50/70 dark:bg-[#0B192C]/40">
-                <div className="container-custom max-w-2xl w-full">
-                    <div className="bg-white dark:bg-[#132035] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm p-6 sm:p-10 text-center">
+            <div className="flex min-h-[calc(100vh-140px)] w-full items-start justify-start overflow-x-hidden bg-[#F6F7F9] px-4 py-8 dark:bg-[#0B192C]/40 sm:px-6 md:items-center md:justify-center md:py-10">
+                <div className="mx-auto min-w-0 w-full max-w-2xl">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 text-center dark:border-white/10 dark:bg-[#132035] sm:p-8">
                         {/* Status Icon */}
-                        <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-[#8A6305] dark:text-[#E5B54A] border border-[#8A6305]/20 flex items-center justify-center mx-auto mb-5 text-3xl shadow-xs">
-                            <MdHourglassTop className="animate-pulse" />
+                        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-[#8A6305]/20 bg-amber-50 text-2xl text-[#8A6305] dark:bg-amber-950/40 dark:text-[#E5B54A]">
+                            <Hourglass />
                         </div>
 
                         {/* Title & Badge */}
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-[#8A6305] dark:text-[#E5B54A] text-xs font-bold mb-3 border border-[#8A6305]/20">
-                            <span className="w-2 h-2 rounded-full bg-[#8A6305] animate-ping" />
+                            <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
                             <span>{isArabic ? 'الطلب قيد المراجعة والتدقيق' : 'Request Pending Review'}</span>
                         </div>
 
@@ -206,26 +198,26 @@ export default function MerchantRegisterPage() {
                                 href={`https://wa.me/${SALES_MANAGER_CLEAN}?text=${waMsg}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs sm:text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2"
+                                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#16833d] px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-[#126f34] sm:text-sm"
                             >
                                 <FaWhatsapp className="text-lg" />
-                                <span>{isArabic ? 'تواصل مع مدير المبيعات عبر واتساب لتسريع التفعيل' : 'Contact Sales on WhatsApp to Expedite Activation'}</span>
+                                <span>{isArabic ? 'تواصل مع مدير المبيعات حول حالة الطلب' : 'Ask Sales About Your Application'}</span>
                             </a>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
                                 <Link
                                     href="/products"
-                                    className="py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#0B192C] dark:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+                                    className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-slate-100 px-4 py-2.5 text-xs font-bold text-[#0B192C] transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
                                 >
-                                    <MdShoppingBag className="text-base text-[#8A6305]" />
+                                    <ShoppingBag className="text-base text-[#8A6305]" />
                                     <span>{isArabic ? 'تصفح المنتجات والطلب كزائر' : 'Browse Products as Guest'}</span>
                                 </Link>
 
                                 <Link
                                     href="/"
-                                    className="py-2.5 px-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-[#0B192C] dark:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+                                    className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-4 py-2.5 text-xs font-bold text-[#0B192C] transition-colors hover:bg-slate-50 dark:border-white/15 dark:text-white dark:hover:bg-white/5"
                                 >
-                                    <MdHome className="text-base text-slate-500" />
+                                    <Home className="text-base text-slate-500" />
                                     <span>{isArabic ? 'العودة للصفحة الرئيسية' : 'Return to Home'}</span>
                                 </Link>
                             </div>
@@ -237,10 +229,10 @@ export default function MerchantRegisterPage() {
     }
 
     return (
-        <div className="w-full min-h-[calc(100vh-140px)] flex items-center justify-center py-8 md:py-14 bg-slate-50/70 dark:bg-[#0B192C]/40">
-            <div className="container-custom max-w-4xl w-full">
+        <div className="flex min-h-[calc(100vh-140px)] w-full items-start justify-start overflow-x-hidden bg-[#F6F7F9] px-4 py-8 dark:bg-[#0B192C]/40 sm:px-6 md:items-center md:justify-center md:py-12">
+            <div className="mx-auto min-w-0 w-full max-w-4xl">
                 {/* Main Card: Split Panel Layout */}
-                <div className="bg-white dark:bg-[#132035] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+                <div className="grid min-w-0 w-full grid-cols-1 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#132035] lg:grid-cols-12">
                     
                     {/* Panel 1: Merchant Value & Trust (Hidden on mobile, 5 cols on desktop) */}
                     <div className="hidden lg:flex lg:col-span-5 bg-[#FAF6EC] dark:bg-[#0E1A29] p-6 sm:p-8 flex-col justify-between border-b lg:border-b-0 lg:border-e border-slate-200/80 dark:border-white/10">
@@ -265,7 +257,7 @@ export default function MerchantRegisterPage() {
                             {/* 4 Wholesale Benefits */}
                             <div className="space-y-3 mb-5">
                                 <div className="flex items-start gap-2.5">
-                                    <MdCheckCircle className="text-[#8A6305] text-lg shrink-0 mt-0.5" />
+                                    <CheckCircle2 className="text-[#8A6305] text-lg shrink-0 mt-0.5" />
                                     <div>
                                         <h4 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white">
                                             {isArabic ? 'كشوف أسعار الجملة الفورية' : 'Instant Wholesale Access'}
@@ -277,7 +269,7 @@ export default function MerchantRegisterPage() {
                                 </div>
 
                                 <div className="flex items-start gap-2.5">
-                                    <MdCheckCircle className="text-[#8A6305] text-lg shrink-0 mt-0.5" />
+                                    <CheckCircle2 className="text-[#8A6305] text-lg shrink-0 mt-0.5" />
                                     <div>
                                         <h4 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white">
                                             {isArabic ? 'توصيل وجدولة منتظمة' : 'Scheduled Direct Delivery'}
@@ -289,7 +281,7 @@ export default function MerchantRegisterPage() {
                                 </div>
 
                                 <div className="flex items-start gap-2.5">
-                                    <MdCheckCircle className="text-[#8A6305] text-lg shrink-0 mt-0.5" />
+                                    <CheckCircle2 className="text-[#8A6305] text-lg shrink-0 mt-0.5" />
                                     <div>
                                         <h4 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white">
                                             {isArabic ? 'فواتير نظامية معتمدة' : 'Official Trade Invoices'}
@@ -301,7 +293,7 @@ export default function MerchantRegisterPage() {
                                 </div>
 
                                 <div className="flex items-start gap-2.5">
-                                    <MdCheckCircle className="text-[#8A6305] text-lg shrink-0 mt-0.5" />
+                                    <CheckCircle2 className="text-[#8A6305] text-lg shrink-0 mt-0.5" />
                                     <div>
                                         <h4 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white">
                                             {isArabic ? 'استجابة وتجهيز فوري' : 'Direct WhatsApp Orders'}
@@ -318,7 +310,7 @@ export default function MerchantRegisterPage() {
                         <div className="pt-3.5 border-t border-slate-200/80 dark:border-white/10">
                             <div className="flex items-center justify-between text-xs">
                                 <div className="flex items-center gap-1.5 text-[#475569] dark:text-slate-400">
-                                    <MdSupportAgent className="text-base text-[#8A6305]" />
+                                    <Headset className="text-base text-[#8A6305]" />
                                     <span>{isArabic ? 'مساعدة في التسجيل:' : 'Support:'}</span>
                                 </div>
                                 <a 
@@ -335,7 +327,7 @@ export default function MerchantRegisterPage() {
                     </div>
 
                     {/* Panel 2: The Registration Form (7 cols on desktop) */}
-                    <div className="lg:col-span-7 p-6 sm:p-8 md:p-9 flex flex-col justify-between">
+                    <div className="min-w-0 lg:col-span-7 p-6 sm:p-8 md:p-9 flex flex-col justify-between">
                         <div>
                             {/* Form Header with Proper Spacing */}
                             <div className="mb-5">
@@ -351,7 +343,7 @@ export default function MerchantRegisterPage() {
 
                             {/* Error Alert */}
                             {error && (
-                                <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-bold text-center">
+                                <div role="alert" aria-live="polite" className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-center text-xs font-bold text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300">
                                     {error}
                                 </div>
                             )}
@@ -365,7 +357,7 @@ export default function MerchantRegisterPage() {
                                         </label>
                                         <div className="relative rounded-xl">
                                             <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
-                                                <MdStore className="text-base" />
+                                                <Store className="text-base" />
                                             </div>
                                             <input
                                                 id="reg-shopName"
@@ -376,7 +368,7 @@ export default function MerchantRegisterPage() {
                                                 value={formData.shopName}
                                                 onChange={handleChange}
                                                 placeholder={isArabic ? 'مثال: سوبرماركت الأمانة' : 'e.g. Al-Amana Market'}
-                                                className="block w-full ps-9 pe-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8A6305] text-xs sm:text-sm font-medium transition-all"
+                                                className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2.5 ps-9 pe-3 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:text-sm"
                                             />
                                         </div>
                                     </div>
@@ -387,7 +379,7 @@ export default function MerchantRegisterPage() {
                                         </label>
                                         <div className="relative rounded-xl">
                                             <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
-                                                <MdPerson className="text-base" />
+                                                <User className="text-base" />
                                             </div>
                                             <input
                                                 id="reg-ownerName"
@@ -398,7 +390,7 @@ export default function MerchantRegisterPage() {
                                                 value={formData.ownerName}
                                                 onChange={handleChange}
                                                 placeholder={isArabic ? 'محمد أحمد' : 'Mohammad Ahmad'}
-                                                className="block w-full ps-9 pe-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8A6305] text-xs sm:text-sm font-medium transition-all"
+                                                className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2.5 ps-9 pe-3 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:text-sm"
                                             />
                                         </div>
                                     </div>
@@ -411,7 +403,7 @@ export default function MerchantRegisterPage() {
                                         </label>
                                         <div className="relative rounded-xl">
                                             <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
-                                                <MdPhone className="text-base" />
+                                                <Phone className="text-base" />
                                             </div>
                                             <input
                                                 id="reg-phone"
@@ -424,7 +416,7 @@ export default function MerchantRegisterPage() {
                                                 onChange={handleChange}
                                                 placeholder="09xxxxxxxx"
                                                 dir="ltr"
-                                                className="block w-full ps-9 pe-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8A6305] text-xs sm:text-sm font-medium transition-all font-mono"
+                                                className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2.5 ps-9 pe-3 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:text-sm"
                                             />
                                         </div>
                                     </div>
@@ -435,14 +427,14 @@ export default function MerchantRegisterPage() {
                                         </label>
                                         <div className="relative rounded-xl">
                                             <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
-                                                <MdLocationOn className="text-base" />
+                                                <MapPin className="text-base" />
                                             </div>
                                             <select
                                                 id="reg-city"
                                                 name="city"
                                                 value={formData.city}
                                                 onChange={handleChange}
-                                                className="block w-full ps-9 pe-8 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#8A6305] text-xs sm:text-sm font-medium transition-all cursor-pointer appearance-none"
+                                                className="block min-h-11 w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 ps-9 pe-8 text-xs font-medium text-slate-900 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:text-sm"
                                             >
                                                 {SYRIAN_CITIES.map((c) => (
                                                     <option key={c} value={c} className="dark:bg-zinc-800">
@@ -451,7 +443,7 @@ export default function MerchantRegisterPage() {
                                                 ))}
                                             </select>
                                             <div className="absolute inset-y-0 end-0 pe-2.5 flex items-center pointer-events-none text-slate-400">
-                                                <MdExpandMore className="text-lg" />
+                                                <ChevronDown className="text-lg" />
                                             </div>
                                         </div>
                                     </div>
@@ -470,17 +462,18 @@ export default function MerchantRegisterPage() {
                                         value={formData.address}
                                         onChange={handleChange}
                                         placeholder={isArabic ? 'اسم الحي / الشارع / نقطة علامة قريبة' : 'Area, street, nearby landmark'}
-                                        className="block w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8A6305] text-xs sm:text-sm font-medium transition-all"
+                                        className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:text-sm"
                                     />
                                 </div>
 
-                                <div>
+                                <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                                    <div>
                                     <label htmlFor="reg-password" className="block text-xs font-bold text-[#0B192C] dark:text-slate-200 mb-1">
                                         {isArabic ? 'كلمة المرور (6 خانات على الأقل) *' : 'Password (min 6 characters) *'}
                                     </label>
                                     <div className="relative rounded-xl">
                                         <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
-                                            <MdLock className="text-base" />
+                                            <Lock className="text-base" />
                                         </div>
                                         <input
                                             id="reg-password"
@@ -491,7 +484,7 @@ export default function MerchantRegisterPage() {
                                             value={formData.password}
                                             onChange={handleChange}
                                             placeholder="••••••••"
-                                            className="block w-full ps-9 pe-10 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8A6305] text-xs sm:text-sm font-medium transition-all"
+                                            className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2.5 ps-9 pe-10 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:text-sm"
                                         />
                                         <button
                                             type="button"
@@ -499,18 +492,41 @@ export default function MerchantRegisterPage() {
                                             className="absolute inset-y-0 end-0 pe-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
                                             aria-label={showPassword ? (isArabic ? "إخفاء كلمة المرور" : "Hide password") : (isArabic ? "إظهار كلمة المرور" : "Show password")}
                                         >
-                                            {showPassword ? <MdVisibilityOff className="text-base" /> : <MdVisibility className="text-base" />}
+                                            {showPassword ? <EyeOff className="text-base" /> : <Eye className="text-base" />}
                                         </button>
+                                    </div>
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="reg-confirm-password" className="mb-1 block text-xs font-bold text-[#0B192C] dark:text-slate-200">
+                                            {isArabic ? 'تأكيد كلمة المرور *' : 'Confirm Password *'}
+                                        </label>
+                                        <div className="relative">
+                                            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-slate-400">
+                                                <Lock className="text-base" />
+                                            </div>
+                                            <input
+                                                id="reg-confirm-password"
+                                                type={showPassword ? 'text' : 'password'}
+                                                name="confirmPassword"
+                                                required
+                                                maxLength={64}
+                                                value={formData.confirmPassword}
+                                                onChange={handleChange}
+                                                placeholder="••••••••"
+                                                className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2.5 ps-9 pe-3 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:text-sm"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-3 px-4 rounded-xl bg-[#0B192C] hover:bg-[#8A6305] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white font-bold text-xs sm:text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 mt-2"
+                                    className="mt-2 flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#0B192C] px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-[#8A6305] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#8A6305] dark:hover:bg-[#725204] sm:text-sm"
                                 >
                                     <span>{loading ? (isArabic ? 'جاري إرسال الطلب...' : 'Submitting Request...') : (isArabic ? 'إرسال طلب فتح حساب تجاري' : 'Submit Merchant Application')}</span>
-                                    {!loading && <MdArrowForward className={`text-base ${isArabic ? 'rotate-180' : ''}`} />}
+                                    {!loading && <ArrowRight className={`text-base ${isArabic ? 'rotate-180' : ''}`} />}
                                 </button>
                             </form>
                         </div>

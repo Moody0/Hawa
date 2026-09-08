@@ -24,8 +24,13 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "scripts/**",
+    "prisma/**",
+    "screenshots/**",
     "temp-query*.js",
     "test-*.js",
+    "*.js",
+    "*.mjs",
+    "!eslint.config.mjs",
   ]),
 ]);
 

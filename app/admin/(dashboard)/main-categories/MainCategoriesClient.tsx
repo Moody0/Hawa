@@ -8,22 +8,7 @@ import { deleteMainCategory, toggleMainCategoryActive, toggleMainCategoryFeature
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { 
-    MdAdd, 
-    MdDelete, 
-    MdEdit, 
-    MdImage, 
-    MdSearch, 
-    MdSync, 
-    MdToggleOff, 
-    MdToggleOn,
-    MdStar,
-    MdStarBorder,
-    MdVisibility,
-    MdCategory,
-    MdShoppingBag,
-    MdBrandingWatermark
-} from "react-icons/md";
+import { Plus, Trash2, Pencil, Image, Search, RefreshCw, ToggleLeft, ToggleRight, Star, Eye, FolderTree, ShoppingBag, Tag } from 'lucide-react';
 import RelatedItemsModal from "../components/RelatedItemsModal";
 
 interface MainCategory {
@@ -183,7 +168,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                         {/* Search & Add Action */}
                         <div className="flex flex-wrap items-center gap-3">
                             <div className="relative min-w-[240px] flex-1 sm:flex-initial">
-                                <MdSearch className="absolute start-3 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
+                                <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
                                 <input
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -197,7 +182,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                     onClick={handleAdd} 
                                     className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] px-5 text-sm font-bold text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
                                 >
-                                    <MdAdd className="text-xl" />
+                                    <Plus className="text-xl" />
                                     <span>{t("admin.addMainCategory")}</span>
                                 </button>
                             )}
@@ -228,7 +213,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                     : "bg-white dark:bg-zinc-800 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/30 hover:border-amber-500"
                             }`}
                         >
-                            <MdStar className="text-sm" />
+                            <Star className="text-sm" />
                             <span>{isArabic ? 'المميزة في الرئيسية (Shop by Category)' : 'Featured on Home'}</span>
                             <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${filterTab === "FEATURED" ? "bg-white/20 text-white" : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300"}`}>
                                 {stats.featured}
@@ -302,7 +287,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                 className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" 
                                             />
                                         ) : (
-                                            <MdImage className="text-5xl text-slate-300 dark:text-zinc-600" />
+                                            <Image className="text-5xl text-slate-300 dark:text-zinc-600" />
                                         )}
 
                                         {/* Order Indicator (Top Left) */}
@@ -324,11 +309,11 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                 }`}
                                             >
                                                 {isFeatLoading ? (
-                                                    <MdSync className="text-sm animate-spin" />
+                                                    <RefreshCw className="text-sm animate-spin" />
                                                 ) : mc.isFeatured ? (
-                                                    <MdStar className="text-lg" />
+                                                    <Star className="text-lg" />
                                                 ) : (
-                                                    <MdStarBorder className="text-lg" />
+                                                    <Star className="text-lg" />
                                                 )}
                                             </button>
                                         )}
@@ -366,7 +351,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                 </span>
                                                 {mc.isFeatured && (
                                                     <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/30 px-2 py-0.5 rounded-md">
-                                                        <MdStar className="text-xs" />
+                                                        <Star className="text-xs" />
                                                         <span>{isArabic ? 'مميز بالرئيسية' : 'Featured'}</span>
                                                     </span>
                                                 )}
@@ -380,7 +365,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                     className="inline-flex items-center gap-1 cursor-pointer rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 px-2.5 py-1 text-[11px] transition-colors"
                                                     title={isArabic ? 'عرض المنتجات المرتبطة' : 'View products'}
                                                 >
-                                                    <MdShoppingBag className="text-xs" />
+                                                    <ShoppingBag className="text-xs" />
                                                     <span>{mc._count.products} {isArabic ? 'منتج' : 'Products'}</span>
                                                 </button>
 
@@ -390,7 +375,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                     className="inline-flex items-center gap-1 cursor-pointer rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100 px-2.5 py-1 text-[11px] transition-colors"
                                                     title={isArabic ? 'عرض الفئات الفرعية' : 'View subcategories'}
                                                 >
-                                                    <MdCategory className="text-xs" />
+                                                    <FolderTree className="text-xs" />
                                                     <span>{mc._count.categories} {isArabic ? 'فئة فرعية' : 'Categories'}</span>
                                                 </button>
 
@@ -400,7 +385,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                     className="inline-flex items-center gap-1 cursor-pointer rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 hover:bg-purple-100 px-2.5 py-1 text-[11px] transition-colors"
                                                     title={isArabic ? 'عرض الشركات الموزعة' : 'View brands'}
                                                 >
-                                                    <MdBrandingWatermark className="text-xs" />
+                                                    <Tag className="text-xs" />
                                                     <span>{mc._count.brands} {isArabic ? 'ماركات' : 'Brands'}</span>
                                                 </button>
                                             </div>
@@ -415,7 +400,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"
                                             >
-                                                <MdVisibility className="text-sm" />
+                                                <Eye className="text-sm" />
                                                 <span>{isArabic ? 'معاينة' : 'Preview'}</span>
                                             </a>
 
@@ -429,11 +414,11 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                         title={isArabic ? 'تفعيل / تعطيل' : 'Toggle Active'}
                                                     >
                                                         {loadingMap[mc.id] ? (
-                                                            <MdSync className="animate-spin text-lg" />
+                                                            <RefreshCw className="animate-spin text-lg" />
                                                         ) : mc.isActive ? (
-                                                            <MdToggleOn className="text-2xl text-emerald-500" />
+                                                            <ToggleRight className="text-2xl text-emerald-500" />
                                                         ) : (
-                                                            <MdToggleOff className="text-2xl text-slate-400" />
+                                                            <ToggleLeft className="text-2xl text-slate-400" />
                                                         )}
                                                     </button>
                                                 )}
@@ -445,7 +430,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                         className="rounded-lg p-1.5 text-slate-600 dark:text-gray-300 hover:bg-[#8A6305]/10 hover:text-[#8A6305] transition-colors cursor-pointer" 
                                                         title={isArabic ? 'تعديل' : 'Edit'}
                                                     >
-                                                        <MdEdit className="text-lg" />
+                                                        <Pencil className="text-lg" />
                                                     </button>
                                                 )}
 
@@ -456,7 +441,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                         className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 transition-colors cursor-pointer" 
                                                         title={isArabic ? 'حذف' : 'Delete'}
                                                     >
-                                                        <MdDelete className="text-lg" />
+                                                        <Trash2 className="text-lg" />
                                                     </button>
                                                 )}
                                             </div>
@@ -470,7 +455,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                     {/* Empty State */}
                     {filtered.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 mt-6">
-                            <MdCategory className="text-5xl text-slate-300 dark:text-zinc-600 mb-2" />
+                            <FolderTree className="text-5xl text-slate-300 dark:text-zinc-600 mb-2" />
                             <h3 className="text-base font-bold text-[#0B192C] dark:text-white">
                                 {isArabic ? 'لا توجد أقسام مطابقة للبحث' : 'No departments found'}
                             </h3>

@@ -3,24 +3,7 @@
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { useState, useMemo } from "react";
-import { 
-    MdDelete, 
-    MdCheckBox, 
-    MdCheckBoxOutlineBlank, 
-    MdSearch, 
-    MdAdd, 
-    MdCheck, 
-    MdImage, 
-    MdStar, 
-    MdStarBorder, 
-    MdEdit,
-    MdSearchOff,
-    MdSync,
-    MdVisibility,
-    MdShoppingBag,
-    MdStorefront,
-    MdCategory
-} from "react-icons/md";
+import { Trash2, Search, Plus, Check, Image, Star, Pencil, SearchX, RefreshCw, Eye, ShoppingBag, Store, FolderTree, CheckSquare, Square } from 'lucide-react';
 import CategoryModal from "./CategoryModal";
 import { deleteCategory, toggleCategoryFeatured, bulkDeleteCategories } from "../../../../lib/admin-actions";
 import RelatedItemsModal from "../components/RelatedItemsModal";
@@ -238,7 +221,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                         {/* Search & Actions */}
                         <div className="flex flex-wrap items-center gap-3">
                             <div className="relative min-w-[220px] flex-1 sm:flex-initial">
-                                <MdSearch className="absolute start-3 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
+                                <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
                                 <input
                                     type="text"
                                     placeholder={isArabic ? 'بحث بالفئة أو الماركة...' : 'Search categories...'}
@@ -265,7 +248,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                     onClick={handleAdd}
                                     className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] px-5 text-sm font-bold text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
                                 >
-                                    <MdAdd className="text-xl" />
+                                    <Plus className="text-xl" />
                                     <span>{t('admin.addCategory')}</span>
                                 </button>
                             )}
@@ -297,7 +280,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                         : "bg-white dark:bg-zinc-800 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/30 hover:border-amber-500"
                                 }`}
                             >
-                                <MdStar className="text-sm" />
+                                <Star className="text-sm" />
                                 <span>{isArabic ? 'المميزة في الرئيسية (Featured Grid)' : 'Featured on Home'}</span>
                                 <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${filterTab === "FEATURED" ? "bg-white/20 text-white" : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300"}`}>
                                     {stats.featured}
@@ -313,7 +296,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                     disabled={isSubmittingBulk}
                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs disabled:opacity-50 cursor-pointer"
                                 >
-                                    {isSubmittingBulk ? <MdSync className="animate-spin text-sm" /> : <MdDelete className="text-sm" />}
+                                    {isSubmittingBulk ? <RefreshCw className="animate-spin text-sm" /> : <Trash2 className="text-sm" />}
                                     <span>{isArabic ? `حذف المحدد (${selectedIds.size})` : `Delete Selected (${selectedIds.size})`}</span>
                                 </button>
                             )}
@@ -323,7 +306,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                     onClick={toggleSelectAll}
                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-700 dark:text-gray-300 hover:border-[#8A6305] transition-all cursor-pointer"
                                 >
-                                    {selectedIds.size === filteredCategories.length ? <MdCheckBox className="text-base text-[#0B192C] dark:text-[#8A6305]" /> : <MdCheckBoxOutlineBlank className="text-base" />}
+                                    {selectedIds.size === filteredCategories.length ? <CheckSquare className="text-base text-[#0B192C] dark:text-[#8A6305]" /> : <Square className="text-base" />}
                                     <span>{selectedIds.size === filteredCategories.length ? (isArabic ? 'إلغاء تحديد الكل' : 'Deselect All') : (isArabic ? 'تحديد الكل' : 'Select All')}</span>
                                 </button>
                             )}
@@ -372,7 +355,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                 className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" 
                                             />
                                         ) : (
-                                            <MdImage className="text-5xl text-slate-300 dark:text-zinc-600" />
+                                            <Image className="text-5xl text-slate-300 dark:text-zinc-600" />
                                         )}
 
                                         {/* Selection Checkbox (Top Left) */}
@@ -385,7 +368,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                     : 'bg-white/80 dark:bg-black/40 border-white/60 text-transparent hover:border-[#0B192C]'
                                             }`}
                                         >
-                                            <MdCheck className="text-base" />
+                                            <Check className="text-base" />
                                         </button>
 
                                         {/* Star Toggle Button (Top Right) */}
@@ -402,11 +385,11 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                 }`}
                                             >
                                                 {isFeatLoading ? (
-                                                    <MdSync className="text-sm animate-spin" />
+                                                    <RefreshCw className="text-sm animate-spin" />
                                                 ) : category.isFeatured ? (
-                                                    <MdStar className="text-lg" />
+                                                    <Star className="text-lg" />
                                                 ) : (
-                                                    <MdStarBorder className="text-lg" />
+                                                    <Star className="text-lg" />
                                                 )}
                                             </button>
                                         )}
@@ -444,7 +427,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                 )}
                                                 {category.isFeatured && (
                                                     <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/30 px-2 py-0.5 rounded-md">
-                                                        <MdStar className="text-xs" />
+                                                        <Star className="text-xs" />
                                                         <span>{isArabic ? 'مميز بالرئيسية' : 'Featured'}</span>
                                                     </span>
                                                 )}
@@ -458,13 +441,13 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                     className="inline-flex items-center gap-1 cursor-pointer rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 px-2.5 py-1 text-[11px] transition-colors"
                                                     title={isArabic ? 'عرض المنتجات المرتبطة' : 'View products'}
                                                 >
-                                                    <MdShoppingBag className="text-xs" />
+                                                    <ShoppingBag className="text-xs" />
                                                     <span>{category._count.products} {isArabic ? 'منتج' : 'Products'}</span>
                                                 </button>
 
                                                 {category.brand?.name && (
                                                     <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 dark:bg-zinc-800/50 text-slate-600 dark:text-gray-400 px-2.5 py-1 text-[11px]">
-                                                        <MdStorefront className="text-xs" />
+                                                        <Store className="text-xs" />
                                                         <span>{category.brand.name}</span>
                                                     </span>
                                                 )}
@@ -481,7 +464,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"
                                                 >
-                                                    <MdVisibility className="text-sm" />
+                                                    <Eye className="text-sm" />
                                                     <span>{isArabic ? 'معاينة' : 'Preview'}</span>
                                                 </a>
                                             ) : <div />}
@@ -495,7 +478,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                         className="rounded-lg p-1.5 text-slate-600 dark:text-gray-300 hover:bg-[#8A6305]/10 hover:text-[#8A6305] transition-colors cursor-pointer" 
                                                         title={isArabic ? 'تعديل' : 'Edit'}
                                                     >
-                                                        <MdEdit className="text-lg" />
+                                                        <Pencil className="text-lg" />
                                                     </button>
                                                 )}
 
@@ -506,7 +489,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                         className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 transition-colors cursor-pointer" 
                                                         title={isArabic ? 'حذف' : 'Delete'}
                                                     >
-                                                        <MdDelete className="text-lg" />
+                                                        <Trash2 className="text-lg" />
                                                     </button>
                                                 )}
                                             </div>
@@ -520,7 +503,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                     {/* Empty State */}
                     {filteredCategories.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 mt-6">
-                            <MdCategory className="text-5xl text-slate-300 dark:text-zinc-600 mb-2" />
+                            <FolderTree className="text-5xl text-slate-300 dark:text-zinc-600 mb-2" />
                             <h3 className="text-base font-bold text-[#0B192C] dark:text-white">
                                 {isArabic ? 'لا توجد فئات مطابقة للبحث' : 'No categories found'}
                             </h3>

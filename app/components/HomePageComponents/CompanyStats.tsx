@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { MdLocalShipping, MdStorefront, MdCategory, MdGroups } from 'react-icons/md';
+import { Truck, Store, FolderTree, Users } from 'lucide-react';
 
 interface CompanyStatsProps {
     stats?: {
@@ -22,28 +22,28 @@ export default function CompanyStats({ stats }: CompanyStatsProps) {
             value: stats?.deliveries || '+9000',
             label: isArabic ? 'عملية توزيع ناجحة' : 'Successful Deliveries',
             sublabel: isArabic ? 'تغطية واسعة لشبكات التجزئة والمحلات' : 'Extensive Retail Coverage',
-            icon: MdLocalShipping,
+            icon: Truck,
             iconColor: 'text-[#8A6305] dark:text-[#8A6305]',
         },
         {
             value: stats?.brands || '+100',
             label: isArabic ? 'علامة تجارية معتمدة' : 'Authorized Brands',
             sublabel: isArabic ? 'وكالات تجارية عالمية ومحلية' : 'Global & Regional Agencies',
-            icon: MdStorefront,
+            icon: Store,
             iconColor: 'text-[#0B192C] dark:text-sky-400',
         },
         {
             value: stats?.products || '+500',
             label: isArabic ? 'منتج غذائي واستهلاكي' : 'Diverse Products',
             sublabel: isArabic ? 'بأعلى مواصفات الجودة والأصالة' : 'Highest Certified Standards',
-            icon: MdCategory,
+            icon: FolderTree,
             iconColor: 'text-[#8A6305] dark:text-[#E5B54A]',
         },
         {
             value: stats?.clients || '+300',
             label: isArabic ? 'عميل وموزع معتمد' : 'Retail Partners',
             sublabel: isArabic ? 'محلات وسوبرماركت ومتاجر جملة' : 'Supermarkets & Wholesale Shops',
-            icon: MdGroups,
+            icon: Users,
             iconColor: 'text-[#8A6305] dark:text-[#8A6305]',
         },
     ];

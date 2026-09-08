@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getValidAdminSession } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
 import ReviewsClient from "./ReviewsClient";
 
@@ -8,13 +7,13 @@ export const metadata = {
 };
 
 export default async function ReviewsPage() {
-    const session = await getServerSession(authOptions);
+    const adminUser = await getValidAdminSession();
 
-    if (!session) {
+    if (!adminUser) {
         redirect("/admin/login");
     }
 
-    if (!session.user.canManageReviews && session.user.role !== "SUPER_ADMIN") {
+    if (!adminUser.canManageReviews && adminUser.role !== "SUPER_ADMIN") {
         redirect("/admin/dashboard");
     }
 

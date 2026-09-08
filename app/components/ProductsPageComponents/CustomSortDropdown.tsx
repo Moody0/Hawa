@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdExpandMore, MdCheck } from "react-icons/md";
+import { ChevronDown, Check } from 'lucide-react';
 import { useLanguage } from "@/app/context/LanguageContext";
 
 export interface SortOption {
@@ -45,14 +45,14 @@ const CustomSortDropdown: React.FC<CustomSortDropdownProps> = ({ sort, setSort, 
             <button
                 type="button"
                 onClick={() => setIsOpen((prev) => !prev)}
-                className="flex items-center gap-2 px-3.5 py-2 bg-gray-100 dark:bg-zinc-800 hover:border-[#8A6305] text-[#0B192C] dark:text-white rounded-full text-xs font-bold border border-gray-200 dark:border-white/10 transition-all active:scale-95"
+                className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-zinc-800 hover:border-[#8A6305] text-[#0B192C] dark:text-white rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 transition-colors cursor-pointer active:scale-95"
                 aria-expanded={isOpen}
                 aria-haspopup="listbox"
             >
-                <span className="hidden sm:inline-block text-gray-400 font-normal">{t("products.sortBy")}:</span>
+                <span className="hidden sm:inline-block text-slate-400 font-normal">{t("products.sortBy")}:</span>
                 <span className="truncate max-w-[130px] sm:max-w-none">{selectedOption.label}</span>
-                <MdExpandMore
-                    className={`text-base text-gray-500 dark:text-gray-400 transition-transform duration-200 shrink-0 ${
+                <ChevronDown
+                    className={`text-sm text-slate-500 dark:text-slate-400 transition-transform duration-200 shrink-0 ${
                         isOpen ? "rotate-180 text-[#8A6305]" : ""
                     }`}
                 />
@@ -66,7 +66,7 @@ const CustomSortDropdown: React.FC<CustomSortDropdownProps> = ({ sort, setSort, 
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -6, scale: 0.96 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className={`absolute top-full mt-2 z-40 w-56 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/10 rounded-2xl p-1.5 shadow-xl ${
+                        className={`absolute top-full mt-2 z-40 w-56 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 rounded-2xl p-1.5 ${
                             dir === "rtl" ? "left-0" : "right-0"
                         }`}
                         role="listbox"
@@ -92,7 +92,7 @@ const CustomSortDropdown: React.FC<CustomSortDropdownProps> = ({ sort, setSort, 
                                     >
                                         <span className="truncate">{option.label}</span>
                                         {isSelected && (
-                                            <MdCheck className="text-base shrink-0 ms-2" />
+                                            <Check className="text-base shrink-0 ms-2" />
                                         )}
                                     </button>
                                 );

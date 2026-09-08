@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useProductRail } from './useProductRail';
 import Image from 'next/image';
-import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface RailCategory {
     id: string;
@@ -90,7 +90,7 @@ const CategoriesRail = ({ categories = [] }: CategoriesRailProps) => {
                         disabled={isLeftDisabled}
                         className="hidden md:flex !absolute top-1/2 -translate-y-1/2 -left-5 z-20 w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:hover:bg-[#8A6305] dark:hover:text-white items-center justify-center transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
                     >
-                        <MdChevronLeft className="text-2xl" />
+                        <ChevronLeft className="text-2xl" />
                     </button>
                     
                     <button
@@ -98,7 +98,7 @@ const CategoriesRail = ({ categories = [] }: CategoriesRailProps) => {
                         disabled={isRightDisabled}
                         className="hidden md:flex !absolute top-1/2 -translate-y-1/2 -right-5 z-20 w-9 h-9 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:hover:bg-[#8A6305] dark:hover:text-white items-center justify-center transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
                     >
-                        <MdChevronRight className="text-2xl" />
+                        <ChevronRight className="text-2xl" />
                     </button>
                 </div>
             </div>

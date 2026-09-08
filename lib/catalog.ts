@@ -17,7 +17,7 @@ export interface CatalogProduct {
     slug: string;
     name: string;
     description: string | null;
-    price: string;
+    price: string | null;
     discountPrice: string | null;
     images: string;
     brandId: string;
@@ -91,6 +91,14 @@ const catalogBrandSelect = {
             name: true,
             slug: true,
             description: true,
+        },
+    },
+    categories: {
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            mainCategoryId: true,
         },
     },
 };
@@ -380,8 +388,9 @@ export const getCatalogMainCategories = cache(
 );
 
 export const getCatalogInitialData = cache(
-    async (categoryId?: string, brandId?: string, mainCategoryId?: string) => {
-        const cacheKey = `catalog-initial-${categoryId || 'none'}-${brandId || 'none'}-${mainCategoryId || 'none'}`;
+    async (categoryId?: string, brandId?: string, mainCategoryId?: string, search?: string) => {
+        const cleanSearch = search ? search.trim().slice(0, 100) : "";
+        const cacheKey = `catalog-initial-${categoryId || 'none'}-${brandId || 'none'}-${mainCategoryId || 'none'}-${cleanSearch ? encodeURIComponent(cleanSearch) : 'none'}`;
         return unstable_cache(
             async () => {
                 try {
@@ -391,6 +400,7 @@ export const getCatalogInitialData = cache(
                         brandId?: string;
                         mainCategoryId?: string;
                         brand: { isActive: boolean };
+                        OR?: Array<Record<string, unknown>>;
                     } = {
                         stock: { gt: 0 },
                         brand: { isActive: true },
@@ -408,6 +418,20 @@ export const getCatalogInitialData = cache(
                         whereClause.mainCategoryId = mainCategoryId;
                     }
 
+                    if (cleanSearch) {
+                        whereClause.OR = [
+                            { name: { contains: cleanSearch, mode: "insensitive" } },
+                            { nameAr: { contains: cleanSearch, mode: "insensitive" } },
+                            { nameEn: { contains: cleanSearch, mode: "insensitive" } },
+                            { sku: { contains: cleanSearch, mode: "insensitive" } },
+                            { description: { contains: cleanSearch, mode: "insensitive" } },
+                            { descriptionAr: { contains: cleanSearch, mode: "insensitive" } },
+                            { descriptionEn: { contains: cleanSearch, mode: "insensitive" } },
+                            { brand: { name: { contains: cleanSearch, mode: "insensitive" } } },
+                            { category: { name: { contains: cleanSearch, mode: "insensitive" } } },
+                        ];
+                    }
+
                     const categoriesPromise = brandId 
                         ? getCatalogCategories(brandId) 
                         : mainCategoryId
@@ -418,7 +442,7 @@ export const getCatalogInitialData = cache(
                         categoriesPromise,
                         prisma.product.findMany({
                             where: whereClause,
-                            take: 12,
+                            take: 36,
                             orderBy: {
                                 createdAt: "desc",
                             },

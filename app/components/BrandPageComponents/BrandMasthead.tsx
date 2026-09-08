@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import ResilientImage from "@/app/components/ResilientImage";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { MdChevronRight, MdChevronLeft } from "react-icons/md";
+import Breadcrumb from "@/app/components/Breadcrumb";
 
 interface BrandMastheadProps {
     brand: {
@@ -59,51 +58,32 @@ export default function BrandMasthead({ brand, totalProducts, basePath = "/brand
     const isAgencies = basePath === "/agencies";
     const parentLabel = isAgencies
         ? (isArabic ? "الوكالات المعتمدة" : "Authorized Agencies")
-        : (isArabic ? "العلامات التجارية" : "Brands");
+        : (isArabic ? "الوكالات والعلامات التجارية" : "Brands & Agencies");
 
     return (
         <section className="mb-8" aria-label="Brand Overview">
-            {/* Clean Breadcrumb Strip */}
-            <nav 
-                className="flex items-center flex-wrap gap-1.5 text-[11px] sm:text-xs font-semibold text-[#475569] dark:text-slate-400 mb-4"
-                aria-label="Breadcrumb"
-            >
-                <Link 
-                    href="/" 
-                    className="hover:text-[#0B192C] dark:hover:text-white transition-colors py-1"
-                >
-                    {isArabic ? "الرئيسية" : "Home"}
-                </Link>
-                {isRtl ? (
-                    <MdChevronLeft className="text-slate-400 dark:text-slate-600 text-sm shrink-0" />
-                ) : (
-                    <MdChevronRight className="text-slate-400 dark:text-slate-600 text-sm shrink-0" />
-                )}
-                <Link 
-                    href={basePath} 
-                    className="hover:text-[#0B192C] dark:hover:text-white transition-colors py-1"
-                >
-                    {parentLabel}
-                </Link>
-                {isRtl ? (
-                    <MdChevronLeft className="text-slate-400 dark:text-slate-600 text-sm shrink-0" />
-                ) : (
-                    <MdChevronRight className="text-slate-400 dark:text-slate-600 text-sm shrink-0" />
-                )}
-                <span className="text-[#0B192C] dark:text-white font-bold truncate max-w-[200px] sm:max-w-none">
-                    {primaryName}
-                </span>
-            </nav>
+            {/* Clean Unified Breadcrumb Strip */}
+            <Breadcrumb
+                items={[
+                    {
+                        label: parentLabel,
+                        href: basePath,
+                    },
+                    {
+                        label: primaryName,
+                    },
+                ]}
+            />
 
             {/* Architectural Masthead Card */}
-            <div className="relative rounded-2xl md:rounded-3xl bg-white dark:bg-[#0C1821] border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
+            <div className="relative rounded-2xl md:rounded-3xl bg-white dark:bg-[#0C1821] border border-slate-200/80 dark:border-white/10 overflow-hidden">
                 {/* Refined Top Accent Bar */}
                 <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#0B192C] via-[#8A6305] to-[#0B192C]" />
 
                 <div className="p-5 sm:p-7 md:p-8">
                     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-7">
                         {/* Logo Plinth Tile */}
-                        <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl bg-white dark:bg-zinc-800/80 border border-slate-200/80 dark:border-white/10 shadow-sm p-3.5 flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-[1.02]">
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl bg-white dark:bg-zinc-800/80 border border-slate-200/80 dark:border-white/10 p-3.5 flex items-center justify-center shrink-0">
                             <div className="relative w-full h-full flex items-center justify-center">
                                 <ResilientImage
                                     src={brandImage}

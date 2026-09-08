@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
-import { MdChevronRight } from 'react-icons/md';
+import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
 interface Category {
@@ -30,7 +30,7 @@ const Categories = ({ categories, t, dir }: CategoriesProps) => {
                 <div className="flex items-center justify-between mb-8 px-2">
                     <h3 className="text-2xl font-bold text-text-main-light dark:text-text-main-dark">{t('home.categories')}</h3>
                     <Link className="text-primary font-medium text-sm flex items-center gap-1 " href="/categories">
-                        {t('common.viewAll')} <MdChevronRight className={`text-sm ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                        {t('common.viewAll')} <ChevronRight className={`text-sm ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                     </Link>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-2 md:gap-4">

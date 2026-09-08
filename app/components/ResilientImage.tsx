@@ -76,8 +76,6 @@ const ResilientImageInner = ({
         ? currentSrc 
         : (isValidImageSrc(fallbackSrc) ? fallbackSrc : IMAGE_PLACEHOLDER_SRC);
 
-    const isPostImg = typeof safeSrc === 'string' && safeSrc.includes('i.postimg.cc');
-
     const isPriority = Boolean(imgProps.priority);
     const { loading, priority, ...restImgProps } = imgProps;
 
@@ -103,7 +101,7 @@ const ResilientImageInner = ({
                 src={safeSrc}
                 fill
                 decoding={imgProps.decoding || "async"}
-                unoptimized={imgProps.unoptimized ?? (typeof safeSrc === 'string' && (safeSrc.startsWith('/api/image-proxy') || isPostImg))}
+                unoptimized={imgProps.unoptimized ?? (typeof safeSrc === 'string' && (safeSrc.startsWith('/api/image-proxy') || safeSrc.startsWith('http')))}
                 sizes={imgProps.sizes || "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
                 className={`${className || ""} block relative z-10`}
                 onLoad={(event) => {

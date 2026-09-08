@@ -4,8 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import ResilientImage from '@/app/components/ResilientImage';
-import { MdChevronRight } from 'react-icons/md';
-import type { RailBrand } from '@/lib/admin-actions';
+import { ChevronRight } from 'lucide-react';
+import type { RailBrand } from '@/lib/public-queries';
 
 interface BrandsRailProps {
     brands?: RailBrand[];
@@ -155,7 +155,7 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
                                 className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-[#0B192C] dark:text-[#8A6305] hover:text-[#8A6305] bg-[#FAF6EC] dark:bg-white/5 border border-[#8A6305]/20 hover:border-[#8A6305]/50 transition-all duration-200 shadow-2xs hover:shadow-xs group"
                             >
                                 <span>{isArabic ? `تصفح كافة الشركات والعلامات (${brands.length}+)` : `View All Partner Brands (${brands.length}+)`}</span>
-                                <MdChevronRight className={`text-base transition-transform group-hover:translate-x-0.5 ${isArabic ? 'rotate-180 group-hover:-translate-x-0.5' : ''}`} />
+                                <ChevronRight className={`text-base transition-transform group-hover:translate-x-0.5 ${isArabic ? 'rotate-180 group-hover:-translate-x-0.5' : ''}`} />
                             </Link>
                         </div>
                     )}

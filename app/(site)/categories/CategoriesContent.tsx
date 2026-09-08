@@ -2,10 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import { MdChevronRight } from "react-icons/md";
 import { useLanguage } from "@/app/context/LanguageContext";
 import CategoriesGrid from "./CategoriesGrid";
+import Breadcrumb from "@/app/components/Breadcrumb";
 import { getSafeImageUrl } from '@/lib/image-utils';
+import ResilientImage from '@/app/components/ResilientImage';
 
 interface Category {
     id: string;
@@ -37,13 +38,15 @@ export default function CategoriesContent({ categories, siteSettings }: Categori
 
     return (
         <div className="w-full pb-20">
-            <nav className="container-custom pt-8 pb-4">
-                <ul className="flex items-center gap-2 text-xs font-medium text-text-muted-light dark:text-text-muted-dark uppercase tracking-widest">
-                    <li><Link className="hover-underline-animated transition-colors" href="/">{t('common.home')}</Link></li>
-                    <li><MdChevronRight className="text-[14px] rtl:rotate-180" /></li>
-                    <li className="text-text-main-light dark:text-text-main-dark">{t('categoriesPage.allCategories')}</li>
-                </ul>
-            </nav>
+            <div className="container-custom pt-6 pb-2">
+                <Breadcrumb
+                    items={[
+                        {
+                            label: t('categoriesPage.allCategories'),
+                        },
+                    ]}
+                />
+            </div>
 
             <section className="container-custom mb-12">
                 <div className="border-l-4 border-zinc-900 dark:border-white pl-6 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-6">
@@ -70,11 +73,11 @@ export default function CategoriesContent({ categories, siteSettings }: Categori
                     </div>
                     <div className="hidden lg:block w-1/3">
                         <div className="relative aspect-square w-full">
-                            <img
+                            <ResilientImage
                                 src={getSafeImageUrl(ctaImage)}
                                 alt={t('products.productSelection')}
                                 className="w-full h-full rounded-2xl shadow-2xl rotate-3 scale-110 rtl:-rotate-3 object-cover"
-                                loading="lazy"
+                                sizes="33vw"
                             />
                         </div>
                     </div>

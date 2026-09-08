@@ -3,7 +3,8 @@ import { Figtree, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getI18n } from "@/lib/i18n";
-import { getSiteSettings } from "@/lib/admin-actions";
+import { getSiteSettings } from "@/lib/public-queries";
+import { headers } from "next/headers";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -129,8 +130,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let requestLocale: 'en' | 'ar' = 'ar';
+  try {
+    const headersList = await headers();
+    if (headersList.get('x-locale') === 'en') {
+      requestLocale = 'en';
+    }
+  } catch {}
+
   const [{ language, dir }, settings] = await Promise.all([
-    getI18n(),
+    getI18n(requestLocale),
     getSiteSettings(),
   ]);
   const exchangeRate = settings?.exchangeRate ? Number(settings.exchangeRate) : 135;

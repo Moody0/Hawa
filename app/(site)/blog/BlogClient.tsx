@@ -4,18 +4,7 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import ResilientImage from '@/app/components/ResilientImage';
-import { 
-    MdSearch, 
-    MdCalendarToday, 
-    MdAccessTime, 
-    MdArrowForward, 
-    MdTrendingUp,
-    MdLocalShipping,
-    MdStorefront,
-    MdVerified,
-    MdOutlineArticle,
-    MdFilterList
-} from 'react-icons/md';
+import { Search, Calendar, Clock, ArrowRight, TrendingUp, Truck, Store, ShieldCheck, FileText, Filter } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 export interface BlogPostItem {
@@ -118,7 +107,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-200/80 dark:border-white/10">
                     <div className="max-w-2xl">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-black uppercase tracking-widest mb-3">
-                            <MdOutlineArticle className="text-sm" />
+                            <FileText className="text-sm" />
                             <span>{isAr ? 'المدونة والتقارير الميدانية' : 'Editorial & Trade Bulletins'}</span>
                         </div>
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight">
@@ -138,9 +127,9 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={isAr ? 'ابحث في المقالات والتقارير...' : 'Search articles and reports...'}
-                            className="w-full py-2.5 ps-10 pe-4 bg-white dark:bg-[#132035] border border-slate-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#8A6305] focus:border-transparent text-[#0B192C] dark:text-white placeholder:text-slate-400 shadow-xs"
+                            className="w-full py-2.5 ps-10 pe-4 bg-white dark:bg-[#132035] border border-slate-200 dark:border-white/10 rounded-2xl text-xs sm:text-sm focus:outline-none focus:border-[#8A6305] text-[#0B192C] dark:text-white placeholder:text-slate-400"
                         />
-                        <MdSearch className="absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none" />
+                        <Search className="absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none" />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
@@ -155,7 +144,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                 {/* Category Filter Tabs */}
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-4 border-b border-slate-200/80 dark:border-white/10">
                     <div className="flex items-center gap-1.5 text-xs text-slate-400 shrink-0 me-2">
-                        <MdFilterList className="text-base text-[#8A6305]" />
+                        <Filter className="text-base text-[#8A6305]" />
                         <span className="font-bold text-[#0B192C] dark:text-slate-300">{isAr ? 'التصنيف:' : 'Filter:'}</span>
                     </div>
                     {categories.map((cat) => {
@@ -183,7 +172,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                     /* Empty State */
                     <div className="text-center py-20 px-4 bg-slate-50 dark:bg-white/[0.02] rounded-3xl border border-slate-200/80 dark:border-white/10 max-w-xl mx-auto my-8">
                         <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/30 text-[#8A6305] dark:text-[#E5B54A] flex items-center justify-center text-2xl mx-auto mb-4 border border-[#8A6305]/20">
-                            <MdOutlineArticle />
+                            <FileText />
                         </div>
                         <h3 className="text-base sm:text-lg font-bold text-[#0B192C] dark:text-white mb-2">
                             {isAr ? 'لم يتم العثور على مقالات مطابقة' : 'No matching articles found'}
@@ -238,12 +227,12 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                                             <div>
                                                 <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium">
                                                     <span className="flex items-center gap-1.5">
-                                                        <MdCalendarToday className="text-sm text-[#8A6305]" />
+                                                        <Calendar className="text-sm text-[#8A6305]" />
                                                         <span>{formatDate(leadPost.createdAt)}</span>
                                                     </span>
                                                     <span>•</span>
                                                     <span className="flex items-center gap-1">
-                                                        <MdAccessTime className="text-sm text-[#8A6305]" />
+                                                        <Clock className="text-sm text-[#8A6305]" />
                                                         <span>{calculateReadTime(leadPost)}</span>
                                                     </span>
                                                 </div>
@@ -262,7 +251,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                                             <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-[#8A6305] dark:text-[#E5B54A]">
                                                 <span className="inline-flex items-center gap-2 group-hover:gap-3 transition-all">
                                                     <span>{isAr ? 'قراءة التحليل كاملاً' : 'Read Full Analysis'}</span>
-                                                    <MdArrowForward className="text-base rtl:rotate-180" />
+                                                    <ArrowRight className="text-base rtl:rotate-180" />
                                                 </span>
                                                 <span className="text-[11px] text-slate-400 font-normal">
                                                     {isAr ? 'شركة حوا للتوزيع' : 'Hawa Distribution'}
@@ -312,12 +301,12 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                                                     <div className="p-5 sm:p-6">
                                                         <div className="flex items-center gap-2.5 text-[11px] text-slate-500 dark:text-slate-400 mb-2 font-medium">
                                                             <span className="flex items-center gap-1">
-                                                                <MdCalendarToday className="text-xs text-[#8A6305]" />
+                                                                <Calendar className="text-xs text-[#8A6305]" />
                                                                 <span>{formatDate(post.createdAt)}</span>
                                                             </span>
                                                             <span>•</span>
                                                             <span className="flex items-center gap-1">
-                                                                <MdAccessTime className="text-xs text-[#8A6305]" />
+                                                                <Clock className="text-xs text-[#8A6305]" />
                                                                 <span>{calculateReadTime(post)}</span>
                                                             </span>
                                                         </div>
@@ -338,7 +327,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                                                 <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-0 flex items-center justify-between border-t border-slate-100 dark:border-white/5 mt-4 pt-3.5">
                                                     <span className="text-xs font-bold text-[#8A6305] dark:text-[#E5B54A] inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                                                         <span>{isAr ? 'متابعة القراءة' : 'Read Article'}</span>
-                                                        <MdArrowForward className="text-sm rtl:rotate-180" />
+                                                        <ArrowRight className="text-sm rtl:rotate-180" />
                                                     </span>
                                                     <span className="text-[10px] font-semibold text-slate-400">
                                                         {isAr ? 'جملة وتجزئة' : 'B2B Trade'}
@@ -358,7 +347,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                         <div className="max-w-2xl">
                             <div className="inline-flex items-center gap-2 text-xs font-black text-[#8A6305] dark:text-[#E5B54A] uppercase tracking-wider mb-2">
-                                <MdVerified className="text-base" />
+                                <ShieldCheck className="text-base" />
                                 <span>{isAr ? 'مكتب التنسيق ومبيعات الجملة' : 'Wholesale Sales Desk'}</span>
                             </div>
                             <h3 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white leading-snug">
@@ -387,7 +376,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                                 href="/products"
                                 className="px-5 py-3 rounded-2xl bg-[#0B192C] hover:bg-[#132035] text-white dark:bg-white/10 dark:hover:bg-white/15 font-bold text-xs flex items-center gap-2 transition-all shadow-sm"
                             >
-                                <MdStorefront className="text-base text-[#E5B54A]" />
+                                <Store className="text-base text-[#E5B54A]" />
                                 <span>{isAr ? 'تصفح كتالوج البضائع' : 'Browse Catalog'}</span>
                             </Link>
                         </div>

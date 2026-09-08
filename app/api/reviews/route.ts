@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { 
+    getClientIp, 
+    checkRateLimit, 
+    checkRequestBodyLimit, 
+    recordSecurityMetric 
+} from "@/lib/rate-limit";
 
 function sanitizeString(val: unknown, maxLen = 300): string {
     if (typeof val !== 'string') return '';
@@ -11,6 +17,30 @@ function sanitizeString(val: unknown, maxLen = 300): string {
 }
 
 export async function POST(request: NextRequest) {
+    const ip = getClientIp(request);
+
+    // Enforce request body size limit (50KB)
+    if (!checkRequestBodyLimit(request, 50 * 1024)) {
+        recordSecurityMetric({ action: 'review_submission', ip, status: 'blocked', reason: 'payload_too_large' });
+        return NextResponse.json(
+            { error: "Payload too large" },
+            { status: 413 }
+        );
+    }
+
+    // IP-level burst limit: max 5 reviews per 10 minutes per IP
+    const burstLimit = checkRateLimit(`review:ip:${ip}`, 5, 10 * 60 * 1000);
+    if (!burstLimit.allowed) {
+        recordSecurityMetric({ action: 'review_submission', ip, status: 'blocked', reason: 'burst_limit_exceeded' });
+        return NextResponse.json(
+            { error: `Too many review submissions. Please wait ${burstLimit.retryAfterSeconds} seconds.` },
+            { 
+                status: 429,
+                headers: { 'Retry-After': String(burstLimit.retryAfterSeconds) }
+            }
+        );
+    }
+
     try {
         const body = await request.json();
         const { productId, rating, feedback, image, name, email } = body;

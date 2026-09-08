@@ -4,21 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/app/context/LanguageContext";
 import ResilientImage from "@/app/components/ResilientImage";
-import { 
-    MdStorefront, 
-    MdLocalShipping, 
-    MdInventory, 
-    MdReceiptLong, 
-    MdVerified, 
-    MdLocationOn, 
-    MdSupportAgent, 
-    MdCheckCircle, 
-    MdArrowForward, 
-    MdShoppingBag,
-    MdSecurity,
-    MdCategory,
-    MdPhone
-} from "react-icons/md";
+import { Store, Truck, Package, Receipt, ShieldCheck, MapPin, Headset, CheckCircle2, ArrowRight, ShoppingBag, Shield, FolderTree, Phone } from 'lucide-react';
 import { FaWhatsapp } from "react-icons/fa";
 import { SYRIAN_GOVERNORATES } from "@/lib/order-validation";
 
@@ -132,7 +118,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
 
     const distributionPillars = [
         {
-            icon: MdVerified,
+            icon: ShieldCheck,
             titleAr: 'وكالات وتوريد أصلي من المصنع',
             titleEn: 'Direct Factory & Agency Sourcing',
             descAr: 'شراكات توريد حصرية ومباشرة مع كبرى الشركات والمصانع لضمان كراتين وطرود المصنع الأصلية بأفضل أسعار الجملة الرسمية.',
@@ -141,7 +127,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
             badgeEn: '100% Authentic'
         },
         {
-            icon: MdLocalShipping,
+            icon: Truck,
             titleAr: 'خطوط توزيع وسيارات مجهزة',
             titleEn: 'Scheduled Distribution & Delivery',
             descAr: 'سيارات وشاحنات توزيع مجهزة تنطلق يومياً لخدمة كافة المناطق والمحافظات بمواعيد تسليم منتظمة ودقيقة لباب المحل.',
@@ -150,7 +136,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
             badgeEn: 'Store-Door Delivery'
         },
         {
-            icon: MdInventory,
+            icon: Package,
             titleAr: 'مستودعات مركزية ومعايير سلامة',
             titleEn: 'Central Warehouses & Food Safety',
             descAr: 'مستودعات تخزين جاف ومكيف مجهزة وفق أعلى معايير سلامة الغذاء ونظام تدوير المخزون لضمان الطزاجة والصلاحية الدائمة.',
@@ -159,7 +145,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
             badgeEn: 'Hygienic Storage'
         },
         {
-            icon: MdReceiptLong,
+            icon: Receipt,
             titleAr: 'فواتير نظامية وأسعار جملة معتمدة',
             titleEn: 'Official Invoicing & Trade Terms',
             descAr: 'فواتير شراء موثقة ومعتمدة لضبط حركة مشتريات المحل وأرشيف الفواتير، مع خيارات دفع مرنة عند الاستلام وبدون وسطاء.',
@@ -205,7 +191,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
                                 href="/products"
                                 className="px-8 py-3.5 rounded-xl bg-[#8A6305] hover:bg-[#9E7309] text-white font-extrabold text-sm shadow-md transition-all active:scale-95 flex items-center gap-2"
                             >
-                                <MdShoppingBag className="text-lg" />
+                                <ShoppingBag className="text-lg" />
                                 <span>{isAr ? 'تصفح كتالوج المنتجات' : 'Explore Product Catalog'}</span>
                             </Link>
 
@@ -213,7 +199,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
                                 href="/account/register"
                                 className="px-7 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/20 font-bold text-sm backdrop-blur-sm transition-all active:scale-95 flex items-center gap-2"
                             >
-                                <MdStorefront className="text-lg text-[#E5B54A]" />
+                                <Store className="text-lg text-[#E5B54A]" />
                                 <span>{isAr ? 'تسجيل حساب تاجر جديد' : 'Register Merchant Account'}</span>
                             </Link>
 
@@ -347,7 +333,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
 
                         {/* Quote Block */}
                         <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 dark:bg-zinc-800/60 border border-[#8A6305]/20 flex items-start gap-3.5">
-                            <MdSecurity className="text-2xl text-[#8A6305] shrink-0 mt-0.5" />
+                            <Shield className="text-2xl text-[#8A6305] shrink-0 mt-0.5" />
                             <div>
                                 <p className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white leading-snug">
                                     "{getContent(settings?.aboutNarrativeQuote, settings?.aboutNarrativeQuoteAr) || (isAr ? 'بضائع أصلية، كروتة المصنع المعتمدة، وتوصيل منتظم لباب المحل.' : 'Authentic goods, official carton pricing, and reliable direct delivery.')}"
@@ -475,7 +461,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
                                     }`}
                                 >
                                     <div className="flex items-center justify-center gap-1 mb-1 text-base">
-                                        <MdLocationOn className={isHQ ? 'text-[#8A6305]' : 'text-slate-400'} />
+                                        <MapPin className={isHQ ? 'text-[#8A6305]' : 'text-slate-400'} />
                                     </div>
                                     <p className="font-extrabold">{isAr ? gov.ar : gov.en}</p>
                                     <span className="text-[10px] font-normal text-slate-400 block mt-0.5">
@@ -520,7 +506,7 @@ export default function AboutUsClient({ settings }: { settings: AboutUsSettings 
                                 className="px-6 py-3.5 rounded-xl bg-[#8A6305] hover:bg-[#9E7309] text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-2"
                             >
                                 <span>{isAr ? 'تسجيل حساب تاجر رسمي' : 'Register Merchant Account'}</span>
-                                <MdArrowForward className={`text-base ${isAr ? 'rotate-180' : ''}`} />
+                                <ArrowRight className={`text-base ${isAr ? 'rotate-180' : ''}`} />
                             </Link>
 
                             <Link

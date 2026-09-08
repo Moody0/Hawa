@@ -163,6 +163,9 @@ model Order {
   promoCode     PromoCode?  @relation(fields: [promoCodeId], references: [id])
   customerId    String?
   customer      Customer?   @relation(fields: [customerId], references: [id])
+  stockReserved  Boolean     @default(true)
+  idempotencyKey String?     @unique
+  requestHash    String?
   items         OrderItem[]
 
   @@index([status])
@@ -217,6 +220,20 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+model InventoryMovement {
+  id         String   @id @default(cuid())
+  orderId    String?
+  productId  String
+  quantity   Int
+  type       String
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([createdAt])
 }
 
 model Settings {

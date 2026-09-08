@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
+import { SITE_ORIGIN } from '@/lib/site-config';
 
 export default function robots(): MetadataRoute.Robots {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hawatrading.com';
+    const baseUrl = SITE_ORIGIN;
 
     return {
         rules: [

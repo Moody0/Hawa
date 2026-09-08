@@ -3,7 +3,7 @@
 import React from 'react';
 import ProductCard from '../ProductsPageComponents/ProductCard';
 import Link from 'next/link';
-import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useProductRail } from './useProductRail';
@@ -45,7 +45,7 @@ const TrendingProducts = ({ products }: TrendingProductsProps) => {
                 <div className="flex items-center justify-between mb-6 px-2">
                     <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#0B192C] dark:text-white">{t('home.trendingNow')}</h3>
                     <Link className="text-[#8A6305] hover:text-[#725204] font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all" href="/products">
-                        {t('common.viewAll')} <MdChevronRight className={`text-sm ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                        {t('common.viewAll')} <ChevronRight className={`text-sm ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                     </Link>
                 </div>
 

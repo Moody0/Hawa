@@ -1,17 +1,39 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { ThemeProvider } from "next-themes";
-import { CartProvider } from "./context/CartContext";
+import { CartProvider, useCart } from "./context/CartContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
 import { CustomerProvider } from "./context/CustomerContext";
 import { Toaster } from "react-hot-toast";
-import { SessionProvider } from "next-auth/react";
-import CartDrawer from "./components/CartDrawer";
+import { WebQualityMonitor } from "./components/WebQualityMonitor";
+
+const CartDrawer = dynamic(() => import("./components/CartDrawer"), {
+    ssr: false,
+});
+
+function DeferredCartDrawer() {
+    const { isDrawerOpen } = useCart();
+    const [hasOpened, setHasOpened] = useState(false);
+
+    useEffect(() => {
+        if (isDrawerOpen) {
+            setHasOpened(true);
+        }
+    }, [isDrawerOpen]);
+
+    if (!hasOpened && !isDrawerOpen) {
+        return null;
+    }
+
+    return <CartDrawer />;
+}
 
 export function Providers({ 
     children, 
-    session, 
+    session: _session, 
     initialExchangeRate = 135,
     initialLanguage = 'ar'
 }: { 
@@ -20,14 +42,15 @@ export function Providers({
     initialExchangeRate?: number,
     initialLanguage?: 'en' | 'ar'
 }) {
-    const content = (
+    return (
         <LanguageProvider initialLanguage={initialLanguage}>
             <CustomerProvider>
                 <CurrencyProvider initialExchangeRate={initialExchangeRate}>
                     <CartProvider>
                     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+                        <WebQualityMonitor />
                         {children}
-                        <CartDrawer />
+                        <DeferredCartDrawer />
                         <Toaster
                             position="bottom-right"
                             toastOptions={{
@@ -69,10 +92,4 @@ export function Providers({
         </CustomerProvider>
     </LanguageProvider>
     );
-
-    if (session) {
-        return <SessionProvider session={session}>{content}</SessionProvider>;
-    }
-
-    return content;
 }

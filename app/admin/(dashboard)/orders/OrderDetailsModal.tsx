@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { MdClose, MdPerson, MdLocationOn, MdInventory2, MdSync, MdDelete, MdStore, MdDescription } from "react-icons/md";
+import { X, User, MapPin, Package, RefreshCw, Trash2, Store, FileText } from 'lucide-react';
 import { FaWhatsapp } from "react-icons/fa";
 import { cleanWhatsAppNumber } from "@/lib/whatsapp-utils";
 import { formatPackaging } from "@/lib/packaging";
@@ -93,7 +93,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                         aria-label={language === "ar" ? "إغلاق" : "Close"}
                         className="p-2 text-text-sub dark:text-gray-400 hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
                     >
-                        <MdClose className="text-[24px]" />
+                        <X className="text-[24px]" />
                     </button>
                 </div>
 
@@ -129,14 +129,14 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-3">
                             <h4 className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400 flex items-center gap-2">
-                                <MdPerson className="text-primary text-[18px]" />
+                                <User className="text-primary text-[18px]" />
                                 {t('admin.customerInformation')}
                             </h4>
                             <div className={`space-y-1.5 ${dir === 'rtl' ? 'me-6' : 'ms-6'}`}>
                                 {order.shopName && (
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="p-1 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
-                                            <MdStore className="text-base" />
+                                            <Store className="text-base" />
                                         </span>
                                         <p className="text-sm font-extrabold text-slate-900 dark:text-white">
                                             {order.shopName}
@@ -149,7 +149,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                         </div>
                         <div className="space-y-3">
                             <h4 className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400 flex items-center gap-2">
-                                <MdLocationOn className="text-primary text-[18px]" />
+                                <MapPin className="text-primary text-[18px]" />
                                 {t('admin.shippingAddress')}
                             </h4>
                             <div className={`space-y-1 ${dir === 'rtl' ? 'me-6' : 'ms-6'}`}>
@@ -165,7 +165,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                     {order.notes && order.notes.trim() && (
                         <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 space-y-1.5">
                             <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
-                                <MdDescription className="text-base" />
+                                <FileText className="text-base" />
                                 <span className="text-xs font-bold uppercase tracking-wider">{t('admin.orderNotes')}</span>
                             </div>
                             <p className="text-xs md:text-sm text-slate-700 dark:text-slate-300 leading-relaxed ps-6 whitespace-pre-wrap">
@@ -177,7 +177,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                     {/* Order Items */}
                     <div className="space-y-4">
                         <h4 className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400 flex items-center gap-2">
-                            <MdInventory2 className="text-primary text-[18px]" />
+                            <Package className="text-primary text-[18px]" />
                             {t('admin.itemsCount').replace('{count}', order.items.length.toString())}
                         </h4>
                         <div className="border border-black/[0.04] dark:border-white/[0.04] rounded-2xl overflow-hidden">
@@ -267,9 +267,9 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                             className="h-10 px-4 rounded-xl font-bold text-xs md:text-sm border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50 flex items-center gap-2"
                         >
                             {isDeleting ? (
-                                <MdSync className="text-[18px] animate-spin" />
+                                <RefreshCw className="text-[18px] animate-spin" />
                             ) : (
-                                <MdDelete className="text-[18px]" />
+                                <Trash2 className="text-[18px]" />
                             )}
                             {t('admin.deleteOrder')}
                         </button>

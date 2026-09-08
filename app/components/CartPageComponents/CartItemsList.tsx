@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { CartItem as CartItemType } from '@/app/context/CartContext';
 import CartItem from './CartItem';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { MdArrowBack } from 'react-icons/md';
+import { ArrowLeft } from 'lucide-react';
 
 interface CartItemsListProps {
     items: CartItemType[];
@@ -18,12 +18,14 @@ const CartItemsList = ({ items, cartCount, removeItem, updateQuantity }: CartIte
     const { t, dir } = useLanguage();
 
     return (
-        <div className="lg:col-span-8 flex flex-col gap-8">
-            <div className="flex flex-col gap-1 pb-4 border-b border-gray-200 dark:border-white/10">
+        <div className="flex flex-col gap-5 lg:col-span-8">
+            <div className="flex flex-col gap-1 border-b border-slate-300 pb-4 dark:border-white/10">
                 <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#0B192C] dark:text-white">{t('cart.yourCart')}</h1>
-                <p className="text-xs font-semibold text-[#475569] dark:text-gray-400">{cartCount} {t('orderComplete.items')}</p>
+                <p className="text-xs font-medium text-[#475569] dark:text-gray-400">
+                    {cartCount} {t('orderComplete.items')} · {dir === 'rtl' ? 'راجع الكميات قبل متابعة طلب التوريد' : 'Review quantities before continuing your supply request'}
+                </p>
             </div>
-            <div className="flex flex-col border-y border-gray-200 dark:border-white/10 divide-y divide-gray-200 dark:divide-white/10">
+            <div className="flex flex-col divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white px-4 dark:divide-white/10 dark:border-white/10 dark:bg-zinc-900 sm:px-5">
                 {items.map(item => {
                     const itemKey = `${item.id}:${item.selectedOption || ''}`;
                     return (
@@ -36,9 +38,9 @@ const CartItemsList = ({ items, cartCount, removeItem, updateQuantity }: CartIte
                     );
                 })}
             </div>
-            <div className="mt-2">
+            <div>
                 <Link href="/products" className="relative inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#475569] hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-colors">
-                    <MdArrowBack className={`text-base ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                    <ArrowLeft className={`text-base ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                     {t('cart.continueShopping')}
                 </Link>
             </div>

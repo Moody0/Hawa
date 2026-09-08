@@ -29,7 +29,7 @@ export interface NavTrendingProduct {
     nameEn?: string | null;
     slug: string;
     images: string;
-    price: number;
+    price: number | null;
     discountPrice: number | null;
     brand?: { name: string } | null;
 }
@@ -94,8 +94,6 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                         nameEn: true,
                         slug: true,
                         images: true,
-                        price: true,
-                        discountPrice: true,
                         isTrending: true,
                         brand: {
                             select: {
@@ -154,8 +152,8 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                 nameEn: p.nameEn || null,
                 slug: p.slug,
                 images: p.images,
-                price: Number(p.price),
-                discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
+                price: null,
+                discountPrice: null,
                 brand: p.brand ? { name: p.brand.name } : null,
             });
 

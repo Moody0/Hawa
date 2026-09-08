@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MdClose, MdSync, MdTranslate, MdImage, MdSettings } from "react-icons/md";
+import { X, RefreshCw, Image, Settings, Languages } from 'lucide-react';
 import { createBanner, updateBanner, BannerInput } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -137,7 +137,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                         onClick={onClose}
                         className="rounded-lg p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                     >
-                        <MdClose className="text-xl" />
+                        <X className="text-xl" />
                     </button>
                 </div>
 
@@ -152,7 +152,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                 : "border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                         }`}
                     >
-                        <MdTranslate className="text-base" />
+                        <Languages className="text-base" />
                         <span>{isArabic ? "النصوص والترجمة (العربية والانجليزية)" : "Bilingual Text & Content"}</span>
                     </button>
                     <button
@@ -164,7 +164,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                 : "border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                         }`}
                     >
-                        <MdImage className="text-base" />
+                        <Image className="text-base" />
                         <span>{isArabic ? "صورة البنر والرابط" : "Media & Link Settings"}</span>
                     </button>
                 </div>
@@ -380,7 +380,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                 disabled={isSubmitting}
                                 className="flex items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] text-white px-5 py-2.5 font-bold text-xs transition-all shadow-xs cursor-pointer disabled:opacity-50"
                             >
-                                {isSubmitting && <MdSync className="animate-spin text-base text-[#8A6305]" />}
+                                {isSubmitting && <RefreshCw className="animate-spin text-base text-[#8A6305]" />}
                                 {banner ? (isArabic ? "تحديث البنر" : "Update Banner") : (isArabic ? "إنشاء البنر" : "Create Banner")}
                             </button>
                         </div>

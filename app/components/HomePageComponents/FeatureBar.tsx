@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdSupportAgent, MdRefresh, MdVerifiedUser, MdLocalShipping } from 'react-icons/md';
+import { Headset, RotateCw, UserCheck, Truck } from 'lucide-react';
 import { getI18n } from '@/lib/i18n';
 
 const FeatureBar = async () => {
@@ -7,22 +7,22 @@ const FeatureBar = async () => {
 
     const features = [
         {
-            icon: MdSupportAgent,
+            icon: Headset,
             title: t('home.customerSupport'),
             subtitle: t('home.customerSupport247'),
         },
         {
-            icon: MdRefresh,
+            icon: RotateCw,
             title: t('home.easyReturns'),
             subtitle: t('home.easyReturnsDesc'),
         },
         {
-            icon: MdVerifiedUser,
+            icon: UserCheck,
             title: t('home.authenticProducts'),
             subtitle: t('home.authenticProductsDesc'),
         },
         {
-            icon: MdLocalShipping,
+            icon: Truck,
             title: t('home.fastShipping'),
             subtitle: t('home.fastShippingDesc'),
         },

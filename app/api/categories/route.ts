@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export async function GET(request: Request) {
     try {
@@ -74,7 +75,7 @@ export async function GET(request: Request) {
         });
 
         const response = NextResponse.json(categories);
-        response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
         return response;
     } catch (error) {
         console.error("Error fetching categories:", error);

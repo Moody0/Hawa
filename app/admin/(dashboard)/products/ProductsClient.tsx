@@ -10,26 +10,7 @@ import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { getSafeImageUrl } from '@/lib/image-utils';
-import {
-    MdChevronRight,
-    MdChevronLeft,
-    MdFileUpload,
-    MdFileDownload,
-    MdAdd,
-    MdSearch,
-    MdExpandMore,
-    MdLocalFireDepartment,
-    MdSell,
-    MdTrendingDown,
-    MdMoneyOff,
-    MdDelete,
-    MdEdit,
-    MdSync,
-    MdArrowUpward,
-    MdArrowDownward,
-    MdShare,
-    MdContentCopy
-} from 'react-icons/md';
+import { ChevronRight, ChevronLeft, Upload, Download, Plus, Search, ChevronDown, Flame, Tag, Trash2, Pencil, RefreshCw, ArrowUp, ArrowDown, Share2, Copy, TrendingDown, CircleSlash } from 'lucide-react';
 import { FaFacebook, FaWhatsapp } from 'react-icons/fa';
 
 interface Product {
@@ -511,6 +492,15 @@ export default function ProductsClient({
         const file = e.target.files?.[0];
         if (!file) return;
 
+        const MAX_IMPORT_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
+        const MAX_IMPORT_ROWS = 2000;
+
+        if (file.size > MAX_IMPORT_FILE_SIZE) {
+            toast.error(language === 'ar' ? 'حجم الملف كبير جداً (الحد الأقصى 5 ميغابايت)' : 'File size too large (max 5MB)');
+            if (e.target) e.target.value = '';
+            return;
+        }
+
         setIsSubmittingBulk(true);
         const reader = new FileReader();
         reader.onload = async (event) => {
@@ -527,21 +517,46 @@ export default function ProductsClient({
                     }
 
                     const headers = lines[0].split(',').map(h => h.trim());
-                    data = lines.slice(1).filter(line => line.trim()).map(line => {
+                    data = lines.slice(1, MAX_IMPORT_ROWS + 1).filter(line => line.trim()).map(line => {
                         const values = line.split(',').map(v => v.replace(/^"|"$/g, '').trim());
                         const obj: ImportRow = {};
                         headers.forEach((header, i) => {
-                            obj[header] = values[i];
+                            const val = values[i] || '';
+                            obj[header] = val.replace(/^[=+\-@\t\r]+/, '');
                         });
                         return obj;
                     });
                 } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
                     const XLSX = await import('xlsx');
                     const bstr = event.target?.result;
-                    const wb = XLSX.read(bstr, { type: 'binary' });
+                    // Safe parser options: disable formulas, disable HTML, cap sheet rows to prevent ReDoS/DoS
+                    const wb = XLSX.read(bstr, { 
+                        type: 'binary',
+                        cellFormula: false,
+                        cellHTML: false,
+                        cellText: true,
+                        sheetRows: MAX_IMPORT_ROWS + 1
+                    });
                     const wsname = wb.SheetNames[0];
+                    if (!wsname || !wb.Sheets[wsname]) {
+                        toast.error(t('admin.fileEmpty'));
+                        return;
+                    }
                     const ws = wb.Sheets[wsname];
-                    data = XLSX.utils.sheet_to_json<ImportRow>(ws);
+                    const rawRows = XLSX.utils.sheet_to_json<ImportRow>(ws);
+
+                    // Sanitize against formula injection and enforce row limit
+                    data = rawRows.slice(0, MAX_IMPORT_ROWS).map(row => {
+                        const sanitizedRow: ImportRow = {};
+                        for (const [key, val] of Object.entries(row)) {
+                            if (typeof val === 'string') {
+                                sanitizedRow[key] = val.replace(/^[=+\-@\t\r]+/, '');
+                            } else {
+                                sanitizedRow[key] = val;
+                            }
+                        }
+                        return sanitizedRow;
+                    });
                 }
 
                 if (data.length === 0) {
@@ -602,9 +617,9 @@ export default function ProductsClient({
                                     onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
                                     className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 hover:border-[#8A6305] text-[#0B192C] dark:text-white h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-2xs cursor-pointer"
                                 >
-                                    <MdFileUpload className="text-[18px]" />
+                                    <Upload className="text-[18px]" />
                                     {t('admin.exportData')}
-                                    <MdExpandMore className={`text-[18px] transition-transform duration-200 ${isExportMenuOpen ? 'rotate-180' : ''}`} />
+                                    <ChevronDown className={`text-[18px] transition-transform duration-200 ${isExportMenuOpen ? 'rotate-180' : ''}`} />
                                 </button>
 
                                 {isExportMenuOpen && (
@@ -631,7 +646,7 @@ export default function ProductsClient({
                             </div>
 
                             <label className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 hover:border-[#8A6305] text-[#0B192C] dark:text-white h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-2xs cursor-pointer">
-                                <MdFileDownload className="text-[18px]" />
+                                <Download className="text-[18px]" />
                                 {t('admin.importData')}
                                 <input
                                     type="file"
@@ -649,7 +664,7 @@ export default function ProductsClient({
                                     }}
                                     className="h-11 px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
                                 >
-                                    <MdAdd className="text-xl" />
+                                    <Plus className="text-xl" />
                                     <span>{t('admin.addNewProduct')}</span>
                                 </button>
                             )}
@@ -702,7 +717,7 @@ export default function ProductsClient({
                         <div className="p-5 border-b border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] flex flex-col lg:flex-row gap-4 lg:items-center justify-between">
                             <div className="relative w-full lg:w-80">
                                 <span className={`absolute inset-y-0 ${dir === 'rtl' ? 'end-0 pe-3' : 'start-0 ps-3'} flex items-center pointer-events-none`}>
-                                    <MdSearch className="text-text-sub dark:text-gray-400 text-[20px]" />
+                                    <Search className="text-text-sub dark:text-gray-400 text-[20px]" />
                                 </span>
                                 <input
                                     className={`block w-full ${dir === 'rtl' ? 'pe-10 ps-3' : 'ps-10 pe-3'} py-2.5 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-xl bg-background-light dark:bg-gray-800 text-sm text-text-main dark:text-white placeholder-text-sub dark:placeholder-gray-500 focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none`}
@@ -724,7 +739,7 @@ export default function ProductsClient({
                                         {brands.map(brand => <option key={brand.id} value={brand.name}>{brand.name}</option>)}
                                     </select>
                                     <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'start-0 ps-2' : 'end-0 pe-2'} flex items-center pointer-events-none text-text-sub dark:text-gray-400`}>
-                                        <MdExpandMore className="text-[20px]" />
+                                        <ChevronDown className="text-[20px]" />
                                     </div>
                                 </div>
                                 {/* Category Filter */}
@@ -738,7 +753,7 @@ export default function ProductsClient({
                                         {uniqueCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                     <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'start-0 ps-2' : 'end-0 pe-2'} flex items-center pointer-events-none text-text-sub dark:text-gray-400`}>
-                                        <MdExpandMore className="text-[20px]" />
+                                        <ChevronDown className="text-[20px]" />
                                     </div>
                                 </div>
                                 {/* Stock Filter */}
@@ -754,7 +769,7 @@ export default function ProductsClient({
                                         <option>{t('admin.outOfStock')}</option>
                                     </select>
                                     <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'start-0 ps-2' : 'end-0 pe-2'} flex items-center pointer-events-none text-text-sub dark:text-gray-400`}>
-                                        <MdExpandMore className="text-[20px]" />
+                                        <ChevronDown className="text-[20px]" />
                                     </div>
                                 </div>
 
@@ -766,7 +781,7 @@ export default function ProductsClient({
                                         : 'bg-background-light dark:bg-gray-800 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] text-text-main dark:text-white hover:border-amber-500 hover:text-amber-500'
                                         }`}
                                 >
-                                    <MdLocalFireDepartment className={`text-[20px] ${showTrendingOnly ? 'fill-1' : ''}`} />
+                                    <Flame className={`text-[20px] ${showTrendingOnly ? 'fill-1' : ''}`} />
                                     <span className="hidden sm:inline">{t('admin.trendingOnly')}</span>
                                 </button>
 
@@ -778,7 +793,7 @@ export default function ProductsClient({
                                         : 'bg-background-light dark:bg-gray-800 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] text-text-main dark:text-white hover:border-emerald-500 hover:text-emerald-500'
                                         }`}
                                 >
-                                    <MdSell className={`text-[20px] ${showOnSaleOnly ? 'fill-1' : ''}`} />
+                                    <Tag className={`text-[20px] ${showOnSaleOnly ? 'fill-1' : ''}`} />
                                     <span className="hidden sm:inline">{t('admin.onSaleOnly')}</span>
                                 </button>
                             </div>
@@ -805,9 +820,9 @@ export default function ProductsClient({
                                             className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/30 transition-all border border-amber-200 dark:border-amber-800/50 disabled:opacity-50"
                                         >
                                             {isSubmittingBulk ? (
-                                                <MdSync className="animate-spin text-[18px]" />
+                                                <RefreshCw className="animate-spin text-[18px]" />
                                             ) : (
-                                                <MdTrendingDown className="text-[18px]" />
+                                                <TrendingDown className="text-[18px]" />
                                             )}
                                             {t('admin.removeTrending')}
                                         </button>
@@ -819,9 +834,9 @@ export default function ProductsClient({
                                             className="flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/30 transition-all border border-emerald-200 dark:border-emerald-800/50 disabled:opacity-50"
                                         >
                                             {isSubmittingBulk ? (
-                                                <MdSync className="animate-spin text-[18px]" />
+                                                <RefreshCw className="animate-spin text-[18px]" />
                                             ) : (
-                                                <MdMoneyOff className="text-[18px]" />
+                                                <CircleSlash className="text-[18px]" />
                                             )}
                                             {t('admin.removeSale')}
                                         </button>
@@ -833,9 +848,9 @@ export default function ProductsClient({
                                             className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg transition-all shadow-md shadow-red-500/20 disabled:opacity-50"
                                         >
                                             {isSubmittingBulk ? (
-                                                <MdSync className="animate-spin text-[18px]" />
+                                                <RefreshCw className="animate-spin text-[18px]" />
                                             ) : (
-                                                <MdDelete className="text-[18px]" />
+                                                <Trash2 className="text-[18px]" />
                                             )}
                                             {t('admin.deleteSelected')}
                                         </button>
@@ -861,8 +876,8 @@ export default function ProductsClient({
                                             <div className="flex items-center">
                                                 {t('admin.productName')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'name' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'name' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'name' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'name' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -870,8 +885,8 @@ export default function ProductsClient({
                                             <div className="flex items-center">
                                                 {t('admin.brands')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'brand' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'brand' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'brand' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'brand' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -879,8 +894,8 @@ export default function ProductsClient({
                                             <div className="flex items-center">
                                                 {t('admin.categoryName')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'category' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'category' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'category' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'category' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -888,8 +903,8 @@ export default function ProductsClient({
                                             <div className="flex items-center">
                                                 {t('admin.priceValue')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'price' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'price' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'price' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'price' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -897,8 +912,8 @@ export default function ProductsClient({
                                             <div className="flex items-center">
                                                 {t('admin.inventory')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'stock' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'stock' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'stock' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'stock' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -906,8 +921,8 @@ export default function ProductsClient({
                                             <div className="flex items-center">
                                                 {t('admin.trending')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'isTrending' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'isTrending' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'isTrending' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'isTrending' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -915,8 +930,8 @@ export default function ProductsClient({
                                             <div className="flex items-center">
                                                 {t('admin.statusValue')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'status' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'status' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'status' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'status' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -1007,9 +1022,9 @@ export default function ProductsClient({
                                                         title={product.isTrending ? "Remove from Trending" : "Mark as Trending"}
                                                     >
                                                         {loadingMap[product.id] ? (
-                                                            <MdSync className="animate-spin text-[20px]" />
+                                                            <RefreshCw className="animate-spin text-[20px]" />
                                                         ) : (
-                                                            <MdLocalFireDepartment className="text-[20px]" />
+                                                            <Flame className="text-[20px]" />
                                                         )}
                                                     </button>
                                                 </td>
@@ -1030,7 +1045,7 @@ export default function ProductsClient({
                                                                 className={`p-1.5 sm:p-2 rounded-lg transition-colors ${activeShareId === product.id ? 'text-primary bg-primary/10' : 'text-text-sub dark:text-gray-400 hover:text-primary hover:bg-primary/10'}`}
                                                                 title={t('admin.shareProduct')}
                                                             >
-                                                                <MdShare className="text-[18px] sm:text-[20px]" />
+                                                                <Share2 className="text-[18px] sm:text-[20px]" />
                                                             </button>
 
                                                             {activeShareId === product.id && (
@@ -1041,7 +1056,7 @@ export default function ProductsClient({
                                                                             onClick={() => handleCopyLink(product.slug)}
                                                                             className="w-full text-start px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 text-xs font-medium text-text-main dark:text-white transition-colors flex items-center gap-3 border-b border-gray-50 dark:border-white/5"
                                                                         >
-                                                                            <MdContentCopy className="text-gray-400" />
+                                                                            <Copy className="text-gray-400" />
                                                                             <span>{t('admin.copyLink')}</span>
                                                                         </button>
                                                                         <button
@@ -1067,7 +1082,7 @@ export default function ProductsClient({
                                                                 onClick={() => handleEdit(product)}
                                                                 className="p-1.5 sm:p-2 text-text-sub dark:text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors" title={t('admin.editProduct')}
                                                             >
-                                                                <MdEdit className="text-[18px] sm:text-[20px]" />
+                                                                <Pencil className="text-[18px] sm:text-[20px]" />
                                                             </button>
                                                         )}
                                                         {canDelete && (
@@ -1075,7 +1090,7 @@ export default function ProductsClient({
                                                                 onClick={() => handleDelete(product.id, product.name)}
                                                                 className="p-1.5 sm:p-2 text-text-sub dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors" title={t('admin.deleteProduct')}
                                                             >
-                                                                <MdDelete className="text-[18px] sm:text-[20px]" />
+                                                                <Trash2 className="text-[18px] sm:text-[20px]" />
                                                             </button>
                                                         )}
                                                     </div>
@@ -1107,7 +1122,7 @@ export default function ProductsClient({
                                     disabled={currentPage === 1}
                                     className="p-1.5 sm:p-2 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-lg text-text-sub dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    <MdChevronLeft className={`text-[18px] sm:text-[20px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                                    <ChevronLeft className={`text-[18px] sm:text-[20px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                                 </button>
 
                                 <div className="flex items-center gap-1">
@@ -1147,7 +1162,7 @@ export default function ProductsClient({
                                     disabled={currentPage === totalPages || totalPages === 0}
                                     className="p-1.5 sm:p-2 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-lg text-text-sub dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    <MdChevronRight className={`text-[18px] sm:text-[20px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                                    <ChevronRight className={`text-[18px] sm:text-[20px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                                 </button>
                             </div>
                         </div>

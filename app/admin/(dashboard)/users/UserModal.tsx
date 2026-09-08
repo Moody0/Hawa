@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createUser, updateUser } from "@/lib/user-actions";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { MdClose, MdSync } from "react-icons/md";
+import { X, RefreshCw } from 'lucide-react';
 
 interface User {
     id: string;
@@ -186,7 +186,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                             aria-label={dir === 'rtl' ? 'إغلاق' : 'Close'}
                             className="p-2 text-text-sub dark:text-gray-400 hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
                         >
-                            <MdClose className="text-[24px]" />
+                            <X className="text-[24px]" />
                         </button>
                     </div>
 
@@ -296,7 +296,7 @@ export default function UserModal({ isOpen, onClose, user }: UserModalProps) {
                                 className="flex-1 px-8 py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {isSubmitting ? (
-                                <MdSync className="animate-spin text-[18px]" />
+                                <RefreshCw className="animate-spin text-[18px]" />
                             ) : (
                                 user ? t('admin.updateUser') : t('admin.createUser')
                             )}

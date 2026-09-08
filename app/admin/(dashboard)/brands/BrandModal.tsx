@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MdClose, MdSync, MdStar } from "react-icons/md";
+import { X, RefreshCw, Star } from 'lucide-react';
 import { createBrand, updateBrand } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -129,7 +129,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                         onClick={onClose} 
                         className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                     >
-                        <MdClose className="text-xl" />
+                        <X className="text-xl" />
                     </button>
                 </div>
 
@@ -210,7 +210,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                             />
                             <div className="flex flex-col">
                                 <span className="text-xs font-bold text-[#0B192C] dark:text-white flex items-center gap-1">
-                                    <MdStar className="text-amber-500 text-sm" />
+                                    <Star className="text-amber-500 text-sm" />
                                     <span>{isArabic ? 'شريك مميز' : 'Featured Partner'}</span>
                                 </span>
                                 <span className="text-[10px] text-amber-600/90 dark:text-amber-400">
@@ -248,7 +248,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                             disabled={isSubmitting} 
                             className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] px-4 py-2.5 font-bold text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 text-sm cursor-pointer"
                         >
-                            {isSubmitting && <MdSync className="animate-spin text-base" />}
+                            {isSubmitting && <RefreshCw className="animate-spin text-base" />}
                             <span>{brand ? (isArabic ? 'حفظ التعديلات' : 'Save Changes') : (isArabic ? 'إضافة الماركة' : 'Create Brand')}</span>
                         </button>
                     </div>

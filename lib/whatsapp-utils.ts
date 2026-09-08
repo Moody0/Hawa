@@ -38,11 +38,16 @@ export interface WhatsAppOrderData {
     notes?: string | null;
     totalAmount: number;
     items: WhatsAppOrderItem[];
+    isQuoteRequest?: boolean;
+    showPrices?: boolean;
 }
 
 export function generateWhatsAppOrderMessage(order: WhatsAppOrderData): string {
     const lines: string[] = [];
-    lines.push(`🛒 *طلب جملة جديد – شركة حوا للتوزيع والتجارة*`);
+    const showPrices = order.showPrices !== false && !order.isQuoteRequest;
+    lines.push(order.isQuoteRequest
+        ? `🛒 *طلب توريد جملة للمراجعة – شركة حوا للتوزيع والتجارة*`
+        : `🛒 *طلب جملة جديد – شركة حوا للتوزيع والتجارة*`);
     lines.push(`━━━━━━━━━━━━━━━━━━`);
     lines.push(`📦 *رقم الطلبية:* #${order.id.slice(-8).toUpperCase()}`);
     if (order.shopName) {
@@ -73,21 +78,23 @@ export function generateWhatsAppOrderMessage(order: WhatsAppOrderData): string {
                 contentStr = ` (${rawContent})`;
             }
         }
-        const priceText = item.price > 0
+        const priceText = showPrices && item.price > 0
             ? `${(item.price * item.quantity).toLocaleString()} ل.س`
-            : 'السعر عند الطلب';
+            : 'السعر يحدد بعد المراجعة';
         const opt = item.options ? ` [${item.options}]` : '';
         lines.push(`${index + 1}️⃣ *${pName}*${opt}`);
         lines.push(`   └ الكمية: *${item.quantity} ${pkg}*${contentStr} • ${priceText}`);
     });
 
     lines.push(`━━━━━━━━━━━━━━━━━━`);
-    if (order.totalAmount > 0) {
+    if (showPrices && order.totalAmount > 0) {
         lines.push(`💰 *إجمالي الفاتورة التقديرية:* ${order.totalAmount.toLocaleString()} ل.س`);
     } else {
-        lines.push(`💰 *الأسعار:* تحدد رسمياً حسب فواتير الوكالة المعتمدة (السعر عند الطلب)`);
+        lines.push(`💰 *القيمة النهائية:* تحدد بعد مراجعة الطلب وتأكيد الأسعار والتوصيل`);
     }
-    lines.push(`📌 *ملاحظة:* الأسعار النهائية تعتمد حسب فواتير الوكالة الأصلية وجدول التسليم.`);
+    lines.push(showPrices
+        ? `📌 *ملاحظة:* موعد التسليم يؤكد مع فريق المبيعات.`
+        : `📌 *ملاحظة:* لا يتم تحصيل أي دفعة الآن؛ يؤكد فريق المبيعات السعر والتوصيل وترتيبات الدفع.`);
     if (order.notes && order.notes.trim()) {
         lines.push(`📝 *ملاحظات التوصيل:* ${order.notes.trim()}`);
     }

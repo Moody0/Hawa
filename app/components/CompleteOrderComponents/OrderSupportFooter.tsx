@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { MdShoppingBag } from 'react-icons/md';
+import { ShoppingBag } from 'lucide-react';
 
 const OrderSupportFooter = () => {
     const { t } = useLanguage();
@@ -16,7 +16,7 @@ const OrderSupportFooter = () => {
                     className="w-full bg-[#0B192C] hover:bg-[#0F172A] text-white font-bold rounded-xl h-12 flex items-center justify-center gap-2 transition-all active:scale-[0.98] text-sm"
                 >
                     <span>{t('cart.continueShopping')}</span>
-                    <MdShoppingBag className="text-base text-[#8A6305]" />
+                    <ShoppingBag className="text-base text-[#8A6305]" />
                 </Link>
             </div>
             <div className="mt-8 flex flex-col items-center gap-2 text-center">

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useProductRail } from './useProductRail';
 
-import { MdRestaurant, MdSetMeal, MdAcUnit, MdLocalCafe, MdBakeryDining, MdFastfood } from 'react-icons/md';
+import { Utensils, Fish, Snowflake, Coffee, Croissant, Sandwich } from 'lucide-react';
 
 const CATEGORIES = [
     {
@@ -13,42 +13,42 @@ const CATEGORIES = [
         nameAr: 'المعكرونة والحبوب',
         nameEn: 'Pasta & Grains',
         slug: 'pasta-grains',
-        icon: MdRestaurant
+        icon: Utensils
     },
     {
         id: 'canned-fish',
         nameAr: 'التونة والأسماك المعلبة',
         nameEn: 'Canned Fish & Tuna',
         slug: 'canned-fish',
-        icon: MdSetMeal
+        icon: Fish
     },
     {
         id: 'sauces-condiments',
         nameAr: 'الصلصات والتوابل',
         nameEn: 'Sauces & Condiments',
         slug: 'sauces-condiments',
-        icon: MdFastfood
+        icon: Sandwich
     },
     {
         id: 'frozen-foods',
         nameAr: 'المفرزات والبحريات',
         nameEn: 'Frozen Foods',
         slug: 'frozen-foods',
-        icon: MdAcUnit
+        icon: Snowflake
     },
     {
         id: 'coffee-hot-drinks',
         nameAr: 'القهوة والمشروبات',
         nameEn: 'Coffee & Beverages',
         slug: 'coffee-hot-drinks',
-        icon: MdLocalCafe
+        icon: Coffee
     },
     {
         id: 'biscuits-sweets',
         nameAr: 'البسكويت والحلويات',
         nameEn: 'Biscuits & Sweets',
         slug: 'biscuits-sweets',
-        icon: MdBakeryDining
+        icon: Croissant
     }
 ];
 

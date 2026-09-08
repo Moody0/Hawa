@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import OrderSuccessHeader from '@/app/components/CompleteOrderComponents/OrderSuccessHeader';
@@ -7,7 +9,7 @@ import OrderBasicInfo from '@/app/components/CompleteOrderComponents/OrderBasicI
 import OrderShippingAndPayment from '@/app/components/CompleteOrderComponents/OrderShippingAndPayment';
 import OrderItemsSelection from '@/app/components/CompleteOrderComponents/OrderItemsSelection';
 import OrderSupportFooter from '@/app/components/CompleteOrderComponents/OrderSupportFooter';
-import { MdRefresh } from 'react-icons/md';
+import { RotateCw } from 'lucide-react';
 
 import { useLanguage } from '@/app/context/LanguageContext';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -46,6 +48,7 @@ const CompleteOrderContent = () => {
     const router = useRouter();
     const { t, language } = useLanguage();
     const orderId = searchParams.get('id');
+    const isQuoteRequest = searchParams.get('quote') === '1';
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -65,6 +68,13 @@ const CompleteOrderContent = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setOrder(data);
+
+                    // Promptly remove token from URL so it does not linger in browser history or referrer headers
+                    if (token && typeof window !== "undefined" && window.history.replaceState) {
+                        const cleanUrl = new URL(window.location.href);
+                        cleanUrl.searchParams.delete("token");
+                        window.history.replaceState({}, "", cleanUrl.pathname + cleanUrl.search);
+                    }
                 } else {
                     router.push('/');
                 }
@@ -82,7 +92,7 @@ const CompleteOrderContent = () => {
     if (loading) {
         return (
             <div className="flex-grow flex items-center justify-center min-h-[60vh]">
-                <MdRefresh className="animate-spin text-zinc-900 dark:text-white text-4xl" />
+                <RotateCw className="animate-spin text-zinc-900 dark:text-white text-4xl" />
             </div>
         );
     }
@@ -98,6 +108,8 @@ const CompleteOrderContent = () => {
         streetAddress: order.streetAddress,
         notes: order.notes,
         totalAmount: order.totalAmount,
+        isQuoteRequest,
+        showPrices: !isQuoteRequest,
         items: order.items.map(item => ({
             quantity: item.quantity,
             price: item.price,
@@ -111,7 +123,7 @@ const CompleteOrderContent = () => {
 
     return (
         <div className="flex-grow w-full max-w-4xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center">
-            <OrderSuccessHeader />
+            <OrderSuccessHeader isQuoteRequest={isQuoteRequest} />
 
             {/* Prominent WhatsApp Dispatch / Fallback Card */}
             <div className="w-full bg-[#25D366]/10 dark:bg-[#25D366]/15 border border-[#25D366]/30 rounded-2xl p-5 md:p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-5 shadow-sm">
@@ -145,6 +157,7 @@ const CompleteOrderContent = () => {
                 <OrderBasicInfo
                     orderId={order.id}
                     totalAmount={order.totalAmount}
+                    isQuoteRequest={isQuoteRequest}
                 />
 
                 <OrderShippingAndPayment
@@ -154,10 +167,12 @@ const CompleteOrderContent = () => {
                     city={order.city}
                     phone={order.phone}
                     notes={order.notes}
+                    isQuoteRequest={isQuoteRequest}
                 />
 
                 <OrderItemsSelection
                     items={order.items}
+                    showPrices={!isQuoteRequest}
                 />
             </div>
 
@@ -170,7 +185,7 @@ const Page = () => {
     return (
         <Suspense fallback={
             <div className="flex-grow flex items-center justify-center min-h-[60vh]">
-                <MdRefresh className="animate-spin text-zinc-900 dark:text-white text-4xl" />
+                <RotateCw className="animate-spin text-zinc-900 dark:text-white text-4xl" />
             </div>
         }>
             <CompleteOrderContent />

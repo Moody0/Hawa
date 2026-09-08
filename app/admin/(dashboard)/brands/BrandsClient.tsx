@@ -8,23 +8,7 @@ import { deleteBrand, toggleBrandActive, toggleBrandFeatured } from "../../../..
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { 
-    MdAdd, 
-    MdDelete, 
-    MdEdit, 
-    MdImage, 
-    MdSearch, 
-    MdStar, 
-    MdStarBorder, 
-    MdSync, 
-    MdToggleOff, 
-    MdToggleOn,
-    MdVisibility,
-    MdStorefront,
-    MdShoppingBag,
-    MdCategory,
-    MdAccountTree
-} from "react-icons/md";
+import { Plus, Trash2, Pencil, Image, Search, Star, RefreshCw, ToggleLeft, ToggleRight, Eye, Store, ShoppingBag, FolderTree, Network } from 'lucide-react';
 import RelatedItemsModal from "../components/RelatedItemsModal";
 
 interface Brand {
@@ -187,7 +171,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                         {/* Search & Add Action */}
                         <div className="flex flex-wrap items-center gap-3">
                             <div className="relative min-w-[240px] flex-1 sm:flex-initial">
-                                <MdSearch className="absolute start-3 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
+                                <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
                                 <input
                                     value={searchQuery}
                                     onChange={(event) => setSearchQuery(event.target.value)}
@@ -201,7 +185,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                     onClick={handleAdd} 
                                     className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] px-5 text-sm font-bold text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
                                 >
-                                    <MdAdd className="text-xl" />
+                                    <Plus className="text-xl" />
                                     <span>{t("admin.addBrand")}</span>
                                 </button>
                             )}
@@ -232,7 +216,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                     : "bg-white dark:bg-zinc-800 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/30 hover:border-amber-500"
                             }`}
                         >
-                            <MdStar className="text-sm" />
+                            <Star className="text-sm" />
                             <span>{isArabic ? 'الشركاء المميزين (Featured)' : 'Featured Partners'}</span>
                             <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${statusFilter === "FEATURED" ? "bg-white/20 text-white" : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300"}`}>
                                 {stats.featured}
@@ -306,13 +290,13 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                 className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" 
                                             />
                                         ) : (
-                                            <MdImage className="text-5xl text-slate-300 dark:text-zinc-600" />
+                                            <Image className="text-5xl text-slate-300 dark:text-zinc-600" />
                                         )}
 
                                         {/* Main Category Badge (Top Left) */}
                                         {brand.mainCategory?.name && (
                                             <div className="absolute top-2.5 start-2.5 flex items-center gap-1 bg-[#0B192C]/85 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
-                                                <MdAccountTree className="text-xs text-[#8A6305]" />
+                                                <Network className="text-xs text-[#8A6305]" />
                                                 <span>{brand.mainCategory.name}</span>
                                             </div>
                                         )}
@@ -331,11 +315,11 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                 }`}
                                             >
                                                 {isFeatLoading ? (
-                                                    <MdSync className="text-sm animate-spin" />
+                                                    <RefreshCw className="text-sm animate-spin" />
                                                 ) : brand.isFeatured ? (
-                                                    <MdStar className="text-lg" />
+                                                    <Star className="text-lg" />
                                                 ) : (
-                                                    <MdStarBorder className="text-lg" />
+                                                    <Star className="text-lg" />
                                                 )}
                                             </button>
                                         )}
@@ -373,7 +357,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                 </span>
                                                 {brand.isFeatured && (
                                                     <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/30 px-2 py-0.5 rounded-md">
-                                                        <MdStar className="text-xs" />
+                                                        <Star className="text-xs" />
                                                         <span>{isArabic ? 'شريك مميز' : 'Featured Partner'}</span>
                                                     </span>
                                                 )}
@@ -387,7 +371,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                     className="inline-flex items-center gap-1 cursor-pointer rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 px-2.5 py-1 text-[11px] transition-colors"
                                                     title={isArabic ? 'عرض منتجات الماركة' : 'View brand products'}
                                                 >
-                                                    <MdShoppingBag className="text-xs" />
+                                                    <ShoppingBag className="text-xs" />
                                                     <span>{brand._count.products} {isArabic ? 'منتج' : 'Products'}</span>
                                                 </button>
 
@@ -397,7 +381,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                     className="inline-flex items-center gap-1 cursor-pointer rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100 px-2.5 py-1 text-[11px] transition-colors"
                                                     title={isArabic ? 'عرض فئات الماركة' : 'View brand categories'}
                                                 >
-                                                    <MdCategory className="text-xs" />
+                                                    <FolderTree className="text-xs" />
                                                     <span>{brand._count.categories} {isArabic ? 'فئة' : 'Categories'}</span>
                                                 </button>
                                             </div>
@@ -412,7 +396,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"
                                             >
-                                                <MdVisibility className="text-sm" />
+                                                <Eye className="text-sm" />
                                                 <span>{isArabic ? 'معاينة المتجر' : 'Preview Store'}</span>
                                             </a>
 
@@ -426,11 +410,11 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                         title={isArabic ? 'تفعيل / تعطيل' : 'Toggle Active'}
                                                     >
                                                         {loadingMap[`active:${brand.id}`] ? (
-                                                            <MdSync className="animate-spin text-lg" />
+                                                            <RefreshCw className="animate-spin text-lg" />
                                                         ) : brand.isActive ? (
-                                                            <MdToggleOn className="text-2xl text-emerald-500" />
+                                                            <ToggleRight className="text-2xl text-emerald-500" />
                                                         ) : (
-                                                            <MdToggleOff className="text-2xl text-slate-400" />
+                                                            <ToggleLeft className="text-2xl text-slate-400" />
                                                         )}
                                                     </button>
                                                 )}
@@ -442,7 +426,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                         className="rounded-lg p-1.5 text-slate-600 dark:text-gray-300 hover:bg-[#8A6305]/10 hover:text-[#8A6305] transition-colors cursor-pointer" 
                                                         title={isArabic ? 'تعديل' : 'Edit'}
                                                     >
-                                                        <MdEdit className="text-lg" />
+                                                        <Pencil className="text-lg" />
                                                     </button>
                                                 )}
 
@@ -453,7 +437,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                         className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 transition-colors cursor-pointer" 
                                                         title={isArabic ? 'حذف' : 'Delete'}
                                                     >
-                                                        <MdDelete className="text-lg" />
+                                                        <Trash2 className="text-lg" />
                                                     </button>
                                                 )}
                                             </div>
@@ -467,7 +451,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                     {/* Empty State */}
                     {filteredBrands.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 mt-6">
-                            <MdStorefront className="text-5xl text-slate-300 dark:text-zinc-600 mb-2" />
+                            <Store className="text-5xl text-slate-300 dark:text-zinc-600 mb-2" />
                             <h3 className="text-base font-bold text-[#0B192C] dark:text-white">
                                 {isArabic ? 'لا توجد ماركات مطابقة للبحث' : 'No brands found'}
                             </h3>

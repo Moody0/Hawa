@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+export const dynamic = 'force-dynamic';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCustomer } from '@/app/context/CustomerContext';
@@ -8,22 +10,7 @@ import { useCart } from '@/app/context/CartContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import ResilientImage from '@/app/components/ResilientImage';
 import toast from 'react-hot-toast';
-import { 
-    MdStore, 
-    MdPerson, 
-    MdPhone, 
-    MdLocationOn, 
-    MdShoppingBag, 
-    MdFavorite, 
-    MdRepeat, 
-    MdTimeline, 
-    MdEdit, 
-    MdLogout, 
-    MdCheckCircle, 
-    MdSchedule, 
-    MdLocalShipping,
-    MdWhatsapp
-} from 'react-icons/md';
+import { Store, Phone, ShoppingBag, Heart, Pencil, LogOut, CheckCircle2, Clock, Truck, Repeat, AlertCircle, RefreshCw, LogIn } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 interface OrderItemProduct {
@@ -59,6 +46,25 @@ interface CustomerOrder {
     items: OrderItem[];
 }
 
+interface WishlistProduct {
+    id: string;
+    name: string;
+    nameAr?: string | null;
+    slug: string;
+    images: string;
+    price: number;
+    packaging?: string | null;
+    brand?: { name: string } | null;
+}
+
+type SectionStatus = 'loading' | 'success' | 'error' | 'unauthorized';
+
+interface SectionState<T> {
+    status: SectionStatus;
+    data: T[];
+    errorMessage?: string;
+}
+
 export default function MerchantPortalPage() {
     const router = useRouter();
     const { customer, isLoading, logout, updateProfile } = useCustomer();
@@ -67,12 +73,16 @@ export default function MerchantPortalPage() {
     const isArabic = language === 'ar';
 
     const [activeTab, setActiveTab] = useState<'orders' | 'wishlist' | 'profile' | 'track'>('orders');
-    const [orders, setOrders] = useState<CustomerOrder[]>([]);
-    const [ordersLoading, setOrdersLoading] = useState(true);
-    const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
-    const [wishlistLoading, setWishlistLoading] = useState(false);
+    const [ordersState, setOrdersState] = useState<SectionState<CustomerOrder>>({
+        status: 'loading',
+        data: [],
+    });
+    const [wishlistState, setWishlistState] = useState<SectionState<WishlistProduct>>({
+        status: 'loading',
+        data: [],
+    });
 
-    // Profile form state
+    // Profile form state and accessibility
     const [profileForm, setProfileForm] = useState({
         shopName: '',
         ownerName: '',
@@ -80,7 +90,16 @@ export default function MerchantPortalPage() {
         address: '',
         notes: '',
     });
+    const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
+    const [submitStatus, setSubmitStatus] = useState<string>('');
     const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+    const shopNameRef = useRef<HTMLInputElement>(null);
+    const ownerNameRef = useRef<HTMLInputElement>(null);
+    const cityRef = useRef<HTMLInputElement>(null);
+    const addressRef = useRef<HTMLInputElement>(null);
+
+    const tabButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000';
     const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
@@ -101,43 +120,85 @@ export default function MerchantPortalPage() {
     }, [isLoading, customer, router]);
 
     // Fetch Orders
-    const fetchOrders = async () => {
-        setOrdersLoading(true);
+    const fetchOrders = useCallback(async () => {
+        setOrdersState((prev) => ({ ...prev, status: 'loading', errorMessage: undefined }));
         try {
             const res = await fetch('/api/customer/orders');
-            if (res.ok) {
-                const data = await res.json();
-                setOrders(data.orders || []);
+            if (res.status === 401 || res.status === 403) {
+                setOrdersState({
+                    status: 'unauthorized',
+                    data: [],
+                    errorMessage: isArabic ? 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مجدداً لعرض طلباتك.' : 'Session expired. Please log in again to view your orders.',
+                });
+                return;
             }
+            if (!res.ok) {
+                const errData = await res.json().catch(() => null);
+                setOrdersState((prev) => ({
+                    status: 'error',
+                    data: prev.data,
+                    errorMessage: errData?.error || (isArabic ? 'فشل جلب الطلبات، يرجى إعادة المحاولة.' : 'Failed to load orders. Please try again.'),
+                }));
+                return;
+            }
+            const data = await res.json();
+            setOrdersState({
+                status: 'success',
+                data: data.orders || [],
+            });
         } catch (err) {
             console.error('Error fetching customer orders:', err);
-        } finally {
-            setOrdersLoading(false);
+            setOrdersState((prev) => ({
+                status: 'error',
+                data: prev.data,
+                errorMessage: isArabic ? 'تعذر الاتصال بالخادم، يرجى التحقق من الشبكة وإعادة المحاولة.' : 'Network error. Please check your connection and retry.',
+            }));
         }
-    };
+    }, [isArabic]);
 
     // Fetch Wishlist
-    const fetchWishlist = async () => {
-        setWishlistLoading(true);
+    const fetchWishlist = useCallback(async () => {
+        setWishlistState((prev) => ({ ...prev, status: 'loading', errorMessage: undefined }));
         try {
             const res = await fetch('/api/customer/wishlist');
-            if (res.ok) {
-                const data = await res.json();
-                setWishlistProducts(data.products || []);
+            if (res.status === 401 || res.status === 403) {
+                setWishlistState({
+                    status: 'unauthorized',
+                    data: [],
+                    errorMessage: isArabic ? 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مجدداً لعرض المفضلة.' : 'Session expired. Please log in again to view your wishlist.',
+                });
+                return;
             }
+            if (!res.ok) {
+                const errData = await res.json().catch(() => null);
+                setWishlistState((prev) => ({
+                    status: 'error',
+                    data: prev.data,
+                    errorMessage: errData?.error || (isArabic ? 'فشل جلب المفضلة، يرجى إعادة المحاولة.' : 'Failed to load wishlist. Please try again.'),
+                }));
+                return;
+            }
+            const data = await res.json();
+            setWishlistState({
+                status: 'success',
+                data: data.products || [],
+            });
         } catch (err) {
             console.error('Error fetching wishlist products:', err);
-        } finally {
-            setWishlistLoading(false);
+            setWishlistState((prev) => ({
+                status: 'error',
+                data: prev.data,
+                errorMessage: isArabic ? 'تعذر الاتصال بالخادم، يرجى التحقق من الشبكة وإعادة المحاولة.' : 'Network error. Please check your connection and retry.',
+            }));
         }
-    };
+    }, [isArabic]);
 
     useEffect(() => {
         if (customer) {
             fetchOrders();
             fetchWishlist();
         }
-    }, [customer]);
+    }, [customer, fetchOrders, fetchWishlist]);
 
     // Re-order handler: adds all items of past order into cart
     const handleReorder = (order: CustomerOrder) => {
@@ -169,9 +230,78 @@ export default function MerchantPortalPage() {
 
     const handleSaveProfile = async (e: React.FormEvent) => {
         e.preventDefault();
+        const errors: Record<string, string> = {};
+
+        if (!profileForm.shopName.trim()) {
+            errors.shopName = isArabic ? 'يرجى إدخال اسم المحل أو المتجر' : 'Store name is required';
+        }
+        if (!profileForm.ownerName.trim()) {
+            errors.ownerName = isArabic ? 'يرجى إدخال اسم صاحب الطلب' : 'Owner/Manager name is required';
+        }
+        if (!profileForm.city.trim()) {
+            errors.city = isArabic ? 'يرجى تحديد المحافظة أو المدينة' : 'City/Governorate is required';
+        }
+        if (!profileForm.address.trim()) {
+            errors.address = isArabic ? 'يرجى إدخال العنوان بالتفصيل' : 'Detailed address is required';
+        }
+
+        if (Object.keys(errors).length > 0) {
+            setProfileErrors(errors);
+            setSubmitStatus(isArabic ? 'يرجى تصحيح أخطاء النموذج قبل الحفظ' : 'Please fix the errors before saving');
+            if (errors.shopName) {
+                shopNameRef.current?.focus();
+            } else if (errors.ownerName) {
+                ownerNameRef.current?.focus();
+            } else if (errors.city) {
+                cityRef.current?.focus();
+            } else if (errors.address) {
+                addressRef.current?.focus();
+            }
+            return;
+        }
+
+        setProfileErrors({});
         setIsSavingProfile(true);
-        const res = await updateProfile(profileForm);
-        setIsSavingProfile(false);
+        setSubmitStatus(isArabic ? 'جاري حفظ التعديلات...' : 'Saving changes...');
+        try {
+            const res = await updateProfile(profileForm);
+            if (res && res.error) {
+                setSubmitStatus(isArabic ? 'تعذر حفظ البيانات، يرجى المحاولة مرة أخرى' : 'Failed to update store details');
+            } else {
+                setSubmitStatus(isArabic ? 'تم حفظ بيانات المتجر بنجاح' : 'Store details updated successfully');
+            }
+        } catch {
+            setSubmitStatus(isArabic ? 'حدث خطأ غير متوقع أثناء الحفظ' : 'An unexpected error occurred while saving');
+        } finally {
+            setIsSavingProfile(false);
+        }
+    };
+
+    const handleTabKeyDown = (e: React.KeyboardEvent, currentTab: 'orders' | 'wishlist' | 'profile') => {
+        const tabOrder: Array<'orders' | 'wishlist' | 'profile'> = ['orders', 'wishlist', 'profile'];
+        const currentIndex = tabOrder.indexOf(currentTab);
+        let nextIndex = -1;
+
+        if (e.key === 'ArrowRight') {
+            nextIndex = isArabic
+                ? (currentIndex - 1 + tabOrder.length) % tabOrder.length
+                : (currentIndex + 1) % tabOrder.length;
+        } else if (e.key === 'ArrowLeft') {
+            nextIndex = isArabic
+                ? (currentIndex + 1) % tabOrder.length
+                : (currentIndex - 1 + tabOrder.length) % tabOrder.length;
+        } else if (e.key === 'Home') {
+            nextIndex = 0;
+        } else if (e.key === 'End') {
+            nextIndex = tabOrder.length - 1;
+        }
+
+        if (nextIndex !== -1) {
+            e.preventDefault();
+            const nextTab = tabOrder[nextIndex];
+            setActiveTab(nextTab);
+            tabButtonRefs.current[nextTab]?.focus();
+        }
     };
 
     const getStatusBadge = (status: string) => {
@@ -181,44 +311,44 @@ export default function MerchantPortalPage() {
                 return {
                     label: isArabic ? 'جديد (بانتظار التأكيد)' : 'Pending',
                     bg: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300',
-                    icon: MdSchedule,
+                    icon: Clock,
                 };
             case 'CONTACTED':
                 return {
                     label: isArabic ? 'تم التواصل' : 'Contacted',
                     bg: 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-sky-300 border-blue-300',
-                    icon: MdPhone,
+                    icon: Phone,
                 };
             case 'PROCESSING':
                 return {
                     label: isArabic ? 'قيد التجهيز بالمستودع' : 'Processing in Warehouse',
                     bg: 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border-purple-300',
-                    icon: MdSchedule,
+                    icon: Clock,
                 };
             case 'SHIPPED':
             case 'DELIVERED':
                 return {
                     label: isArabic ? 'مع سيارة التوزيع' : 'Out for Delivery',
                     bg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300',
-                    icon: MdLocalShipping,
+                    icon: Truck,
                 };
             case 'COMPLETED':
                 return {
                     label: isArabic ? 'مكتمل ومسلّم' : 'Completed',
                     bg: 'bg-green-100 text-green-900 dark:bg-green-950/60 dark:text-green-300 border-green-400',
-                    icon: MdCheckCircle,
+                    icon: CheckCircle2,
                 };
             case 'CANCELLED':
                 return {
                     label: isArabic ? 'ملغي' : 'Cancelled',
                     bg: 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300',
-                    icon: MdSchedule,
+                    icon: Clock,
                 };
             default:
                 return {
                     label: status,
                     bg: 'bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-gray-200 border-gray-300',
-                    icon: MdSchedule,
+                    icon: Clock,
                 };
         }
     };
@@ -240,7 +370,7 @@ export default function MerchantPortalPage() {
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-start sm:items-center gap-4">
                         <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0">
-                            <MdStore className="text-3xl sm:text-4xl text-[#8A6305]" />
+                            <Store className="text-3xl sm:text-4xl text-[#8A6305]" />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1">
@@ -280,70 +410,139 @@ export default function MerchantPortalPage() {
                             onClick={logout}
                             className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-rose-600 text-white text-xs font-bold flex items-center gap-1.5 transition-colors border border-white/20"
                         >
-                            <MdLogout className="text-base" />
+                            <LogOut className="text-base" />
                             <span>{isArabic ? 'خروج' : 'Logout'}</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-gray-200 dark:border-white/10 mb-8 overflow-x-auto scrollbar-hide pb-2">
+            {/* Navigation Tabs with ARIA Tablist semantics */}
+            <div
+                role="tablist"
+                aria-label={isArabic ? 'أقسام حساب التاجر' : 'Merchant account sections'}
+                className="flex items-center gap-2 border-b border-gray-200 dark:border-white/10 mb-8 overflow-x-auto scrollbar-hide pb-2"
+            >
                 <button
+                    ref={(el) => { tabButtonRefs.current['orders'] = el; }}
+                    role="tab"
+                    id="account-tab-orders"
+                    aria-controls="account-panel-orders"
+                    aria-selected={activeTab === 'orders'}
+                    tabIndex={activeTab === 'orders' ? 0 : -1}
                     onClick={() => setActiveTab('orders')}
-                    className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                    onKeyDown={(e) => handleTabKeyDown(e, 'orders')}
+                    className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] ${
                         activeTab === 'orders'
                             ? 'bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white shadow-md'
                             : 'bg-gray-100 dark:bg-white/5 text-slate-700 dark:text-gray-300 hover:bg-gray-200'
                     }`}
                 >
-                    <MdShoppingBag className="text-base" />
+                    <ShoppingBag className="text-base" />
                     <span>{isArabic ? 'طلباتي السابقة' : 'Past Orders'}</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-black">
-                        {orders.length}
+                        {ordersState.status === 'loading' ? '…' : ordersState.status === 'success' ? ordersState.data.length : '!'}
                     </span>
                 </button>
 
                 <button
+                    ref={(el) => { tabButtonRefs.current['wishlist'] = el; }}
+                    role="tab"
+                    id="account-tab-wishlist"
+                    aria-controls="account-panel-wishlist"
+                    aria-selected={activeTab === 'wishlist'}
+                    tabIndex={activeTab === 'wishlist' ? 0 : -1}
                     onClick={() => setActiveTab('wishlist')}
-                    className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                    onKeyDown={(e) => handleTabKeyDown(e, 'wishlist')}
+                    className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] ${
                         activeTab === 'wishlist'
                             ? 'bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white shadow-md'
                             : 'bg-gray-100 dark:bg-white/5 text-slate-700 dark:text-gray-300 hover:bg-gray-200'
                     }`}
                 >
-                    <MdFavorite className="text-base text-rose-500" />
+                    <Heart className="text-base text-rose-500" />
                     <span>{isArabic ? 'المفضلة' : 'Saved Favorites'}</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-black">
-                        {wishlistProducts.length}
+                        {wishlistState.status === 'loading' ? '…' : wishlistState.status === 'success' ? wishlistState.data.length : '!'}
                     </span>
                 </button>
 
                 <button
+                    ref={(el) => { tabButtonRefs.current['profile'] = el; }}
+                    role="tab"
+                    id="account-tab-profile"
+                    aria-controls="account-panel-profile"
+                    aria-selected={activeTab === 'profile'}
+                    tabIndex={activeTab === 'profile' ? 0 : -1}
                     onClick={() => setActiveTab('profile')}
-                    className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                    onKeyDown={(e) => handleTabKeyDown(e, 'profile')}
+                    className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] ${
                         activeTab === 'profile'
                             ? 'bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white shadow-md'
                             : 'bg-gray-100 dark:bg-white/5 text-slate-700 dark:text-gray-300 hover:bg-gray-200'
                     }`}
                 >
-                    <MdEdit className="text-base" />
+                    <Pencil className="text-base" />
                     <span>{isArabic ? 'بيانات المحل' : 'Store Details'}</span>
                 </button>
             </div>
 
             {/* TAB CONTENT: Past Orders */}
             {activeTab === 'orders' && (
-                <div>
-                    {ordersLoading ? (
+                <div
+                    role="tabpanel"
+                    id="account-panel-orders"
+                    aria-labelledby="account-tab-orders"
+                    tabIndex={0}
+                    className="focus:outline-none"
+                >
+                    {ordersState.status === 'loading' ? (
                         <div className="py-16 text-center text-slate-400">
                             <div className="w-8 h-8 mx-auto border-3 border-[#8A6305] border-t-transparent rounded-full animate-spin mb-3" />
                             <span>{isArabic ? 'جاري جلب الطلبات...' : 'Loading orders...'}</span>
                         </div>
-                    ) : orders.length === 0 ? (
+                    ) : ordersState.status === 'unauthorized' ? (
+                        <div className="bg-white dark:bg-[#132035] p-8 sm:p-10 rounded-3xl border border-amber-200/80 dark:border-amber-900/40 text-center max-w-md mx-auto">
+                            <div className="w-16 h-16 mx-auto rounded-full bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400">
+                                <LogIn className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-2">
+                                {isArabic ? 'انتهت صلاحية الجلسة' : 'Session Expired'}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-gray-400 mb-6 leading-relaxed">
+                                {ordersState.errorMessage || (isArabic ? 'يرجى تسجيل الدخول مجدداً لعرض طلباتك.' : 'Please log in again to view your past orders.')}
+                            </p>
+                            <Link
+                                href="/account/login"
+                                className="px-6 py-3 rounded-xl bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white font-bold text-xs inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
+                            >
+                                <LogIn className="w-4 h-4" />
+                                <span>{isArabic ? 'تسجيل الدخول' : 'Log In'}</span>
+                            </Link>
+                        </div>
+                    ) : ordersState.status === 'error' ? (
+                        <div className="bg-white dark:bg-[#132035] p-8 sm:p-10 rounded-3xl border border-rose-200/80 dark:border-rose-900/40 text-center max-w-md mx-auto">
+                            <div className="w-16 h-16 mx-auto rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center mb-4 text-rose-600 dark:text-rose-400">
+                                <AlertCircle className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-2">
+                                {isArabic ? 'تعذر تحميل الطلبات' : 'Unable to Load Orders'}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-gray-400 mb-6 leading-relaxed">
+                                {ordersState.errorMessage || (isArabic ? 'حدث خطأ أثناء جلب قائمة الطلبات. يرجى إعادة المحاولة.' : 'An error occurred while fetching orders. Please try again.')}
+                            </p>
+                            <button
+                                onClick={fetchOrders}
+                                className="px-6 py-3 rounded-xl bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white font-bold text-xs inline-flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                <span>{isArabic ? 'إعادة المحاولة' : 'Retry'}</span>
+                            </button>
+                        </div>
+                    ) : ordersState.data.length === 0 ? (
                         <div className="bg-white dark:bg-[#132035] p-10 rounded-3xl border border-gray-100 dark:border-white/10 text-center max-w-md mx-auto">
                             <div className="w-16 h-16 mx-auto rounded-full bg-[#FAF6EC] dark:bg-white/5 flex items-center justify-center mb-4">
-                                <MdShoppingBag className="text-3xl text-gray-400" />
+                                <ShoppingBag className="text-3xl text-gray-400" />
                             </div>
                             <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-1">
                                 {isArabic ? 'لا توجد طلبات سابقة بعد' : 'No previous orders yet'}
@@ -360,7 +559,7 @@ export default function MerchantPortalPage() {
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            {orders.map((order) => {
+                            {ordersState.data.map((order) => {
                                 const badge = getStatusBadge(order.status);
                                 const StatusIcon = badge.icon;
                                 const dateStr = new Date(order.createdAt).toLocaleDateString(
@@ -395,7 +594,7 @@ export default function MerchantPortalPage() {
                                                 onClick={() => handleReorder(order)}
                                                 className="px-4 py-2.5 rounded-xl bg-[#FAF6EC] hover:bg-[#0B192C] text-[#0B192C] hover:text-white dark:bg-white/10 dark:text-white dark:hover:bg-[#8A6305] dark:hover:text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 border border-[#8A6305]/30 cursor-pointer shrink-0"
                                             >
-                                                <MdRepeat className="text-base text-[#8A6305]" />
+                                                <Repeat className="w-4 h-4 text-[#8A6305]" />
                                                 <span>{isArabic ? 'إعادة طلب نفس المنتجات' : 'Re-order Items'}</span>
                                             </button>
                                         </div>
@@ -457,16 +656,60 @@ export default function MerchantPortalPage() {
 
             {/* TAB CONTENT: Wishlist */}
             {activeTab === 'wishlist' && (
-                <div>
-                    {wishlistLoading ? (
+                <div
+                    role="tabpanel"
+                    id="account-panel-wishlist"
+                    aria-labelledby="account-tab-wishlist"
+                    tabIndex={0}
+                    className="focus:outline-none"
+                >
+                    {wishlistState.status === 'loading' ? (
                         <div className="py-16 text-center text-slate-400">
                             <div className="w-8 h-8 mx-auto border-3 border-[#8A6305] border-t-transparent rounded-full animate-spin mb-3" />
                             <span>{isArabic ? 'جاري جلب المفضلة...' : 'Loading saved items...'}</span>
                         </div>
-                    ) : wishlistProducts.length === 0 ? (
+                    ) : wishlistState.status === 'unauthorized' ? (
+                        <div className="bg-white dark:bg-[#132035] p-8 sm:p-10 rounded-3xl border border-amber-200/80 dark:border-amber-900/40 text-center max-w-md mx-auto">
+                            <div className="w-16 h-16 mx-auto rounded-full bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400">
+                                <LogIn className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-2">
+                                {isArabic ? 'انتهت صلاحية الجلسة' : 'Session Expired'}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-gray-400 mb-6 leading-relaxed">
+                                {wishlistState.errorMessage || (isArabic ? 'يرجى تسجيل الدخول مجدداً لعرض المفضلة.' : 'Please log in again to view your saved items.')}
+                            </p>
+                            <Link
+                                href="/account/login"
+                                className="px-6 py-3 rounded-xl bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white font-bold text-xs inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
+                            >
+                                <LogIn className="w-4 h-4" />
+                                <span>{isArabic ? 'تسجيل الدخول' : 'Log In'}</span>
+                            </Link>
+                        </div>
+                    ) : wishlistState.status === 'error' ? (
+                        <div className="bg-white dark:bg-[#132035] p-8 sm:p-10 rounded-3xl border border-rose-200/80 dark:border-rose-900/40 text-center max-w-md mx-auto">
+                            <div className="w-16 h-16 mx-auto rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center mb-4 text-rose-600 dark:text-rose-400">
+                                <AlertCircle className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-2">
+                                {isArabic ? 'تعذر تحميل المفضلة' : 'Unable to Load Wishlist'}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-gray-400 mb-6 leading-relaxed">
+                                {wishlistState.errorMessage || (isArabic ? 'حدث خطأ أثناء جلب قائمة المفضلة. يرجى إعادة المحاولة.' : 'An error occurred while fetching your wishlist. Please try again.')}
+                            </p>
+                            <button
+                                onClick={fetchWishlist}
+                                className="px-6 py-3 rounded-xl bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white font-bold text-xs inline-flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                <span>{isArabic ? 'إعادة المحاولة' : 'Retry'}</span>
+                            </button>
+                        </div>
+                    ) : wishlistState.data.length === 0 ? (
                         <div className="bg-white dark:bg-[#132035] p-10 rounded-3xl border border-gray-100 dark:border-white/10 text-center max-w-md mx-auto">
                             <div className="w-16 h-16 mx-auto rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center mb-4">
-                                <MdFavorite className="text-3xl text-rose-400" />
+                                <Heart className="text-3xl text-rose-400" />
                             </div>
                             <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-1">
                                 {isArabic ? 'المفضلة فارغة' : 'Your wishlist is empty'}
@@ -483,7 +726,7 @@ export default function MerchantPortalPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {wishlistProducts.map((product) => {
+                            {wishlistState.data.map((product) => {
                                 const primaryImg = product.images?.split(',')[0]?.trim() || '';
                                 const displayName = (isArabic ? product.nameAr : product.name) || product.name;
                                 return (
@@ -526,7 +769,7 @@ export default function MerchantPortalPage() {
                                             }}
                                             className="w-full py-2.5 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                         >
-                                            <MdShoppingBag className="text-sm" />
+                                            <ShoppingBag className="text-sm" />
                                             <span>{isArabic ? 'إضافة للسلة' : 'Add to Cart'}</span>
                                         </button>
                                     </div>
@@ -539,7 +782,13 @@ export default function MerchantPortalPage() {
 
             {/* TAB CONTENT: Store Profile Edit */}
             {activeTab === 'profile' && (
-                <div className="max-w-2xl bg-white dark:bg-[#132035] p-6 sm:p-8 rounded-3xl border border-gray-200/80 dark:border-white/10">
+                <div
+                    role="tabpanel"
+                    id="account-panel-profile"
+                    aria-labelledby="account-tab-profile"
+                    tabIndex={0}
+                    className="max-w-2xl bg-white dark:bg-[#132035] p-6 sm:p-8 rounded-3xl border border-gray-200/80 dark:border-white/10 focus:outline-none"
+                >
                     <h3 className="text-lg font-black text-[#0B192C] dark:text-white mb-1">
                         {isArabic ? 'تعديل بيانات المحل التجاري' : 'Edit Store Details'}
                     </h3>
@@ -547,75 +796,153 @@ export default function MerchantPortalPage() {
                         {isArabic ? 'هذه البيانات تُستخدم تلقائياً عند إتمام أي طلبية جديدة.' : 'These details are automatically populated when placing orders.'}
                     </p>
 
-                    <form onSubmit={handleSaveProfile} className="space-y-4">
+                    <form onSubmit={handleSaveProfile} noValidate className="space-y-4">
+                        {/* Live announcement region for assistive technologies */}
+                        <div aria-live="polite" aria-atomic="true" className="sr-only">
+                            {submitStatus}
+                        </div>
+
                         <div>
-                            <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
-                                {isArabic ? 'اسم المحل / المتجر' : 'Store Name'}
+                            <label htmlFor="profile-shop-name" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                                {isArabic ? 'اسم المحل / المتجر' : 'Store Name'} <span className="text-rose-500" aria-hidden="true">*</span>
                             </label>
                             <input
+                                id="profile-shop-name"
+                                ref={shopNameRef}
                                 type="text"
                                 required
+                                aria-required="true"
+                                aria-invalid={Boolean(profileErrors.shopName)}
+                                aria-describedby={profileErrors.shopName ? 'profile-shop-name-error' : undefined}
                                 value={profileForm.shopName}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, shopName: e.target.value }))}
-                                className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                onChange={(e) => {
+                                    setProfileForm((prev) => ({ ...prev, shopName: e.target.value }));
+                                    if (profileErrors.shopName) setProfileErrors((prev) => ({ ...prev, shopName: '' }));
+                                }}
+                                className={`block w-full px-3.5 py-2.5 rounded-xl border bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-0 focus:outline-none transition-colors ${
+                                    profileErrors.shopName
+                                        ? 'border-rose-500 focus:border-rose-600'
+                                        : 'border-gray-200 dark:border-white/10 focus:border-[#8A6305]'
+                                }`}
                             />
+                            {profileErrors.shopName && (
+                                <p id="profile-shop-name-error" className="text-xs text-rose-500 mt-1 font-medium">
+                                    {profileErrors.shopName}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
-                                {isArabic ? 'اسم صاحب الطلب / المسؤول' : 'Owner / Manager Name'}
+                            <label htmlFor="profile-owner-name" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                                {isArabic ? 'اسم صاحب الطلب / المسؤول' : 'Owner / Manager Name'} <span className="text-rose-500" aria-hidden="true">*</span>
                             </label>
                             <input
+                                id="profile-owner-name"
+                                ref={ownerNameRef}
                                 type="text"
                                 required
+                                aria-required="true"
+                                aria-invalid={Boolean(profileErrors.ownerName)}
+                                aria-describedby={profileErrors.ownerName ? 'profile-owner-name-error' : undefined}
                                 value={profileForm.ownerName}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, ownerName: e.target.value }))}
-                                className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                onChange={(e) => {
+                                    setProfileForm((prev) => ({ ...prev, ownerName: e.target.value }));
+                                    if (profileErrors.ownerName) setProfileErrors((prev) => ({ ...prev, ownerName: '' }));
+                                }}
+                                className={`block w-full px-3.5 py-2.5 rounded-xl border bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-0 focus:outline-none transition-colors ${
+                                    profileErrors.ownerName
+                                        ? 'border-rose-500 focus:border-rose-600'
+                                        : 'border-gray-200 dark:border-white/10 focus:border-[#8A6305]'
+                                }`}
                             />
+                            {profileErrors.ownerName && (
+                                <p id="profile-owner-name-error" className="text-xs text-rose-500 mt-1 font-medium">
+                                    {profileErrors.ownerName}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
-                                {isArabic ? 'المحافظة / المنطقة' : 'Governorate / City'}
+                            <label htmlFor="profile-city" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                                {isArabic ? 'المحافظة / المنطقة' : 'Governorate / City'} <span className="text-rose-500" aria-hidden="true">*</span>
                             </label>
                             <input
+                                id="profile-city"
+                                ref={cityRef}
                                 type="text"
                                 required
+                                aria-required="true"
+                                aria-invalid={Boolean(profileErrors.city)}
+                                aria-describedby={profileErrors.city ? 'profile-city-error' : undefined}
                                 value={profileForm.city}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, city: e.target.value }))}
-                                className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                onChange={(e) => {
+                                    setProfileForm((prev) => ({ ...prev, city: e.target.value }));
+                                    if (profileErrors.city) setProfileErrors((prev) => ({ ...prev, city: '' }));
+                                }}
+                                className={`block w-full px-3.5 py-2.5 rounded-xl border bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-0 focus:outline-none transition-colors ${
+                                    profileErrors.city
+                                        ? 'border-rose-500 focus:border-rose-600'
+                                        : 'border-gray-200 dark:border-white/10 focus:border-[#8A6305]'
+                                }`}
                             />
+                            {profileErrors.city && (
+                                <p id="profile-city-error" className="text-xs text-rose-500 mt-1 font-medium">
+                                    {profileErrors.city}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
-                                {isArabic ? 'العنوان بالتفصيل' : 'Detailed Address'}
+                            <label htmlFor="profile-address" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                                {isArabic ? 'العنوان بالتفصيل' : 'Detailed Address'} <span className="text-rose-500" aria-hidden="true">*</span>
                             </label>
                             <input
+                                id="profile-address"
+                                ref={addressRef}
                                 type="text"
                                 required
+                                aria-required="true"
+                                aria-invalid={Boolean(profileErrors.address)}
+                                aria-describedby={profileErrors.address ? 'profile-address-error' : undefined}
                                 value={profileForm.address}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, address: e.target.value }))}
-                                className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                onChange={(e) => {
+                                    setProfileForm((prev) => ({ ...prev, address: e.target.value }));
+                                    if (profileErrors.address) setProfileErrors((prev) => ({ ...prev, address: '' }));
+                                }}
+                                className={`block w-full px-3.5 py-2.5 rounded-xl border bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-0 focus:outline-none transition-colors ${
+                                    profileErrors.address
+                                        ? 'border-rose-500 focus:border-rose-600'
+                                        : 'border-gray-200 dark:border-white/10 focus:border-[#8A6305]'
+                                }`}
                             />
+                            {profileErrors.address && (
+                                <p id="profile-address-error" className="text-xs text-rose-500 mt-1 font-medium">
+                                    {profileErrors.address}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
+                            <label htmlFor="profile-notes" className="block text-xs font-bold text-[#0B192C] dark:text-gray-200 mb-1">
                                 {isArabic ? 'ملاحظات التوصيل الافتراضية' : 'Default Delivery Notes'}
                             </label>
                             <textarea
+                                id="profile-notes"
                                 rows={2}
+                                aria-describedby="profile-notes-hint"
                                 value={profileForm.notes}
                                 onChange={(e) => setProfileForm((prev) => ({ ...prev, notes: e.target.value }))}
-                                className="block w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                className="block w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:border-[#8A6305] focus:ring-0 focus:outline-none transition-colors"
                             />
+                            <p id="profile-notes-hint" className="text-[11px] text-slate-500 dark:text-gray-400 mt-1">
+                                {isArabic ? 'ملاحظات إضافية لسائق الشاحنة أو أوقات التسليم المفضلة' : 'Optional notes for delivery driver or preferred delivery times'}
+                            </p>
                         </div>
 
                         <button
                             type="submit"
                             disabled={isSavingProfile}
-                            className="px-6 py-3 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white dark:text-white font-extrabold text-xs shadow-md transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
+                            className="px-6 py-3 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white dark:text-white font-extrabold text-xs shadow-md transition-all active:scale-95 disabled:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305]"
                         >
                             {isSavingProfile ? (isArabic ? 'جاري الحفظ...' : 'Saving...') : (isArabic ? 'حفظ التعديلات' : 'Save Changes')}
                         </button>

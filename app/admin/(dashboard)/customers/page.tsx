@@ -1,21 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-    MdStore, 
-    MdPhone, 
-    MdLocationOn, 
-    MdShoppingBag, 
-    MdSearch, 
-    MdCheckCircle, 
-    MdBlock, 
-    MdDelete,
-    MdRefresh,
-    MdHourglassTop,
-    MdVerified,
-    MdCheck,
-    MdClose
-} from 'react-icons/md';
+import { Store, Phone, MapPin, ShoppingBag, Search, CheckCircle2, Ban, Trash2, RotateCw, ShieldCheck, Check, X, Hourglass } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -150,7 +136,7 @@ export default function AdminCustomersPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-black text-[#0B192C] dark:text-white flex items-center gap-2">
-                        <MdStore className="text-[#8A6305]" />
+                        <Store className="text-[#8A6305]" />
                         <span>إدارة طلبات وحسابات التجار</span>
                     </h1>
                     <p className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 mt-1">
@@ -164,7 +150,7 @@ export default function AdminCustomersPage() {
                         className="p-2.5 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
                         title="تحديث القائمة"
                     >
-                        <MdRefresh className="text-xl" />
+                        <RotateCw className="text-xl" />
                     </button>
                     <span className="text-xs font-black px-3.5 py-2 rounded-xl bg-[#FAF6EC] dark:bg-white/5 text-[#8A6305] dark:text-[#8A6305] border border-[#8A6305]/20">
                         {customers.length} إجمالي الحسابات
@@ -184,7 +170,7 @@ export default function AdminCustomersPage() {
                                 : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
-                        <MdHourglassTop className="text-sm" />
+                        <Hourglass className="text-sm" />
                         <span>بانتظار الموافقة</span>
                         <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${activeTab === 'pending' ? 'bg-amber-700 text-white' : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'}`}>
                             {pendingList.length}
@@ -199,7 +185,7 @@ export default function AdminCustomersPage() {
                                 : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
-                        <MdVerified className="text-sm text-emerald-400" />
+                        <ShieldCheck className="text-sm text-emerald-400" />
                         <span>الحسابات المفعلة</span>
                         <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${activeTab === 'active' ? 'bg-slate-700 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
                             {activeList.length}
@@ -223,7 +209,7 @@ export default function AdminCustomersPage() {
 
                 {/* Search input */}
                 <div className="relative w-full md:max-w-md">
-                    <MdSearch className="absolute start-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+                    <Search className="absolute start-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
                     <input
                         type="text"
                         value={search}
@@ -243,7 +229,7 @@ export default function AdminCustomersPage() {
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="py-16 text-center text-slate-400 space-y-2">
-                        <MdStore className="text-4xl mx-auto text-slate-300 dark:text-slate-600" />
+                        <Store className="text-4xl mx-auto text-slate-300 dark:text-slate-600" />
                         <p className="text-sm font-bold">
                             {activeTab === 'pending'
                                 ? 'لا توجد طلبات تسجيل جديدة بانتظار الموافقة حالياً'
@@ -305,12 +291,12 @@ export default function AdminCustomersPage() {
                                             <td className="p-3.5 text-center">
                                                 {c.isActive ? (
                                                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300">
-                                                        <MdVerified className="text-xs" />
+                                                        <ShieldCheck className="text-xs" />
                                                         <span>مفعل ومعتمد</span>
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300">
-                                                        <MdHourglassTop className="text-xs animate-spin" />
+                                                        <Hourglass className="text-xs animate-spin" />
                                                         <span>بانتظار الموافقة</span>
                                                     </span>
                                                 )}
@@ -339,7 +325,7 @@ export default function AdminCustomersPage() {
                                                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                                                             title="موافقة وتفعيل الحساب"
                                                         >
-                                                            <MdCheck className="text-sm" />
+                                                            <Check className="text-sm" />
                                                             <span>موافقة وتفعيل</span>
                                                         </button>
                                                     ) : (
@@ -349,7 +335,7 @@ export default function AdminCustomersPage() {
                                                             className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
                                                             title="تعطيل الحساب مؤقتاً"
                                                         >
-                                                            <MdBlock className="text-lg" />
+                                                            <Ban className="text-lg" />
                                                         </button>
                                                     )}
 
@@ -359,7 +345,7 @@ export default function AdminCustomersPage() {
                                                         className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                                                         title={!c.isActive ? 'رفض وحذف الطلب' : 'حذف الحساب'}
                                                     >
-                                                        <MdDelete className="text-lg" />
+                                                        <Trash2 className="text-lg" />
                                                     </button>
                                                 </div>
                                             </td>

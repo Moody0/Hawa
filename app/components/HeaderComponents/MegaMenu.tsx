@@ -7,7 +7,7 @@ import { useCurrency } from "@/app/context/CurrencyContext";
 import { useCart } from "@/app/context/CartContext";
 import { useCustomer } from "@/app/context/CustomerContext";
 import ResilientImage from "@/app/components/ResilientImage";
-import { MdSearch, MdLock } from "react-icons/md";
+import { Search, Lock } from 'lucide-react';
 import toast from "react-hot-toast";
 
 interface Brand {
@@ -93,7 +93,6 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
             slug: product.slug,
             quantity: 1,
         });
-        toast.success(language === "ar" ? `تمت إضافة ${displayName} إلى السلة` : `Added ${displayName} to cart`);
     };
 
     return (
@@ -105,7 +104,7 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
                 className="absolute z-20 top-3 left-3 w-8 h-8 bg-white text-black hover:bg-[#8A6305] hover:text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 border border-gray-100"
                 aria-label="Quick View"
             >
-                <MdSearch size={18} />
+                <Search size={18} />
             </button>
 
             {/* Image Area — 177×177px */}

@@ -4,8 +4,15 @@ import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 
-const CheckoutSteps = () => {
+interface CheckoutStepsProps {
+    isQuoteRequest: boolean;
+}
+
+const CheckoutSteps = ({ isQuoteRequest }: CheckoutStepsProps) => {
     const { t, language } = useLanguage();
+    const pageTitle = isQuoteRequest
+        ? (language === 'ar' ? 'طلب توريد جملة' : 'Wholesale Supply Request')
+        : (language === 'ar' ? 'إتمام الطلب' : 'Complete Order');
 
     return (
         <div className="flex flex-col gap-2 pb-6">
@@ -19,14 +26,20 @@ const CheckoutSteps = () => {
                 </Link>
                 <span className="mx-2 md:mx-4 text-gray-300 dark:text-white/20">|</span>
                 <span className="text-[#8A6305] font-extrabold">
-                    {t('checkout.shippingInformation')}
+                    {pageTitle}
                 </span>
             </nav>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#0B192C] dark:text-white">
-                {t('checkout.shippingInformation')}
+                {pageTitle}
             </h1>
             <p className="text-xs md:text-sm font-medium text-[#475569] dark:text-gray-400">
-                {language === 'ar' ? 'يرجى إدخال معلومات التوصيل أدناه' : 'Please enter your delivery information below'}
+                {isQuoteRequest
+                    ? (language === 'ar'
+                        ? 'أدخل بيانات المحل ليؤكد فريق المبيعات السعر والتوصيل وترتيبات الدفع'
+                        : 'Enter your store details so sales can confirm pricing, delivery, and payment terms')
+                    : (language === 'ar'
+                        ? 'راجع بيانات المحل والتوصيل قبل تأكيد الطلب'
+                        : 'Review the store and delivery details before confirming your order')}
             </p>
         </div>
     );

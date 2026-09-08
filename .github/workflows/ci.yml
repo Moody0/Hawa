@@ -1,0 +1,88 @@
+name: Quality Gate CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: test
+  CI: 'true'
+  # Explicitly isolate CI from production database
+  DATABASE_URL: 'postgresql://ci_isolated:mock_secret@127.0.0.1:5432/hawa_isolated_ci_test?schema=public'
+  NEXTAUTH_SECRET: 'ci_temporary_mock_secret_key_123456789'
+  CUSTOMER_AUTH_SECRET: 'ci_temporary_mock_customer_secret_key_123456789'
+
+jobs:
+  quality-gate:
+    name: Typecheck, Lint, Test & Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Cache Next.js Build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Prisma Schema Validation & Client Generation
+        run: |
+          npx prisma validate
+          npx prisma generate
+
+      - name: TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: ESLint Check
+        run: npm run lint
+
+      - name: Unit & Integration Tests (Isolated)
+        run: npm run test:run
+
+      - name: Next.js Production Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Production Route & API Smoke Automation
+        run: npm run test:smoke
+
+      - name: Install Playwright Chromium Browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser Critical Journey Smoke Tests
+        run: npm run test:e2e
+        env:
+          NODE_ENV: production
+
+      - name: Upload Test Failure Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7

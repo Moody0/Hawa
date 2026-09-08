@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import ProductsClient from "./ProductsClient";
 import { getCatalogInitialData, getCatalogBrands, getBrandBySlug } from "@/lib/catalog";
 import { findCategoryByIdentifier } from "@/lib/category-utils";
+import { parseCatalogUrlParams, buildCatalogUrl } from "@/lib/catalog-url";
 
 import { Metadata } from "next";
 
@@ -13,11 +14,43 @@ export async function generateMetadata({
 }: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
-    const params = await searchParams;
-    const brandSlug = typeof params.brand === "string" ? params.brand : null;
+    const rawParams = await searchParams;
+    const parsed = parseCatalogUrlParams(rawParams);
+    const canonicalUrl = buildCatalogUrl(parsed, "/products");
 
-    if (brandSlug) {
-        const brand = await getBrandBySlug(brandSlug);
+    if (parsed.search) {
+        const title = `نتائج البحث عن "${parsed.search}" بالجملة | Hawa Distribution - حوا للتوزيع`;
+        const description = `تصفح نتائج البحث عن "${parsed.search}" في كتالوج منتجات شركة حوا للتوزيع والتجارة بأسعار الجملة.`;
+        return {
+            title,
+            description,
+            alternates: {
+                canonical: canonicalUrl,
+            },
+            openGraph: {
+                title,
+                description,
+                url: canonicalUrl,
+                images: [
+                    {
+                        url: "/og-image.jpg",
+                        width: 1200,
+                        height: 630,
+                        alt: `Search results for ${parsed.search}`,
+                    },
+                ],
+            },
+            twitter: {
+                card: "summary_large_image",
+                title,
+                description,
+                images: ["/og-image.jpg"],
+            },
+        };
+    }
+
+    if (parsed.brands.length === 1) {
+        const brand = await getBrandBySlug(parsed.brands[0]);
         if (brand) {
             const title = `منتجات وكالة ${brand.name} بالجملة | Hawa Distribution - حوا للتوزيع`;
             const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
@@ -26,12 +59,12 @@ export async function generateMetadata({
                 title,
                 description,
                 alternates: {
-                    canonical: `/products?brand=${brand.slug}`,
+                    canonical: canonicalUrl,
                 },
                 openGraph: {
                     title,
                     description,
-                    url: `/products?brand=${brand.slug}`,
+                    url: canonicalUrl,
                     images: [
                         {
                             url: image,
@@ -55,12 +88,12 @@ export async function generateMetadata({
         title: "كتالوج المنتجات وعروض الوكالات | Products Catalog - Hawa Distribution",
         description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة من مواد غذائية ومنظفات بأسعار الجملة لدى شركة حوا للتوزيع والتجارة.",
         alternates: {
-            canonical: "/products",
+            canonical: canonicalUrl,
         },
         openGraph: {
             title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - حوا للتوزيع",
             description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة حوا للتوزيع والتجارة.",
-            url: "/products",
+            url: canonicalUrl,
             images: [
                 {
                     url: "/og-image.jpg",
@@ -84,32 +117,44 @@ export default async function ProductsPage({
 }: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    const params = await searchParams;
-    const category = typeof params.category === "string" ? params.category : null;
+    const rawParams = await searchParams;
+    const parsed = parseCatalogUrlParams(rawParams);
 
-    if (category) {
-        const resolvedCategory = await findCategoryByIdentifier(category);
-        redirect(resolvedCategory ? `/categories/${resolvedCategory.slug}` : "/products");
+    // If a single category is requested with no other query, redirect to canonical /categories/[slug]
+    if (parsed.categories.length === 1 && parsed.brands.length === 0 && !parsed.search) {
+        const resolvedCategory = await findCategoryByIdentifier(parsed.categories[0]);
+        if (resolvedCategory) {
+            redirect(`/categories/${resolvedCategory.slug}`);
+        }
     }
 
-    const brandSlug = typeof params.brand === "string" ? params.brand : null;
-    const activeBrand = brandSlug ? await getBrandBySlug(brandSlug) : null;
+    const firstBrandSlug = parsed.brands.length === 1 ? parsed.brands[0] : null;
+    const activeBrand = firstBrandSlug ? await getBrandBySlug(firstBrandSlug) : null;
 
     const [{ categories, products, totalProducts }, brands] = await Promise.all([
-        getCatalogInitialData(undefined, activeBrand?.id),
+        getCatalogInitialData(undefined, activeBrand?.id, undefined, parsed.search),
         getCatalogBrands(),
     ]);
 
     return (
         <Suspense fallback={<CatalogLoadingFallback />}>
             <ProductsClient
-                key={activeBrand ? `brand-${activeBrand.id}` : "all-products"}
+                key={activeBrand ? `brand-${activeBrand.id}` : parsed.search ? `search-${parsed.search}` : "all-products"}
                 initialCategories={categories}
                 initialBrands={brands}
                 initialProducts={products}
                 initialTotal={totalProducts}
                 activeCategory={null}
                 activeBrand={activeBrand}
+                initialSearch={parsed.search}
+                initialSort={parsed.sort}
+                initialPage={parsed.page}
+                initialInStock={parsed.inStock}
+                initialOnSale={parsed.onSale}
+                initialIsTrending={parsed.isTrending}
+                initialView={parsed.view}
+                initialBrandSlugs={parsed.brands}
+                initialCategorySlugs={parsed.categories}
             />
         </Suspense>
     );

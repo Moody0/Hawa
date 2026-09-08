@@ -8,7 +8,7 @@ import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import AdminHeader from "../../components/AdminHeader";
 import UserModal from "./UserModal";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { MdChevronRight, MdPersonAdd, MdEdit, MdDelete, MdArrowUpward, MdArrowDownward } from "react-icons/md";
+import { ChevronRight, UserPlus, Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface User {
     id: string;
@@ -97,7 +97,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                             {/* Breadcrumbs */}
                             <div className="flex items-center gap-2 text-sm text-text-sub dark:text-gray-400 mb-1">
                                 <Link href="/admin/dashboard" className="hover:text-primary cursor-pointer transition-colors">{t('admin.dashboard')}</Link>
-                                <MdChevronRight className={`text-[12px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                                <ChevronRight className={`text-[12px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                                 <span className="text-text-main dark:text-white font-medium">{t('admin.userManagement')}</span>
                             </div>
                             <h2 className="text-3xl font-extrabold text-text-main dark:text-white tracking-tight">{t('admin.systemUsers')}</h2>
@@ -110,7 +110,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                             }}
                             className="bg-[#0B192C] hover:bg-[#1e293b] text-white h-12 px-6 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-xs transform hover:-translate-y-0.5 active:translate-y-0"
                         >
-                            <MdPersonAdd className="text-[20px]" />
+                            <UserPlus className="text-[20px]" />
                             {t('admin.addNewUser')}
                         </button>
                     </div>
@@ -133,8 +133,8 @@ export default function UsersClient({ users }: { users: User[] }) {
                                             <div className="flex items-center">
                                                 {t('admin.username')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'username' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'username' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'username' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'username' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -142,8 +142,8 @@ export default function UsersClient({ users }: { users: User[] }) {
                                             <div className="flex items-center">
                                                 {t('admin.role')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'role' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'role' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'role' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'role' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -152,8 +152,8 @@ export default function UsersClient({ users }: { users: User[] }) {
                                             <div className="flex items-center">
                                                 {t('admin.createdAt')}
                                                 <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                    <MdArrowUpward className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'createdAt' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
-                                                    <MdArrowDownward className={`w-2.5 h-2.5 ${sortConfig.key === 'createdAt' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'createdAt' && sortConfig.direction === 'asc' ? 'text-primary' : 'text-gray-300'}`} />
+                                                    <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'createdAt' && sortConfig.direction === 'desc' ? 'text-primary' : 'text-gray-300'}`} />
                                                 </span>
                                             </div>
                                         </th>
@@ -204,7 +204,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                                                         className="size-9 rounded-lg flex items-center justify-center text-text-sub dark:text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
                                                         title={t('admin.editUser')}
                                                     >
-                                                        <MdEdit className="text-[20px]" />
+                                                        <Pencil className="text-[20px]" />
                                                     </button>
                                                     {user.username !== 'admin' && (
                                                         <button
@@ -212,7 +212,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                                                             className="size-9 rounded-lg flex items-center justify-center text-text-sub dark:text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                                                             title={t('admin.deleteUser')}
                                                         >
-                                                            <MdDelete className="text-[20px]" />
+                                                            <Trash2 className="text-[20px]" />
                                                         </button>
                                                     )}
                                                 </div>

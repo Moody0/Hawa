@@ -1,13 +1,12 @@
 import { getUsers } from "@/lib/user-actions";
 import UsersClient from "./UsersClient";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getValidAdminSession } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
 
 export default async function AdminUsersPage() {
-    const session = await getServerSession(authOptions);
+    const adminUser = await getValidAdminSession();
 
-    if (!session || session.user.role !== 'SUPER_ADMIN') {
+    if (!adminUser || adminUser.role !== 'SUPER_ADMIN') {
         redirect('/admin/dashboard');
     }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MdClose, MdCloudUpload, MdStar, MdStarOutline } from 'react-icons/md';
+import { X, UploadCloud, Star } from 'lucide-react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { toast } from 'react-hot-toast';
 
@@ -147,7 +147,7 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                         className="w-8 h-8 flex items-center justify-center rounded-full text-[#475569] hover:text-[#0B192C] hover:bg-gray-100 transition-colors cursor-pointer"
                         aria-label={language === 'ar' ? 'إغلاق نافذة التقييم' : 'Close review modal'}
                     >
-                        <MdClose className="text-lg" />
+                        <X className="text-lg" />
                     </button>
                 </div>
 
@@ -177,8 +177,8 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                                             className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
                                         >
                                             {star <= (hoveredRating || rating)
-                                                ? <MdStar className="text-[32px] text-[#8A6305] transition-colors" />
-                                                : <MdStarOutline className="text-[32px] text-gray-300 transition-colors" />
+                                                ? <Star className="text-[32px] text-[#8A6305] transition-colors" />
+                                                : <Star className="text-[32px] text-gray-300 transition-colors" />
                                             }
                                         </button>
                                     ))}
@@ -219,7 +219,7 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                                         onClick={() => fileInputRef.current?.click()}
                                         className="w-full h-28 rounded-[10px] border border-dashed border-gray-200 flex flex-col items-center justify-center gap-1.5 text-[#475569] hover:text-[#0B192C] hover:border-gray-300 transition-colors"
                                     >
-                                        <MdCloudUpload className="text-2xl" />
+                                        <UploadCloud className="text-2xl" />
                                         <span className="text-xs font-medium">{t('products.reviewModal.uploadImage')}</span>
                                     </button>
                                 )}
@@ -277,8 +277,8 @@ export default function ReviewModal({ isOpen, onClose, productId, productName, p
                                     <div className="flex items-center gap-px">
                                         {[1, 2, 3, 4, 5].map(s => (
                                             s <= rating
-                                                ? <MdStar key={s} className="text-xs text-[#8A6305]" />
-                                                : <MdStarOutline key={s} className="text-xs text-gray-300" />
+                                                ? <Star key={s} className="text-xs text-[#8A6305]" />
+                                                : <Star key={s} className="text-xs text-gray-300" />
                                         ))}
                                     </div>
                                 </div>

@@ -2,23 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { 
-    MdDashboard, 
-    MdShoppingBag, 
-    MdStorefront,
-    MdCategory, 
-    MdViewCarousel, 
-    MdInventory2, 
-    MdEditNote, 
-    MdGroup, 
-    MdSettings,
-    MdClose,
-    MdLogout,
-    MdAccountTree,
-    MdStar,
-    MdPeople,
-    MdArticle
-} from "react-icons/md";
+import { LayoutDashboard, ShoppingBag, Store, FolderTree, Package, Users, Settings, X, LogOut, Star, FileText, Network, GalleryHorizontal, FileEdit } from 'lucide-react';
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -61,34 +45,34 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         {
             title: t('admin.overview') || "Overview",
             items: [
-                { href: "/admin/dashboard", icon: MdDashboard, label: t('admin.dashboard') }
+                { href: "/admin/dashboard", icon: LayoutDashboard, label: t('admin.dashboard') }
             ]
         },
         {
             title: t('admin.catalogManagement') || "Catalog Management",
             items: [
-                { href: "/admin/main-categories", icon: MdAccountTree, label: t("admin.mainCategories"), superAdminOnly: true },
-                { href: "/admin/categories", icon: MdCategory, label: t('admin.categories'), permission: "canManageCategories" },
-                { href: "/admin/brands", icon: MdStorefront, label: t('admin.brands'), permission: "canManageBrands" },
-                { href: "/admin/products", icon: MdShoppingBag, label: t('admin.products'), permission: "canManageProducts" }
+                { href: "/admin/main-categories", icon: Network, label: t("admin.mainCategories"), superAdminOnly: true },
+                { href: "/admin/categories", icon: FolderTree, label: t('admin.categories'), permission: "canManageCategories" },
+                { href: "/admin/brands", icon: Store, label: t('admin.brands'), permission: "canManageBrands" },
+                { href: "/admin/products", icon: ShoppingBag, label: t('admin.products'), permission: "canManageProducts" }
             ]
         },
         {
             title: t('admin.salesAndCustomers') || "Sales & Customers",
             items: [
-                { href: "/admin/orders", icon: MdInventory2, label: t('admin.orders'), permission: "canManageOrders" },
-                { href: "/admin/customers", icon: MdPeople, label: t('admin.customers') || "Customers", permission: "canManageOrders" },
-                { href: "/admin/reviews", icon: MdStar, label: t('admin.reviews'), permission: "canManageReviews" }
+                { href: "/admin/orders", icon: Package, label: t('admin.orders'), permission: "canManageOrders" },
+                { href: "/admin/customers", icon: Users, label: t('admin.customers') || "Customers", permission: "canManageOrders" },
+                { href: "/admin/reviews", icon: Star, label: t('admin.reviews'), permission: "canManageReviews" }
             ]
         },
         {
             title: t('admin.storeAndSystem') || "Store & System",
             items: [
-                { href: "/admin/banners", icon: MdViewCarousel, label: t('admin.banners'), permission: "canManageBanners" },
-                { href: "/admin/blog", icon: MdArticle, label: t('admin.blog') || "Blog", superAdminOnly: true },
-                { href: "/admin/site-content", icon: MdEditNote, label: t('admin.siteContent'), superAdminOnly: true },
-                { href: "/admin/users", icon: MdGroup, label: t('admin.users'), superAdminOnly: true },
-                { href: "/admin/settings", icon: MdSettings, label: t('admin.settings'), superAdminOnly: true }
+                { href: "/admin/banners", icon: GalleryHorizontal, label: t('admin.banners'), permission: "canManageBanners" },
+                { href: "/admin/blog", icon: FileText, label: t('admin.blog') || "Blog", superAdminOnly: true },
+                { href: "/admin/site-content", icon: FileEdit, label: t('admin.siteContent'), superAdminOnly: true },
+                { href: "/admin/users", icon: Users, label: t('admin.users'), superAdminOnly: true },
+                { href: "/admin/settings", icon: Settings, label: t('admin.settings'), superAdminOnly: true }
             ]
         }
     ];
@@ -147,7 +131,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                                 className="lg:hidden p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                                 aria-label="Close Sidebar"
                             >
-                                <MdClose className="text-2xl" />
+                                <X className="text-2xl" />
                             </button>
                         </div>
 
@@ -221,7 +205,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                             onClick={handleSignOut}
                             className="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors group text-xs font-semibold"
                         >
-                            <MdLogout className={`text-base group-hover:text-rose-600 transition-colors ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                            <LogOut className={`text-base group-hover:text-rose-600 transition-colors ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                             <span>{t('admin.signOut')}</span>
                         </button>
                     </div>

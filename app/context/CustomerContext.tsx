@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useLanguage } from './LanguageContext';
 
@@ -57,17 +57,70 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         } catch {}
     }, []);
 
-    // Fetch authenticated customer
+    const abortRef = useRef<AbortController | null>(null);
+    const mergedCustomerIdsRef = useRef<Set<string>>(new Set());
+
+    // Fetch authenticated customer and merge guest wishlist once
     const fetchSession = useCallback(async () => {
+        if (abortRef.current) {
+            abortRef.current.abort();
+        }
+        const controller = new AbortController();
+        abortRef.current = controller;
+
         try {
-            const res = await fetch('/api/customer/auth/me');
+            const res = await fetch('/api/customer/auth/me?includeWishlist=true', {
+                signal: controller.signal,
+            });
             if (res.ok) {
                 const data = await res.json();
                 if (data.authenticated && data.customer) {
                     setCustomer(data.customer);
-                    if (Array.isArray(data.wishlistIds)) {
+
+                    const customerId = data.customer.id;
+                    if (!mergedCustomerIdsRef.current.has(customerId)) {
+                        mergedCustomerIdsRef.current.add(customerId);
+
+                        let localGuestIds: string[] = [];
+                        try {
+                            const local = localStorage.getItem(LOCAL_WISHLIST_KEY);
+                            if (local) {
+                                const parsed = JSON.parse(local);
+                                if (Array.isArray(parsed)) localGuestIds = parsed;
+                            }
+                        } catch {}
+
+                        if (localGuestIds.length > 0) {
+                            try {
+                                const mergeRes = await fetch('/api/customer/wishlist', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        action: 'merge',
+                                        productIds: localGuestIds,
+                                    }),
+                                });
+                                if (mergeRes.ok) {
+                                    const mergeData = await mergeRes.json();
+                                    if (Array.isArray(mergeData.wishlistIds)) {
+                                        setWishlistIds(mergeData.wishlistIds);
+                                        try {
+                                            localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(mergeData.wishlistIds));
+                                        } catch {}
+                                    }
+                                }
+                            } catch (mergeErr) {
+                                console.error('Failed to merge guest wishlist:', mergeErr);
+                                mergedCustomerIdsRef.current.delete(customerId);
+                            }
+                        } else if (Array.isArray(data.wishlistIds)) {
+                            setWishlistIds(data.wishlistIds);
+                            try {
+                                localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(data.wishlistIds));
+                            } catch {}
+                        }
+                    } else if (Array.isArray(data.wishlistIds)) {
                         setWishlistIds(data.wishlistIds);
-                        localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(data.wishlistIds));
                     }
                 } else {
                     setCustomer(null);
@@ -75,15 +128,24 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             } else {
                 setCustomer(null);
             }
-        } catch {
-            setCustomer(null);
+        } catch (err: unknown) {
+            if ((err as Error)?.name !== 'AbortError') {
+                setCustomer(null);
+            }
         } finally {
-            setIsLoading(false);
+            if (abortRef.current === controller) {
+                setIsLoading(false);
+            }
         }
     }, []);
 
     useEffect(() => {
         fetchSession();
+        return () => {
+            if (abortRef.current) {
+                abortRef.current.abort();
+            }
+        };
     }, [fetchSession]);
 
     const isFavorite = useCallback(
@@ -110,14 +172,23 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
                 const res = await fetch('/api/customer/wishlist', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ productId }),
+                    body: JSON.stringify({
+                        action: nextFav ? 'add' : 'remove',
+                        productId,
+                    }),
                 });
                 if (!res.ok) {
                     // Revert if failed
                     setWishlistIds(wishlistIds);
+                    try {
+                        localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(wishlistIds));
+                    } catch {}
                 }
             } catch {
                 setWishlistIds(wishlistIds);
+                try {
+                    localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(wishlistIds));
+                } catch {}
             }
         }
 
@@ -164,8 +235,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             } else {
                 return { success: false, error: data.error || (isArabic ? 'فشل تسجيل الدخول' : 'Login failed') };
             }
-        } catch (err: any) {
-            return { success: false, error: err.message || (isArabic ? 'حدث خطأ في الاتصال' : 'Network error') };
+        } catch (err: unknown) {
+            return { success: false, error: (err as Error)?.message || (isArabic ? 'حدث خطأ في الاتصال' : 'Network error') };
         }
     };
 
@@ -201,8 +272,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             } else {
                 return { success: false, error: data.error || (isArabic ? 'فشل إنشاء الحساب' : 'Registration failed') };
             }
-        } catch (err: any) {
-            return { success: false, error: err.message || (isArabic ? 'حدث خطأ في الاتصال' : 'Network error') };
+        } catch (err: unknown) {
+            return { success: false, error: (err as Error)?.message || (isArabic ? 'حدث خطأ في الاتصال' : 'Network error') };
         }
     };
 
@@ -210,7 +281,12 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         try {
             await fetch('/api/customer/auth/logout', { method: 'POST' });
         } catch {}
+        mergedCustomerIdsRef.current.clear();
         setCustomer(null);
+        setWishlistIds([]);
+        try {
+            localStorage.removeItem(LOCAL_WISHLIST_KEY);
+        } catch {}
         toast(isArabic ? 'تم تسجيل الخروج بنجاح' : 'Logged out successfully');
     };
 
@@ -228,8 +304,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
                 return { success: true };
             }
             return { success: false, error: resData.error };
-        } catch (err: any) {
-            return { success: false, error: err.message };
+        } catch (err: unknown) {
+            return { success: false, error: (err as Error)?.message };
         }
     };
 

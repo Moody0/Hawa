@@ -28,7 +28,11 @@ const securityHeaders = [
   },
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self';",
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data: https:; connect-src 'self' https://aws-0-eu-central-1.pooler.supabase.com https://*.supabase.co https://wa.me; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self';",
+  },
+  {
+    key: 'Content-Security-Policy-Report-Only',
+    value: "default-src 'self'; script-src 'self' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data:; connect-src 'self' https://aws-0-eu-central-1.pooler.supabase.com https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self'; report-uri /api/csp-report;",
   },
 ];
 

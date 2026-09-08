@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/admin-auth';
 import slugify from 'slugify';
 
 export async function GET() {
@@ -18,10 +17,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
-        }
+        await requireAdminSession();
+    } catch {
+        return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
+    }
+    try {
 
         const body = await req.json();
         const { title, titleAr, category, excerpt, content, image, isPublished } = body;
@@ -60,11 +60,11 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
-        }
-
+        await requireAdminSession();
+    } catch {
+        return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
+    }
+    try {
         const body = await req.json();
         const { id, title, category, excerpt, content, image, isPublished } = body;
 
@@ -86,17 +86,18 @@ export async function PUT(req: Request) {
 
         return NextResponse.json({ success: true, post: updated });
     } catch (error: any) {
+        console.error('Admin blog PUT error:', error);
         return NextResponse.json({ error: error?.message || 'Failed to update post' }, { status: 500 });
     }
 }
 
 export async function DELETE(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
-        }
-
+        await requireAdminSession();
+    } catch {
+        return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
+    }
+    try {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
 

@@ -2,19 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MdClose, MdShoppingBag, MdDelete, MdArrowForward, MdArrowBack, MdLock } from 'react-icons/md';
+import { X, ShoppingBag, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
 import { useCustomer } from '@/app/context/CustomerContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { formatPackaging, formatPackageItems } from '@/lib/packaging';
+import RollingNumber from '@/app/components/RollingNumber';
 
 const CartDrawer = () => {
-    const { items, isDrawerOpen, closeDrawer, subtotal, updateQuantity, removeItem } = useCart();
+    const { items, isHydrated, isDrawerOpen, closeDrawer, subtotal, updateQuantity, removeItem } = useCart();
     const { customer } = useCustomer();
-    const { t, dir, language } = useLanguage();
+    const { dir, language } = useLanguage();
     const { formatPrice } = useCurrency();
     const [mounted, setMounted] = useState(false);
+    const [shouldRender, setShouldRender] = useState(isDrawerOpen);
+    const [isAnimating, setIsAnimating] = useState(false);
     const isLockedForGuest = !customer;
     const drawerRef = React.useRef<HTMLDivElement>(null);
     const closeBtnRef = React.useRef<HTMLButtonElement>(null);
@@ -22,6 +25,20 @@ const CartDrawer = () => {
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    useEffect(() => {
+        if (isDrawerOpen) {
+            setShouldRender(true);
+            const timer = setTimeout(() => setIsAnimating(true), 20);
+            return () => clearTimeout(timer);
+        } else {
+            setIsAnimating(false);
+            const timer = setTimeout(() => {
+                setShouldRender(false);
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [isDrawerOpen]);
 
     // Prevent body scroll and handle keyboard accessibility (Escape, Focus Trap)
     useEffect(() => {
@@ -60,18 +77,18 @@ const CartDrawer = () => {
         }
     }, [isDrawerOpen, closeDrawer]);
 
-    if (!mounted) return null;
+    if (!mounted || !shouldRender) return null;
 
     const drawerTransform = dir === 'rtl' 
-        ? (isDrawerOpen ? 'translate-x-0' : '-translate-x-full') 
-        : (isDrawerOpen ? 'translate-x-0' : 'translate-x-full');
+        ? (isAnimating ? 'translate-x-0' : '-translate-x-full') 
+        : (isAnimating ? 'translate-x-0' : 'translate-x-full');
 
     return (
-        <>
+        <div className="fixed inset-0 z-[9998] overflow-hidden" aria-hidden={!isDrawerOpen}>
             {/* Backdrop Overlay */}
             <div 
-                className={`fixed inset-0 bg-black/60 backdrop-blur-xs z-[9998] transition-opacity duration-300 ${
-                    isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 ease-out ${
+                    isAnimating ? 'opacity-100' : 'opacity-0'
                 }`}
                 onClick={closeDrawer}
             />
@@ -82,17 +99,17 @@ const CartDrawer = () => {
                 role="dialog"
                 aria-modal="true"
                 aria-label={language === 'ar' ? 'سلة التسوق' : 'Shopping Cart'}
-                className={`fixed top-0 bottom-0 z-[9999] w-full max-w-md bg-white dark:bg-zinc-900 shadow-2xl transition-transform duration-300 ease-out transform ${drawerTransform} ${
-                    dir === 'rtl' ? 'left-0' : 'right-0'
-                } flex flex-col border-s border-gray-100 dark:border-white/10 ${!isDrawerOpen ? 'invisible pointer-events-none' : ''}`}
+                className={`fixed top-0 bottom-0 z-[9999] w-full sm:max-w-md bg-white dark:bg-zinc-900 shadow-2xl transition-transform duration-300 ease-out transform ${drawerTransform} ${
+                    dir === 'rtl' ? 'left-0 border-e' : 'right-0 border-s'
+                } flex flex-col border-gray-100 dark:border-white/10 ${!isAnimating ? 'pointer-events-none' : ''}`}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100 dark:border-white/10 shrink-0">
                     <h2 className="text-lg font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
-                        <MdShoppingBag className="text-xl" />
+                        <ShoppingBag className="text-xl" />
                         <span>{language === 'ar' ? 'سلة التسوق' : 'Shopping Cart'}</span>
                         <span className="text-xs font-semibold text-gray-400 ms-1">
-                            ({items.reduce((acc, item) => acc + item.quantity, 0)})
+                            ({items.length})
                         </span>
                     </h2>
                     <button 
@@ -101,16 +118,22 @@ const CartDrawer = () => {
                         className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-gray-500 hover:text-black dark:hover:text-white"
                         aria-label={language === 'ar' ? 'إغلاق سلة التسوق' : 'Close drawer'}
                     >
-                        <MdClose className="text-xl" />
+                        <X className="text-xl" />
                     </button>
                 </div>
 
                 {/* Items List */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {items.length === 0 ? (
+                    {!isHydrated ? (
+                        <div className="space-y-3 p-1 animate-pulse">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="h-20 bg-slate-100 dark:bg-zinc-800 rounded-xl" />
+                            ))}
+                        </div>
+                    ) : items.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center p-8 text-gray-400">
                             <div className="w-16 h-16 rounded-full bg-[#FAF6EC] dark:bg-[#1A1A14] flex items-center justify-center mb-4 border border-[#8A6305]/20">
-                                <MdShoppingBag className="text-3xl text-[#8A6305]" />
+                                <ShoppingBag className="text-3xl text-[#8A6305]" />
                             </div>
                             <p className="text-base font-bold text-[#0B192C] dark:text-white mb-1">
                                 {language === 'ar' ? 'سلة التسوق فارغة' : 'Your cart is empty'}
@@ -175,14 +198,15 @@ const CartDrawer = () => {
                                         </div>
                                         
                                         <div className="flex items-center justify-between mt-2">
-                                            <div className="flex items-center bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-white/10 h-8 px-1">
+                                            <div dir="ltr" className="flex items-center bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-white/10 h-8 px-1">
                                                 <button 
                                                     onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedOption)}
                                                     className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-[#8A6305] transition-colors text-sm font-bold cursor-pointer"
                                                     aria-label={language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity'}
                                                 >-</button>
-                                                <span className="px-2 text-center text-xs font-bold text-[#0B192C] dark:text-white select-none whitespace-nowrap">
-                                                    {item.quantity} {formatPackaging(item.packaging, language, { short: true })}
+                                                <span className="px-2 text-center text-xs font-bold text-[#0B192C] dark:text-white select-none whitespace-nowrap flex items-center gap-1">
+                                                    <RollingNumber value={item.quantity} />
+                                                    <span>{formatPackaging(item.packaging, language, { short: true })}</span>
                                                 </span>
                                                 <button 
                                                     onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedOption)}
@@ -197,7 +221,7 @@ const CartDrawer = () => {
                                             className="absolute top-3 end-3 text-gray-400 hover:text-red-500 transition-colors p-1.5 cursor-pointer"
                                             aria-label={language === 'ar' ? 'حذف المنتج من السلة' : 'Remove item'}
                                         >
-                                            <MdDelete className="text-lg" />
+                                            <Trash2 className="text-lg" />
                                         </button>
                                     </div>
                                 </div>
@@ -248,13 +272,13 @@ const CartDrawer = () => {
                                 className="w-full py-3 bg-[#0B192C] hover:bg-[#8A6305] text-white text-center rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 active:scale-95 shadow-md dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white"
                             >
                                 <span>{language === 'ar' ? 'متابعة الطلب' : 'Proceed'}</span>
-                                {dir === 'rtl' ? <MdArrowBack className="text-sm" /> : <MdArrowForward className="text-sm" />}
+                                {dir === 'rtl' ? <ArrowLeft className="text-sm" /> : <ArrowRight className="text-sm" />}
                             </Link>
                         </div>
                     </div>
                 )}
             </div>
-        </>
+        </div>
     );
 };
 

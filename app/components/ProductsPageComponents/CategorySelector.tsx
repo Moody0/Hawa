@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { useRef, useEffect, useState } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { MdGridView, MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { Grid, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CategoryItem {
     id: string;
@@ -125,9 +125,9 @@ const CategorySelector = ({
                     type="button"
                     onClick={() => handleScroll('left')}
                     aria-label="Scroll left"
-                    className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 w-8 h-8 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:hover:bg-[#8A6305] dark:hover:text-white items-center justify-center transition-all cursor-pointer z-20 shadow-xs"
+                    className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 w-8 h-8 rounded-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:hover:bg-[#8A6305] dark:hover:text-white items-center justify-center transition-colors cursor-pointer z-20"
                 >
-                    <MdChevronLeft className="text-xl" />
+                    <ChevronLeft className="text-xl" />
                 </button>
             )}
 
@@ -140,13 +140,13 @@ const CategorySelector = ({
                 {/* All Products Tab */}
                 <Link
                     href={allHref}
-                    className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 active:scale-95 whitespace-nowrap shadow-2xs ${
+                    className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-150 active:scale-95 whitespace-nowrap ${
                         isAllActive
-                            ? 'bg-[#0B192C] dark:bg-[#8A6305] text-white font-bold shadow-xs'
-                            : 'bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-white/10 text-[#475569] dark:text-gray-300 hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#8A6305] hover:bg-[#FAF6EC]/60 dark:hover:bg-white/5'
+                            ? 'bg-[#0B192C] dark:bg-[#8A6305] text-white font-bold'
+                            : 'bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 text-[#475569] dark:text-gray-300 hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#8A6305] hover:bg-[#FAF6EC]/60 dark:hover:bg-white/5'
                     }`}
                 >
-                    <MdGridView className={`text-base ${isAllActive ? 'text-[#8A6305] dark:text-white' : 'text-gray-500 dark:text-gray-400'}`} />
+                    <Grid className={`text-base ${isAllActive ? 'text-[#8A6305] dark:text-white' : 'text-slate-500 dark:text-slate-400'}`} />
                     <span>{allLabel}</span>
                 </Link>
 
@@ -160,10 +160,10 @@ const CategorySelector = ({
                             key={category.id}
                             id={`category-item-${category.slug}`}
                             href={getCategoryHref(category)}
-                            className={`shrink-0 inline-flex items-center px-3.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 active:scale-95 whitespace-nowrap shadow-2xs ${
+                            className={`shrink-0 inline-flex items-center px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-150 active:scale-95 whitespace-nowrap ${
                                 isActive
-                                    ? 'bg-[#0B192C] dark:bg-[#8A6305] text-white font-bold shadow-xs'
-                                    : 'bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-white/10 text-[#475569] dark:text-gray-300 hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#8A6305] hover:bg-[#FAF6EC]/60 dark:hover:bg-white/5'
+                                    ? 'bg-[#0B192C] dark:bg-[#8A6305] text-white font-bold'
+                                    : 'bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 text-[#475569] dark:text-gray-300 hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#8A6305] hover:bg-[#FAF6EC]/60 dark:hover:bg-white/5'
                             }`}
                         >
                             <span>{displayName}</span>
@@ -178,9 +178,9 @@ const CategorySelector = ({
                     type="button"
                     onClick={() => handleScroll('right')}
                     aria-label="Scroll right"
-                    className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 w-8 h-8 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:hover:bg-[#8A6305] dark:hover:text-white items-center justify-center transition-all cursor-pointer z-20 shadow-xs"
+                    className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 w-8 h-8 rounded-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-[#8A6305] hover:text-white hover:border-[#8A6305] dark:hover:bg-[#8A6305] dark:hover:text-white items-center justify-center transition-colors cursor-pointer z-20"
                 >
-                    <MdChevronRight className="text-xl" />
+                    <ChevronRight className="text-xl" />
                 </button>
             )}
         </div>

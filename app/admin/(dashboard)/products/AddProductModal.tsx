@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MdClose, MdExpandMore, MdSync, MdCheckCircle, MdCloudUpload } from "react-icons/md";
+import { X, ChevronDown, RefreshCw, CheckCircle2, UploadCloud } from 'lucide-react';
 import { createProduct, updateProduct } from "../../../../lib/admin-actions";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { toast } from "react-hot-toast";
@@ -269,7 +269,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                         onClick={onClose}
                         className="p-2 text-text-sub dark:text-gray-400 hover:text-primary hover:bg-primary/10 rounded-full transition-colors cursor-pointer"
                     >
-                        <MdClose className="text-[24px]" />
+                        <X className="text-[24px]" />
                     </button>
                 </div>
 
@@ -304,7 +304,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                             onClick={() => removeImage(url)}
                                             className="absolute top-1 end-1 size-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
                                         >
-                                            <MdClose className="text-xs" />
+                                            <X className="text-xs" />
                                         </button>
                                     </div>
                                 ))}
@@ -321,12 +321,12 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                 >
                                     {isUploadingImage ? (
                                         <>
-                                            <MdSync className="text-lg animate-spin text-[#8A6305]" />
+                                            <RefreshCw className="text-lg animate-spin text-[#8A6305]" />
                                             <span>{language === 'ar' ? 'جاري الرفع...' : 'Uploading...'}</span>
                                         </>
                                     ) : (
                                         <>
-                                            <MdCloudUpload className="text-lg text-[#8A6305]" />
+                                            <UploadCloud className="text-lg text-[#8A6305]" />
                                             <span>{language === 'ar' ? 'رفع صور من الجهاز' : 'Upload from PC'}</span>
                                         </>
                                     )}
@@ -435,7 +435,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                             <option key={mc.id} value={mc.id}>{mc.name}</option>
                                         ))}
                                     </select>
-                                    <MdExpandMore className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
+                                    <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
                                 </div>
                             </div>
                         )}
@@ -456,7 +456,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                         <option key={brand.id} value={brand.id}>{brand.name}</option>
                                     ))}
                                 </select>
-                                <MdExpandMore className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
+                                <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
                             </div>
                         </div>
 
@@ -476,7 +476,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
-                                <MdExpandMore className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
+                                <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
                             </div>
                         </div>
 
@@ -684,9 +684,9 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                         className="bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] disabled:opacity-50 text-white h-12 px-8 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm transform active:scale-[0.98] cursor-pointer"
                     >
                         {isLoading ? (
-                            <MdSync className="animate-spin text-[20px]" />
+                            <RefreshCw className="animate-spin text-[20px]" />
                         ) : (
-                            <MdCheckCircle className="text-[20px]" />
+                            <CheckCircle2 className="text-[20px]" />
                         )}
                         {isLoading ? (product ? (language === 'ar' ? 'جاري التحديث...' : 'Updating...') : (language === 'ar' ? 'جاري الحفظ...' : 'Saving...')) : (product ? (language === 'ar' ? 'تحديث المنتج' : 'Update Product') : (language === 'ar' ? 'حفظ المنتج' : 'Save Product'))}
                     </button>

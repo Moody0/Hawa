@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MdClose, MdSearch, MdImage } from "react-icons/md";
+import { X, Search, Image } from 'lucide-react';
 import { getRelatedProducts, getRelatedCategories, getRelatedBrands } from "../actions/related";
 import { useLanguage } from "@/app/context/LanguageContext";
 
@@ -83,13 +83,13 @@ export default function RelatedItemsModal({
                         onClick={onClose}
                         className="rounded-xl p-2 text-text-sub hover:bg-black/5 hover:text-text-main dark:hover:bg-white/5 dark:hover:text-white transition-colors"
                     >
-                        <MdClose className="text-2xl" />
+                        <X className="text-2xl" />
                     </button>
                 </div>
 
                 <div className="p-6 border-b border-black/[0.04] dark:border-white/[0.04]">
                     <div className="relative">
-                        <MdSearch className={`absolute ${dir === 'rtl' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-xl text-text-sub/60`} />
+                        <Search className={`absolute ${dir === 'rtl' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-xl text-text-sub/60`} />
                         <input
                             type="text"
                             value={searchQuery}
@@ -119,7 +119,7 @@ export default function RelatedItemsModal({
                                         ) : item.image ? (
                                             <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                         ) : (
-                                            <MdImage className="text-2xl text-gray-400" />
+                                            <Image className="text-2xl text-gray-400" />
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">

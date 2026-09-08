@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +19,47 @@ const ALLOWED_MIME_TYPES = new Set([
     'image/webp',
     'image/avif',
 ]);
+
+const MAX_PROXY_BYTES = 5 * 1024 * 1024; // 5MB maximum proxy response
+const CACHE_DIR = path.join(process.cwd(), '.cache', 'image-proxy');
+
+// Ensure cache directory exists synchronously on module init
+try {
+    if (!fs.existsSync(CACHE_DIR)) {
+        fs.mkdirSync(CACHE_DIR, { recursive: true });
+    }
+} catch {
+    // Ignore error if concurrent worker created directory
+}
+
+// In-flight deduplication to avoid multiple simultaneous requests for the exact same image
+const inFlightRequests = new Map<string, Promise<{ buffer: Buffer; contentType: string }>>();
+
+// Concurrency queue to protect upstream image host (e.g. i.postimg.cc) from being hammered
+let activeFetches = 0;
+const MAX_CONCURRENT_UPSTREAM = 6;
+const fetchQueue: Array<() => void> = [];
+
+function acquireFetchSlot(): Promise<void> {
+    if (activeFetches < MAX_CONCURRENT_UPSTREAM) {
+        activeFetches++;
+        return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+        fetchQueue.push(() => {
+            activeFetches++;
+            resolve();
+        });
+    });
+}
+
+function releaseFetchSlot() {
+    activeFetches--;
+    if (fetchQueue.length > 0 && activeFetches < MAX_CONCURRENT_UPSTREAM) {
+        const next = fetchQueue.shift();
+        next?.();
+    }
+}
 
 function isPrivateIpOrHost(hostname: string): boolean {
     const host = hostname.toLowerCase().trim();
@@ -40,6 +84,61 @@ function isPrivateIpOrHost(hostname: string): boolean {
     return false;
 }
 
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+    return fetch(url, {
+        redirect: 'follow',
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'image/avif,image/webp,image/apng,image/*;q=0.8',
+        },
+        signal: AbortSignal.timeout(timeoutMs),
+    });
+}
+
+async function fetchFromUpstream(imageUrl: string): Promise<{ buffer: Buffer; contentType: string }> {
+    await acquireFetchSlot();
+    try {
+        let response = await fetchWithTimeout(imageUrl, 15000);
+
+        // If rate limited or server temporarily busy, brief retry
+        if (!response.ok && (response.status === 429 || response.status >= 500)) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            response = await fetchWithTimeout(imageUrl, 15000);
+        }
+
+        if (!response.ok) {
+            throw new Error(`Upstream returned ${response.status}: ${response.statusText}`);
+        }
+
+        const rawContentType = response.headers.get('content-type') || '';
+        const contentType = rawContentType.split(';')[0].trim().toLowerCase();
+
+        if (!ALLOWED_MIME_TYPES.has(contentType)) {
+            throw new Error(`Disallowed content type: ${contentType}`);
+        }
+
+        const contentLengthHeader = response.headers.get('content-length');
+        if (contentLengthHeader) {
+            const contentLength = parseInt(contentLengthHeader, 10);
+            if (!isNaN(contentLength) && contentLength > MAX_PROXY_BYTES) {
+                throw new Error('Image size exceeds maximum allowed limit (5MB)');
+            }
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        if (arrayBuffer.byteLength > MAX_PROXY_BYTES) {
+            throw new Error('Image size exceeds maximum allowed limit (5MB)');
+        }
+
+        return {
+            buffer: Buffer.from(arrayBuffer),
+            contentType,
+        };
+    } finally {
+        releaseFetchSlot();
+    }
+}
+
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     let imageUrl = searchParams.get('url');
@@ -55,15 +154,18 @@ export async function GET(req: NextRequest) {
         return new NextResponse('Invalid image URL', { status: 400 });
     }
 
+    const cacheKey = crypto.createHash('sha256').update(imageUrl).digest('hex');
+
     try {
         const parsedUrl = new URL(imageUrl);
-        if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-            return new NextResponse('Invalid protocol', { status: 400 });
+        // Only HTTPS is permitted
+        if (parsedUrl.protocol !== 'https:') {
+            return new NextResponse('Invalid protocol: Only HTTPS origins are allowed', { status: 400 });
         }
 
         const hostname = parsedUrl.hostname.toLowerCase();
 
-        // Check private IP or cloud metadata
+        // Check private IP or cloud metadata (SSRF defense)
         if (isPrivateIpOrHost(hostname)) {
             return new NextResponse('Access to private network or metadata is forbidden', { status: 403 });
         }
@@ -73,37 +175,63 @@ export async function GET(req: NextRequest) {
             return new NextResponse('Image host is not in the allowed list', { status: 403 });
         }
 
-        const response = await fetch(imageUrl, {
-            redirect: 'error',
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-                'Accept': 'image/avif,image/webp,image/apng,image/*;q=0.8',
-            },
-            signal: AbortSignal.timeout(10000),
+        // 1. Check local persistent disk cache
+        const binPath = path.join(CACHE_DIR, `${cacheKey}.bin`);
+        const metaPath = path.join(CACHE_DIR, `${cacheKey}.json`);
+
+        try {
+            const [metaRaw, data] = await Promise.all([
+                fs.promises.readFile(metaPath, 'utf8'),
+                fs.promises.readFile(binPath),
+            ]);
+            const meta = JSON.parse(metaRaw);
+            const headers = new Headers();
+            headers.set('Content-Type', meta.contentType || 'image/png');
+            headers.set('X-Content-Type-Options', 'nosniff');
+            headers.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=86400, immutable');
+            headers.set('X-Cache', 'HIT');
+
+            return new NextResponse(new Uint8Array(data), { headers });
+        } catch {
+            // Cache miss: proceed to fetch
+        }
+
+        // 2. Fetch from upstream (with in-flight request coalescing)
+        let fetchPromise = inFlightRequests.get(cacheKey);
+        if (!fetchPromise) {
+            fetchPromise = fetchFromUpstream(imageUrl);
+            inFlightRequests.set(cacheKey, fetchPromise);
+        }
+
+        const { buffer, contentType } = await fetchPromise;
+
+        // 3. Save to disk cache asynchronously without blocking client response
+        Promise.all([
+            fs.promises.writeFile(binPath, buffer),
+            fs.promises.writeFile(
+                metaPath,
+                JSON.stringify({
+                    contentType,
+                    size: buffer.length,
+                    cachedAt: Date.now(),
+                    url: imageUrl,
+                })
+            ),
+        ]).catch((err) => {
+            console.error('Failed to write image to disk cache:', err);
         });
-
-        if (!response.ok) {
-            return new NextResponse(`Failed to fetch image: ${response.statusText}`, { status: response.status });
-        }
-
-        const rawContentType = response.headers.get('content-type') || '';
-        const contentType = rawContentType.split(';')[0].trim().toLowerCase();
-
-        // Block non-image or potentially dangerous MIME types (e.g. SVG scripts, HTML)
-        if (!ALLOWED_MIME_TYPES.has(contentType)) {
-            return new NextResponse('Disallowed or dangerous content type', { status: 415 });
-        }
-
-        const buffer = await response.arrayBuffer();
 
         const headers = new Headers();
         headers.set('Content-Type', contentType);
         headers.set('X-Content-Type-Options', 'nosniff');
         headers.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=86400, immutable');
+        headers.set('X-Cache', 'MISS');
 
-        return new NextResponse(buffer, { headers });
+        return new NextResponse(new Uint8Array(buffer), { headers });
     } catch (error) {
-        console.error('Image proxy error:', error);
+        console.error('Image proxy error for', imageUrl, ':', error);
         return new NextResponse('Failed to load remote image', { status: 502 });
+    } finally {
+        inFlightRequests.delete(cacheKey);
     }
 }

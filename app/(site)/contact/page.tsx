@@ -2,15 +2,7 @@
 
 import React, { useState } from 'react';
 import { Metadata } from 'next';
-import { 
-    MdPhone, 
-    MdLocationOn, 
-    MdAccessTime, 
-    MdStore, 
-    MdSend, 
-    MdSupportAgent,
-    MdEmail
-} from 'react-icons/md';
+import { Phone, MapPin, Clock, Store, Send, Headset, Mail } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -89,7 +81,7 @@ export default function ContactUsPage() {
                                         href="tel:+963993443901"
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-gray-50 text-xs font-bold transition-all shadow-xs"
                                     >
-                                        <MdPhone />
+                                        <Phone />
                                         <span>اتصال هاتفي</span>
                                     </a>
                                 </div>
@@ -101,7 +93,7 @@ export default function ContactUsPage() {
                     <div className="bg-gradient-to-br from-[#FAF6EC] via-amber-50/40 to-transparent dark:from-[#132035] dark:via-[#0B192C] border border-[#8A6305]/30 hover:border-[#8A6305] rounded-3xl p-6 transition-all shadow-xs hover:shadow-md">
                         <div className="flex items-start gap-4">
                             <div className="w-14 h-14 rounded-2xl bg-[#0B192C] dark:bg-[#8A6305] text-[#8A6305] dark:text-white border border-[#8A6305]/40 flex items-center justify-center text-2xl shrink-0 shadow-sm">
-                                <MdStore className="text-3xl" />
+                                <Store className="text-3xl" />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#8A6305]/10 text-[#8A6305] dark:text-[#8A6305] text-[11px] font-extrabold mb-1">
@@ -121,7 +113,7 @@ export default function ContactUsPage() {
                                         href="tel:+963994166000"
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B192C] hover:bg-[#1a2e4c] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white text-xs font-bold transition-all shadow-xs"
                                     >
-                                        <MdPhone />
+                                        <Phone />
                                         <span>اتصال هاتفي</span>
                                     </a>
                                     <a
@@ -142,7 +134,7 @@ export default function ContactUsPage() {
                     <div className="bg-white dark:bg-[#132035] rounded-3xl p-6 border border-gray-200/80 dark:border-white/10 shadow-xs">
                         <div className="flex items-start gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-[#FAF6EC] dark:bg-white/5 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#8A6305] flex items-center justify-center text-2xl shrink-0">
-                                <MdLocationOn />
+                                <MapPin />
                             </div>
                             <div>
                                 <h4 className="text-sm font-black text-[#0B192C] dark:text-white mb-1">
@@ -159,7 +151,7 @@ export default function ContactUsPage() {
                     <div className="bg-white dark:bg-[#132035] rounded-3xl p-6 border border-gray-200/80 dark:border-white/10 shadow-xs">
                         <div className="flex items-start gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-[#FAF6EC] dark:bg-white/5 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#8A6305] flex items-center justify-center text-2xl shrink-0">
-                                <MdAccessTime />
+                                <Clock />
                             </div>
                             <div>
                                 <h4 className="text-sm font-black text-[#0B192C] dark:text-white mb-1">
@@ -198,7 +190,7 @@ export default function ContactUsPage() {
                                     value={formData.name}
                                     onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
                                     placeholder="محمد أحمد"
-                                    className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                    className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:border-[#8A6305] focus:ring-0 focus:outline-none transition-colors"
                                 />
                             </div>
 
@@ -212,7 +204,7 @@ export default function ContactUsPage() {
                                     value={formData.shopName}
                                     onChange={(e) => setFormData(p => ({ ...p, shopName: e.target.value }))}
                                     placeholder="سوبرماركت الأمانة"
-                                    className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                    className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:border-[#8A6305] focus:ring-0 focus:outline-none transition-colors"
                                 />
                             </div>
                         </div>
@@ -230,7 +222,7 @@ export default function ContactUsPage() {
                                     value={formData.phone}
                                     onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
                                     placeholder="09xxxxxxxx"
-                                    className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                    className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:border-[#8A6305] focus:ring-0 focus:outline-none transition-colors font-mono"
                                 />
                             </div>
 
@@ -244,7 +236,7 @@ export default function ContactUsPage() {
                                     value={formData.city}
                                     onChange={(e) => setFormData(p => ({ ...p, city: e.target.value }))}
                                     placeholder="حمص"
-                                    className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                    className="block w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:border-[#8A6305] focus:ring-0 focus:outline-none transition-colors"
                                 />
                             </div>
                         </div>
@@ -259,7 +251,7 @@ export default function ContactUsPage() {
                                 value={formData.message}
                                 onChange={(e) => setFormData(p => ({ ...p, message: e.target.value }))}
                                 placeholder="اكتب الأصناف أو الوكالات التي ترغب بالاستفسار عن أسعار جملتها أو جدول توزيعها..."
-                                className="block w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#8A6305] focus:outline-none"
+                                className="block w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:border-[#8A6305] focus:ring-0 focus:outline-none transition-colors"
                             />
                         </div>
 

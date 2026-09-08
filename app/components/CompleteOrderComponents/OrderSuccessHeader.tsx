@@ -2,19 +2,32 @@
 
 import React from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { MdCheckCircle } from 'react-icons/md';
+import { CheckCircle2 } from 'lucide-react';
 
-const OrderSuccessHeader = () => {
-    const { t } = useLanguage();
+interface OrderSuccessHeaderProps {
+    isQuoteRequest?: boolean;
+}
+
+const OrderSuccessHeader = ({ isQuoteRequest = false }: OrderSuccessHeaderProps) => {
+    const { t, language } = useLanguage();
 
     return (
         <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mb-5 relative">
-                <div className="absolute inset-0 border-2 border-emerald-500/30 rounded-full animate-ping opacity-75"></div>
-                <MdCheckCircle className="text-emerald-500 text-5xl sm:text-6xl relative z-10" />
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 sm:h-20 sm:w-20">
+                <CheckCircle2 className="h-9 w-9 text-emerald-600 sm:h-11 sm:w-11" />
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#0B192C] dark:text-white mb-2">{t('orderComplete.thankYou')}</h1>
-            <p className="text-[#475569] dark:text-gray-400 text-sm sm:text-base font-medium">{t('orderComplete.orderConfirmed')}</p>
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#0B192C] dark:text-white mb-2">
+                {isQuoteRequest
+                    ? (language === 'ar' ? 'تم استلام طلب التوريد' : 'Supply request received')
+                    : t('orderComplete.thankYou')}
+            </h1>
+            <p className="text-[#475569] dark:text-gray-400 text-sm sm:text-base font-medium">
+                {isQuoteRequest
+                    ? (language === 'ar'
+                        ? 'سيتواصل معك فريق المبيعات خلال ساعات العمل لتأكيد التفاصيل'
+                        : 'Our sales team will contact you during business hours to confirm the details')
+                    : t('orderComplete.orderConfirmed')}
+            </p>
         </div>
     );
 };

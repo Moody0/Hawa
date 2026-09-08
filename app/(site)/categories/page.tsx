@@ -1,6 +1,6 @@
 import React from "react";
 import CategoriesContent from "./CategoriesContent";
-import { getSiteSettings } from "@/lib/admin-actions";
+import { getSiteSettings } from "@/lib/public-queries";
 import { getCatalogCategories } from "@/lib/catalog";
 import { Metadata } from "next";
 

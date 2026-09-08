@@ -1,4 +1,4 @@
-import { getSiteSettings } from "@/lib/admin-actions";
+import { getSiteSettings } from "@/lib/public-queries";
 import AboutUsClient from "./AboutUsClient";
 import { Metadata } from "next";
 

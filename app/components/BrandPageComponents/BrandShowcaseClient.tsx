@@ -5,7 +5,7 @@ import { useLanguage } from "@/app/context/LanguageContext";
 import BrandMasthead from "./BrandMasthead";
 import BrandCatalogToolbar, { CategoryItem } from "./BrandCatalogToolbar";
 import EditorialProductCard, { Product as BrandProductItem } from "@/app/components/ProductsPageComponents/EditorialProductCard";
-import { MdSearchOff, MdRefresh } from "react-icons/md";
+import { SearchX, RotateCw } from 'lucide-react';
 
 interface BrandShowcaseClientProps {
     brand: {
@@ -49,6 +49,8 @@ export default function BrandShowcaseClient({
     const [loading, setLoading] = useState(false);
     const [isInitialMount, setIsInitialMount] = useState(true);
     const observerRef = useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const requestIdRef = useRef<number>(0);
 
     const hasMore = products.length < totalProducts;
 
@@ -60,13 +62,28 @@ export default function BrandShowcaseClient({
         return () => clearTimeout(handler);
     }, [searchQuery]);
 
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
+
     // Fetch Products
     const fetchProducts = useCallback(async (targetPage: number, reset: boolean) => {
+        if (reset && abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        const currentReqId = ++requestIdRef.current;
+
         setLoading(true);
         try {
             const params = new URLSearchParams();
             params.set("page", targetPage.toString());
-            params.set("limit", "12");
+            params.set("limit", "36");
             params.set("brandIds", brand.id);
 
             if (activeCategoryId !== "all") {
@@ -80,14 +97,11 @@ export default function BrandShowcaseClient({
             if (sort === "price_asc") params.set("sort", "price_asc");
             else if (sort === "price_desc") params.set("sort", "price_desc");
             else if (sort === "newest") params.set("sort", "newest");
-            if (!reset && targetPage > 1) {
-                params.set("knownTotal", totalProducts.toString());
-                params.set("skipCount", "true");
-            }
 
-            const res = await fetch(`/api/products?${params.toString()}`);
-            if (res.ok) {
+            const res = await fetch(`/api/products?${params.toString()}`, { signal: controller.signal });
+            if (res.ok && currentReqId === requestIdRef.current) {
                 const data = await res.json();
+                if (currentReqId !== requestIdRef.current) return;
                 if (reset) {
                     setProducts(data.products || []);
                 } else {
@@ -101,12 +115,15 @@ export default function BrandShowcaseClient({
                     setTotalProducts(data.pagination.total);
                 }
             }
-        } catch (err) {
+        } catch (err: unknown) {
+            if (err instanceof Error && err.name === 'AbortError') return;
             console.error("Failed to load brand products", err);
         } finally {
-            setLoading(false);
+            if (!controller.signal.aborted && currentReqId === requestIdRef.current) {
+                setLoading(false);
+            }
         }
-    }, [brand.id, activeCategoryId, debouncedSearch, sort, totalProducts]);
+    }, [brand.id, activeCategoryId, debouncedSearch, sort]);
 
     // React to filter, sort, or search changes
     useEffect(() => {
@@ -175,7 +192,7 @@ export default function BrandShowcaseClient({
             {products.length === 0 && !loading && (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl bg-slate-50 dark:bg-zinc-900 border border-slate-200/80 dark:border-white/5 my-6">
                     <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 flex items-center justify-center mb-4">
-                        <MdSearchOff className="text-3xl" />
+                        <SearchX className="text-3xl" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-[#0B192C] dark:text-white mb-1.5">
                         {isArabic ? "لم يتم العثور على منتجات مطابقة" : "No Products Found"}
@@ -189,9 +206,9 @@ export default function BrandShowcaseClient({
                     <button
                         type="button"
                         onClick={handleResetFilters}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0B192C] dark:bg-[#8A6305] text-white text-xs font-bold transition-all active:scale-95 shadow-xs"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0B192C] dark:bg-[#8A6305] text-white text-xs font-bold transition-colors cursor-pointer active:scale-95"
                     >
-                        <MdRefresh className="text-base" />
+                        <RotateCw className="text-base" />
                         <span>{isArabic ? "إعادة تعيين الفلاتر" : "Reset Filters"}</span>
                     </button>
                 </div>

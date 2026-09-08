@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdEmail, MdCameraAlt, MdLocalOffer, MdStar } from 'react-icons/md';
+import { Mail, Camera, Tag, Star } from 'lucide-react';
 import { getI18n } from '@/lib/i18n';
 
 const FooterInfoBar = async () => {
@@ -7,22 +7,22 @@ const FooterInfoBar = async () => {
 
     const items = [
         {
-            icon: MdStar,
+            icon: Star,
             title: t('home.footerInfoExclusive'),
             subtitle: t('home.footerInfoExclusiveDesc'),
         },
         {
-            icon: MdLocalOffer,
+            icon: Tag,
             title: t('home.footerInfoDiscount'),
             subtitle: t('home.footerInfoDiscountDesc'),
         },
         {
-            icon: MdCameraAlt,
+            icon: Camera,
             title: t('home.footerInfoInstagram'),
             subtitle: t('home.footerInfoInstagramDesc'),
         },
         {
-            icon: MdEmail,
+            icon: Mail,
             title: t('home.footerInfoNewsletter'),
             subtitle: t('home.footerInfoNewsletterDesc'),
         },
