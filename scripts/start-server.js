@@ -34,9 +34,12 @@ const prewarm = (process.env.PREWARM_IMAGES_ON_START === 'false' || !fs.existsSy
 
 let isShuttingDown = false;
 let currentChild = null;
+let consecutiveFastCrashes = 0;
+let lastStartTime = 0;
 
 function startChild() {
     if (isShuttingDown) return;
+    lastStartTime = Date.now();
     const child = spawn(process.execPath, [nextBin, 'start', '-p', port], {
         stdio: 'inherit',
         cwd: path.join(__dirname, '..'),
@@ -49,6 +52,20 @@ function startChild() {
             process.exit(code || 0);
             return;
         }
+
+        const uptime = (Date.now() - lastStartTime) / 1000;
+        if (uptime < 5) {
+            consecutiveFastCrashes++;
+        } else {
+            consecutiveFastCrashes = 0;
+        }
+
+        if (consecutiveFastCrashes >= 3) {
+            console.error(`\n[Server Supervisor] Server exited immediately 3 consecutive times. Port ${port} is likely already occupied by another application (e.g. another dev server). Stopping supervisor to prevent infinite loop.`);
+            process.exit(1);
+            return;
+        }
+
         console.warn(`[Server Supervisor] Next.js process exited (code=${code}, signal=${signal}). Restarting in 1s...`);
         setTimeout(startChild, 1000);
     });
