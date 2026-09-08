@@ -25,15 +25,15 @@ export const metadata: Metadata = {
             {
                 url: `${SITE_ORIGIN}/og-image.jpg`,
                 secureUrl: `${SITE_ORIGIN}/og-image.jpg`,
-                width: 1200,
-                height: 630,
+                width: 1080,
+                height: 1080,
                 type: 'image/jpeg',
                 alt: 'Hawa Distribution Blog & Trade Reports',
             },
         ],
     },
     twitter: {
-        card: 'summary_large_image',
+        card: 'summary',
         title: 'المدونة والتقارير التجارية | شركة حوا للتوزيع والتجارة',
         description: 'آخر تقارير السلع والوكالات الغذائية وإرشادات أصحاب المتاجر من شركة حوا للتوزيع والتجارة.',
         images: [`${SITE_ORIGIN}/og-image.jpg`],

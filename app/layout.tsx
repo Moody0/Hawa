@@ -85,15 +85,15 @@ export const metadata: Metadata = {
       {
         url: `${metadataBase}/og-image.jpg`,
         secureUrl: `${metadataBase}/og-image.jpg`,
-        width: 1200,
-        height: 630,
+        width: 1080,
+        height: 1080,
         type: "image/jpeg",
         alt: "حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد - Hawa Distribution",
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد - Hawa Distribution",
     description:
       "شركة حوا للتوزيع والتجارة - المنصة الرائدة لتوريد كبرى الوكالات والعلامات التجارية للمحلات والسوبرماركت بالجملة. توريد مباشر وطلب فوري عبر واتساب.",
