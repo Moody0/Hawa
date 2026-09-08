@@ -18,14 +18,14 @@ export const metadata: Metadata = {
         images: [
             {
                 url: "/og-image.jpg",
-                width: 1080,
-                height: 1080,
+                width: 1200,
+                height: 630,
                 alt: "Hawa Distribution Shipping & Delivery",
             },
         ],
     },
     twitter: {
-        card: "summary",
+        card: "summary_large_image",
         title: "الشحن والتوصيل وسياسة التوريد | Hawa Distribution - حوا للتوزيع",
         description: "تعرف على شروط الشحن والتوريد المباشر وسياسة الاستلام المعتمدة لدى شركة حوا للتوزيع والتجارة.",
         images: ["/og-image.jpg"],

@@ -10,7 +10,6 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import { getSiteSettings } from '@/lib/public-queries';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { SITE_ORIGIN, toAbsoluteImageUrl } from '@/lib/site-config';
 
 export const revalidate = 60;
 
@@ -173,38 +172,13 @@ export async function generateMetadata(
         return { title: 'مقال غير موجود | Hawa Distribution' };
     }
 
-    const imageUrl = toAbsoluteImageUrl(post.image);
-    const postTitle = `${post.title} | شركة حوا للتوزيع والتجارة`;
-    const postDesc = post.excerpt || post.title;
-
     return {
-        title: postTitle,
-        description: postDesc,
-        alternates: {
-            canonical: `/blog/${post.slug}`,
-        },
+        title: `${post.title} | شركة حوا للتوزيع والتجارة`,
+        description: post.excerpt || post.title,
         openGraph: {
             title: post.title,
-            description: postDesc,
-            type: 'article',
-            url: `${SITE_ORIGIN}/blog/${post.slug}`,
-            siteName: 'حوا للتوزيع والتجارة | Hawa Distribution & Trading',
-            locale: 'ar_SY',
-            images: [
-                {
-                    url: imageUrl,
-                    secureUrl: imageUrl.startsWith('https://') ? imageUrl : undefined,
-                    width: 1200,
-                    height: 630,
-                    alt: post.title,
-                },
-            ],
-        },
-        twitter: {
-            card: 'summary_large_image',
-            title: post.title,
-            description: postDesc,
-            images: [imageUrl],
+            description: post.excerpt || post.title,
+            images: post.image ? [{ url: post.image }] : [],
         },
     };
 }

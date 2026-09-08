@@ -17,14 +17,14 @@ export const metadata: Metadata = {
         images: [
             {
                 url: "/og-image.jpg",
-                width: 1080,
-                height: 1080,
-                alt: "Hawa Distribution - About Us",
+                width: 1200,
+                height: 630,
+                alt: "About Hawa Distribution",
             },
         ],
     },
     twitter: {
-        card: "summary",
+        card: "summary_large_image",
         title: "من نحن | شركة حوا للتوزيع والتجارة",
         description: "تعرف على شركة حوا للتوزيع والتجارة - المنصة الرائدة لتوزيع منتجات الوكالات للمحلات والتجار.",
         images: ["/og-image.jpg"],

@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BrandShowcaseClient from "@/app/components/BrandPageComponents/BrandShowcaseClient";
 import { getBrandBySlug, getCatalogInitialData } from "@/lib/catalog";
-import { SITE_ORIGIN, toAbsoluteImageUrl } from "@/lib/site-config";
 
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
@@ -18,9 +17,9 @@ export async function generateMetadata(
         };
     }
 
-    const title = `وكالة ${brand.name} بالجملة | Hawa Distribution - حوا للتوزيع`;
+    const title = `${brand.name} | Hawa Distribution - حوا للتوزيع`;
     const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
-    const imageUrl = toAbsoluteImageUrl(brand.image);
+    const image = brand.image || '/og-image.jpg';
 
     return {
         title,
@@ -32,13 +31,10 @@ export async function generateMetadata(
             title,
             description,
             type: 'website',
-            url: `${SITE_ORIGIN}/brands/${brand.slug}`,
-            siteName: 'حوا للتوزيع والتجارة | Hawa Distribution & Trading',
-            locale: 'ar_SY',
+            url: `/brands/${brand.slug}`,
             images: [
                 {
-                    url: imageUrl,
-                    secureUrl: imageUrl.startsWith('https://') ? imageUrl : undefined,
+                    url: image,
                     width: 1200,
                     height: 630,
                     alt: brand.name,
@@ -49,7 +45,7 @@ export async function generateMetadata(
             card: 'summary_large_image',
             title,
             description,
-            images: [imageUrl],
+            images: [image],
         },
     };
 }

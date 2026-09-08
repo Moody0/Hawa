@@ -14,14 +14,14 @@ export const metadata = {
         images: [
             {
                 url: "/og-image.jpg",
-                width: 1080,
-                height: 1080,
+                width: 1200,
+                height: 630,
                 alt: "Hawa Distribution Partner Brands",
             },
         ],
     },
     twitter: {
-        card: "summary",
+        card: "summary_large_image",
         title: "وكالاتنا والعلامات التجارية المعتمدة | Hawa Distribution - حوا للتوزيع",
         description: "استكشف الوكالات والعلامات التجارية المعتمدة لدى شركة حوا للتوزيع والتجارة.",
         images: ["/og-image.jpg"],

@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ProductsClient from "../../products/ProductsClient";
 import { getCatalogInitialData, getCatalogBrands } from "@/lib/catalog";
-import { SITE_ORIGIN, toAbsoluteImageUrl } from "@/lib/site-config";
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
@@ -37,7 +36,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 
     const title = `${department.name} بالجملة | Hawa Distribution - حوا للتوزيع`;
     const description = department.description || `تصفح منتجات قسم ${department.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
-    const imageUrl = toAbsoluteImageUrl(department.image);
+    const image = department.image || '/og-image.jpg';
 
     return {
         title,
@@ -49,13 +48,10 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
             title,
             description,
             type: 'website',
-            url: `${SITE_ORIGIN}/departments/${department.slug}`,
-            siteName: 'حوا للتوزيع والتجارة | Hawa Distribution & Trading',
-            locale: 'ar_SY',
+            url: `/departments/${department.slug}`,
             images: [
                 {
-                    url: imageUrl,
-                    secureUrl: imageUrl.startsWith('https://') ? imageUrl : undefined,
+                    url: image,
                     width: 1200,
                     height: 630,
                     alt: department.name,
@@ -66,7 +62,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
             card: 'summary_large_image',
             title,
             description,
-            images: [imageUrl],
+            images: [image],
         },
     };
 }
