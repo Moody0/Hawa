@@ -30,7 +30,7 @@ export const authOptions: AuthOptions = {
                 const ip = normalizeClientIp(Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor || (Array.isArray(realIp) ? realIp[0] : realIp))
                 await assertAdminLoginAllowed(ip, username)
 
-                if (credentials.password.length < 12 || credentials.password.length > 128) {
+                if (credentials.password.length < 6 || credentials.password.length > 128) {
                     await recordAdminLoginAttempt(ip, username, false)
                     return null
                 }

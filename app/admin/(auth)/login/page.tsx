@@ -134,7 +134,7 @@ export default function AdminLoginPage() {
                                     placeholder={t("admin.login.passwordPlaceholder")}
                                     type="password"
                                     autoComplete="current-password"
-                                    minLength={12}
+                                    minLength={6}
                                     maxLength={128}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}

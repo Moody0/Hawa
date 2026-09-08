@@ -33,8 +33,8 @@ const FALLBACK_HIGHLIGHT_CARDS: HighlightCard[] = [
         productNameAr: 'لحوم ولانشون معلب',
         productNameEn: 'Canned Meats & Goods',
         priceText: '',
-        heroImage: '/uploads/categories/cat-328006c06c.webp',
-        productThumb: '/uploads/categories/cat-328006c06c.webp',
+        heroImage: '/images/categories/canned-foods.webp',
+        productThumb: '/images/categories/canned-foods.webp',
     },
     {
         id: 'detergents',
@@ -46,8 +46,8 @@ const FALLBACK_HIGHLIGHT_CARDS: HighlightCard[] = [
         productNameAr: 'سوائل جلي ومعقمات',
         productNameEn: 'Detergents & Sanitisers',
         priceText: '',
-        heroImage: '/uploads/categories/cat-173332ecce.webp',
-        productThumb: '/uploads/categories/cat-173332ecce.webp',
+        heroImage: '/images/categories/dishwashing-liquid.webp',
+        productThumb: '/images/categories/dishwashing-liquid.webp',
     },
     {
         id: 'dairy-oils',
@@ -59,8 +59,8 @@ const FALLBACK_HIGHLIGHT_CARDS: HighlightCard[] = [
         productNameAr: 'سمن بقري وزيوت طعام',
         productNameEn: 'Ghee & Vegetable Oils',
         priceText: '',
-        heroImage: '/uploads/categories/cat-c4b2e6c6c2.webp',
-        productThumb: '/uploads/categories/cat-c4b2e6c6c2.webp',
+        heroImage: '/images/categories/cooking-oil-ghee.webp',
+        productThumb: '/images/categories/cooking-oil-ghee.webp',
     },
     {
         id: 'seafood',
@@ -72,8 +72,8 @@ const FALLBACK_HIGHLIGHT_CARDS: HighlightCard[] = [
         productNameAr: 'تونة وسردين فاخر',
         productNameEn: 'Premium Tuna & Sardines',
         priceText: '',
-        heroImage: '/uploads/categories/cat-f10c952ab5.webp',
-        productThumb: '/uploads/categories/cat-f10c952ab5.webp',
+        heroImage: '/images/categories/canned-foods.webp',
+        productThumb: '/images/categories/canned-foods.webp',
     },
 ];
 

@@ -47,7 +47,7 @@ function validateCredentials(usernameValue: string, password?: string, passwordR
     const username = usernameValue.trim().normalize("NFKC").toLocaleLowerCase("en-US");
     if (!username || username.length > 128) throw new Error("Username must contain 1 to 128 characters");
     if (passwordRequired && !password) throw new Error("Password is required");
-    if (password && (password.length < 12 || password.length > 128)) throw new Error("Password must contain 12 to 128 characters");
+    if (password && (password.length < 6 || password.length > 128)) throw new Error("Password must contain 6 to 128 characters");
     return username;
 }
 
