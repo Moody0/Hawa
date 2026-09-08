@@ -22,16 +22,16 @@ function createPrismaClient() {
         try {
             const databaseUrl = new URL(rawDatabaseUrl);
             if (!databaseUrl.searchParams.has("connection_limit")) {
-                databaseUrl.searchParams.set("connection_limit", "1");
+                databaseUrl.searchParams.set("connection_limit", "10");
             }
             if (!databaseUrl.searchParams.has("pool_timeout")) {
-                databaseUrl.searchParams.set("pool_timeout", "10");
+                databaseUrl.searchParams.set("pool_timeout", "30");
             }
             if (!databaseUrl.searchParams.has("connect_timeout")) {
-                databaseUrl.searchParams.set("connect_timeout", "10");
+                databaseUrl.searchParams.set("connect_timeout", "30");
             }
 
-            return new PrismaClient({ datasourceUrl: databaseUrl.toString() });
+            return new PrismaClient({ datasources: { db: { url: databaseUrl.toString() } } });
         } catch {
             // Let Prisma report the original configuration error below.
         }
