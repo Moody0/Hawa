@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import React, { Suspense } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ProductsClient from "../../products/ProductsClient";
 import { getCatalogInitialData, getCategoryBySlug, getCatalogBrands } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
@@ -124,27 +124,10 @@ export default async function CategoryPage(
     const activeCategory = await getCategoryBySlug(params.slug);
 
     if (activeCategory) {
-        const [{ categories, products, totalProducts }, brands] = await Promise.all([
-            getCatalogInitialData(
-                activeCategory.id,
-                activeCategory.brandId || undefined
-            ),
-            getCatalogBrands(),
-        ]);
-
-        return (
-            <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
-                <ProductsClient
-                    key={activeCategory.slug}
-                    initialCategories={categories}
-                    initialBrands={brands}
-                    initialProducts={products}
-                    initialTotal={totalProducts}
-                    activeCategory={activeCategory}
-                    activeBrand={activeCategory.brand}
-                />
-            </Suspense>
-        );
+        // Keep old category URLs working while using one canonical catalog
+        // route. Rendering the client catalog directly here used to create a
+        // URL-sync/fetch feedback loop on legacy links.
+        redirect(`/products?category=${encodeURIComponent(activeCategory.slug)}`);
     }
 
     const mainCategory = await getMainCategory(params.slug);

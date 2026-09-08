@@ -1,8 +1,6 @@
 import React, { Suspense } from "react";
-import { redirect } from "next/navigation";
 import ProductsClient from "./ProductsClient";
-import { getCatalogInitialData, getCatalogBrands, getBrandBySlug } from "@/lib/catalog";
-import { findCategoryByIdentifier } from "@/lib/category-utils";
+import { getCatalogInitialData, getCatalogBrands, getBrandBySlug, getCategoryBySlug, getCatalogCategories } from "@/lib/catalog";
 import { parseCatalogUrlParams, buildCatalogUrl } from "@/lib/catalog-url";
 
 import { Metadata } from "next";
@@ -120,32 +118,41 @@ export default async function ProductsPage({
     const rawParams = await searchParams;
     const parsed = parseCatalogUrlParams(rawParams);
 
-    // If a single category is requested with no other query, redirect to canonical /categories/[slug]
-    if (parsed.categories.length === 1 && parsed.brands.length === 0 && !parsed.search) {
-        const resolvedCategory = await findCategoryByIdentifier(parsed.categories[0]);
-        if (resolvedCategory) {
-            redirect(`/categories/${resolvedCategory.slug}`);
-        }
-    }
-
     const firstBrandSlug = parsed.brands.length === 1 ? parsed.brands[0] : null;
     const activeBrand = firstBrandSlug ? await getBrandBySlug(firstBrandSlug) : null;
 
-    const [{ categories, products, totalProducts }, brands] = await Promise.all([
-        getCatalogInitialData(undefined, activeBrand?.id, undefined, parsed.search),
+    // Resolve category slugs on the server so category links can use the same
+    // products page as every other catalog view. This also makes old links
+    // such as /products?category=<slug> work without a redirect/404 hop.
+    const resolvedCategories = parsed.categories.length > 0
+        ? (await Promise.all(parsed.categories.map((slug) => getCategoryBySlug(slug)))).filter(
+            (category): category is NonNullable<typeof category> => Boolean(category)
+        )
+        : [];
+    const activeCategory = parsed.categories.length === 1 && parsed.brands.length === 0 && !parsed.search
+        ? resolvedCategories[0] || null
+        : null;
+
+    const [{ categories: catalogCategories, products, totalProducts }, brands, allCategories] = await Promise.all([
+        activeCategory
+            ? getCatalogInitialData(activeCategory.id, activeCategory.brandId, undefined, parsed.search)
+            : getCatalogInitialData(undefined, activeBrand?.id, undefined, parsed.search),
         getCatalogBrands(),
+        parsed.categories.length > 0 ? getCatalogCategories() : Promise.resolve([]),
     ]);
+
+    const categories = parsed.categories.length > 0 ? (allCategories.length > 0 ? allCategories : catalogCategories) : catalogCategories;
 
     return (
         <Suspense fallback={<CatalogLoadingFallback />}>
             <ProductsClient
-                key={activeBrand ? `brand-${activeBrand.id}` : parsed.search ? `search-${parsed.search}` : "all-products"}
+                key={activeCategory ? `category-${activeCategory.id}` : activeBrand ? `brand-${activeBrand.id}` : parsed.search ? `search-${parsed.search}` : "all-products"}
                 initialCategories={categories}
                 initialBrands={brands}
                 initialProducts={products}
                 initialTotal={totalProducts}
-                activeCategory={null}
-                activeBrand={activeBrand}
+                activeCategory={activeCategory}
+                activeBrand={activeCategory ? null : activeBrand}
                 initialSearch={parsed.search}
                 initialSort={parsed.sort}
                 initialPage={parsed.page}

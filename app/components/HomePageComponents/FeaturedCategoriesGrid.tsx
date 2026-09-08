@@ -254,7 +254,8 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl' 
                         return (
                             <Link
                                 key={category.id}
-                                href={`/categories/${encodeURIComponent(category.slug)}`}
+                                href={`/products?category=${encodeURIComponent(category.slug)}`}
+                                prefetch={false}
                                 data-reveal-item
                                 className="group flex-none w-[calc((100vw-3.5rem)/2)] min-w-[145px] max-w-[210px] md:w-[210px] snap-start flex flex-col rounded-xl bg-[#F1F2F4] dark:bg-zinc-800/70 border border-transparent hover:border-slate-300 dark:hover:border-zinc-600 overflow-hidden transition-colors duration-200"
                             >

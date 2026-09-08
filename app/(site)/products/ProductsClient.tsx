@@ -19,6 +19,7 @@ interface Category {
     description: string | null;
     image: string | null;
     nameEn?: string | null;
+    mainCategoryId?: string | null;
     _count?: {
         products: number;
     };
@@ -114,12 +115,16 @@ const ProductsClient = ({
     const pathname = usePathname();
 
     const initialResolvedBrandIds = useMemo(() => {
+        // A category page already scopes products to its category. Keeping the
+        // derived brand in the client filter creates a URL/effect feedback loop
+        // and duplicates the same request, so only honor an explicit brand URL.
+        if (activeCategory && (!initialBrandSlugs || initialBrandSlugs.length === 0)) return [];
         if (activeBrand) return [activeBrand.id];
         if (!initialBrandSlugs || initialBrandSlugs.length === 0) return [];
         return initialBrands
             .filter((b) => initialBrandSlugs.includes(b.slug) || initialBrandSlugs.includes(b.id))
             .map((b) => b.id);
-    }, [activeBrand, initialBrandSlugs, initialBrands]);
+    }, [activeCategory, activeBrand, initialBrandSlugs, initialBrands]);
 
     const initialResolvedCategoryIds = useMemo(() => {
         if (activeCategory) return [activeCategory.id];
@@ -275,7 +280,7 @@ const ProductsClient = ({
 
     // Dynamically fetch and update categories/departments when brand filters change in sidebar
     useEffect(() => {
-        if (isInitialRender) return;
+        if (isInitialRender || activeCategory) return;
 
         categoryAbortControllerRef.current?.abort();
         const controller = new AbortController();
@@ -309,7 +314,7 @@ const ProductsClient = ({
                             if (prev.categoryIds.length === 0) return prev;
                             const validCategoryIds = prev.categoryIds.filter((catId) =>
                                 data.some(
-                                    (c: any) =>
+                                    (c: Category) =>
                                         c.id === catId ||
                                         c.slug === catId ||
                                         c.mainCategoryId === catId
@@ -340,7 +345,7 @@ const ProductsClient = ({
         return () => {
             controller.abort();
         };
-    }, [filters.brandIds, activeMainCategory, activeBrand, isInitialRender, initialCategories]);
+    }, [filters.brandIds, activeMainCategory, activeBrand, activeCategory, isInitialRender, initialCategories]);
 
     // Debounce live search by 300ms
     useEffect(() => {
@@ -449,7 +454,6 @@ const ProductsClient = ({
         [
             page,
             filters,
-            activeCategory,
             activeMainCategory,
             debouncedSearch,
             sort,
