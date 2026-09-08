@@ -34,7 +34,7 @@ export default function ReviewsClient() {
             const res = await fetch("/api/admin/reviews");
             if (res.ok) {
                 const data = await res.json();
-                setReviews(data);
+                setReviews(data.items);
             } else {
                 toast.error(t("admin.errorGeneric"));
             }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { recordErrorEvent } from '@/lib/monitoring';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,13 +99,7 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Respons
 async function fetchFromUpstream(imageUrl: string): Promise<{ buffer: Buffer; contentType: string }> {
     await acquireFetchSlot();
     try {
-        let response = await fetchWithTimeout(imageUrl, 15000);
-
-        // If rate limited or server temporarily busy, brief retry
-        if (!response.ok && (response.status === 429 || response.status >= 500)) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            response = await fetchWithTimeout(imageUrl, 15000);
-        }
+        const response = await fetchWithTimeout(imageUrl, 5000);
 
         if (!response.ok) {
             throw new Error(`Upstream returned ${response.status}: ${response.statusText}`);
@@ -137,6 +132,19 @@ async function fetchFromUpstream(imageUrl: string): Promise<{ buffer: Buffer; co
     } finally {
         releaseFetchSlot();
     }
+}
+
+function streamBuffer(buffer: Buffer): ReadableStream<Uint8Array> {
+    const chunkSize = 64 * 1024;
+    let offset = 0;
+    return new ReadableStream({
+        pull(controller) {
+            if (offset >= buffer.length) return controller.close();
+            const end = Math.min(offset + chunkSize, buffer.length);
+            controller.enqueue(new Uint8Array(buffer.subarray(offset, end)));
+            offset = end;
+        },
+    });
 }
 
 export async function GET(req: NextRequest) {
@@ -190,8 +198,9 @@ export async function GET(req: NextRequest) {
             headers.set('X-Content-Type-Options', 'nosniff');
             headers.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=86400, immutable');
             headers.set('X-Cache', 'HIT');
+            headers.set('ETag', `"${cacheKey}"`);
 
-            return new NextResponse(new Uint8Array(data), { headers });
+            return new NextResponse(streamBuffer(data), { headers });
         } catch {
             // Cache miss: proceed to fetch
         }
@@ -226,11 +235,13 @@ export async function GET(req: NextRequest) {
         headers.set('X-Content-Type-Options', 'nosniff');
         headers.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=86400, immutable');
         headers.set('X-Cache', 'MISS');
+        headers.set('ETag', `"${cacheKey}"`);
 
-        return new NextResponse(new Uint8Array(buffer), { headers });
+        return new NextResponse(streamBuffer(buffer), { headers });
     } catch (error) {
         console.error('Image proxy error for', imageUrl, ':', error);
-        return new NextResponse('Failed to load remote image', { status: 502 });
+        recordErrorEvent({ category: 'image_proxy_failure', route: '/api/image-proxy', message: error instanceof Error ? error.message : 'Image proxy failure', status: 502 });
+        return NextResponse.redirect(new URL('/placeholder.svg', req.url), 307);
     } finally {
         inFlightRequests.delete(cacheKey);
     }

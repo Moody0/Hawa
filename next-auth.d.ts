@@ -1,14 +1,16 @@
-import NextAuth, { DefaultSession } from "next-auth"
+import { DefaultSession } from "next-auth"
+import type { AdminPermission } from "@/lib/admin-permissions"
 
 declare module "next-auth" {
     interface Session {
         user: {
             id: string
             role: string
+            iat?: number
+            permissions: AdminPermission[]
             canManageBrands: boolean
             canDeleteBrands: boolean
             canManageProducts: boolean
-            canDeleteProducts: boolean
             canDeleteProducts: boolean
             canManageCategories: boolean
             canDeleteCategories: boolean
@@ -25,6 +27,7 @@ declare module "next-auth" {
     interface User {
         id: string
         role: string
+        permissions: AdminPermission[]
         canManageBrands: boolean
         canDeleteBrands: boolean
         canManageProducts: boolean
@@ -45,6 +48,7 @@ declare module "next-auth/jwt" {
     interface JWT {
         id: string
         role: string
+        permissions: AdminPermission[]
         canManageBrands: boolean
         canDeleteBrands: boolean
         canManageProducts: boolean

@@ -34,10 +34,11 @@ export default function AdminLoginPage() {
                 setLoading(false);
             } else if (result?.ok) {
                 const rawCallback = new URLSearchParams(window.location.search).get("callbackUrl");
-                const destination = (rawCallback && !rawCallback.startsWith("/admin/login")) 
-                    ? rawCallback 
+                const destination = rawCallback?.startsWith("/admin/") && !rawCallback.startsWith("/admin/login") && !rawCallback.startsWith("//")
+                    ? rawCallback
                     : "/admin/dashboard";
-                window.location.href = destination;
+                router.replace(destination);
+                router.refresh();
             } else {
                 setError(t("admin.login.errorGeneric"));
                 setLoading(false);
@@ -82,7 +83,7 @@ export default function AdminLoginPage() {
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
-                            <div className="bg-red-50/80 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-medium">
+                            <div role="alert" aria-live="assertive" className="bg-red-50/80 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-medium">
                                 {error}
                             </div>
                         )}
@@ -100,10 +101,12 @@ export default function AdminLoginPage() {
                                     <User className="text-[20px]" />
                                 </span>
                                 <input
-                                    className={`w-full ${inputPadding} py-3.5 bg-gray-50/50 dark:bg-black/20 border border-black/[0.04] dark:border-white/[0.04] rounded-xl focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary text-text-main dark:text-white placeholder:text-gray-400 transition-all outline-none font-medium`}
+                                    className={`w-full ${inputPadding} py-3.5 bg-gray-50/50 dark:bg-black/20 border border-black/[0.04] dark:border-white/[0.04] rounded-xl focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary text-text-main dark:text-white placeholder:text-gray-400 transition-all font-medium`}
                                     id="username"
                                     placeholder={t("admin.login.usernamePlaceholder")}
                                     type="text"
+                                    autoComplete="username"
+                                    maxLength={128}
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     required
@@ -126,10 +129,13 @@ export default function AdminLoginPage() {
                                     <Lock className="text-[20px]" />
                                 </span>
                                 <input
-                                    className={`w-full ${inputPadding} py-3.5 bg-gray-50/50 dark:bg-black/20 border border-black/[0.04] dark:border-white/[0.04] rounded-xl focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary text-text-main dark:text-white placeholder:text-gray-400 transition-all outline-none font-medium`}
+                                    className={`w-full ${inputPadding} py-3.5 bg-gray-50/50 dark:bg-black/20 border border-black/[0.04] dark:border-white/[0.04] rounded-xl focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary text-text-main dark:text-white placeholder:text-gray-400 transition-all font-medium`}
                                     id="password"
                                     placeholder={t("admin.login.passwordPlaceholder")}
                                     type="password"
+                                    autoComplete="current-password"
+                                    minLength={12}
+                                    maxLength={128}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required

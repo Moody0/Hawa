@@ -7,6 +7,7 @@ import ProductHeader from '@/app/components/ProductDetailsComponents/ProductHead
 import ProductActions from '@/app/components/ProductDetailsComponents/ProductActions';
 import ProductAccordions from '@/app/components/ProductDetailsComponents/ProductAccordions';
 import RelatedProducts from '@/app/components/ProductDetailsComponents/RelatedProducts';
+import { canViewWholesalePrices, projectProductPrices, projectProductsPrices } from '@/lib/price-visibility';
 
 // ProductPageProps removed as it was unused and replaced by inline props
 
@@ -15,7 +16,8 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
     const product = await prisma.product.findFirst({
         where: {
             slug: params.slug,
-            brand: { isActive: true },
+            archivedAt: null,
+            brand: { isActive: true, archivedAt: null },
         },
         include: {
             brand: true,
@@ -32,10 +34,14 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
             categoryId: product.categoryId,
             brandId: product.brandId,
             id: { not: product.id },
-            brand: { isActive: true },
+            archivedAt: null,
+            brand: { isActive: true, archivedAt: null },
         },
         take: 4,
     });
+    const canViewPrices = await canViewWholesalePrices();
+    const safeProduct = projectProductPrices(product, canViewPrices);
+    const safeRelatedProducts = projectProductsPrices(relatedProducts, canViewPrices);
 
     return (
         <div className="grow w-full mx-auto px-6 py-8 md:px-20 lg:px-32 xl:px-48 2xl:px-64 lg:py-12">
@@ -73,9 +79,9 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                         name: product.name,
                         nameAr: product.nameAr,
                         nameEn: product.nameEn,
-                        price: Number(product.price),
-                        discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
-                        hidePrice: product.hidePrice,
+                        price: safeProduct.price == null ? 0 : Number(safeProduct.price),
+                        discountPrice: safeProduct.discountPrice == null ? null : Number(safeProduct.discountPrice),
+                        hidePrice: product.hidePrice || !canViewPrices,
                         image: product.images.split(',')[0],
                         slug: product.slug,
                         options: product.options,
@@ -96,10 +102,10 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                 </div>
             </div>
 
-            <RelatedProducts products={relatedProducts.map(p => ({
+            <RelatedProducts products={safeRelatedProducts.map(p => ({
                 ...p,
-                price: Number(p.price),
-                discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
+                price: p.price == null ? 0 : Number(p.price),
+                discountPrice: p.discountPrice == null ? null : Number(p.discountPrice),
                 discountType: p.discountType,
                 discountValue: p.discountValue ? Number(p.discountValue) : null,
                 createdAt: p.createdAt.toISOString(),

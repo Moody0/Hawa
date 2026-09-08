@@ -1,5 +1,4 @@
-import { getValidAdminSession } from "@/lib/admin-auth";
-import { redirect } from "next/navigation";
+import { requireAdminSession } from "@/lib/admin-auth";
 import ReviewsClient from "./ReviewsClient";
 
 export const metadata = {
@@ -7,15 +6,7 @@ export const metadata = {
 };
 
 export default async function ReviewsPage() {
-    const adminUser = await getValidAdminSession();
-
-    if (!adminUser) {
-        redirect("/admin/login");
-    }
-
-    if (!adminUser.canManageReviews && adminUser.role !== "SUPER_ADMIN") {
-        redirect("/admin/dashboard");
-    }
+    await requireAdminSession("REVIEWS_VIEW");
 
     return <ReviewsClient />;
 }

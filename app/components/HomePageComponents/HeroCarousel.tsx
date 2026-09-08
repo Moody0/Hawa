@@ -339,18 +339,6 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
         handleSwipeEnd();
     };
 
-    const onMouseDown = (e: React.MouseEvent) => {
-        handleSwipeStart(e.clientX);
-    };
-
-    const onMouseMove = (e: React.MouseEvent) => {
-        handleSwipeMove(e.clientX);
-    };
-
-    const onMouseUp = () => {
-        handleSwipeEnd();
-    };
-
     const headline = parseHeadline(isArabic ? currentSlide.titleAr : currentSlide.title, isArabic);
     const badgeText = isArabic ? currentSlide.badgeAr : currentSlide.badge;
     const subtitleText = isArabic ? currentSlide.subtitleAr : currentSlide.subtitle;
@@ -367,10 +355,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             tabIndex={0}
             onKeyDown={handleKeyDown}
             onMouseEnter={() => setIsHoverPaused(true)}
-            onMouseLeave={() => {
-                setIsHoverPaused(false);
-                if (isDragging.current) handleSwipeEnd();
-            }}
+            onMouseLeave={() => setIsHoverPaused(false)}
             onFocusCapture={() => setIsFocusPaused(true)}
             onBlurCapture={(event) => {
                 if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -380,10 +365,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
-            onMouseDown={onMouseDown}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
-            className="group relative w-full overflow-hidden border-b border-slate-200 bg-white dark:border-white/10 dark:bg-[#0B192C] focus:outline-hidden select-none touch-pan-y cursor-grab active:cursor-grabbing"
+            className="group/hero relative w-full overflow-hidden border-b border-slate-200 bg-white dark:border-white/10 dark:bg-[#0B192C] focus:outline-hidden touch-pan-y"
         >
             <style jsx>{`
                 @keyframes heroProgress {
@@ -525,7 +507,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 type="button"
                 onClick={isArabic ? goToNext : goToPrev}
                 aria-label={isArabic ? "الشريحة التالية" : "Previous slide"}
-                className="absolute left-3 top-[145px] md:top-[165px] lg:top-1/2 -translate-y-1/2 z-30 hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 transition-colors hover:bg-slate-100 active:scale-95 sm:flex cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305]"
+                className="absolute left-3 top-[145px] md:top-[165px] lg:top-1/2 -translate-y-1/2 z-30 hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-xs transition-all duration-200 hover:bg-slate-100 active:scale-95 sm:flex cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] opacity-0 pointer-events-none group-hover/hero:opacity-100 group-hover/hero:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
                 <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
@@ -535,7 +517,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 type="button"
                 onClick={isArabic ? goToPrev : goToNext}
                 aria-label={isArabic ? "الشريحة السابقة" : "Next slide"}
-                className="absolute right-3 top-[145px] md:top-[165px] lg:top-1/2 -translate-y-1/2 z-30 hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 transition-colors hover:bg-slate-100 active:scale-95 sm:flex cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305]"
+                className="absolute right-3 top-[145px] md:top-[165px] lg:top-1/2 -translate-y-1/2 z-30 hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-xs transition-all duration-200 hover:bg-slate-100 active:scale-95 sm:flex cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] opacity-0 pointer-events-none group-hover/hero:opacity-100 group-hover/hero:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
                 <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>

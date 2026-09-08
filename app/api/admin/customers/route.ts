@@ -1,142 +1,101 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { requireAdminSession } from '@/lib/admin-auth';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdminSession, type AdminUserSession } from "@/lib/admin-auth";
+import { adminApiError, validationError } from "@/lib/admin-api";
+import { customerStatusSchema, identifierSchema, zodFieldErrors } from "@/lib/admin-validation";
+import { writeAdminAuditLog } from "@/lib/admin-audit";
 
-export async function GET(req: Request) {
-    try {
-        await requireAdminSession();
-    } catch {
-        return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
-    }
-    try {
-
-        const { searchParams } = new URL(req.url);
-        const cursor = searchParams.get('cursor');
-        const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '50')), 100);
-        const search = searchParams.get('search')?.trim();
-        const activeOnly = searchParams.get('active');
-
-        const where: Record<string, any> = {};
-        if (activeOnly === 'true') where.isActive = true;
-        if (activeOnly === 'false') where.isActive = false;
-        if (search) {
-            where.OR = [
-                { shopName: { contains: search, mode: 'insensitive' } },
-                { ownerName: { contains: search, mode: 'insensitive' } },
-                { phone: { contains: search, mode: 'insensitive' } },
-                { city: { contains: search, mode: 'insensitive' } },
-            ];
-        }
-
-        const [customers, total] = await Promise.all([
-            prisma.customer.findMany({
-                where,
-                take: limit + 1,
-                skip: cursor ? 1 : 0,
-                cursor: cursor ? { id: cursor } : undefined,
-                orderBy: [
-                    { createdAt: 'desc' },
-                    { id: 'desc' }
-                ],
-                include: {
-                    _count: {
-                        select: {
-                            orders: true,
-                            wishlist: true,
-                        },
-                    },
-                },
-            }),
-            prisma.customer.count({ where })
-        ]);
-
-        const hasMore = customers.length > limit;
-        const pageCustomers = hasMore ? customers.slice(0, limit) : customers;
-        const nextCursor = hasMore ? pageCustomers[pageCustomers.length - 1].id : null;
-
-        // Group totalSpent directly in the database for the active customer page
-        const customerIds = pageCustomers.map(c => c.id);
-        const orderSpentGroups = customerIds.length > 0
-            ? await prisma.order.groupBy({
-                by: ['customerId'],
-                where: {
-                    customerId: { in: customerIds },
-                    status: { not: 'CANCELLED' }
-                },
-                _sum: { totalAmount: true }
-            })
-            : [];
-        const spentMap = new Map(orderSpentGroups.map(g => [g.customerId, Number(g._sum.totalAmount || 0)]));
-
-        const formatted = pageCustomers.map((c) => ({
-            id: c.id,
-            shopName: c.shopName,
-            ownerName: c.ownerName,
-            phone: c.phone,
-            city: c.city,
-            address: c.address,
-            notes: c.notes,
-            isActive: c.isActive,
-            createdAt: c.createdAt,
-            ordersCount: c._count.orders,
-            wishlistCount: c._count.wishlist,
-            totalSpent: spentMap.get(c.id) || 0,
-        }));
-
-        return NextResponse.json({
-            success: true,
-            customers: formatted,
-            pagination: {
-                total,
-                hasMore,
-                nextCursor,
-                limit
-            }
-        });
-    } catch (error) {
-        console.error('Admin customers GET error:', error);
-        return NextResponse.json({ error: 'Server error' }, { status: 500 });
-    }
+export async function GET(request: Request) {
+  try {
+    await requireAdminSession("CUSTOMERS_VIEW");
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get("cursor");
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 50, 1), 100);
+    const search = url.searchParams.get("search")?.trim().slice(0, 200);
+    const active = url.searchParams.get("active");
+    const where = {
+      archivedAt: null,
+      ...(active === "true" || active === "false" ? { isActive: active === "true" } : {}),
+      ...(search ? { OR: [
+        { shopName: { contains: search, mode: "insensitive" as const } },
+        { ownerName: { contains: search, mode: "insensitive" as const } },
+        { phone: { contains: search, mode: "insensitive" as const } },
+        { city: { contains: search, mode: "insensitive" as const } },
+      ] } : {}),
+    };
+    const [rows, total] = await Promise.all([
+      prisma.customer.findMany({
+        where,
+        take: limit + 1,
+        skip: cursor ? 1 : 0,
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        include: { _count: { select: { orders: true, wishlist: true } } },
+      }),
+      prisma.customer.count({ where }),
+    ]);
+    const hasMore = rows.length > limit;
+    const page = rows.slice(0, limit);
+    const ids = page.map((customer) => customer.id);
+    const spending = ids.length ? await prisma.order.groupBy({
+      by: ["customerId"],
+      where: { customerId: { in: ids }, status: { not: "CANCELLED" }, archivedAt: null },
+      _sum: { totalAmount: true },
+    }) : [];
+    const spent = new Map(spending.map((row) => [row.customerId, Number(row._sum.totalAmount || 0)]));
+    const items = page.map((customer) => ({
+      id: customer.id,
+      shopName: customer.shopName,
+      ownerName: customer.ownerName,
+      phone: customer.phone,
+      city: customer.city,
+      address: customer.address,
+      notes: customer.notes,
+      isActive: customer.isActive,
+      createdAt: customer.createdAt,
+      ordersCount: customer._count.orders,
+      wishlistCount: customer._count.wishlist,
+      totalSpent: spent.get(customer.id) || 0,
+    }));
+    const nextCursor = hasMore ? items.at(-1)?.id ?? null : null;
+    return NextResponse.json({
+      items, total, nextCursor, previousCursor: cursor ? items[0]?.id ?? null : null,
+      success: true, customers: items,
+      pagination: { total, hasMore, nextCursor, limit },
+    });
+  } catch (error) {
+    return adminApiError(error);
+  }
 }
 
-export async function PATCH(req: Request) {
-    try {
-        await requireAdminSession();
-    } catch {
-        return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
-    }
-    try {
-        const body = await req.json();
-        const { id, isActive } = body;
-
-        const updated = await prisma.customer.update({
-            where: { id },
-            data: { isActive },
-        });
-
-        return NextResponse.json({ success: true, customer: updated });
-    } catch (error: any) {
-        return NextResponse.json({ error: error?.message || 'Failed to update' }, { status: 500 });
-    }
+export async function PATCH(request: Request) {
+  try {
+    const session = await requireAdminSession("CUSTOMERS_MANAGE");
+    const parsed = customerStatusSchema.safeParse(await request.json());
+    if (!parsed.success) return validationError(zodFieldErrors(parsed.error));
+    const customer = await prisma.customer.update({ where: { id: parsed.data.id, archivedAt: null }, data: { isActive: parsed.data.isActive } });
+    const audit = await writeAdminAuditLog({
+      actorId: (session.user as AdminUserSession).id,
+      action: parsed.data.isActive ? "ENABLE" : "DISABLE",
+      entityType: "Customer",
+      entityId: customer.id,
+    });
+    return NextResponse.json({ ok: true, success: true, data: customer, customer, auditId: audit.id });
+  } catch (error) {
+    return adminApiError(error);
+  }
 }
 
-export async function DELETE(req: Request) {
-    try {
-        await requireAdminSession();
-    } catch {
-        return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
-    }
-    try {
-        const { searchParams } = new URL(req.url);
-        const id = searchParams.get('id');
-
-        if (!id) {
-            return NextResponse.json({ error: 'ID required' }, { status: 400 });
-        }
-
-        await prisma.customer.delete({ where: { id } });
-        return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error?.message || 'Failed to delete' }, { status: 500 });
-    }
+export async function DELETE(request: Request) {
+  try {
+    const session = await requireAdminSession("CUSTOMERS_ARCHIVE");
+    const id = identifierSchema.safeParse(new URL(request.url).searchParams.get("id"));
+    if (!id.success) return validationError({ id: ["A valid customer ID is required"] });
+    const customer = await prisma.customer.update({ where: { id: id.data, archivedAt: null }, data: { archivedAt: new Date(), isActive: false } });
+    const audit = await writeAdminAuditLog({ actorId: (session.user as AdminUserSession).id, action: "ARCHIVE", entityType: "Customer", entityId: customer.id });
+    return NextResponse.json({ ok: true, success: true, data: customer, auditId: audit.id });
+  } catch (error) {
+    return adminApiError(error);
+  }
 }
+

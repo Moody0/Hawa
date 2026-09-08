@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { canViewWholesalePrices, projectProductsPrices } from "@/lib/price-visibility";
 
 export const runtime = "nodejs";
 export const revalidate = 3600;
@@ -7,24 +8,24 @@ export const revalidate = 3600;
 export async function GET() {
     try {
         const trendingProducts = await prisma.product.findMany({
-            where: {
-                isTrending: true,
-            },
+            where: { isTrending: true, archivedAt: null, brand: { isActive: true, archivedAt: null } },
             include: {
                 category: true,
             },
         });
 
-        const response = NextResponse.json(trendingProducts.map(p => ({
+        const canViewPrices = await canViewWholesalePrices();
+        const projected = projectProductsPrices(trendingProducts, canViewPrices);
+        const response = NextResponse.json(projected.map(p => ({
             ...p,
-            price: p.price.toString(),
-            discountPrice: p.discountPrice ? p.discountPrice.toString() : null,
+            price: p.price == null ? null : p.price.toString(),
+            discountPrice: p.discountPrice == null ? null : p.discountPrice.toString(),
             discountType: p.discountType,
-            discountValue: p.discountValue ? p.discountValue.toString() : null
+            discountValue: p.discountValue == null ? null : p.discountValue.toString()
         })));
         response.headers.set(
             "Cache-Control",
-            "public, s-maxage=3600, stale-while-revalidate=86400"
+            canViewPrices ? "private, no-store" : "public, s-maxage=3600, stale-while-revalidate=86400"
         );
         return response;
     } catch (error) {

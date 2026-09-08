@@ -2,6 +2,13 @@ import { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import {
+    assertAdminLoginAllowed,
+    normalizeAdminUsername,
+    normalizeClientIp,
+    recordAdminLoginAttempt,
+} from "@/lib/admin-login-throttle"
+import { writeAdminAuditLog } from "@/lib/admin-audit"
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -12,16 +19,29 @@ export const authOptions: AuthOptions = {
                 password: { label: "Password", type: "password" },
                 rememberMe: { label: "Remember me", type: "text" }
             },
-            async authorize(credentials) {
+            async authorize(credentials, request) {
                 if (!credentials?.username || !credentials?.password) {
                     return null
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: { username: credentials.username }
+                const username = normalizeAdminUsername(credentials.username)
+                const forwardedFor = request.headers?.["x-forwarded-for"]
+                const realIp = request.headers?.["x-real-ip"]
+                const ip = normalizeClientIp(Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor || (Array.isArray(realIp) ? realIp[0] : realIp))
+                await assertAdminLoginAllowed(ip, username)
+
+                if (credentials.password.length < 12 || credentials.password.length > 128) {
+                    await recordAdminLoginAttempt(ip, username, false)
+                    return null
+                }
+
+                const user = await prisma.user.findFirst({
+                    where: { username, archivedAt: null, disabledAt: null },
+                    include: { permissions: { select: { permission: true } } },
                 })
 
                 if (!user) {
+                    await recordAdminLoginAttempt(ip, username, false)
                     return null
                 }
 
@@ -31,8 +51,18 @@ export const authOptions: AuthOptions = {
                 )
 
                 if (!isPasswordValid) {
+                    await recordAdminLoginAttempt(ip, username, false)
                     return null
                 }
+
+                await recordAdminLoginAttempt(ip, username, true)
+                await writeAdminAuditLog({
+                    actorId: user.id,
+                    action: "ADMIN_LOGIN_SUCCESS",
+                    entityType: "User",
+                    entityId: user.id,
+                    metadata: { ipHashRecorded: true },
+                })
 
                 const rememberMe = credentials.rememberMe === "true"
 
@@ -41,6 +71,7 @@ export const authOptions: AuthOptions = {
                     name: user.username,
                     role: user.role,
                     rememberMe,
+                    permissions: user.permissions.map((item) => item.permission),
                     canManageBrands: user.canManageBrands,
                     canDeleteBrands: user.canDeleteBrands,
                     canManageProducts: user.canManageProducts,
@@ -67,6 +98,7 @@ export const authOptions: AuthOptions = {
                 token.id = user.id;
                 token.role = user.role;
                 token.rememberMe = (user as { rememberMe?: boolean }).rememberMe;
+                token.permissions = user.permissions;
                 token.canManageBrands = user.canManageBrands;
                 token.canDeleteBrands = user.canDeleteBrands;
                 token.canManageProducts = user.canManageProducts;
@@ -93,6 +125,7 @@ export const authOptions: AuthOptions = {
                 session.user.id = token.id as string;
                 (session.user as any).iat = token.iat;
                 session.user.role = token.role as string;
+                session.user.permissions = token.permissions || [];
                 session.user.canManageBrands = token.canManageBrands as boolean;
                 session.user.canDeleteBrands = token.canDeleteBrands as boolean;
                 session.user.canManageProducts = token.canManageProducts as boolean;

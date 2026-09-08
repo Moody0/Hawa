@@ -9,25 +9,68 @@ datasource db {
 }
 
 model User {
-  id                  String   @id @default(cuid())
+  id                  String           @id @default(cuid())
   password            String
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  username            String   @unique
-  canDeleteBanners    Boolean  @default(true)
-  canDeleteCategories Boolean  @default(true)
-  canDeleteOrders     Boolean  @default(true)
-  canDeleteProducts   Boolean  @default(true)
-  canDeletePromoCodes Boolean  @default(true)
-  canManageBanners    Boolean  @default(true)
-  canManageCategories Boolean  @default(true)
-  canManageOrders     Boolean  @default(true)
-  canManageProducts   Boolean  @default(true)
-  canManagePromoCodes Boolean  @default(true)
-  role                Role     @default(ADMIN)
-  canDeleteBrands     Boolean  @default(true)
-  canManageBrands     Boolean  @default(true)
-  canManageReviews    Boolean  @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  username            String           @unique
+  canDeleteBanners    Boolean          @default(true)
+  canDeleteCategories Boolean          @default(true)
+  canDeleteOrders     Boolean          @default(true)
+  canDeleteProducts   Boolean          @default(true)
+  canDeletePromoCodes Boolean          @default(true)
+  canManageBanners    Boolean          @default(true)
+  canManageCategories Boolean          @default(true)
+  canManageOrders     Boolean          @default(true)
+  canManageProducts   Boolean          @default(true)
+  canManagePromoCodes Boolean          @default(true)
+  role                Role             @default(ADMIN)
+  canDeleteBrands     Boolean          @default(true)
+  canManageBrands     Boolean          @default(true)
+  canManageReviews    Boolean          @default(true)
+  archivedAt          DateTime?
+  disabledAt          DateTime?
+  permissions         UserPermission[]
+  auditLogs           AdminAuditLog[]  @relation("AdminAuditActor")
+
+  @@index([archivedAt])
+  @@index([disabledAt])
+}
+
+model UserPermission {
+  userId     String
+  permission AdminPermission
+  createdAt  DateTime        @default(now())
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permission])
+  @@index([permission])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation("AdminAuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([action, createdAt])
+}
+
+model AdminLoginAttempt {
+  id         String   @id @default(cuid())
+  keyHash    String
+  scope      String
+  successful Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([keyHash, scope, createdAt])
+  @@index([createdAt])
 }
 
 model MainCategory {
@@ -42,69 +85,74 @@ model MainCategory {
   isFeatured  Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  archivedAt  DateTime?
   categories  Category[]
   products    Product[]
   brands      Brand[]
 
   @@index([isActive, showInNav, navOrder])
   @@index([isFeatured])
+  @@index([archivedAt])
 }
 
 model Category {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  image       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  isFeatured  Boolean   @default(false)
-  slug        String    @unique
-  brandId     String
-  brand       Brand     @relation(fields: [brandId], references: [id])
-  products    Product[]
+  id             String        @id @default(cuid())
+  name           String
+  description    String?
+  image          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  isFeatured     Boolean       @default(false)
+  slug           String        @unique
+  brandId        String
+  brand          Brand         @relation(fields: [brandId], references: [id])
+  products       Product[]
   mainCategoryId String?
   mainCategory   MainCategory? @relation(fields: [mainCategoryId], references: [id])
+  archivedAt     DateTime?
 
   @@unique([brandId, name])
   @@index([brandId])
   @@index([mainCategoryId])
   @@index([isFeatured])
   @@index([isFeatured, updatedAt])
+  @@index([archivedAt])
 }
 
 model Product {
-  id             String        @id @default(cuid())
-  name           String
-  nameAr         String?
-  nameEn         String?
-  slug           String        @unique
-  images         String
-  isTrending     Boolean       @default(false)
-  description    String?
-  descriptionAr  String?
-  descriptionEn  String?
-  price          Decimal       @db.Decimal(10, 2)
-  discountPrice  Decimal?      @db.Decimal(10, 2)
-  discountType   String?
-  discountValue  Decimal?      @db.Decimal(10, 2)
-  stock          Int           @default(0)
-  options        String?
-  categoryId     String
-  packaging      String?       @default("طرد")
+  id              String         @id @default(cuid())
+  name            String
+  nameAr          String?
+  nameEn          String?
+  slug            String         @unique
+  images          String
+  isTrending      Boolean        @default(false)
+  description     String?
+  descriptionAr   String?
+  descriptionEn   String?
+  price           Decimal        @db.Decimal(10, 2)
+  discountPrice   Decimal?       @db.Decimal(10, 2)
+  discountType    String?
+  discountValue   Decimal?       @db.Decimal(10, 2)
+  stock           Int            @default(0)
+  options         String?
+  categoryId      String
+  packaging       String?        @default("طرد")
   itemsPerPackage String?
-  minOrder       Int           @default(1)
-  hidePrice      Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  sku            String?
-  brandId        String
-  mainCategoryId String?
-  orderItems     OrderItem[]
-  brand          Brand         @relation(fields: [brandId], references: [id])
-  category       Category      @relation(fields: [categoryId], references: [id])
-  mainCategory   MainCategory? @relation(fields: [mainCategoryId], references: [id])
-  reviews        Review[]
-  wishlistItems  WishlistItem[]
+  minOrder        Int            @default(1)
+  hidePrice       Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  sku             String?
+  brandId         String
+  mainCategoryId  String?
+  orderItems      OrderItem[]
+  brand           Brand          @relation(fields: [brandId], references: [id])
+  category        Category       @relation(fields: [categoryId], references: [id])
+  mainCategory    MainCategory?  @relation(fields: [mainCategoryId], references: [id])
+  reviews         Review[]
+  wishlistItems   WishlistItem[]
+  archivedAt      DateTime?
 
   @@index([brandId])
   @@index([categoryId])
@@ -122,88 +170,98 @@ model Product {
   @@index([updatedAt])
   @@index([discountPrice])
   @@index([isTrending, updatedAt])
+  @@index([archivedAt])
 }
 
 model Brand {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  slug        String     @unique
-  description String?
-  image       String?
-  group       BrandGroup @default(DIFFERENT)
-  isActive    Boolean    @default(true)
-  isFeatured  Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  categories  Category[]
-  products    Product[]
+  id             String        @id @default(cuid())
+  name           String        @unique
+  slug           String        @unique
+  description    String?
+  image          String?
+  group          BrandGroup    @default(DIFFERENT)
+  isActive       Boolean       @default(true)
+  isFeatured     Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  categories     Category[]
+  products       Product[]
   mainCategoryId String?
   mainCategory   MainCategory? @relation(fields: [mainCategoryId], references: [id])
+  archivedAt     DateTime?
 
   @@index([group])
   @@index([isActive])
   @@index([isFeatured])
   @@index([mainCategoryId])
+  @@index([archivedAt])
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  totalAmount   Decimal     @db.Decimal(10, 2)
-  status        OrderStatus @default(PENDING)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  city          String
-  streetAddress String
-  Name          String
-  phone         String
-  shopName      String?
-  notes         String?
-  discount      Decimal     @default(0) @db.Decimal(10, 2)
-  promoCodeId   String?
-  promoCode     PromoCode?  @relation(fields: [promoCodeId], references: [id])
-  customerId    String?
-  customer      Customer?   @relation(fields: [customerId], references: [id])
+  id             String      @id @default(cuid())
+  totalAmount    Decimal     @db.Decimal(10, 2)
+  status         OrderStatus @default(PENDING)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  city           String
+  streetAddress  String
+  Name           String
+  phone          String
+  shopName       String?
+  notes          String?
+  discount       Decimal     @default(0) @db.Decimal(10, 2)
+  promoCodeId    String?
+  promoCode      PromoCode?  @relation(fields: [promoCodeId], references: [id])
+  customerId     String?
+  customer       Customer?   @relation(fields: [customerId], references: [id])
   stockReserved  Boolean     @default(true)
   idempotencyKey String?     @unique
   requestHash    String?
-  items         OrderItem[]
+  items          OrderItem[]
+  archivedAt     DateTime?
 
   @@index([status])
   @@index([createdAt])
   @@index([promoCodeId])
   @@index([customerId])
+  @@index([archivedAt])
 }
 
 model Banner {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   title        String?
   subtitle     String?
   titleAr      String?
   subtitleAr   String?
   image        String
-  buttonText   String?  @default("Shop Now")
-  buttonTextAr String?  @default("تسوق الآن")
-  link         String?  @default("/products")
-  badge        String?  @default("Certified Wholesale")
-  badgeAr      String?  @default("توزيع جملة معتمد")
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  buttonText   String?   @default("Shop Now")
+  buttonTextAr String?   @default("تسوق الآن")
+  link         String?   @default("/products")
+  badge        String?   @default("Certified Wholesale")
+  badgeAr      String?   @default("توزيع جملة معتمد")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  archivedAt   DateTime?
 
   @@index([isActive, createdAt])
+  @@index([archivedAt])
 }
 
 model PromoCode {
-  id                 String   @id @default(cuid())
-  code               String   @unique
+  id                 String    @id @default(cuid())
+  code               String    @unique
   discountPercentage Int
   delegateName       String?
-  isActive           Boolean  @default(true)
-  usageCount         Int      @default(0)
-  totalSales         Decimal  @default(0) @db.Decimal(10, 2)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  isActive           Boolean   @default(true)
+  usageCount         Int       @default(0)
+  totalSales         Decimal   @default(0) @db.Decimal(10, 2)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
   orders             Order[]
+  archivedAt         DateTime?
+
+  @@index([archivedAt])
 }
 
 model OrderItem {
@@ -223,13 +281,14 @@ model OrderItem {
 }
 
 model InventoryMovement {
-  id         String   @id @default(cuid())
-  orderId    String?
-  productId  String
-  quantity   Int
-  type       String
-  reason     String?
-  createdAt  DateTime @default(now())
+  id               String   @id @default(cuid())
+  orderId          String?
+  productId        String
+  quantity         Int
+  type             String
+  reason           String?
+  createdAt        DateTime @default(now())
+  deduplicationKey String?  @unique
 
   @@index([orderId])
   @@index([productId])
@@ -369,54 +428,93 @@ enum Role {
   ADMIN
 }
 
+enum AdminPermission {
+  PRODUCTS_VIEW
+  PRODUCTS_MANAGE
+  PRODUCTS_ARCHIVE
+  PRODUCTS_IMPORT
+  BRANDS_VIEW
+  BRANDS_MANAGE
+  BRANDS_ARCHIVE
+  CATEGORIES_VIEW
+  CATEGORIES_MANAGE
+  CATEGORIES_ARCHIVE
+  MAIN_CATEGORIES_VIEW
+  MAIN_CATEGORIES_MANAGE
+  MAIN_CATEGORIES_ARCHIVE
+  BANNERS_VIEW
+  BANNERS_MANAGE
+  BANNERS_ARCHIVE
+  ORDERS_VIEW
+  ORDERS_MANAGE
+  ORDERS_ARCHIVE
+  CUSTOMERS_VIEW
+  CUSTOMERS_MANAGE
+  CUSTOMERS_ARCHIVE
+  REVIEWS_VIEW
+  REVIEWS_MANAGE
+  REVIEWS_ARCHIVE
+  BLOG_VIEW
+  BLOG_MANAGE
+  BLOG_ARCHIVE
+  SITE_CONTENT_VIEW
+  SITE_CONTENT_MANAGE
+  SITE_CONTENT_ARCHIVE
+  AUDIT_LOG_VIEW
+}
+
 enum BrandGroup {
   MAIN
   DIFFERENT
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  productId   String
-  rating      Int
-  feedback    String?
-  image       String?
-  name        String
-  email       String?
-  isApproved  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id         String    @id @default(cuid())
+  productId  String
+  rating     Int
+  feedback   String?
+  image      String?
+  name       String
+  email      String?
+  isApproved Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  archivedAt DateTime?
 
   @@index([productId])
   @@index([productId, isApproved])
   @@index([isApproved, createdAt])
+  @@index([archivedAt])
 }
 
 model Customer {
-  id           String         @id @default(cuid())
-  shopName     String
-  ownerName    String
-  phone        String         @unique
-  city         String
-  address      String
-  password     String
-  notes        String?
-  isActive     Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  orders       Order[]
-  wishlist     WishlistItem[]
+  id         String         @id @default(cuid())
+  shopName   String
+  ownerName  String
+  phone      String         @unique
+  city       String
+  address    String
+  password   String
+  notes      String?
+  isActive   Boolean        @default(false)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  orders     Order[]
+  wishlist   WishlistItem[]
+  archivedAt DateTime?
 
   @@index([phone])
+  @@index([archivedAt])
 }
 
 model WishlistItem {
-  id         String    @id @default(cuid())
+  id         String   @id @default(cuid())
   customerId String
   productId  String
-  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt  DateTime  @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
 
   @@unique([customerId, productId])
   @@index([customerId])
@@ -424,21 +522,23 @@ model WishlistItem {
 }
 
 model Post {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   titleAr     String?
-  slug        String   @unique
+  slug        String    @unique
   excerpt     String?
   excerptAr   String?
-  content     String   @db.Text
-  contentAr   String?  @db.Text
+  content     String    @db.Text
+  contentAr   String?   @db.Text
   image       String?
-  category    String   @default("أخبار الشركة")
-  categoryAr  String?  @default("أخبار الشركة")
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  category    String    @default("أخبار الشركة")
+  categoryAr  String?   @default("أخبار الشركة")
+  isPublished Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  archivedAt  DateTime?
 
   @@index([isPublished, createdAt])
   @@index([category])
+  @@index([archivedAt])
 }

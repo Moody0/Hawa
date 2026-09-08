@@ -41,6 +41,8 @@ async function safelySetGuestSessionCookie(response: NextResponse, orderId: stri
 
 export async function POST(request: Request) {
     const ip = getClientIp(request);
+    let submittedIdempotencyKey: string | null = null;
+    let submittedRequestHash: string | null = null;
 
     // Enforce request body size limit (200KB)
     if (!checkRequestBodyLimit(request, 200 * 1024)) {
@@ -122,7 +124,14 @@ export async function POST(request: Request) {
         // 4. Determine and validate Idempotency Key (Phase 3.5)
         const headerKey = request.headers.get("x-idempotency-key") || request.headers.get("idempotency-key");
         const bodyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : null;
-        const idempotencyKey = (headerKey || bodyKey || `ord_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`).trim();
+        const idempotencyKey = (headerKey || bodyKey || "").trim().normalize("NFKC");
+        if (!/^[A-Za-z0-9._:-]{16,128}$/.test(idempotencyKey)) {
+            return NextResponse.json(
+                { success: false, error: "INVALID_IDEMPOTENCY_KEY", message: "A valid 16-128 character idempotency key is required." },
+                { status: 400 },
+            );
+        }
+        submittedIdempotencyKey = idempotencyKey;
 
         // Compute deterministic request hash
         const requestHash = computeOrderRequestHash({
@@ -132,6 +141,7 @@ export async function POST(request: Request) {
             streetAddress: cleanData.streetAddress,
             items: aggregatedItems,
         });
+        submittedRequestHash = requestHash;
 
         // Retrieve configured WhatsApp number
         const settings = await prisma.settings.findUnique({
@@ -171,7 +181,7 @@ export async function POST(request: Request) {
                         error: "IDEMPOTENCY_CONFLICT",
                         message: "مفتاح العملية مستخدم لطلب مختلف. يرجى تجديد السلة وإعادة المحاولة.",
                     },
-                    { status: 422 }
+                    { status: 409 }
                 );
             }
 
@@ -321,6 +331,7 @@ export async function POST(request: Request) {
                         productId: item.productId,
                         quantity: -item.quantity, // negative denotes reservation
                         type: "RESERVATION",
+                        deduplicationKey: `reservation:${newOrder.id}:${item.productId}:v1`,
                         reason: `حجز كمية للطلب رقم ${newOrder.id}`,
                     },
                 });
@@ -348,19 +359,25 @@ export async function POST(request: Request) {
     } catch (error: any) {
         // Handle concurrent race collision on unique idempotencyKey
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-            const target = (error.meta?.target as string[]) || [];
-            if (target.includes("idempotencyKey")) {
-                const replay = await prisma.order.findFirst({
-                    where: {
-                        OR: [
-                            { idempotencyKey: (error.meta as any)?.idempotencyKey },
-                        ],
-                    },
+            const target = error.meta?.target;
+            const isIdempotencyCollision = Array.isArray(target)
+                ? target.includes("idempotencyKey")
+                : String(target || "").includes("idempotencyKey");
+            if (isIdempotencyCollision && submittedIdempotencyKey) {
+                const replay = await prisma.order.findUnique({
+                    where: { idempotencyKey: submittedIdempotencyKey },
                     include: { items: true },
                 });
                 if (replay) {
+                    if (!submittedRequestHash || replay.requestHash !== submittedRequestHash) {
+                        return NextResponse.json(
+                            { success: false, error: "IDEMPOTENCY_CONFLICT", message: "The idempotency key belongs to a different request." },
+                            { status: 409 },
+                        );
+                    }
                     const token = signOrderAccessToken(replay.id);
-                    return NextResponse.json({ ...replay, orderToken: token, isReplay: true }, { status: 200 });
+                    const safeReplay = { ...replay, totalAmount: 0, items: replay.items.map((item) => ({ ...item, price: 0 })) };
+                    return NextResponse.json({ ...safeReplay, orderToken: token, isReplay: true }, { status: 200 });
                 }
             }
         }

@@ -49,7 +49,7 @@ export interface NavMainCategory {
 async function fetchNavigationData(): Promise<NavMainCategory[]> {
     try {
         const mainCategories = await prisma.mainCategory.findMany({
-            where: { isActive: true, showInNav: true },
+            where: { isActive: true, showInNav: true, archivedAt: null },
             orderBy: { navOrder: "asc" },
             select: {
                 id: true,
@@ -58,7 +58,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                 description: true,
                 image: true,
                 brands: {
-                    where: { isActive: true },
+                    where: { isActive: true, archivedAt: null },
                     orderBy: { name: "asc" },
                     select: {
                         id: true,
@@ -68,6 +68,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                     },
                 },
                 categories: {
+                    where: { archivedAt: null, brand: { archivedAt: null, isActive: true } },
                     orderBy: { name: "asc" },
                     select: {
                         id: true,
@@ -86,6 +87,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                     take: 30,
                 },
                 products: {
+                    where: { archivedAt: null, brand: { archivedAt: null, isActive: true }, category: { archivedAt: null } },
                     orderBy: { createdAt: "desc" },
                     select: {
                         id: true,

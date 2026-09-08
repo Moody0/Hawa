@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs/config';
+
+const productionScriptSources = "'self' 'unsafe-inline' https://va.vercel-scripts.com";
+const developmentScriptSources = `${productionScriptSources} 'unsafe-eval'`;
 
 const securityHeaders = [
   {
@@ -28,11 +32,11 @@ const securityHeaders = [
   },
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data: https:; connect-src 'self' https://aws-0-eu-central-1.pooler.supabase.com https://*.supabase.co https://wa.me; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self';",
+    value: `default-src 'self'; script-src ${process.env.NODE_ENV === 'production' ? productionScriptSources : developmentScriptSources}; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data: https:; connect-src 'self' https://aws-0-eu-central-1.pooler.supabase.com https://*.supabase.co https://*.ingest.sentry.io https://wa.me; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self';`,
   },
   {
     key: 'Content-Security-Policy-Report-Only',
-    value: "default-src 'self'; script-src 'self' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data:; connect-src 'self' https://aws-0-eu-central-1.pooler.supabase.com https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self'; report-uri /api/csp-report;",
+    value: "default-src 'self'; script-src 'self' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data:; connect-src 'self' https://aws-0-eu-central-1.pooler.supabase.com https://*.supabase.co https://*.ingest.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self'; report-uri /api/csp-report;",
   },
 ];
 
@@ -103,6 +107,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer({
+const analyzedConfig = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })(nextConfig);
+
+export default withSentryConfig(analyzedConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+});

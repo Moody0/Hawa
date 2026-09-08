@@ -13,6 +13,7 @@ import MobileStickyOrderBar from '@/app/components/ProductDetailsComponents/Mobi
 import { ProductPurchaseProvider } from '@/app/context/ProductPurchaseContext';
 import { getI18n } from '@/lib/i18n';
 import { canViewWholesalePrices, projectProductPrices, projectProductsPrices } from '@/lib/price-visibility';
+import { SITE_ORIGIN, toAbsoluteImageUrl } from '@/lib/site-config';
 
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
@@ -47,7 +48,8 @@ export async function generateMetadata(
         ? `${product.name} من وكالة ${brandName}. متوفر للطلب والبيع بالجملة مع شحن موثوق عبر شركة حوا للتوزيع والتجارة. ${product.description.slice(0, 120)}`
         : `اشترِ ${product.name} من وكالة ${brandName} بأفضل أسعار الجملة المعتمدة من شركة حوا للتوزيع والتجارة.`;
 
-    const mainImage = (product.images as string).split(',').map((img: string) => img.trim()).filter(Boolean)[0] || '/logo.png';
+    const rawImage = (product.images as string).split(',').map((img: string) => img.trim()).filter(Boolean)[0];
+    const imageUrl = toAbsoluteImageUrl(rawImage);
 
     return {
         title,
@@ -59,10 +61,13 @@ export async function generateMetadata(
             title,
             description,
             type: 'article',
-            url: `/products/${product.slug}`,
+            url: `${SITE_ORIGIN}/products/${product.slug}`,
+            siteName: 'حوا للتوزيع والتجارة | Hawa Distribution & Trading',
+            locale: 'ar_SY',
             images: [
                 {
-                    url: mainImage,
+                    url: imageUrl,
+                    secureUrl: imageUrl.startsWith('https://') ? imageUrl : undefined,
                     width: 1200,
                     height: 630,
                     alt: product.name,
@@ -73,7 +78,7 @@ export async function generateMetadata(
             card: 'summary_large_image',
             title,
             description,
-            images: [mainImage],
+            images: [imageUrl],
         },
     };
 }

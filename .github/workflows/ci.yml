@@ -17,12 +17,29 @@ env:
   DATABASE_URL: 'postgresql://ci_isolated:mock_secret@127.0.0.1:5432/hawa_isolated_ci_test?schema=public'
   NEXTAUTH_SECRET: 'ci_temporary_mock_secret_key_123456789'
   CUSTOMER_AUTH_SECRET: 'ci_temporary_mock_customer_secret_key_123456789'
+  DIRECT_URL: 'postgresql://ci_isolated:mock_secret@127.0.0.1:5432/hawa_isolated_ci_test?schema=public'
+  TEST_ADMIN_PASSWORD: 'CI-only-password-2026!'
+  MEDIA_STORAGE_DIR: '/tmp/hawa-media'
 
 jobs:
   quality-gate:
     name: Typecheck, Lint, Test & Smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci_isolated
+          POSTGRES_PASSWORD: mock_secret
+          POSTGRES_DB: hawa_isolated_ci_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci_isolated -d hawa_isolated_ci_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - name: Checkout Code
@@ -51,6 +68,8 @@ jobs:
         run: |
           npx prisma validate
           npx prisma generate
+          npx prisma migrate deploy
+          npm run db:seed:test
 
       - name: TypeScript Typecheck
         run: npm run typecheck
@@ -60,6 +79,9 @@ jobs:
 
       - name: Unit & Integration Tests (Isolated)
         run: npm run test:run
+
+      - name: PostgreSQL Concurrency & Inventory Tests
+        run: npm run test:concurrency
 
       - name: Next.js Production Build
         run: npm run build
@@ -76,6 +98,9 @@ jobs:
         run: npm run test:e2e
         env:
           NODE_ENV: production
+
+      - name: Production Dependency Audit
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Upload Test Failure Artifacts
         if: failure()

@@ -9,6 +9,7 @@ import { generateUniqueBrandSlug, getZadLandBrandId } from "./brand-utils";
 import { executeOrderStatusUpdate, executeOrderDeletion, OrderStatusType } from "./inventory-transitions";
 import { recordErrorEvent } from "./monitoring";
 import { clearProductsApiCache } from "./products-cache";
+import { writeAdminAuditLog } from "./admin-audit";
 
 export type CacheEntity =
     | 'catalog'
@@ -606,8 +607,9 @@ function getStatusColor(status: string) {
 
 export async function getAdminBrands() {
     try {
-        await requireAdminSession("canManageBrands");
+        await requireAdminSession("BRANDS_VIEW");
         const brands = await prisma.brand.findMany({
+            where: { archivedAt: null },
             orderBy: [
                 { isFeatured: "desc" },
                 { name: "asc" },
@@ -635,13 +637,13 @@ export async function getAdminBrands() {
         }));
     } catch (error) {
         console.error("Failed to fetch brands:", error);
-        return [];
+        throw error;
     }
 }
 
 export async function createBrand(data: BrandInput) {
     try {
-        await requireAdminSession("canManageBrands");
+        await requireAdminSession("BRANDS_MANAGE");
         const slug = await generateUniqueBrandSlug(data.name);
         const group = data.group === "MAIN" ? BrandGroup.MAIN : BrandGroup.DIFFERENT;
 
@@ -679,7 +681,7 @@ export async function createBrand(data: BrandInput) {
 
 export async function updateBrand(id: string, data: BrandInput) {
     try {
-        await requireAdminSession("canManageBrands");
+        await requireAdminSession("BRANDS_MANAGE");
         const slug = await generateUniqueBrandSlug(data.name, id);
         const group = data.group === "MAIN" ? BrandGroup.MAIN : BrandGroup.DIFFERENT;
 
@@ -721,7 +723,7 @@ export async function updateBrand(id: string, data: BrandInput) {
 
 export async function deleteBrand(id: string) {
     try {
-        await requireAdminSession("canDeleteBrands");
+        const session = await requireAdminSession("BRANDS_ARCHIVE");
         const [productCount, categoryCount] = await Promise.all([
             prisma.product.count({ where: { brandId: id } }),
             prisma.category.count({ where: { brandId: id } }),
@@ -731,7 +733,8 @@ export async function deleteBrand(id: string) {
             return { success: false, error: "deleteBrandWithCatalog" };
         }
 
-        await prisma.brand.delete({ where: { id } });
+        await prisma.brand.update({ where: { id, archivedAt: null }, data: { archivedAt: new Date(), isActive: false } });
+        await writeAdminAuditLog({ actorId: session.user.id, action: "ARCHIVE", entityType: "Brand", entityId: id });
 
         revalidatePath("/");
         revalidatePath("/brands");
@@ -746,7 +749,7 @@ export async function deleteBrand(id: string) {
 
 export async function toggleBrandActive(id: string, isActive: boolean) {
     try {
-        await requireAdminSession("canManageBrands");
+        await requireAdminSession("BRANDS_MANAGE");
         await prisma.brand.update({
             where: { id },
             data: { isActive },
@@ -765,7 +768,7 @@ export async function toggleBrandActive(id: string, isActive: boolean) {
 
 export async function toggleBrandFeatured(id: string, isFeatured: boolean) {
     try {
-        await requireAdminSession("canManageBrands");
+        await requireAdminSession("BRANDS_MANAGE");
         await prisma.brand.update({
             where: {
                 id,
@@ -799,8 +802,9 @@ interface MainCategoryInput {
 
 export async function getAdminMainCategories() {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("MAIN_CATEGORIES_VIEW");
         const mainCategories = await prisma.mainCategory.findMany({
+            where: { archivedAt: null },
             orderBy: { navOrder: "asc" },
             include: {
                 _count: {
@@ -820,7 +824,7 @@ export async function getAdminMainCategories() {
         }));
     } catch (error) {
         console.error("Failed to fetch main categories:", error);
-        return [];
+        throw error;
     }
 }
 
@@ -843,7 +847,7 @@ function generateMainCategorySlug(name: string, description?: string | null, exi
 
 export async function createMainCategory(data: MainCategoryInput) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("MAIN_CATEGORIES_MANAGE");
         let slug = generateMainCategorySlug(data.name, data.description);
 
         const existing = await prisma.mainCategory.findUnique({ where: { slug } });
@@ -883,7 +887,7 @@ export async function createMainCategory(data: MainCategoryInput) {
 
 export async function updateMainCategory(id: string, data: MainCategoryInput) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("MAIN_CATEGORIES_MANAGE");
         const current = await prisma.mainCategory.findUnique({ where: { id } });
         let slug = generateMainCategorySlug(data.name, data.description, current?.slug);
 
@@ -927,7 +931,7 @@ export async function updateMainCategory(id: string, data: MainCategoryInput) {
 
 export async function deleteMainCategory(id: string) {
     try {
-        await requireAdminSession("canDeleteCategories");
+        const session = await requireAdminSession("MAIN_CATEGORIES_ARCHIVE");
         const [brandCount, categoryCount, productCount] = await Promise.all([
             prisma.brand.count({ where: { mainCategoryId: id } }),
             prisma.category.count({ where: { mainCategoryId: id } }),
@@ -938,7 +942,8 @@ export async function deleteMainCategory(id: string) {
             return { success: false, error: "Cannot delete a main category that has brands, categories, or products assigned to it. Please reassign them first." };
         }
 
-        await prisma.mainCategory.delete({ where: { id } });
+        await prisma.mainCategory.update({ where: { id, archivedAt: null }, data: { archivedAt: new Date(), isActive: false, showInNav: false } });
+        await writeAdminAuditLog({ actorId: session.user.id, action: "ARCHIVE", entityType: "MainCategory", entityId: id });
 
         revalidatePath("/");
         revalidatePath("/admin/main-categories");
@@ -952,7 +957,7 @@ export async function deleteMainCategory(id: string) {
 
 export async function toggleMainCategoryFeatured(id: string, isFeatured: boolean) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("MAIN_CATEGORIES_MANAGE");
         await prisma.mainCategory.update({
             where: { id },
             data: { isFeatured },
@@ -970,7 +975,7 @@ export async function toggleMainCategoryFeatured(id: string, isFeatured: boolean
 
 export async function toggleMainCategoryActive(id: string, isActive: boolean) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("MAIN_CATEGORIES_MANAGE");
         await prisma.mainCategory.update({
             where: { id },
             data: { isActive },
@@ -994,11 +999,11 @@ export async function getAdminProducts(options?: {
     search?: string;
 }) {
     try {
-        await requireAdminSession("canManageProducts");
+        await requireAdminSession("PRODUCTS_VIEW");
         const limit = options?.limit ? Math.min(Math.max(1, options.limit), 500) : 100;
         const cursor = options?.cursor;
 
-        const where: any = {};
+        const where: any = { archivedAt: null };
         if (options?.categoryId) where.categoryId = options.categoryId;
         if (options?.brandId) where.brandId = options.brandId;
         if (options?.search) {
@@ -1071,16 +1076,17 @@ export async function getAdminProducts(options?: {
         }));
     } catch (error) {
         console.error("Failed to fetch products:", error);
-        return [];
+        throw error;
     }
 }
 
 export async function getAdminCategories(page = 1, limit = 500) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("CATEGORIES_VIEW");
         const skip = (page - 1) * limit;
         const [categories, total] = await Promise.all([
             prisma.category.findMany({
+                where: { archivedAt: null },
                 select: {
                     id: true,
                     name: true,
@@ -1109,7 +1115,7 @@ export async function getAdminCategories(page = 1, limit = 500) {
                     name: 'asc'
                 }
             }),
-            prisma.category.count()
+            prisma.category.count({ where: { archivedAt: null } })
         ]);
         
         return {
@@ -1127,16 +1133,17 @@ export async function getAdminCategories(page = 1, limit = 500) {
         };
     } catch (error) {
         console.error("Failed to fetch categories:", error);
-        return { categories: [], pagination: { total: 0, pages: 0, page: 1, limit: 50 } };
+        throw error;
     }
 }
 
 export async function getAdminOrders(page = 1, limit = 50) {
     try {
-        await requireAdminSession("canManageOrders");
+        await requireAdminSession("ORDERS_VIEW");
         const skip = (page - 1) * limit;
         const [orders, total] = await Promise.all([
             prisma.order.findMany({
+                where: { archivedAt: null },
                 select: {
                     id: true,
                     shopName: true,
@@ -1174,7 +1181,7 @@ export async function getAdminOrders(page = 1, limit = 50) {
                     createdAt: 'desc'
                 }
             }),
-            prisma.order.count()
+            prisma.order.count({ where: { archivedAt: null } })
         ]);
 
         return {
@@ -1208,13 +1215,13 @@ export async function getAdminOrders(page = 1, limit = 50) {
         };
     } catch (error) {
         console.error("Failed to fetch orders:", error);
-        return { orders: [], pagination: { total: 0, pages: 0, page: 1, limit: 50 } };
+        throw error;
     }
 }
 
 export async function createProduct(data: ProductInput) {
     try {
-        await requireAdminSession("canManageProducts");
+        await requireAdminSession("PRODUCTS_MANAGE");
         const category = await prisma.category.findUnique({
             where: { id: data.categoryId },
             select: { brandId: true, mainCategoryId: true },
@@ -1302,7 +1309,7 @@ export async function createProduct(data: ProductInput) {
 
 export async function updateProduct(id: string, data: ProductInput & { isTrending?: boolean }) {
     try {
-        await requireAdminSession("canManageProducts");
+        await requireAdminSession("PRODUCTS_MANAGE");
         const category = await prisma.category.findUnique({
             where: { id: data.categoryId },
             select: { brandId: true, mainCategoryId: true },
@@ -1386,10 +1393,12 @@ export async function updateProduct(id: string, data: ProductInput & { isTrendin
 
 export async function deleteProduct(id: string) {
     try {
-        await requireAdminSession("canDeleteProducts");
-        await prisma.product.delete({
-            where: { id }
+        const session = await requireAdminSession("PRODUCTS_ARCHIVE");
+        await prisma.product.update({
+            where: { id, archivedAt: null },
+            data: { archivedAt: new Date(), isTrending: false },
         });
+        await writeAdminAuditLog({ actorId: session.user.id, action: "ARCHIVE", entityType: "Product", entityId: id });
 
         revalidatePath('/admin/products');
         revalidatePath('/products');
@@ -1407,8 +1416,9 @@ export async function deleteProduct(id: string) {
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {
     try {
-        await requireAdminSession("canManageOrders");
+        const session = await requireAdminSession("ORDERS_MANAGE");
         await executeOrderStatusUpdate(id, status as OrderStatusType);
+        await writeAdminAuditLog({ actorId: session.user.id, action: "STATUS_TRANSITION", entityType: "Order", entityId: id, metadata: { status } });
 
         revalidatePath('/admin/orders');
         revalidatePath('/admin/dashboard');
@@ -1422,8 +1432,9 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
 
 export async function deleteOrder(id: string) {
     try {
-        await requireAdminSession("canDeleteOrders");
+        const session = await requireAdminSession("ORDERS_ARCHIVE");
         await executeOrderDeletion(id);
+        await writeAdminAuditLog({ actorId: session.user.id, action: "ARCHIVE", entityType: "Order", entityId: id });
 
         revalidatePath('/admin/orders');
         revalidatePath('/admin/dashboard');
@@ -1436,7 +1447,7 @@ export async function deleteOrder(id: string) {
 
 export async function createCategory(data: CategoryInput) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("CATEGORIES_MANAGE");
         const brandId = data.brandId || await getZadLandBrandId();
         const slug = await generateUniqueCategorySlug(data.name);
 
@@ -1474,7 +1485,7 @@ export async function createCategory(data: CategoryInput) {
 
 export async function updateCategory(id: string, data: CategoryInput) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("CATEGORIES_MANAGE");
         const brandId = data.brandId || await getZadLandBrandId();
         const slug = await generateUniqueCategorySlug(data.name, id);
 
@@ -1513,18 +1524,12 @@ export async function updateCategory(id: string, data: CategoryInput) {
 
 export async function deleteCategory(id: string) {
     try {
-        await requireAdminSession("canDeleteCategories");
-        const productsCount = await prisma.product.count({
-            where: { categoryId: id }
+        const session = await requireAdminSession("CATEGORIES_ARCHIVE");
+        await prisma.category.update({
+            where: { id, archivedAt: null },
+            data: { archivedAt: new Date(), isFeatured: false },
         });
-
-        if (productsCount > 0) {
-            return { success: false, error: "deleteCategoryWithProducts" };
-        }
-
-        await prisma.category.delete({
-            where: { id }
-        });
+        await writeAdminAuditLog({ actorId: session.user.id, action: "ARCHIVE", entityType: "Category", entityId: id });
 
         revalidatePath('/admin/categories');
         revalidatePath('/admin/products');
@@ -1541,7 +1546,7 @@ export async function deleteCategory(id: string) {
 
 export async function toggleCategoryFeatured(id: string, isFeatured: boolean) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("CATEGORIES_MANAGE");
         await prisma.category.update({
             where: { id },
             data: { isFeatured }
@@ -1708,7 +1713,7 @@ export async function getHomeCollectionSections(): Promise<HomeCollectionSection
 
 export async function toggleProductTrending(id: string, isTrending: boolean) {
     try {
-        await requireAdminSession("canManageProducts");
+        await requireAdminSession("PRODUCTS_MANAGE");
         await prisma.product.update({
             where: { id },
             data: { isTrending }
@@ -1766,7 +1771,7 @@ export async function getTrendingProducts() {
 
 export async function getCategoriesForCleanup() {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("CATEGORIES_VIEW");
         return await prisma.category.findMany({
             select: { id: true, name: true }
         });
@@ -1778,7 +1783,7 @@ export async function getCategoriesForCleanup() {
 
 export async function bulkFixCategoryNames(mapping: { id: string, newName: string }[]) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("CATEGORIES_MANAGE");
         await Promise.all(mapping.map(item => 
             prisma.category.update({
                 where: { id: item.id },
@@ -1796,7 +1801,7 @@ export async function bulkFixCategoryNames(mapping: { id: string, newName: strin
 
 export async function bulkCreateProducts(products: ProductImportRow[]) {
     try {
-        await requireAdminSession("canManageProducts");
+        await requireAdminSession("PRODUCTS_IMPORT");
         // getZadLandBrandId call if needed
         await getZadLandBrandId();
         
@@ -1949,8 +1954,9 @@ export interface BannerInput {
 
 export async function getAdminBanners() {
     try {
-        await requireAdminSession("canManageBanners");
+        await requireAdminSession("BANNERS_VIEW");
         const banners = await prisma.banner.findMany({
+            where: { archivedAt: null },
             orderBy: {
                 createdAt: 'desc'
             }
@@ -1963,13 +1969,13 @@ export async function getAdminBanners() {
         }));
     } catch (error) {
         console.error("Failed to fetch banners:", error);
-        return [];
+        throw error;
     }
 }
 
 export async function createBanner(data: BannerInput) {
     try {
-        await requireAdminSession("canManageBanners");
+        await requireAdminSession("BANNERS_MANAGE");
         const banner = await prisma.banner.create({
             data: {
                 title: data.title,
@@ -2004,7 +2010,7 @@ export async function createBanner(data: BannerInput) {
 
 export async function updateBanner(id: string, data: BannerInput) {
     try {
-        await requireAdminSession("canManageBanners");
+        await requireAdminSession("BANNERS_MANAGE");
         const banner = await prisma.banner.update({
             where: { id },
             data: {
@@ -2040,10 +2046,12 @@ export async function updateBanner(id: string, data: BannerInput) {
 
 export async function deleteBanner(id: string) {
     try {
-        await requireAdminSession("canDeleteBanners");
-        await prisma.banner.delete({
-            where: { id }
+        const session = await requireAdminSession("BANNERS_ARCHIVE");
+        await prisma.banner.update({
+            where: { id, archivedAt: null },
+            data: { archivedAt: new Date(), isActive: false },
         });
+        await writeAdminAuditLog({ actorId: session.user.id, action: "ARCHIVE", entityType: "Banner", entityId: id });
 
         invalidateCacheEntities(['banners']);
         return { success: true };
@@ -2055,7 +2063,7 @@ export async function deleteBanner(id: string) {
 
 export async function toggleBannerStatus(id: string, isActive: boolean) {
     try {
-        await requireAdminSession("canManageBanners");
+        await requireAdminSession("BANNERS_MANAGE");
         await prisma.banner.update({
             where: { id },
             data: { isActive }
@@ -2438,7 +2446,7 @@ export async function updateSiteSettings(data: {
 
 export async function bulkToggleTrending(ids: string[], isTrending: boolean) {
     try {
-        await requireAdminSession("canManageProducts");
+        await requireAdminSession("PRODUCTS_MANAGE");
         await prisma.product.updateMany({
             where: {
                 id: { in: ids }
@@ -2456,7 +2464,7 @@ export async function bulkToggleTrending(ids: string[], isTrending: boolean) {
 
 export async function bulkRemoveSale(ids: string[]) {
     try {
-        await requireAdminSession("canManageProducts");
+        await requireAdminSession("PRODUCTS_MANAGE");
         await prisma.product.updateMany({
             where: {
                 id: { in: ids }
@@ -2478,7 +2486,7 @@ export async function bulkRemoveSale(ids: string[]) {
 
 export async function bulkDeleteProducts(ids: string[]) {
     try {
-        await requireAdminSession("canDeleteProducts");
+        const session = await requireAdminSession("PRODUCTS_ARCHIVE");
         // Find which products have orders
         const productsWithOrders = await prisma.product.findMany({
             where: {
@@ -2492,11 +2500,13 @@ export async function bulkDeleteProducts(ids: string[]) {
         const idsToDelete = ids.filter(id => !idsWithOrders.has(id));
 
         if (idsToDelete.length > 0) {
-            await prisma.product.deleteMany({
+            await prisma.product.updateMany({
                 where: {
                     id: { in: idsToDelete }
-                }
+                },
+                data: { archivedAt: new Date(), isTrending: false },
             });
+            await writeAdminAuditLog({ actorId: session.user.id, action: "BULK_ARCHIVE", entityType: "Product", metadata: { ids: idsToDelete } });
         }
 
         revalidatePath('/');
@@ -2522,7 +2532,7 @@ export async function bulkDeleteProducts(ids: string[]) {
 
 export async function bulkDeleteCategories(ids: string[]) {
     try {
-        await requireAdminSession("canDeleteCategories");
+        const session = await requireAdminSession("CATEGORIES_ARCHIVE");
         // Find which categories have products
         const categoriesWithProducts = await prisma.category.findMany({
             where: {
@@ -2536,11 +2546,13 @@ export async function bulkDeleteCategories(ids: string[]) {
         const idsToDelete = ids.filter(id => !idsWithProducts.has(id));
 
         if (idsToDelete.length > 0) {
-            await prisma.category.deleteMany({
+            await prisma.category.updateMany({
                 where: {
                     id: { in: idsToDelete }
-                }
+                },
+                data: { archivedAt: new Date(), isFeatured: false },
             });
+            await writeAdminAuditLog({ actorId: session.user.id, action: "BULK_ARCHIVE", entityType: "Category", metadata: { ids: idsToDelete } });
         }
 
         invalidateCacheEntities(['categories', 'catalog', 'navigation']);

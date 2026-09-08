@@ -4,14 +4,39 @@ import { prisma } from '@/lib/prisma';
 import BlogClient, { BlogPostItem } from './BlogClient';
 import { getSiteSettings } from '@/lib/public-queries';
 
+import { SITE_ORIGIN } from '@/lib/site-config';
+
 export const revalidate = 60; // 1 minute revalidation
 
 export const metadata: Metadata = {
     title: 'المدونة والتقارير التجارية | شركة حوا للتوزيع والتجارة',
     description: 'مركز معلومات وأخبار تجارة الجملة وتوزيع المواد الغذائية في سوريا: إطلاقات الوكالات، لوائح أسعار الطرود، نصائح إدارة المحلات والسوبرماركت، ومؤشرات السوق.',
+    alternates: {
+        canonical: '/blog',
+    },
     openGraph: {
         title: 'المدونة وأخبار الوكالات | Hawa Distribution & Trading',
-        description: 'آخر تقارير السلع والوكالات الغذائية وإرشادات أصحاب المتاجر من شركة حوا للتوزيع.',
+        description: 'آخر تقارير السلع والوكالات الغذائية وإرشادات أصحاب المتاجر من شركة حوا للتوزيع والتجارة.',
+        url: `${SITE_ORIGIN}/blog`,
+        siteName: 'حوا للتوزيع والتجارة | Hawa Distribution & Trading',
+        locale: 'ar_SY',
+        type: 'website',
+        images: [
+            {
+                url: `${SITE_ORIGIN}/og-image.jpg`,
+                secureUrl: `${SITE_ORIGIN}/og-image.jpg`,
+                width: 1200,
+                height: 630,
+                type: 'image/jpeg',
+                alt: 'Hawa Distribution Blog & Trade Reports',
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'المدونة والتقارير التجارية | شركة حوا للتوزيع والتجارة',
+        description: 'آخر تقارير السلع والوكالات الغذائية وإرشادات أصحاب المتاجر من شركة حوا للتوزيع والتجارة.',
+        images: [`${SITE_ORIGIN}/og-image.jpg`],
     },
 };
 
@@ -73,7 +98,7 @@ export default async function BlogPage() {
     let posts: any[] = [];
     try {
         posts = await prisma.post.findMany({
-            where: { isPublished: true },
+            where: { isPublished: true, archivedAt: null },
             orderBy: { createdAt: 'desc' },
         });
     } catch (err) {

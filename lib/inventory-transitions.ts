@@ -218,6 +218,17 @@ export async function executeOrderStatusUpdate(
         }
 
         if (evaluation.inventoryAction === "RELEASE_RESERVATION") {
+            // Atomically claim the active reservation before changing stock.
+            // Only one request across all application instances can succeed.
+            const claimed = await tx.order.updateMany({
+                where: { id: orderId, status: order.status, stockReserved: true, archivedAt: null },
+                data: { status: targetStatus, stockReserved: false },
+            });
+            if (claimed.count !== 1) {
+                const latest = await tx.order.findUnique({ where: { id: orderId }, select: { status: true, stockReserved: true } });
+                if (latest?.status === targetStatus && !latest.stockReserved) return { success: true, noOp: true };
+                throw new Error("Order reservation was already claimed by another request");
+            }
             for (const item of order.items) {
                 await tx.product.update({
                     where: { id: item.productId },
@@ -234,24 +245,23 @@ export async function executeOrderStatusUpdate(
                         productId: item.productId,
                         quantity: item.quantity,
                         type: "RELEASE",
+                        deduplicationKey: `release:${order.id}:${item.productId}:reservation:v1`,
                         reason: `إلغاء الطلب رقم ${order.id} وإعادة الكمية المحجوزة للمستودع`,
                     },
                 });
             }
 
-            await tx.order.update({
-                where: { id: orderId },
-                data: {
-                    status: targetStatus,
-                    stockReserved: false,
-                },
-            });
         } else {
             // Advancing to DELIVERED, COMPLETED, SHIPPED, etc.
             // Stock was reserved at order creation. NO double decrement!
             await tx.order.update({
                 where: { id: orderId },
-                data: { status: targetStatus },
+                data: {
+                    status: targetStatus,
+                    stockReserved: targetStatus === "DELIVERED" || targetStatus === "COMPLETED"
+                        ? false
+                        : order.stockReserved,
+                },
             });
         }
 
@@ -263,10 +273,32 @@ export async function executeOrderStatusUpdate(
 }
 
 /**
- * Persists order deletion inside a database transaction, releasing active stock
- * reservations if applicable and recording auditable inventory movements.
+ * Archives a terminal order. Active orders must be cancelled first so any
+ * reservation release remains an explicit and independently audited transition.
  */
 export async function executeOrderDeletion(
+    orderId: string
+): Promise<{ success: boolean; released: boolean }> {
+    const { prisma } = await import("./prisma");
+    return prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({ where: { id: orderId } });
+        if (!order) throw new Error("Order not found");
+        if (order.archivedAt) return { success: true, released: false };
+        if (!["CANCELLED", "DELIVERED", "COMPLETED"].includes(order.status)) {
+            throw new Error("Active orders must be cancelled before archiving");
+        }
+        if (order.stockReserved) throw new Error("Order reservation must be finalized before archiving");
+        await tx.order.update({
+            where: { id: orderId, archivedAt: null },
+            data: { archivedAt: new Date() },
+        });
+        return { success: true, released: false };
+    });
+}
+
+// Kept private temporarily for migration review only; no dashboard path invokes
+// this historical hard-delete implementation.
+async function legacyExecuteOrderHardDeletion(
     orderId: string
 ): Promise<{ success: boolean; released: boolean }> {
     const { prisma } = await import("./prisma");
@@ -319,4 +351,3 @@ export async function executeOrderDeletion(
         timeout: 30000,
     });
 }
-

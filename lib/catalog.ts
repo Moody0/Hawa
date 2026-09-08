@@ -399,11 +399,15 @@ export const getCatalogInitialData = cache(
                         categoryId?: string;
                         brandId?: string;
                         mainCategoryId?: string;
-                        brand: { isActive: boolean };
+                        archivedAt: null;
+                        brand: { isActive: boolean; archivedAt: null };
+                        category: { archivedAt: null };
                         OR?: Array<Record<string, unknown>>;
                     } = {
                         stock: { gt: 0 },
-                        brand: { isActive: true },
+                        archivedAt: null,
+                        brand: { isActive: true, archivedAt: null },
+                        category: { archivedAt: null },
                     };
 
                     if (categoryId) {
@@ -482,10 +486,10 @@ export const getCatalogInitialData = cache(
                             description: product.description,
                             descriptionAr: product.descriptionAr,
                             descriptionEn: product.descriptionEn,
-                            price: product.price.toString(),
-                            discountPrice: product.discountPrice ? product.discountPrice.toString() : null,
-                            discountType: product.discountType,
-                            discountValue: product.discountValue ? product.discountValue.toString() : null,
+                            price: null,
+                            discountPrice: null,
+                            discountType: null,
+                            discountValue: null,
                             images: product.images,
                             brandId: product.brandId,
                             categoryId: product.categoryId,
@@ -525,4 +529,3 @@ export const getCatalogInitialData = cache(
         )();
     }
 );
-

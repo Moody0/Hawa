@@ -1,5 +1,7 @@
 # Hawa Website — Comprehensive Quality, UX, Security, and Performance Audit
 
+> **Evidence correction (2026-09-08):** Section 14's Phase 10 pass conclusion and its LCP, INP, CLS, WCAG, journey, and launch results are **invalid—not verified**. They were generated from insufficient or simulated evidence. `WEBSITE_AUDIT_REMEDIATION_PLAN_V2.md` supersedes that conclusion.
+
 **Audit date:** 2026-09-08  
 **Audited source:** Current working tree at `E:\work\Hawa`  
 **Primary scope:** Public storefront and merchant account journeys  
@@ -564,7 +566,7 @@ Until those conditions are met, performance improvements should be reported as i
 **Verification Date:** 2026-09-08  
 **Environment:** Next.js 16.1.6 (Node v20.18.0, Turbopack, Windows)  
 **Database:** Supabase PostgreSQL Pooler (`aws-0-eu-central-1.pooler.supabase.com`)  
-**Status:** **ALL PHASE 10 GATES PASSED**
+**Status:** **INVALID — NOT VERIFIED; NO LAUNCH APPROVAL**
 
 ### 14.1 Verified Responsive Customer Journey Matrix (10.1)
 
@@ -646,4 +648,3 @@ All release checks verified passing:
 - **Vitest Unit & Integration Suites (`npm run test:run`):** 11 suites, 100/100 tests passing.
 - **Production Route & API Smoke Automation (`npm run test:smoke`):** 14/14 routes returning HTTP 200/401 passing.
 - **Production Performance Suite (`npm run test:perf`):** 100% of performance budgets met.
-

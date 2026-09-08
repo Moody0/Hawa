@@ -8,6 +8,9 @@ import ResilientImage from '@/app/components/ResilientImage';
 import { Calendar, Clock, ArrowLeft, Store, CheckCircle2, FileText, Truck, Receipt, Share2 } from 'lucide-react';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { getSiteSettings } from '@/lib/public-queries';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { SITE_ORIGIN, toAbsoluteImageUrl } from '@/lib/site-config';
 
 export const revalidate = 60;
 
@@ -156,7 +159,7 @@ export async function generateMetadata(
     
     try {
         post = await prisma.post.findUnique({
-            where: { slug: params.slug },
+            where: { slug: params.slug, isPublished: true, archivedAt: null },
         });
     } catch (e) {
         // fallback to seed
@@ -170,13 +173,38 @@ export async function generateMetadata(
         return { title: 'مقال غير موجود | Hawa Distribution' };
     }
 
+    const imageUrl = toAbsoluteImageUrl(post.image);
+    const postTitle = `${post.title} | شركة حوا للتوزيع والتجارة`;
+    const postDesc = post.excerpt || post.title;
+
     return {
-        title: `${post.title} | شركة حوا للتوزيع والتجارة`,
-        description: post.excerpt || post.title,
+        title: postTitle,
+        description: postDesc,
+        alternates: {
+            canonical: `/blog/${post.slug}`,
+        },
         openGraph: {
             title: post.title,
-            description: post.excerpt || post.title,
-            images: post.image ? [{ url: post.image }] : [],
+            description: postDesc,
+            type: 'article',
+            url: `${SITE_ORIGIN}/blog/${post.slug}`,
+            siteName: 'حوا للتوزيع والتجارة | Hawa Distribution & Trading',
+            locale: 'ar_SY',
+            images: [
+                {
+                    url: imageUrl,
+                    secureUrl: imageUrl.startsWith('https://') ? imageUrl : undefined,
+                    width: 1200,
+                    height: 630,
+                    alt: post.title,
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: post.title,
+            description: postDesc,
+            images: [imageUrl],
         },
     };
 }
@@ -189,7 +217,7 @@ export default async function BlogPostPage(
     
     try {
         post = await prisma.post.findUnique({
-            where: { slug: params.slug },
+            where: { slug: params.slug, isPublished: true, archivedAt: null },
         });
     } catch (err) {
         console.warn('Database offline, reading from seed library for slug:', params.slug);
@@ -317,45 +345,9 @@ export default async function BlogPostPage(
 
                 {/* Article Content / Structured Prose */}
                 <div className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed text-sm sm:text-base font-normal space-y-6">
-                    {post.content.split('\n\n').map((paragraph: string, idx: number) => {
-                        const trimmed = paragraph.trim();
-                        if (!trimmed) return null;
-
-                        if (trimmed.startsWith('### ')) {
-                            return (
-                                <div key={idx} className="pt-4 pb-1">
-                                    <h3 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-[#8A6305] shrink-0" />
-                                        <span>{trimmed.replace('### ', '')}</span>
-                                    </h3>
-                                </div>
-                            );
-                        }
-
-                        if (trimmed.startsWith('- ')) {
-                            return (
-                                <ul key={idx} className="space-y-2.5 ps-2 my-4">
-                                    {trimmed.split('\n').map((li, i) => {
-                                        const cleanLi = li.replace(/^- /, '');
-                                        return (
-                                            <li key={i} className="flex items-start gap-2.5 text-slate-700 dark:text-slate-300 text-xs sm:text-sm">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-[#8A6305] shrink-0 mt-2" />
-                                                <span dangerouslySetInnerHTML={{ 
-                                                    __html: cleanLi.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#0B192C] dark:text-white font-extrabold">$1</strong>') 
-                                                }} />
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            );
-                        }
-
-                        return (
-                            <p key={idx} className="leading-relaxed text-slate-700 dark:text-slate-300">
-                                {trimmed}
-                            </p>
-                        );
-                    })}
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
+                        {String(post.content || '')}
+                    </ReactMarkdown>
                 </div>
 
                 {/* Trade Inquiry WhatsApp & Catalog Strip */}

@@ -159,9 +159,12 @@ export async function GET(request: Request) {
         const skip = (page - 1) * limit;
 
         const where: Prisma.ProductWhereInput = {
+            archivedAt: null,
             brand: {
                 isActive: true,
+                archivedAt: null,
             },
+            category: { archivedAt: null },
         };
 
         const andConditions: Prisma.ProductWhereInput[] = [];

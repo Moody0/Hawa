@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import { getI18n } from "@/lib/i18n";
 import { getSiteSettings } from "@/lib/public-queries";
 import { headers } from "next/headers";
+import { SITE_ORIGIN } from "@/lib/site-config";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -18,10 +19,7 @@ const noto_sans_arabic = Noto_Sans_Arabic({
   display: "swap",
 });
 
-const metadataBase =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXTAUTH_URL ||
-  "https://hawatrading.com";
+const metadataBase = SITE_ORIGIN;
 
 export const viewport: Viewport = {
   themeColor: "#0B192C",
@@ -77,27 +75,29 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ar_SY",
-    alternateLocale: ["en_US", "ar_SA"],
-    siteName: "Hawa Distribution | حوا للتوزيع والتجارة",
-    title: "Hawa Distribution & Trading | Wholesale Agencies - حوا للتوزيع والتجارة",
+    alternateLocale: ["en_US"],
+    siteName: "حوا للتوزيع والتجارة | Hawa Distribution & Trading",
+    title: "حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد - Hawa Distribution",
     description:
-      "شركة حوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة. توريد مباشر وطلب سريع عبر واتساب.",
+      "شركة حوا للتوزيع والتجارة - المنصة الرائدة لتوريد كبرى الوكالات والعلامات التجارية للمحلات والسوبرماركت بالجملة (زوان، الريف، حليبنا، صن بل، سيلفر فيش، بوفالو، روكافيرا، المغربي). توريد مباشر وطلب فوري عبر واتساب.",
     url: metadataBase,
     images: [
       {
-        url: "/og-image.jpg",
+        url: `${metadataBase}/og-image.jpg`,
+        secureUrl: `${metadataBase}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: "Hawa Distribution & Trading",
+        type: "image/jpeg",
+        alt: "حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد - Hawa Distribution",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hawa Distribution & Trading | Wholesale Agencies - حوا للتوزيع والتجارة",
+    title: "حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد - Hawa Distribution",
     description:
-      "شركة حوا للتوزيع والتجارة - المنصة الرائدة لعرض وتوزيع منتجات الوكالات للمحلات والتجار بالجملة. توريد مباشر وطلب سريع عبر واتساب.",
-    images: ["/og-image.jpg"],
+      "شركة حوا للتوزيع والتجارة - المنصة الرائدة لتوريد كبرى الوكالات والعلامات التجارية للمحلات والسوبرماركت بالجملة. توريد مباشر وطلب فوري عبر واتساب.",
+    images: [`${metadataBase}/og-image.jpg`],
   },
   robots: {
     index: true,

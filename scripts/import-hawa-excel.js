@@ -46,12 +46,17 @@ async function main() {
 
   // 1. Ensure Default Admin
   console.log('1. Seeding Admin User...');
-  const existingAdmin = await prisma.user.findUnique({ where: { username: 'admin' } });
+  const adminUsername = process.env.ADMIN_SEED_USERNAME?.trim().normalize('NFKC').toLocaleLowerCase('en-US');
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD;
+  if (!adminUsername || !adminPassword || adminPassword.length < 12 || adminPassword.length > 128) {
+    throw new Error('ADMIN_SEED_USERNAME and a 12-128 character ADMIN_SEED_PASSWORD are required');
+  }
+  const existingAdmin = await prisma.user.findUnique({ where: { username: adminUsername } });
   if (!existingAdmin) {
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
     await prisma.user.create({
       data: {
-        username: 'admin',
+        username: adminUsername,
         password: hashedPassword,
         role: 'SUPER_ADMIN',
         canManageBrands: true,
@@ -69,9 +74,9 @@ async function main() {
         canManageReviews: true
       }
     });
-    console.log('   Created default admin user: admin / admin123');
+    console.log(`   Created administrator ${adminUsername} without exposing credentials.`);
   } else {
-    console.log('   Admin user already exists.');
+    console.log('   Administrator already exists.');
   }
 
   // 2. Ensure Settings

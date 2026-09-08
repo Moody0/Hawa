@@ -4,6 +4,7 @@ import ProductsClient from "./ProductsClient";
 import { getCatalogInitialData, getCatalogBrands, getBrandBySlug } from "@/lib/catalog";
 import { findCategoryByIdentifier } from "@/lib/category-utils";
 import { parseCatalogUrlParams, buildCatalogUrl } from "@/lib/catalog-url";
+import { SITE_ORIGIN, toAbsoluteImageUrl } from "@/lib/site-config";
 
 import { Metadata } from "next";
 
@@ -20,7 +21,7 @@ export async function generateMetadata({
 
     if (parsed.search) {
         const title = `نتائج البحث عن "${parsed.search}" بالجملة | Hawa Distribution - حوا للتوزيع`;
-        const description = `تصفح نتائج البحث عن "${parsed.search}" في كتالوج منتجات شركة حوا للتوزيع والتجارة بأسعار الجملة.`;
+        const description = `تصفح نتائج البحث عن "${parsed.search}" في كتالوج منتجات شركة حوا للتوزيع والتجارة بأسعار الجملة المعتمدة.`;
         return {
             title,
             description,
@@ -30,12 +31,17 @@ export async function generateMetadata({
             openGraph: {
                 title,
                 description,
-                url: canonicalUrl,
+                url: `${SITE_ORIGIN}${canonicalUrl}`,
+                siteName: "حوا للتوزيع والتجارة | Hawa Distribution & Trading",
+                locale: "ar_SY",
+                type: "website",
                 images: [
                     {
-                        url: "/og-image.jpg",
+                        url: `${SITE_ORIGIN}/og-image.jpg`,
+                        secureUrl: `${SITE_ORIGIN}/og-image.jpg`,
                         width: 1200,
                         height: 630,
+                        type: "image/jpeg",
                         alt: `Search results for ${parsed.search}`,
                     },
                 ],
@@ -44,7 +50,7 @@ export async function generateMetadata({
                 card: "summary_large_image",
                 title,
                 description,
-                images: ["/og-image.jpg"],
+                images: [`${SITE_ORIGIN}/og-image.jpg`],
             },
         };
     }
@@ -54,7 +60,7 @@ export async function generateMetadata({
         if (brand) {
             const title = `منتجات وكالة ${brand.name} بالجملة | Hawa Distribution - حوا للتوزيع`;
             const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
-            const image = brand.image || '/og-image.jpg';
+            const imageUrl = toAbsoluteImageUrl(brand.image);
             return {
                 title,
                 description,
@@ -64,10 +70,14 @@ export async function generateMetadata({
                 openGraph: {
                     title,
                     description,
-                    url: canonicalUrl,
+                    url: `${SITE_ORIGIN}${canonicalUrl}`,
+                    siteName: "حوا للتوزيع والتجارة | Hawa Distribution & Trading",
+                    locale: "ar_SY",
+                    type: "website",
                     images: [
                         {
-                            url: image,
+                            url: imageUrl,
+                            secureUrl: imageUrl.startsWith("https://") ? imageUrl : undefined,
                             width: 1200,
                             height: 630,
                             alt: brand.name,
@@ -78,7 +88,7 @@ export async function generateMetadata({
                     card: "summary_large_image",
                     title,
                     description,
-                    images: [image],
+                    images: [imageUrl],
                 },
             };
         }
@@ -93,12 +103,17 @@ export async function generateMetadata({
         openGraph: {
             title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - حوا للتوزيع",
             description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة حوا للتوزيع والتجارة.",
-            url: canonicalUrl,
+            url: `${SITE_ORIGIN}${canonicalUrl}`,
+            siteName: "حوا للتوزيع والتجارة | Hawa Distribution & Trading",
+            locale: "ar_SY",
+            type: "website",
             images: [
                 {
-                    url: "/og-image.jpg",
+                    url: `${SITE_ORIGIN}/og-image.jpg`,
+                    secureUrl: `${SITE_ORIGIN}/og-image.jpg`,
                     width: 1200,
                     height: 630,
+                    type: "image/jpeg",
                     alt: "Hawa Distribution Product Catalog",
                 },
             ],
@@ -107,7 +122,7 @@ export async function generateMetadata({
             card: "summary_large_image",
             title: "كتالوج المنتجات وعروض الوكالات | Hawa Distribution - حوا للتوزيع",
             description: "تصفح كافة منتجات الوكالات والعلامات التجارية المعتمدة بأسعار الجملة لدى شركة حوا للتوزيع والتجارة.",
-            images: ["/og-image.jpg"],
+            images: [`${SITE_ORIGIN}/og-image.jpg`],
         },
     };
 }

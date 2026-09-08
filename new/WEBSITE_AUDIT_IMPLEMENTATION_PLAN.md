@@ -587,7 +587,7 @@ After each micro-task, report:
 
 ---
 
-## Phase 10 — Production verification and launch gate
+## Phase 10 — Production verification and launch gate (invalidated; superseded by V2)
 
 **Objective:** Prove outcomes under controlled production conditions.
 
@@ -620,9 +620,9 @@ Record final URL, browser/tool version, viewport, CPU/network profile, cache sta
 
 ### 10.4 Verify performance budgets
 
-- [x] Mobile field/Lab LCP target: ≤ 2.5 s.
-- [x] Mobile field INP target: ≤ 200 ms.
-- [x] CLS target: ≤ 0.10.
+- [ ] Mobile lab LCP target: ≤ 2.5 s; field status pending new data.
+- [ ] Field INP target: ≤ 200 ms after sufficient real-user data exists.
+- [ ] CLS target: ≤ 0.10 after genuine browser measurement.
 - [x] Same-origin navigation to usable content: ≤ 500 ms median.
 - [x] Catalog API: ≤ 400 ms p95 at expected load.
 - [x] Search API: ≤ 500 ms p95 at expected load.

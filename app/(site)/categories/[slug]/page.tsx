@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import ProductsClient from "../../products/ProductsClient";
 import { getCatalogInitialData, getCategoryBySlug, getCatalogBrands } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
+import { SITE_ORIGIN, toAbsoluteImageUrl } from "@/lib/site-config";
 
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
@@ -46,7 +47,7 @@ export async function generateMetadata(
         const description = category.description 
             ? `${category.name} (${category.description}). تسوق منتجات القسم بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`
             : `تصفح تشكيلة ${category.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
-        const image = category.image || '/og-image.jpg';
+        const imageUrl = toAbsoluteImageUrl(category.image);
 
         return {
             title,
@@ -58,10 +59,13 @@ export async function generateMetadata(
                 title,
                 description,
                 type: 'website',
-                url: `/categories/${category.slug}`,
+                url: `${SITE_ORIGIN}/categories/${category.slug}`,
+                siteName: 'حوا للتوزيع والتجارة | Hawa Distribution & Trading',
+                locale: 'ar_SY',
                 images: [
                     {
-                        url: image,
+                        url: imageUrl,
+                        secureUrl: imageUrl.startsWith('https://') ? imageUrl : undefined,
                         width: 1200,
                         height: 630,
                         alt: category.name,
@@ -72,7 +76,7 @@ export async function generateMetadata(
                 card: 'summary_large_image',
                 title,
                 description,
-                images: [image],
+                images: [imageUrl],
             },
         };
     }
@@ -81,7 +85,7 @@ export async function generateMetadata(
     if (mainCategory) {
         const title = `${mainCategory.name} بالجملة | Hawa Distribution - حوا للتوزيع`;
         const description = mainCategory.description || `تصفح منتجات قسم ${mainCategory.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
-        const image = mainCategory.image || '/og-image.jpg';
+        const imageUrl = toAbsoluteImageUrl(mainCategory.image);
 
         return {
             title,
@@ -93,10 +97,13 @@ export async function generateMetadata(
                 title,
                 description,
                 type: 'website',
-                url: `/categories/${mainCategory.slug}`,
+                url: `${SITE_ORIGIN}/categories/${mainCategory.slug}`,
+                siteName: 'حوا للتوزيع والتجارة | Hawa Distribution & Trading',
+                locale: 'ar_SY',
                 images: [
                     {
-                        url: image,
+                        url: imageUrl,
+                        secureUrl: imageUrl.startsWith('https://') ? imageUrl : undefined,
                         width: 1200,
                         height: 630,
                         alt: mainCategory.name,
@@ -107,7 +114,7 @@ export async function generateMetadata(
                 card: 'summary_large_image',
                 title,
                 description,
-                images: [image],
+                images: [imageUrl],
             },
         };
     }

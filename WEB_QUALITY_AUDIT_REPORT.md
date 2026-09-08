@@ -1,4 +1,6 @@
 # Comprehensive Web Quality, Performance, UX & Security Audit Report
+
+> **Evidence correction (2026-09-08):** Any LCP, INP, CLS, WCAG-conformance, or launch-pass statement derived from simulated scripts is **invalid—not verified**. Only source-backed findings remain useful until genuine browser and field evidence replaces those claims.
 **Target Application:** Hawa Distribution & Trading (شركة حـوا للتوزيع والتجارة)  
 **Codebase Stack:** Next.js 16.1.6 (App Router), React 19.2.3, Tailwind CSS v4, Prisma ORM 5.22.0 (PostgreSQL/Neon/Supabase), NextAuth v4, TypeScript 5  
 **Audit Scope:** Full system audit covering Performance & Core Web Vitals, Data Fetching & Caching Architecture, 5 Primary B2B User Journeys & UX, WCAG 2.2 AA Accessibility, Technical SEO, and Security & Error Resilience.  

@@ -4,20 +4,27 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-    const password = 'SecureAdminPass123!';
+    const username = process.env.ADMIN_SEED_USERNAME?.trim().normalize('NFKC').toLocaleLowerCase('en-US')
+    const password = process.env.ADMIN_SEED_PASSWORD
+    if (!username || !password) {
+        throw new Error('ADMIN_SEED_USERNAME and ADMIN_SEED_PASSWORD are required')
+    }
+    if (password.length < 12 || password.length > 128) {
+        throw new Error('ADMIN_SEED_PASSWORD must contain 12 to 128 characters')
+    }
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    const admin = await prisma.user.upsert({
-        where: { username: 'admin' },
-        update: {},
+    await prisma.user.upsert({
+        where: { username },
+        update: { password: hashedPassword, disabledAt: null, archivedAt: null },
         create: {
-            username: 'admin',
+            username,
             password: hashedPassword,
+            role: 'SUPER_ADMIN',
         },
     })
 
-    console.log(`Admin user created/updated. Username: admin, Password: ${password}`)
-    console.log({ admin })
+    console.log(`Administrator ${username} created or updated without exposing credentials.`)
 }
 
 main()

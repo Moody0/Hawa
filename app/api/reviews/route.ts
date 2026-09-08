@@ -95,6 +95,8 @@ export async function GET(request: NextRequest) {
             where: {
                 productId,
                 isApproved: true,
+                archivedAt: null,
+                product: { archivedAt: null },
             },
             orderBy: {
                 createdAt: "desc"

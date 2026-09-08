@@ -350,7 +350,7 @@ export const getApprovedReviews = unstable_cache(
     async () => {
         try {
             const reviews = await prisma.review.findMany({
-                where: { isApproved: true },
+                where: { isApproved: true, archivedAt: null, product: { archivedAt: null } },
                 take: 12,
                 orderBy: { createdAt: 'desc' },
                 include: {
@@ -368,7 +368,7 @@ export const getApprovedReviews = unstable_cache(
             });
             if (reviews.length === 0) {
                 const sampleProducts = await prisma.product.findMany({
-                    where: { images: { not: '' } },
+                    where: { images: { not: '' }, archivedAt: null },
                     take: 8,
                     select: { name: true, nameAr: true, nameEn: true, images: true, slug: true }
                 });
@@ -487,7 +487,8 @@ export const getOnSaleProducts = unstable_cache(
         try {
             const products = await prisma.product.findMany({
                 where: {
-                    brand: { isActive: true },
+                    archivedAt: null,
+                    brand: { isActive: true, archivedAt: null },
                     discountPrice: {
                         not: null
                     }
@@ -499,10 +500,10 @@ export const getOnSaleProducts = unstable_cache(
 
             return products.map(product => ({
                 ...product,
-                price: Number(product.price),
-                discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
-                discountType: product.discountType,
-                discountValue: product.discountValue ? Number(product.discountValue) : null,
+                price: null,
+                discountPrice: null,
+                discountType: null,
+                discountValue: null,
                 stock: Number(product.stock),
                 createdAt: product.createdAt.toISOString(),
                 updatedAt: product.updatedAt.toISOString(),
@@ -534,6 +535,7 @@ export const getMainCategoryBrands = unstable_cache(
                 where: {
                     group: BrandGroup.MAIN,
                     isActive: true,
+                    archivedAt: null,
                 },
                 take: 4,
                 orderBy: [
@@ -569,7 +571,8 @@ export const getBestSellerProducts = unstable_cache(
             const products = await prisma.product.findMany({
                 where: {
                     isTrending: true,
-                    brand: { isActive: true },
+                    archivedAt: null,
+                    brand: { isActive: true, archivedAt: null },
                     stock: { gt: 0 },
                     price: { gte: 0 },
                     NOT: [
@@ -617,7 +620,8 @@ export const getNewArrivalProducts = unstable_cache(
         try {
             const products = await prisma.product.findMany({
                 where: {
-                    brand: { isActive: true },
+                    archivedAt: null,
+                    brand: { isActive: true, archivedAt: null },
                     stock: { gt: 0 },
                     price: { gte: 0 },
                     NOT: [
@@ -665,7 +669,8 @@ export const getTrendingWeeklyProducts = unstable_cache(
         try {
             const products = await prisma.product.findMany({
                 where: {
-                    brand: { isActive: true },
+                    archivedAt: null,
+                    brand: { isActive: true, archivedAt: null },
                     stock: { gt: 0 },
                     price: { gte: 0 },
                     NOT: [

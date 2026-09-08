@@ -19,23 +19,7 @@ const { spawn, execSync } = require('child_process');
 function ensureBuildId() {
     const buildIdPath = path.join(__dirname, '..', '.next', 'BUILD_ID');
     if (!fs.existsSync(buildIdPath)) {
-        const manifestPath = path.join(__dirname, '..', '.next', 'build-manifest.json');
-        if (fs.existsSync(manifestPath)) {
-            try {
-                const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-                const file = (manifest.lowPriorityFiles || []).find((f) => f.startsWith('static/'));
-                if (file) {
-                    const match = file.match(/^static\/([^/]+)\//);
-                    if (match && match[1]) {
-                        fs.writeFileSync(buildIdPath, match[1].trim());
-                        return;
-                    }
-                }
-            } catch {}
-        }
-        try {
-            fs.writeFileSync(buildIdPath, 'production-build-id');
-        } catch {}
+        throw new Error('Missing .next/BUILD_ID; performance tests require a valid production build.');
     }
 }
 

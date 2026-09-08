@@ -6,25 +6,18 @@ import { LayoutDashboard, ShoppingBag, Store, FolderTree, Package, Users, Settin
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
+import type { AdminPermission } from "@/lib/admin-permissions";
 
 interface AdminSidebarProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-type PermissionKey =
-    | "canManageBrands"
-    | "canManageProducts"
-    | "canManageCategories"
-    | "canManageBanners"
-    | "canManageOrders"
-    | "canManageReviews";
-
 interface NavItem {
     href: string;
     icon: React.ComponentType<{ className?: string }>;
     label: string;
-    permission?: PermissionKey;
+    permission?: AdminPermission;
     superAdminOnly?: boolean;
 }
 
@@ -51,26 +44,26 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         {
             title: t('admin.catalogManagement') || "Catalog Management",
             items: [
-                { href: "/admin/main-categories", icon: Network, label: t("admin.mainCategories"), superAdminOnly: true },
-                { href: "/admin/categories", icon: FolderTree, label: t('admin.categories'), permission: "canManageCategories" },
-                { href: "/admin/brands", icon: Store, label: t('admin.brands'), permission: "canManageBrands" },
-                { href: "/admin/products", icon: ShoppingBag, label: t('admin.products'), permission: "canManageProducts" }
+                { href: "/admin/main-categories", icon: Network, label: t("admin.mainCategories"), permission: "MAIN_CATEGORIES_VIEW" },
+                { href: "/admin/categories", icon: FolderTree, label: t('admin.categories'), permission: "CATEGORIES_VIEW" },
+                { href: "/admin/brands", icon: Store, label: t('admin.brands'), permission: "BRANDS_VIEW" },
+                { href: "/admin/products", icon: ShoppingBag, label: t('admin.products'), permission: "PRODUCTS_VIEW" }
             ]
         },
         {
             title: t('admin.salesAndCustomers') || "Sales & Customers",
             items: [
-                { href: "/admin/orders", icon: Package, label: t('admin.orders'), permission: "canManageOrders" },
-                { href: "/admin/customers", icon: Users, label: t('admin.customers') || "Customers", permission: "canManageOrders" },
-                { href: "/admin/reviews", icon: Star, label: t('admin.reviews'), permission: "canManageReviews" }
+                { href: "/admin/orders", icon: Package, label: t('admin.orders'), permission: "ORDERS_VIEW" },
+                { href: "/admin/customers", icon: Users, label: t('admin.customers') || "Customers", permission: "CUSTOMERS_VIEW" },
+                { href: "/admin/reviews", icon: Star, label: t('admin.reviews'), permission: "REVIEWS_VIEW" }
             ]
         },
         {
             title: t('admin.storeAndSystem') || "Store & System",
             items: [
-                { href: "/admin/banners", icon: GalleryHorizontal, label: t('admin.banners'), permission: "canManageBanners" },
-                { href: "/admin/blog", icon: FileText, label: t('admin.blog') || "Blog", superAdminOnly: true },
-                { href: "/admin/site-content", icon: FileEdit, label: t('admin.siteContent'), superAdminOnly: true },
+                { href: "/admin/banners", icon: GalleryHorizontal, label: t('admin.banners'), permission: "BANNERS_VIEW" },
+                { href: "/admin/blog", icon: FileText, label: t('admin.blog') || "Blog", permission: "BLOG_VIEW" },
+                { href: "/admin/site-content", icon: FileEdit, label: t('admin.siteContent'), permission: "SITE_CONTENT_VIEW" },
                 { href: "/admin/users", icon: Users, label: t('admin.users'), superAdminOnly: true },
                 { href: "/admin/settings", icon: Settings, label: t('admin.settings'), superAdminOnly: true }
             ]
@@ -128,7 +121,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="lg:hidden p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                className="lg:hidden min-h-11 min-w-11 p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                                 aria-label="Close Sidebar"
                             >
                                 <X className="text-2xl" />
@@ -140,7 +133,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                             {navSections.map((section, sIdx) => {
                                 const visibleItems = section.items.filter((item) => {
                                     if (item.superAdminOnly && !isSuperAdmin) return false;
-                                    if (item.permission && !isSuperAdmin && !session?.user?.[item.permission]) return false;
+                                    if (item.permission && !isSuperAdmin && !session?.user?.permissions?.includes(item.permission)) return false;
                                     return true;
                                 });
 

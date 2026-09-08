@@ -2,31 +2,20 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
-// Ensure BUILD_ID exists before starting Next.js production server
+// A production server must only start from a genuine completed Next.js build.
 const buildIdPath = path.join(__dirname, '..', '.next', 'BUILD_ID');
 if (!fs.existsSync(buildIdPath)) {
-    const manifestPath = path.join(__dirname, '..', '.next', 'build-manifest.json');
-    if (fs.existsSync(manifestPath)) {
-        try {
-            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-            const file = (manifest.lowPriorityFiles || []).find((f) => f.startsWith('static/'));
-            if (file) {
-                const match = file.match(/^static\/([^/]+)\//);
-                if (match && match[1]) {
-                    fs.writeFileSync(buildIdPath, match[1].trim());
-                }
-            }
-        } catch {
-            // fallback
-        }
+    console.error('Missing .next/BUILD_ID. Run a successful production build before starting the server.');
+    process.exit(1);
+}
+
+if (process.env.NODE_ENV === 'production') {
+    const mediaDir = process.env.MEDIA_STORAGE_DIR;
+    if (!mediaDir || !path.isAbsolute(mediaDir)) {
+        console.error('MEDIA_STORAGE_DIR must be an absolute persistent path in production.');
+        process.exit(1);
     }
-    if (!fs.existsSync(buildIdPath)) {
-        try {
-            fs.writeFileSync(buildIdPath, 'production-build-id');
-        } catch {
-            // ignore
-        }
-    }
+    fs.mkdirSync(mediaDir, { recursive: true });
 }
 
 const port = process.env.PORT || '3000';

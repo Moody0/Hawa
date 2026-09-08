@@ -4,13 +4,35 @@
  */
 
 // 1. Canonical Origin
-const rawSiteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.SITE_URL ||
-    process.env.NEXTAUTH_URL ||
-    "https://hawatrading.com";
+export function getPublicSiteUrl(): string {
+    const raw = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL;
+    if (raw && !raw.includes("localhost") && !raw.includes("127.0.0.1")) {
+        return raw.replace(/\/+$/, "");
+    }
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+        return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`.replace(/\/+$/, "");
+    }
+    if (process.env.VERCEL_URL) {
+        return `https://${process.env.VERCEL_URL}`.replace(/\/+$/, "");
+    }
+    return "https://hawatrading.com";
+}
 
-export const SITE_ORIGIN = rawSiteUrl.replace(/\/+$/, "");
+export const SITE_ORIGIN = getPublicSiteUrl();
+
+/**
+ * Resolves any relative or absolute image path into a full public HTTPS URL suitable for social scrapers.
+ */
+export function toAbsoluteImageUrl(imagePath?: string | null): string {
+    if (!imagePath || imagePath === "/placeholder.svg" || imagePath === "") {
+        return `${SITE_ORIGIN}/og-image.jpg`;
+    }
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+        return imagePath;
+    }
+    const cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+    return `${SITE_ORIGIN}${cleanPath}`;
+}
 
 // 2. Verified Contact Information
 export const CONTACT_CONFIG = {

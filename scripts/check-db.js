@@ -19,11 +19,13 @@ async function verify() {
     const admin = await prisma.user.findUnique({
         where: { username: "admin" }
     });
-    const passMatches = admin ? await bcrypt.compare("Admin@123456", admin.password) : false;
+    const verificationPassword = process.env.ADMIN_VERIFY_PASSWORD;
+    const passMatches = admin && verificationPassword ? await bcrypt.compare(verificationPassword, admin.password) : undefined;
     console.log("2. Admin User:", admin ? "PASS" : "FAIL");
     console.log("   - Username:", admin?.username);
     console.log("   - Role:", admin?.role);
-    console.log("   - Password Verification:", passMatches ? "PASS (Admin@123456 verified)" : "FAIL");
+    console.log("   - Credential verification requested:", Boolean(verificationPassword));
+    if (verificationPassword) console.log("   - Credential matches:", passMatches);
 
     // 3. Check Default Brand
     const brand = await prisma.brand.findUnique({
