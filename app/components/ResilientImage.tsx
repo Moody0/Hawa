@@ -76,7 +76,14 @@ const ResilientImageInner = ({
         : (isValidImageSrc(fallbackSrc) ? fallbackSrc : IMAGE_PLACEHOLDER_SRC);
 
     const isPriority = Boolean(imgProps.priority);
-    const { loading, priority: _priority, ...restImgProps } = imgProps;
+    const {
+        loading,
+        priority: _priority,
+        preload: requestedPreload,
+        fetchPriority,
+        ...restImgProps
+    } = imgProps;
+    const shouldPreload = requestedPreload ?? isPriority;
 
     return (
         <span className="relative block h-full w-full overflow-hidden">
@@ -94,7 +101,8 @@ const ResilientImageInner = ({
 
             <Image
                 {...restImgProps}
-                priority={isPriority}
+                preload={shouldPreload}
+                fetchPriority={shouldPreload ? undefined : fetchPriority}
                 {...(isPriority ? {} : { loading: loading || "lazy" })}
                 alt={alt || ""}
                 src={safeSrc}

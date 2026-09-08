@@ -42,8 +42,9 @@ const cleanUrl = (url: string): string => {
 };
 
 /**
- * Returns a safe image URL, proxying remote images (e.g. i.postimg.cc, Shopify CDN)
- * through /api/image-proxy to bypass sanctions and regional blocks (e.g., Syria).
+ * Returns a safe image URL. Remote URLs stay remote so Next/Image can send
+ * them through the platform's built-in optimizer and CDN without an extra
+ * application-function hop.
  */
 export const getSafeImageUrl = (url: string | null | undefined): string => {
     if (!url || !isValidImageSrc(url)) return IMAGE_PLACEHOLDER_SRC;
@@ -55,9 +56,10 @@ export const getSafeImageUrl = (url: string | null | undefined): string => {
         return trimmedUrl;
     }
 
-    // Remote images: route through /api/image-proxy to guarantee delivery across all regions
+    // Next/Image turns configured remote sources into same-origin /_next/image
+    // requests, so users do not connect to the remote host directly.
     if (isRemoteImageUrl(trimmedUrl)) {
-        return getProxyImageUrl(trimmedUrl);
+        return trimmedUrl;
     }
 
     return trimmedUrl || IMAGE_PLACEHOLDER_SRC;
@@ -79,9 +81,8 @@ export const getPrimaryImage = (images: string | null | undefined): string =>
 
 /**
  * Generates an ordered list of fallback candidates:
- * 1. Proxied URL via the application server
- * 2. Direct remote URL (in case the proxy has a transient issue)
- * 3. Fallback placeholder SVG
+ * 1. Direct remote URL through Next/Image's optimizer and CDN
+ * 2. Fallback placeholder SVG
  */
 export const getImageSourceCandidates = (
     url: string | null | undefined,
@@ -102,9 +103,7 @@ export const getImageSourceCandidates = (
         return [trimmedUrl, fallbackSrc];
     }
 
-    const proxied = getProxyImageUrl(trimmedUrl);
     const candidates = [
-        proxied,
         trimmedUrl,
         fallbackSrc,
     ];
