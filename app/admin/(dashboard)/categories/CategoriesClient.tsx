@@ -2,6 +2,7 @@
 
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
+import { useConfirm } from "../../context/ConfirmDialogContext";
 import { useState, useMemo } from "react";
 import { Trash2, Search, Plus, Check, Image, Star, Pencil, SearchX, RefreshCw, Eye, ShoppingBag, Store, FolderTree, CheckSquare, Square } from 'lucide-react';
 import CategoryModal from "./CategoryModal";
@@ -42,6 +43,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
     const isArabic = language === 'ar';
+    const confirm = useConfirm();
     const canManage = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canManageCategories;
     const canDelete = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canDeleteCategories;
 
@@ -116,9 +118,14 @@ export default function CategoriesClient({ categories: initialCategories, brands
         if (selectedIds.size === 0) return;
         const ids = Array.from(selectedIds);
         
-        if (!confirm(isArabic ? `هل أنت متأكد من حذف ${ids.length} فئة؟ لا يمكن التراجع عن هذا الإجراء.` : `Are you sure you want to delete ${ids.length} categories? This action cannot be undone.`)) {
-            return;
-        }
+        const ok = await confirm({
+            title: isArabic ? "حذف فئات متعددة" : "Bulk Delete Categories",
+            message: isArabic ? `هل أنت متأكد من حذف ${ids.length} فئة؟ لا يمكن التراجع عن هذا الإجراء.` : `Are you sure you want to delete ${ids.length} categories? This action cannot be undone.`,
+            confirmText: isArabic ? "حذف الفئات" : "Delete Categories",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
 
         setIsSubmittingBulk(true);
         try {
@@ -149,7 +156,14 @@ export default function CategoriesClient({ categories: initialCategories, brands
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (!confirm(isArabic ? `هل أنت متأكد من حذف فئة "${name}"؟` : `Are you sure you want to delete "${name}"?`)) return;
+        const ok = await confirm({
+            title: isArabic ? "حذف الفئة" : "Delete Category",
+            message: isArabic ? `هل أنت متأكد من حذف فئة "${name}"؟` : `Are you sure you want to delete "${name}"?`,
+            confirmText: isArabic ? "حذف" : "Delete",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
         
         try {
             const result = await deleteCategory(id);

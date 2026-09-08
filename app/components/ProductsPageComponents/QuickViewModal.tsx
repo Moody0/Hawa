@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ResilientImage from '@/app/components/ResilientImage';
 import { useCurrency } from '@/app/context/CurrencyContext';
@@ -47,7 +47,12 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
     const { formatPrice } = useCurrency();
     const { addItem } = useCart();
     const { customer } = useCustomer();
-    const [quantity, setQuantity] = useState(1);
+    const minQuantity = Math.max(1, Number(product.minOrder) || 1);
+    const [quantity, setQuantity] = useState(minQuantity);
+
+    useEffect(() => {
+        setQuantity(Math.max(1, Number(product.minOrder) || 1));
+    }, [product.id, product.minOrder]);
 
     const isLockedForGuest = !customer;
 
@@ -77,12 +82,12 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
             price: Number(product.discountPrice || product.price),
             image: primaryImage,
             slug: product.slug,
-            quantity: quantity,
+            quantity: Math.max(minQuantity, quantity),
             description: displayDesc || undefined,
             selectedOption: selectedOption || undefined,
             packaging: formatPackaging(product.packaging, language),
             itemsPerPackage: product.itemsPerPackage || null,
-            minOrder: product.minOrder || 1,
+            minOrder: minQuantity,
         });
         onClose();
     };
@@ -227,8 +232,9 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                             
                             <div dir="ltr" className="flex items-center justify-between border border-gray-200 dark:border-white/10 rounded-xl px-2 py-1.5 w-32 sm:w-36 bg-gray-50 dark:bg-zinc-800">
                                 <button 
-                                    onClick={() => setQuantity(Math.max(product.minOrder || 1, quantity - 1))} 
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 font-bold cursor-pointer text-base transition-colors"
+                                    onClick={() => setQuantity(Math.max(minQuantity, quantity - 1))} 
+                                    disabled={quantity <= minQuantity}
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed font-bold cursor-pointer text-base transition-colors"
                                     aria-label="Decrease quantity"
                                 >-</button>
                                 <span className="font-bold text-xs sm:text-sm text-[#0B192C] dark:text-white select-none whitespace-nowrap flex items-center gap-1">

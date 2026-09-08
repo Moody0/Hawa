@@ -1,4 +1,4 @@
-const SENSITIVE_KEY = /^(body|data|cookie|cookies|authorization|password|passcode|secret|token|phone|email|name|ownerName|shopName|address|streetAddress|query|search|cart|items|credentials)$/i;
+const SENSITIVE_KEY = /^(body|data|cookie|cookies|authorization|password|passcode|secret|token|phone|email|name|ownerName|shopName|address|streetAddress|query|search|cart|items|credentials|price|wholesalePrice|guestPrice|cost|discountPrice|wholesale|costPrice)$/i;
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
 const PHONE = /(?:\+?\d[\d\s().-]{7,}\d)/g;
 const TOKEN = /\b(?:bearer\s+)?[A-Za-z0-9_-]{24,}\b/gi;

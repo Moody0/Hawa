@@ -23,6 +23,7 @@ const CartItem = ({ item, removeItem, updateQuantity }: CartItemProps) => {
     const { customer } = useCustomer();
     const { language } = useLanguage();
     const isLockedForGuest = !customer;
+    const minQuantity = Math.max(1, Number(item.minOrder) || 1);
 
     return (
         <div className="flex items-center gap-3 py-5 sm:gap-5">
@@ -91,8 +92,11 @@ const CartItem = ({ item, removeItem, updateQuantity }: CartItemProps) => {
                     {/* Pill Quantity */}
                     <div dir="ltr" className="flex h-10 w-[126px] shrink-0 items-center rounded-lg border border-slate-300 bg-white px-2 dark:border-white/15 dark:bg-zinc-800">
                         <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedOption)}
-                            disabled={item.quantity <= 1}
+                            onClick={() => {
+                                if (item.quantity <= minQuantity) return;
+                                updateQuantity(item.id, item.quantity - 1, item.selectedOption);
+                            }}
+                            disabled={item.quantity <= minQuantity}
                             className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-[#8A6305] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-base cursor-pointer font-bold"
                             aria-label="Decrease quantity"
                         >−</button>

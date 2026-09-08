@@ -2,6 +2,7 @@
 
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
+import { useConfirm } from "../../context/ConfirmDialogContext";
 import { useState } from "react";
 import { Plus, RefreshCw, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import BannerModal from "./BannerModal";
@@ -28,6 +29,7 @@ interface Banner {
 }
 
 export default function BannersClient({ banners }: { banners: Banner[] }) {
+    const confirm = useConfirm();
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
     const isArabic = language === 'ar';
@@ -50,18 +52,24 @@ export default function BannersClient({ banners }: { banners: Banner[] }) {
     };
 
     const handleDelete = async (id: string, title: string) => {
-        if (confirm(t('admin.confirmDeleteBanner').replace('{title}', title))) {
-            try {
-                const result = await deleteBanner(id);
-                if (result.success) {
-                    toast.success(t('admin.bannerDeleted'));
-                } else {
-                    toast.error(result.error || "Failed to delete banner");
-                }
-            } catch (error) {
-                console.error("Error deleting banner:", error);
-                toast.error("An unexpected error occurred");
+        const ok = await confirm({
+            title: isArabic ? "حذف البنر" : "Delete Banner",
+            message: t('admin.confirmDeleteBanner').replace('{title}', title),
+            confirmText: isArabic ? "حذف" : "Delete",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
+        try {
+            const result = await deleteBanner(id);
+            if (result.success) {
+                toast.success(t('admin.bannerDeleted'));
+            } else {
+                toast.error(result.error || "Failed to delete banner");
             }
+        } catch (error) {
+            console.error("Error deleting banner:", error);
+            toast.error("An unexpected error occurred");
         }
     };
 

@@ -11,6 +11,7 @@ vi.mock('@/lib/prisma', () => ({
     prisma: {
         user: {
             findUnique: vi.fn(),
+            findFirst: vi.fn(),
         },
     },
 }));
@@ -31,13 +32,17 @@ describe('Admin Revocation & Fresh DB Verification (Task 4.4)', () => {
         };
         (getServerSession as any).mockResolvedValue(mockSession);
 
-        (prisma.user.findUnique as any).mockResolvedValue({
+        (prisma.user.findFirst as any).mockResolvedValue({
             id: 'admin-1',
             username: 'admin',
             role: 'ADMIN',
-            updatedAt: new Date(1000 * 1000), // same time
+            updatedAt: new Date(1000 * 1000),
             canManageProducts: true,
             canDeleteProducts: true,
+            permissions: [
+                { permission: 'PRODUCTS_MANAGE' },
+                { permission: 'PRODUCTS_ARCHIVE' },
+            ],
         });
 
         const session = await requireAdminSession('canManageProducts');
@@ -57,10 +62,10 @@ describe('Admin Revocation & Fresh DB Verification (Task 4.4)', () => {
         (getServerSession as any).mockResolvedValue(staleSession);
 
         // Account is deleted in DB
-        (prisma.user.findUnique as any).mockResolvedValue(null);
+        (prisma.user.findFirst as any).mockResolvedValue(null);
 
         await expect(requireAdminSession()).rejects.toThrow(
-            /Admin account no longer exists or has been deleted/
+            /Administrator account is unavailable or disabled/
         );
 
         const validSession = await getValidAdminSession();
@@ -79,11 +84,12 @@ describe('Admin Revocation & Fresh DB Verification (Task 4.4)', () => {
         (getServerSession as any).mockResolvedValue(staleSession);
 
         // Account was demoted to regular USER in DB
-        (prisma.user.findUnique as any).mockResolvedValue({
+        (prisma.user.findFirst as any).mockResolvedValue({
             id: 'demoted-admin-id',
             username: 'former-admin',
             role: 'USER',
             updatedAt: new Date(1000 * 1000),
+            permissions: [],
         });
 
         await expect(requireAdminSession()).rejects.toThrow(
@@ -107,17 +113,20 @@ describe('Admin Revocation & Fresh DB Verification (Task 4.4)', () => {
         (getServerSession as any).mockResolvedValue(staleSession);
 
         // Permission was revoked in DB
-        (prisma.user.findUnique as any).mockResolvedValue({
+        (prisma.user.findFirst as any).mockResolvedValue({
             id: 'admin-2',
             username: 'admin-two',
             role: 'ADMIN',
             updatedAt: new Date(1000 * 1000),
             canManageProducts: true,
-            canDeleteProducts: false, // revoked!
+            canDeleteProducts: false,
+            permissions: [
+                { permission: 'PRODUCTS_MANAGE' },
+            ],
         });
 
         await expect(requireAdminSession('canDeleteProducts')).rejects.toThrow(
-            /Insufficient administrative privileges \(canDeleteProducts\)/
+            /Missing administrator permission: PRODUCTS_ARCHIVE/
         );
     });
 
@@ -133,16 +142,19 @@ describe('Admin Revocation & Fresh DB Verification (Task 4.4)', () => {
         (getServerSession as any).mockResolvedValue(oldSession);
 
         // Account was updated / password changed at T=2000s
-        (prisma.user.findUnique as any).mockResolvedValue({
+        (prisma.user.findFirst as any).mockResolvedValue({
             id: 'admin-3',
             username: 'admin-three',
             role: 'ADMIN',
             updatedAt: new Date(2000 * 1000),
             canManageProducts: true,
+            permissions: [
+                { permission: 'PRODUCTS_MANAGE' },
+            ],
         });
 
         await expect(requireAdminSession()).rejects.toThrow(
-            /Session has been invalidated due to account modifications/
+            /Session has been invalidated/
         );
 
         const validSession = await getValidAdminSession();
@@ -161,15 +173,16 @@ describe('Admin Revocation & Fresh DB Verification (Task 4.4)', () => {
         (getServerSession as any).mockResolvedValue(staleSession);
 
         // Demoted to ADMIN in DB
-        (prisma.user.findUnique as any).mockResolvedValue({
+        (prisma.user.findFirst as any).mockResolvedValue({
             id: 'demoted-super-id',
             username: 'former-super',
             role: 'ADMIN',
             updatedAt: new Date(1000 * 1000),
+            permissions: [],
         });
 
         await expect(requireSuperAdminSession()).rejects.toThrow(
-            /Super Admin privileges required/
+            /Super administrator privileges required/
         );
     });
 });

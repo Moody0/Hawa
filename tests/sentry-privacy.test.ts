@@ -20,4 +20,24 @@ describe("Sentry privacy scrubbing", () => {
     expect(String(event.message)).not.toContain("example.com");
     expect(String(event.message)).not.toContain("+963");
   });
+
+  it("scrubs wholesale price, guest price, and cost fields from telemetry payloads", () => {
+    const event = scrubSentryEvent({
+      extra: {
+        productId: "prod-123",
+        price: 15000,
+        wholesalePrice: 12000,
+        guestPrice: 15000,
+        cost: 9000,
+        discountPrice: 11000,
+        wholesale: true,
+        costPrice: 8500,
+        category: "Beverages",
+      },
+    });
+    expect(event.extra).toEqual({
+      productId: "prod-123",
+      category: "Beverages",
+    });
+  });
 });

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
+import { useConfirm } from "../../context/ConfirmDialogContext";
 import BrandModal from "./BrandModal";
 import { deleteBrand, toggleBrandActive, toggleBrandFeatured } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
@@ -36,6 +37,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
     const { data: session } = useSession() || {};
     const { t, language } = useLanguage();
     const isArabic = language === 'ar';
+    const confirm = useConfirm();
     const canManage = session?.user?.role === "SUPER_ADMIN" || session?.user?.canManageBrands;
     const canDelete = session?.user?.role === "SUPER_ADMIN" || session?.user?.canDeleteBrands;
 
@@ -96,7 +98,14 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
     };
 
     const handleDelete = async (brand: Brand) => {
-        if (!confirm(isArabic ? `هل أنت متأكد من حذف العلامة التجارية "${brand.name}"؟` : `Are you sure you want to delete "${brand.name}"?`)) return;
+        const ok = await confirm({
+            title: isArabic ? "حذف العلامة التجارية" : "Delete Brand",
+            message: isArabic ? `هل أنت متأكد من حذف العلامة التجارية "${brand.name}"؟` : `Are you sure you want to delete "${brand.name}"?`,
+            confirmText: isArabic ? "حذف" : "Delete",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
 
         const result = await deleteBrand(brand.id);
         if (result.success) {

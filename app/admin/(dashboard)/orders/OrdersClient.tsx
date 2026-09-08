@@ -4,6 +4,7 @@ import AdminHeader from "../../components/AdminHeader";
 import { Truck, CreditCard, ChevronDown, Eye, Trash2, RefreshCw, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Store, Clock, CheckCircle2 } from 'lucide-react';
 import { FaWhatsapp } from "react-icons/fa";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
+import { useConfirm } from "../../context/ConfirmDialogContext";
 import Link from "next/link";
 import { updateOrderStatus, deleteOrder } from "../../../../lib/admin-actions";
 import { cleanWhatsAppNumber } from "../../../../lib/whatsapp-utils";
@@ -47,6 +48,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
     const canManage = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canManageOrders;
     const canDelete = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canDeleteOrders;
     const { t, dir, language } = useLanguage();
+    const isArabic = language === 'ar';
+    const confirm = useConfirm();
 
     const { openSidebar } = useAdminSidebar();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -149,7 +152,14 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
 
     const handleDeleteOrder = async (id: string) => {
         const orderLabel = id.slice(-6).toUpperCase();
-        if (!confirm(t('admin.confirmDeleteOrder').replace('{id}', orderLabel))) return;
+        const ok = await confirm({
+            title: isArabic ? "حذف الطلب" : "Delete Order",
+            message: t('admin.confirmDeleteOrder').replace('{id}', orderLabel),
+            confirmText: isArabic ? "حذف" : "Delete",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
         setDeletingId(id);
         try {
             const result = await deleteOrder(id);

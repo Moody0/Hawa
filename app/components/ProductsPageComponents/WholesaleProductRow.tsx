@@ -62,6 +62,8 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
         : [];
     const primaryImage = images[0] || "";
 
+    const minQuantity = Math.max(1, Number(product.minOrder) || 1);
+
     const handleInitialAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -71,12 +73,12 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
             price: Number(product.discountPrice || product.price),
             image: primaryImage,
             slug: product.slug,
-            quantity: 1,
+            quantity: minQuantity,
             description: displayDesc || undefined,
             selectedOption: defaultOption,
             packaging: formatPackaging(product.packaging, language),
             itemsPerPackage: product.itemsPerPackage || null,
-            minOrder: product.minOrder || 1,
+            minOrder: minQuantity,
         });
     };
 
@@ -89,7 +91,7 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
     const handleDecrease = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (quantityInCart <= 1) {
+        if (quantityInCart <= minQuantity) {
             removeItem(product.id, defaultOption);
         } else {
             updateQuantity(product.id, quantityInCart - 1, defaultOption);
@@ -260,8 +262,8 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
                                         type="button"
                                         onClick={handleDecrease}
                                         className="w-8 h-full flex items-center justify-center text-white/75 hover:text-white hover:bg-white/10 active:scale-90 transition-colors cursor-pointer"
-                                        aria-label="Decrease quantity"
-                                        title={quantityInCart <= 1 ? (isArabic ? "حذف من الطلب" : "Remove") : undefined}
+                                        aria-label={quantityInCart <= minQuantity ? (isArabic ? "حذف من الطلب" : "Remove from order") : (isArabic ? "تقليل الكمية" : "Decrease quantity")}
+                                        title={quantityInCart <= minQuantity ? (isArabic ? "حذف من الطلب" : "Remove") : undefined}
                                     >
                                         <Minus className="w-3.5 h-3.5" />
                                     </button>

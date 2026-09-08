@@ -5,6 +5,7 @@ import { deleteUser } from "@/lib/user-actions";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
+import { useConfirm } from "../../context/ConfirmDialogContext";
 import AdminHeader from "../../components/AdminHeader";
 import UserModal from "./UserModal";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -31,7 +32,9 @@ interface User {
 
 export default function UsersClient({ users }: { users: User[] }) {
     const { openSidebar } = useAdminSidebar();
-    const { t, dir } = useLanguage();
+    const { t, dir, language } = useLanguage();
+    const isArabic = language === 'ar';
+    const confirm = useConfirm();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'createdAt', direction: 'desc' });
@@ -59,6 +62,11 @@ export default function UsersClient({ users }: { users: User[] }) {
         }));
     };
 
+    const handleCreate = () => {
+        setSelectedUser(null);
+        setIsModalOpen(true);
+    };
+
     const handleEdit = (user: User) => {
         setSelectedUser(user);
         setIsModalOpen(true);
@@ -70,17 +78,24 @@ export default function UsersClient({ users }: { users: User[] }) {
             return;
         }
 
-        if (confirm(t('admin.confirmDeleteUser').replace('{username}', username))) {
-            try {
-                const result = await deleteUser(id);
-                if (result.success) {
-                    toast.success("User deleted successfully");
-                } else {
-                    toast.error(result.error || "Failed to delete user");
-                }
-            } catch (error) {
-                toast.error("An unexpected error occurred");
+        const ok = await confirm({
+            title: isArabic ? "حذف المستخدم" : "Delete User",
+            message: t('admin.confirmDeleteUser').replace('{username}', username),
+            confirmText: isArabic ? "حذف" : "Delete",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
+
+        try {
+            const result = await deleteUser(id);
+            if (result.success) {
+                toast.success("User deleted successfully");
+            } else {
+                toast.error(result.error || "Failed to delete user");
             }
+        } catch (error) {
+            toast.error("An unexpected error occurred");
         }
     };
 

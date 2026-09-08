@@ -89,6 +89,8 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
     const primaryImage = images[0] || '';
     const secondaryImage = images.length > 1 && images[1] !== images[0] ? images[1] : null;
 
+    const minQuantity = Math.max(1, Number(product.minOrder) || 1);
+
     const handleInitialAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -98,10 +100,10 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
             price: Number(product.discountPrice || product.price),
             image: primaryImage,
             slug: product.slug,
-            quantity: 1,
+            quantity: minQuantity,
             packaging: formatPackaging(product.packaging, language),
             itemsPerPackage: product.itemsPerPackage || null,
-            minOrder: product.minOrder || 1,
+            minOrder: minQuantity,
         });
     };
 
@@ -114,7 +116,7 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
     const handleDecrease = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (quantityInCart <= 1) {
+        if (quantityInCart <= minQuantity) {
             removeItem(product.id);
         } else {
             updateQuantity(product.id, quantityInCart - 1);
@@ -224,8 +226,8 @@ const ProductCard = ({ product, badge, showBadge = true }: ProductCardProps) => 
                                             type="button"
                                             onClick={handleDecrease}
                                             className="w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer touch-manipulation"
-                                            aria-label="Decrease quantity"
-                                            title="Decrease quantity"
+                                            aria-label={quantityInCart <= minQuantity ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart') : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')}
+                                            title={quantityInCart <= minQuantity ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart') : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')}
                                         >
                                             <Minus className="w-3.5 h-3.5" />
                                         </button>

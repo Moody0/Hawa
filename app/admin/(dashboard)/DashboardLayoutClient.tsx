@@ -3,6 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import AdminSidebar from "../components/AdminSidebar";
 import { AdminSidebarProvider, useAdminSidebar } from "../context/AdminSidebarContext";
+import { ConfirmDialogProvider } from "../context/ConfirmDialogContext";
 
 function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     const { isOpen, closeSidebar } = useAdminSidebar();
@@ -29,7 +30,9 @@ export default function DashboardLayoutClient({
     return (
         <SessionProvider session={session}>
             <AdminSidebarProvider>
-                <DashboardLayoutInner>{children}</DashboardLayoutInner>
+                <ConfirmDialogProvider>
+                    <DashboardLayoutInner>{children}</DashboardLayoutInner>
+                </ConfirmDialogProvider>
             </AdminSidebarProvider>
         </SessionProvider>
     );

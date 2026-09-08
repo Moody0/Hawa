@@ -35,6 +35,23 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+export function normalizeCartItem(newItem: CartItem): CartItem {
+    const cleanOption = (newItem.selectedOption || '').trim() || undefined;
+    const itemMinOrder = Math.max(1, Number(newItem.minOrder) || 1);
+    const initialQty = Math.max(itemMinOrder, Number(newItem.quantity) || itemMinOrder);
+    return {
+        ...newItem,
+        selectedOption: cleanOption,
+        minOrder: itemMinOrder,
+        quantity: initialQty,
+    };
+}
+
+export function clampCartQuantity(quantity: number, minOrder?: number | null): number {
+    const minQty = Math.max(1, Number(minOrder) || 1);
+    return quantity < minQty ? minQty : quantity;
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isHydrated, setIsHydrated] = useState(false);
@@ -68,11 +85,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }, [items, isHydrated]);
 
     const addItem = (newItem: CartItem) => {
-        const cleanOption = (newItem.selectedOption || '').trim() || undefined;
-        const normalizedItem: CartItem = {
-            ...newItem,
-            selectedOption: cleanOption,
-        };
+        const normalizedItem = normalizeCartItem(newItem);
         setItems(prev => {
             const targetKey = getItemKey(normalizedItem);
             const existing = prev.find(item => getItemKey(item) === targetKey);
@@ -98,13 +111,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     const updateQuantity = (id: string, quantity: number, selectedOption?: string) => {
-        if (quantity < 1) return;
+        if (quantity <= 0) {
+            removeItem(id, selectedOption);
+            return;
+        }
         const targetKey = `${id}:${(selectedOption || '').trim()}`;
         setItems(prev => prev.map(item => {
-            if (selectedOption !== undefined) {
-                return getItemKey(item) === targetKey ? { ...item, quantity } : item;
-            }
-            return item.id === id ? { ...item, quantity } : item;
+            const matches = selectedOption !== undefined
+                ? getItemKey(item) === targetKey
+                : item.id === id;
+            if (!matches) return item;
+            const clampedQty = clampCartQuantity(quantity, item.minOrder);
+            return { ...item, quantity: clampedQty };
         }));
     };
 

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
+import { useConfirm } from "../../context/ConfirmDialogContext";
 import MainCategoryModal from "./MainCategoryModal";
 import { deleteMainCategory, toggleMainCategoryActive, toggleMainCategoryFeatured } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
@@ -33,6 +34,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
     const isArabic = language === 'ar';
+    const confirm = useConfirm();
     const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
 
     const [mainCategories, setMainCategories] = useState<MainCategory[]>(initialMainCategories);
@@ -92,7 +94,15 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
     };
 
     const handleDelete = async (mc: MainCategory) => {
-        if (!confirm(isArabic ? `هل أنت متأكد من حذف قسم "${mc.name}"؟` : `Are you sure you want to delete "${mc.name}"?`)) return;
+        const ok = await confirm({
+            title: isArabic ? "حذف القسم الرئيسي" : "Delete Main Category",
+            message: isArabic ? `هل أنت متأكد من حذف قسم "${mc.name}"؟` : `Are you sure you want to delete "${mc.name}"?`,
+            confirmText: isArabic ? "حذف" : "Delete",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
+
         const result = await deleteMainCategory(mc.id);
         if (result.success) {
             setMainCategories(prev => prev.filter(item => item.id !== mc.id));

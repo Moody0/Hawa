@@ -116,6 +116,7 @@ function invalidateCacheEntities(entities: CacheEntity[]) {
 
 function revalidateCatalogCache() {
     invalidateCacheEntities(['catalog', 'navigation']);
+    invalidateDashboardCache();
 }
 
 interface ProductInput {
@@ -282,9 +283,19 @@ export interface DashboardStats {
     }[];
 }
 
+let cachedDashboardStats: { data: DashboardStats; timestamp: number } | null = null;
+const DASHBOARD_CACHE_TTL_MS = 15_000;
+
+function invalidateDashboardCache() {
+    cachedDashboardStats = null;
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
     try {
         await requireAdminSession();
+        if (cachedDashboardStats && (Date.now() - cachedDashboardStats.timestamp) < DASHBOARD_CACHE_TTL_MS) {
+            return cachedDashboardStats.data;
+        }
         const fourteenDaysAgo = new Date();
         fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
         fourteenDaysAgo.setHours(0, 0, 0, 0);
@@ -515,7 +526,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
             };
         });
 
-        return {
+        const statsResult: DashboardStats = {
             totalRevenue: totalRevenueNumber,
             totalOrders: allOrdersCount,
             totalProducts: totalProductsCount,
@@ -568,6 +579,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
                 }))
             }))
         };
+
+        cachedDashboardStats = { data: statsResult, timestamp: Date.now() };
+        return statsResult;
     } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
         return {
@@ -1080,10 +1094,12 @@ export async function getAdminProducts(options?: {
     }
 }
 
-export async function getAdminCategories(page = 1, limit = 500) {
+export async function getAdminCategories(page = 1, limit = 100) {
     try {
         await requireAdminSession("CATEGORIES_VIEW");
-        const skip = (page - 1) * limit;
+        const safeLimit = Math.min(Math.max(1, limit), 200);
+        const safePage = Math.max(1, page);
+        const skip = (safePage - 1) * safeLimit;
         const [categories, total] = await Promise.all([
             prisma.category.findMany({
                 where: { archivedAt: null },
@@ -1110,7 +1126,7 @@ export async function getAdminCategories(page = 1, limit = 500) {
                     }
                 },
                 skip,
-                take: limit,
+                take: safeLimit,
                 orderBy: {
                     name: 'asc'
                 }
@@ -1126,9 +1142,9 @@ export async function getAdminCategories(page = 1, limit = 500) {
             })),
             pagination: {
                 total,
-                pages: Math.ceil(total / limit),
-                page,
-                limit
+                pages: Math.ceil(total / safeLimit),
+                page: safePage,
+                limit: safeLimit
             }
         };
     } catch (error) {
@@ -1423,6 +1439,7 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
         revalidatePath('/admin/orders');
         revalidatePath('/admin/dashboard');
         revalidatePath('/admin/products');
+        invalidateDashboardCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to update order status:", error);
@@ -1438,6 +1455,7 @@ export async function deleteOrder(id: string) {
 
         revalidatePath('/admin/orders');
         revalidatePath('/admin/dashboard');
+        invalidateDashboardCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to delete order:", error);

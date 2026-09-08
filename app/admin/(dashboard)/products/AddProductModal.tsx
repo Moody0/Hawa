@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { X, ChevronDown, RefreshCw, CheckCircle2, UploadCloud } from 'lucide-react';
 import { createProduct, updateProduct } from "../../../../lib/admin-actions";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { toast } from "react-hot-toast";
+import SearchableCombobox from "../../components/SearchableCombobox";
 
 interface Category {
     id: string;
@@ -174,8 +175,6 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
         }
     }, [product, isOpen, brands, categories, mainCategories]);
 
-    if (!isOpen) return null;
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const primaryName = formData.nameEn || formData.name || formData.nameAr;
@@ -249,6 +248,23 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
     };
 
     const filteredCategories = categories.filter((category) => !formData.brandId || category.brandId === formData.brandId);
+
+    const brandOptions = useMemo(
+        () => brands.map((b) => ({ value: b.id, label: b.name })),
+        [brands]
+    );
+
+    const categoryOptions = useMemo(
+        () => filteredCategories.map((c) => ({ value: c.id, label: c.name })),
+        [filteredCategories]
+    );
+
+    const mainCategoryOptions = useMemo(
+        () => (mainCategories || []).map((mc) => ({ value: mc.id, label: mc.name })),
+        [mainCategories]
+    );
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
@@ -424,19 +440,13 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                 <label className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400">
                                     {language === 'ar' ? 'القسم الرئيسي (Main Category)' : 'Main Category'}
                                 </label>
-                                <div className="relative">
-                                    <select
-                                        className="w-full h-12 rounded-xl border border-black/[0.04] dark:border-white/[0.04] bg-gray-50/50 dark:bg-black/20 focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all px-4 text-sm font-medium dark:text-white appearance-none outline-none cursor-pointer"
-                                        value={formData.mainCategoryId}
-                                        onChange={(e) => setFormData({ ...formData, mainCategoryId: e.target.value })}
-                                    >
-                                        <option value="">{language === 'ar' ? '-- اختر القسم الرئيسي --' : '-- Select Main Category --'}</option>
-                                        {mainCategories.map(mc => (
-                                            <option key={mc.id} value={mc.id}>{mc.name}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
-                                </div>
+                                <SearchableCombobox
+                                    options={mainCategoryOptions}
+                                    value={formData.mainCategoryId || ""}
+                                    onChange={(val) => setFormData({ ...formData, mainCategoryId: val })}
+                                    placeholder={language === 'ar' ? '-- اختر القسم الرئيسي --' : '-- Select Main Category --'}
+                                    isArabic={language === 'ar'}
+                                />
                             </div>
                         )}
 
@@ -444,40 +454,29 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                             <label className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400">
                                 {language === 'ar' ? 'الشركة / الماركة (Brand Name)' : 'Brand Name'} <span className="text-primary">*</span>
                             </label>
-                            <div className="relative">
-                                <select
-                                    className="w-full h-12 rounded-xl border border-black/[0.04] dark:border-white/[0.04] bg-gray-50/50 dark:bg-black/20 focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all px-4 text-sm font-medium dark:text-white appearance-none outline-none cursor-pointer"
-                                    required
-                                    value={formData.brandId}
-                                    onChange={(e) => setFormData({ ...formData, brandId: e.target.value, categoryId: "" })}
-                                >
-                                    <option value="">{language === 'ar' ? '-- اختر الماركة / الشركة --' : '-- Select Brand --'}</option>
-                                    {brands.map(brand => (
-                                        <option key={brand.id} value={brand.id}>{brand.name}</option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
-                            </div>
+                            <SearchableCombobox
+                                options={brandOptions}
+                                value={formData.brandId}
+                                onChange={(val) => setFormData({ ...formData, brandId: val, categoryId: "" })}
+                                placeholder={language === 'ar' ? '-- اختر الماركة / الشركة --' : '-- Select Brand --'}
+                                required
+                                isArabic={language === 'ar'}
+                            />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-[11px] font-bold uppercase tracking-widest text-text-sub dark:text-gray-400">
                                 {language === 'ar' ? 'الفئة الفرعية (Sub Category)' : 'Sub Category'} <span className="text-primary">*</span>
                             </label>
-                            <div className="relative">
-                                <select
-                                    className="w-full h-12 rounded-xl border border-black/[0.04] dark:border-white/[0.04] bg-gray-50/50 dark:bg-black/20 focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all px-4 text-sm font-medium dark:text-white appearance-none outline-none cursor-pointer"
-                                    required
-                                    value={formData.categoryId}
-                                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                                >
-                                    <option value="">{language === 'ar' ? '-- اختر الفئة --' : '-- Select Sub Category --'}</option>
-                                    {filteredCategories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-sub text-[20px]" />
-                            </div>
+                            <SearchableCombobox
+                                options={categoryOptions}
+                                value={formData.categoryId}
+                                onChange={(val) => setFormData({ ...formData, categoryId: val })}
+                                placeholder={language === 'ar' ? '-- اختر الفئة --' : '-- Select Sub Category --'}
+                                required
+                                isArabic={language === 'ar'}
+                                disabled={categoryOptions.length === 0}
+                            />
                         </div>
 
                         {/* Options / Variants */}

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
+import { useConfirm } from "../../context/ConfirmDialogContext";
 import AdminHeader from "../../components/AdminHeader";
 import AddProductModal from "./AddProductModal";
 import { deleteProduct, toggleProductTrending, bulkToggleTrending, bulkCreateProducts, bulkRemoveSale, bulkDeleteProducts } from "../../../../lib/admin-actions";
@@ -93,6 +94,7 @@ export default function ProductsClient({
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
     const isArabic = language === 'ar';
+    const confirm = useConfirm();
     const canDelete = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canDeleteProducts;
     const canEdit = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canManageProducts;
 
@@ -289,20 +291,29 @@ export default function ProductsClient({
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (confirm(`⚠️ Are you sure you want to permanently delete "${name}"?\n\nThis action cannot be undone and will remove the product from all future orders.`)) {
-            try {
-                const result = await deleteProduct(id);
-                if (result.success) {
-                    toast.success(t('admin.productDeleted'));
-                } else {
-                    toast.error(t(`admin.${result.error}`) || t('admin.deleteProductError'));
-                }
-            } catch (error) {
-                console.error("Error deleting product:", error);
-                toast.error("An unexpected error occurred");
+        const ok = await confirm({
+            title: isArabic ? "حذف المنتج" : "Delete Product",
+            message: isArabic
+                ? `هل أنت متأكد من رغبتك في حذف "${name}" نهائياً؟ لا يمكن التراجع عن هذا الإجراء.`
+                : `Are you sure you want to permanently delete "${name}"? This action cannot be undone.`,
+            confirmText: isArabic ? "حذف" : "Delete",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
+
+        try {
+            const result = await deleteProduct(id);
+            if (result.success) {
+                toast.success(t('admin.productDeleted'));
+            } else {
+                toast.error(t(`admin.${result.error}`) || t('admin.deleteProductError'));
             }
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            toast.error("An unexpected error occurred");
         }
-    }
+    };
 
     const handleBulkRemoveTrending = async () => {
         if (selectedIds.size === 0) return;
@@ -349,9 +360,16 @@ export default function ProductsClient({
         if (selectedIds.size === 0) return;
         const ids = Array.from(selectedIds);
 
-        if (!confirm(`Are you sure you want to delete ${ids.length} products? This action cannot be undone.`)) {
-            return;
-        }
+        const ok = await confirm({
+            title: isArabic ? "حذف منتجات متعددة" : "Bulk Delete Products",
+            message: isArabic
+                ? `هل أنت متأكد من حذف ${ids.length} منتجات؟ لا يمكن التراجع عن هذا الإجراء.`
+                : `Are you sure you want to delete ${ids.length} products? This action cannot be undone.`,
+            confirmText: isArabic ? "حذف الكل" : "Delete All",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
 
         setIsSubmittingBulk(true);
         try {

@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { Store, Phone, MapPin, ShoppingBag, Search, CheckCircle2, Ban, Trash2, RotateCw, ShieldCheck, Check, X, Hourglass } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import AdminHeader from '../../components/AdminHeader';
+import { useAdminSidebar } from '../../context/AdminSidebarContext';
+import { useConfirm } from '../../context/ConfirmDialogContext';
 
 interface AdminCustomer {
     id: string;
@@ -23,6 +26,8 @@ interface AdminCustomer {
 type TabType = 'pending' | 'active' | 'all';
 
 export default function AdminCustomersPage() {
+    const confirm = useConfirm();
+    const { openSidebar } = useAdminSidebar();
     const [customers, setCustomers] = useState<AdminCustomer[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -97,7 +102,14 @@ export default function AdminCustomersPage() {
             ? `هل أنت متأكد من رفض وحذف طلب تسجيل (${shopName})؟`
             : `هل أنت متأكد من حذف الحساب التجاري لـ (${shopName}) بشكل نهائي؟`;
 
-        if (!confirm(confirmMsg)) return;
+        const ok = await confirm({
+            title: isPending ? "رفض طلب التسجيل" : "حذف الحساب التجاري",
+            message: confirmMsg,
+            confirmText: isPending ? "رفض وحذف" : "حذف الحساب",
+            cancelText: "إلغاء",
+            variant: "danger",
+        });
+        if (!ok) return;
         setActionLoadingId(id);
         try {
             const res = await fetch(`/api/admin/customers?id=${id}`, { method: 'DELETE' });
@@ -131,7 +143,9 @@ export default function AdminCustomersPage() {
         );
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        <div className="flex-1 flex flex-col h-full overflow-y-auto">
+            <AdminHeader title="إدارة طلبات وحسابات التجار" onMenuClick={openSidebar} />
+            <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -356,6 +370,7 @@ export default function AdminCustomersPage() {
                         </table>
                     </div>
                 )}
+            </div>
             </div>
         </div>
     );

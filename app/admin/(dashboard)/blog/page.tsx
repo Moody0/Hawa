@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Pencil, Trash2, CheckCircle2, X, Image, RotateCw, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import AdminHeader from '../../components/AdminHeader';
+import { useAdminSidebar } from '../../context/AdminSidebarContext';
+import { useConfirm } from '../../context/ConfirmDialogContext';
 
 interface BlogPost {
     id: string;
@@ -27,6 +30,8 @@ const BLOG_CATEGORIES = [
 ];
 
 export default function AdminBlogPage() {
+    const confirm = useConfirm();
+    const { openSidebar } = useAdminSidebar();
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -131,7 +136,14 @@ export default function AdminBlogPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('هل أنت متأكد من حذف هذا المقال؟')) return;
+        const ok = await confirm({
+            title: 'حذف المقال',
+            message: 'هل أنت متأكد من حذف هذا المقال نهائياً من المدونة؟',
+            confirmText: 'حذف المقال',
+            cancelText: 'إلغاء',
+            variant: 'danger',
+        });
+        if (!ok) return;
         try {
             const res = await fetch(`/api/admin/blog?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
@@ -144,7 +156,9 @@ export default function AdminBlogPage() {
     };
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        <div className="flex-1 flex flex-col h-full overflow-y-auto">
+            <AdminHeader title="إدارة المدونة والمقالات" onMenuClick={openSidebar} />
+            <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -379,6 +393,7 @@ export default function AdminBlogPage() {
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }

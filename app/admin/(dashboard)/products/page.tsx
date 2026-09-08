@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminProductsPage() {
     const [products, categoriesData, brands, mainCategories] = await Promise.all([
         getAdminProducts(),
-        getAdminCategories(1, 2000),
+        getAdminCategories(1, 200),
         getAdminBrands(),
         getAdminMainCategories()
     ]);

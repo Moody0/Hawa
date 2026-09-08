@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
+import { useConfirm } from "../../context/ConfirmDialogContext";
 import Link from "next/link";
 
 interface Review {
@@ -21,8 +22,10 @@ interface Review {
 }
 
 export default function ReviewsClient() {
-    const { t, dir } = useLanguage();
+    const { t, dir, language } = useLanguage();
+    const isArabic = language === 'ar';
     const { openSidebar } = useAdminSidebar();
+    const confirm = useConfirm();
     const [reviews, setReviews] = useState<Review[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -71,7 +74,14 @@ export default function ReviewsClient() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm(t("admin.confirmDeleteReview"))) return;
+        const ok = await confirm({
+            title: isArabic ? "حذف التقييم" : "Delete Review",
+            message: t("admin.confirmDeleteReview"),
+            confirmText: isArabic ? "حذف" : "Delete",
+            cancelText: isArabic ? "إلغاء" : "Cancel",
+            variant: "danger",
+        });
+        if (!ok) return;
 
         try {
             const res = await fetch(`/api/admin/reviews/${id}`, {

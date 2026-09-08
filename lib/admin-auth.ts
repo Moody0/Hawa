@@ -82,13 +82,17 @@ function toAdminSession(dbUser: LiveAdminUser, iat?: number): AdminUserSession {
 }
 
 export async function getValidAdminSession(): Promise<AdminUserSession | null> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return null;
-  const tokenUser = session.user as Partial<AdminUserSession>;
-  const dbUser = await loadAdminUser(session.user.id);
-  if (!dbUser) return null;
-  assertFreshAdmin(dbUser, tokenUser.iat);
-  return toAdminSession(dbUser, tokenUser.iat);
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return null;
+    const tokenUser = session.user as Partial<AdminUserSession>;
+    const dbUser = await loadAdminUser(session.user.id);
+    if (!dbUser) return null;
+    assertFreshAdmin(dbUser, tokenUser.iat);
+    return toAdminSession(dbUser, tokenUser.iat);
+  } catch {
+    return null;
+  }
 }
 
 export async function requireAdminSession(requiredPermission?: AdminPermission | LegacyAdminPermission) {

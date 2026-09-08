@@ -13,6 +13,7 @@ interface Product {
     price: string | number;
     discountPrice?: string | number | null;
     images: string;
+    minOrder?: number | null;
 }
 
 interface AddToCartButtonProps {
@@ -29,13 +30,16 @@ const AddToCartButton = ({ product, label, language, variant = 'desktop' }: AddT
         e.preventDefault();
         e.stopPropagation();
 
+        const minQuantity = Math.max(1, Number(product.minOrder) || 1);
+
         addItem({
             id: product.id,
             name: product.name,
             price: Number(product.discountPrice || product.price),
             image: product.images.split(',').map((img: string) => img.trim()).filter(Boolean)[0],
             slug: product.slug,
-            quantity: 1,
+            quantity: minQuantity,
+            minOrder: minQuantity,
             description: product.description || undefined
         });
     };

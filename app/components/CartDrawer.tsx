@@ -200,8 +200,13 @@ const CartDrawer = () => {
                                         <div className="flex items-center justify-between mt-2">
                                             <div dir="ltr" className="flex items-center bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-white/10 h-8 px-1">
                                                 <button 
-                                                    onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedOption)}
-                                                    className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-[#8A6305] transition-colors text-sm font-bold cursor-pointer"
+                                                    onClick={() => {
+                                                        const minQty = Math.max(1, Number(item.minOrder) || 1);
+                                                        if (item.quantity <= minQty) return;
+                                                        updateQuantity(item.id, item.quantity - 1, item.selectedOption);
+                                                    }}
+                                                    disabled={item.quantity <= Math.max(1, Number(item.minOrder) || 1)}
+                                                    className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-[#8A6305] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-bold cursor-pointer"
                                                     aria-label={language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity'}
                                                 >-</button>
                                                 <span className="px-2 text-center text-xs font-bold text-[#0B192C] dark:text-white select-none whitespace-nowrap flex items-center gap-1">
