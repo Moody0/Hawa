@@ -476,6 +476,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                         <div className="mt-4 grid grid-cols-2 items-stretch gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5 lg:justify-start">
                             <Link
                                 href={currentSlide.link}
+                                prefetch={false}
                                 className="hero-cta-button group/btn inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#B68012] bg-[#B68012] px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#946809] active:scale-[0.98] sm:gap-2 sm:px-6 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
                             >
                                 <span>{primaryButtonText}</span>
@@ -485,6 +486,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             {secondaryButtonText && (
                                 <Link
                                     href={secondaryLink}
+                                    prefetch={false}
                                     target={secondaryLink.startsWith('http') ? '_blank' : undefined}
                                     rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
                                     className="hero-cta-button inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-white/70 bg-[#0B192C]/75 px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] sm:gap-2 sm:border-[#0B192C] sm:bg-[#0B192C] sm:px-6 sm:text-sm sm:hover:bg-[#152841] dark:sm:border-white dark:sm:bg-white dark:sm:text-[#0B192C] dark:sm:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] sm:focus-visible:ring-[#8A6305] sm:focus-visible:ring-offset-white"

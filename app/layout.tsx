@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { getI18n } from "@/lib/i18n";
 import { getSiteSettings } from "@/lib/public-queries";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -132,8 +132,10 @@ export default async function RootLayout({
 }>) {
   let requestLocale: 'en' | 'ar' = 'ar';
   try {
-    const headersList = await headers();
+    const [headersList, cookiesList] = await Promise.all([headers(), cookies()]);
     if (headersList.get('x-locale') === 'en') {
+      requestLocale = 'en';
+    } else if (cookiesList.get('language')?.value === 'en') {
       requestLocale = 'en';
     }
   } catch {}
@@ -167,36 +169,6 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }}
-        />
-        <script
-          type="speculationrules"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              prefetch: [
-                {
-                  where: {
-                    and: [
-                      {
-                        or: [
-                          { href_matches: "/products/*" },
-                          { href_matches: "/brands/*" },
-                          { href_matches: "/categories/*" },
-                          { href_matches: "/departments/*" },
-                        ],
-                      },
-                      { not: { href_matches: "/admin/*" } },
-                      { not: { href_matches: "/api/*" } },
-                      { not: { href_matches: "/account/*" } },
-                      { not: { href_matches: "/cart" } },
-                      { not: { href_matches: "/place-order" } },
-                      { not: { href_matches: "/complete-order" } },
-                    ],
-                  },
-                  eagerness: "conservative",
-                },
-              ],
-            }),
-          }}
         />
       </head>
       <body

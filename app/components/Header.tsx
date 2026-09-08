@@ -268,11 +268,9 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                                 }}
                                 onMouseEnter={() => {
                                     setHasOpenedMenu(true);
-                                    fetch('/api/navigation', { priority: 'low' }).catch(() => {});
                                 }}
                                 onFocus={() => {
                                     setHasOpenedMenu(true);
-                                    fetch('/api/navigation', { priority: 'low' }).catch(() => {});
                                 }}
                                 className="w-11 h-11 flex items-center justify-center text-white rounded-xl hover:bg-white/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A]"
                                 aria-label={isMobileMenuOpen ? (isArabic ? 'إغلاق القائمة' : 'Close Menu') : (isArabic ? 'فتح القائمة' : 'Open Menu')}

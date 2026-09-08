@@ -281,6 +281,7 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                                 <SwiperSlide key={brand.id || brand.slug} className="h-auto">
                                     <Link
                                         href={`/products?brand=${brand.slug}`}
+                                        prefetch={false}
                                         className="group h-[190px] sm:h-[210px] w-full flex flex-col items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-white/10 shadow-[0_8px_28px_-24px_rgba(11,25,44,0.45)] hover:border-[#C28E2B]/50 hover:-translate-y-1 transition-all duration-300 text-center"
                                     >
                                         {/* Brand Logo Container (Top - Hero Size) */}

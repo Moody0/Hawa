@@ -88,6 +88,18 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Product and brand uploads are content-addressed by their path. Keep
+        // them in the browser/CDN cache so scrolling back does not re-hit the
+        // origin or image optimizer for the same asset.
+        source: '/uploads/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
         source: '/:path*',
         headers: securityHeaders,
       },
