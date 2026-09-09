@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 async function runFullSystemValidation() {
     console.log("==================================================");
-    console.log("   ZAD LAND FULL SYSTEM END-TO-END VERIFICATION   ");
+    console.log("   HAWA FULL SYSTEM END-TO-END VERIFICATION   ");
     console.log("==================================================");
 
     let testProductId = null;
@@ -71,7 +71,7 @@ async function runFullSystemValidation() {
         // 5. Test Option-Aware Order Creation
         const testOrder = await prisma.order.create({
             data: {
-                Name: 'Zad Land Certified Buyer',
+                Name: 'Hawa Certified Buyer',
                 phone: '+963912345678',
                 streetAddress: 'Commercial District Suite 402',
                 city: 'Damascus',

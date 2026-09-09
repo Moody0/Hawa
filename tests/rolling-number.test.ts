@@ -74,3 +74,32 @@ describe('RollingNumber direction transition logic', () => {
         expect(tracker.update(2).direction).toBe(-1);
     });
 });
+
+describe('RollingNumber animation variants', async () => {
+    const { variants } = await import('../app/components/RollingNumber');
+
+    it('has opacity 0 and full clearance (>130%) on exit and initial to prevent lingering tips', () => {
+        const initialIncrease = variants.initial(1);
+        const exitIncrease = variants.exit(1);
+        const animate = variants.animate;
+
+        expect(initialIncrease.opacity).toBe(0);
+        expect(exitIncrease.opacity).toBe(0);
+        expect(animate.opacity).toBe(1);
+        expect(animate.y).toBe("0%");
+
+        // Increasing: enters from bottom (+150%), exits to top (-150%)
+        expect(initialIncrease.y).toBe("150%");
+        expect(exitIncrease.y).toBe("-150%");
+
+        const initialDecrease = variants.initial(-1);
+        const exitDecrease = variants.exit(-1);
+
+        // Decreasing: enters from top (-150%), exits to bottom (+150%)
+        expect(initialDecrease.opacity).toBe(0);
+        expect(exitDecrease.opacity).toBe(0);
+        expect(initialDecrease.y).toBe("-150%");
+        expect(exitDecrease.y).toBe("150%");
+    });
+});
+

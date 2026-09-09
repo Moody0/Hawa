@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { normalizeCartItem, clampCartQuantity, CartItem } from '@/app/context/CartContext';
 
 // Helper simulating CartContext state transitions
@@ -310,7 +310,7 @@ describe('Cart minOrder Adversarial Test Suite (Challenger 1)', () => {
       expect(cart.getItems()).toHaveLength(0);
     });
 
-    it('CartDrawer / CartItem stepper minus is DISABLED at minOrder (does not remove)', () => {
+    it('CartDrawer / CartItem stepper minus removes item when quantity <= minOrder', () => {
       const cart = new CartStateHarness();
       cart.addItem({
         id: 'drawer-item',
@@ -326,14 +326,17 @@ describe('Cart minOrder Adversarial Test Suite (Challenger 1)', () => {
       const minQty = Math.max(1, Number(item.minOrder) || 1);
 
       const cartItemMinusAction = () => {
-        if (item.quantity <= minQty) return;
-        cart.updateQuantity(item.id, item.quantity - 1);
+        if (item.quantity <= minQty) {
+          cart.removeItem(item.id);
+        } else {
+          cart.updateQuantity(item.id, item.quantity - 1);
+        }
       };
 
       cartItemMinusAction();
 
-      expect(cart.getItems()).toHaveLength(1);
-      expect(cart.getItem('drawer-item')?.quantity).toBe(5);
+      expect(cart.getItems()).toHaveLength(0);
+      expect(cart.getItem('drawer-item')).toBeUndefined();
     });
   });
 

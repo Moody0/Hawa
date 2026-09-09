@@ -27,11 +27,12 @@ async function verify() {
     console.log("   - Credential verification requested:", Boolean(verificationPassword));
     if (verificationPassword) console.log("   - Credential matches:", passMatches);
 
-    // 3. Check Default Brand
-    const brand = await prisma.brand.findUnique({
-        where: { slug: "zad-land" }
+    // 3. Check an active brand
+    const brand = await prisma.brand.findFirst({
+        where: { isActive: true },
+        orderBy: { createdAt: "asc" }
     });
-    console.log("3. Default Brand:", brand ? "PASS" : "FAIL");
+    console.log("3. Active Brand:", brand ? "PASS" : "FAIL");
     console.log("   - Name:", brand?.name);
     console.log("   - Slug:", brand?.slug);
 

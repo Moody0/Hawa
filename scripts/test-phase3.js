@@ -45,7 +45,7 @@ async function runPhase3Verification() {
         // 3. Create an Order with selected option variant
         const order = await prisma.order.create({
             data: {
-                Name: 'Zad Land Test Customer',
+                Name: 'Hawa Test Customer',
                 phone: '0987654321',
                 streetAddress: 'Mezzeh Highway',
                 city: 'Damascus',

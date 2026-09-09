@@ -30,15 +30,18 @@ export default function AdminLoginPage() {
             });
 
             if (result?.error) {
-                setError(t("admin.login.invalidCredentials"));
+                if (result.error.toLowerCase().includes("too many") || result.error.toLowerCase().includes("throttled")) {
+                    setError(t("admin.login.tooManyAttempts") || "Too many login attempts. Please wait a few minutes.");
+                } else {
+                    setError(t("admin.login.invalidCredentials"));
+                }
                 setLoading(false);
             } else if (result?.ok) {
                 const rawCallback = new URLSearchParams(window.location.search).get("callbackUrl");
                 const destination = rawCallback?.startsWith("/admin/") && !rawCallback.startsWith("/admin/login") && !rawCallback.startsWith("//")
                     ? rawCallback
                     : "/admin/dashboard";
-                router.replace(destination);
-                router.refresh();
+                window.location.href = destination;
             } else {
                 setError(t("admin.login.errorGeneric"));
                 setLoading(false);

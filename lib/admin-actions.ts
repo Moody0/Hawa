@@ -5,7 +5,7 @@ import { requireAdminSession, requireSuperAdminSession } from "./admin-auth";
 import { revalidatePath, revalidateTag, updateTag, unstable_cache } from "next/cache";
 import { BrandGroup, OrderStatus } from "@prisma/client";
 import { generateUniqueCategorySlug } from "./category-utils";
-import { generateUniqueBrandSlug, getZadLandBrandId } from "./brand-utils";
+import { generateUniqueBrandSlug } from "./brand-utils";
 import { executeOrderStatusUpdate, executeOrderDeletion, OrderStatusType } from "./inventory-transitions";
 import { recordErrorEvent } from "./monitoring";
 import { clearProductsApiCache } from "./products-cache";
@@ -1466,7 +1466,8 @@ export async function deleteOrder(id: string) {
 export async function createCategory(data: CategoryInput) {
     try {
         await requireAdminSession("CATEGORIES_MANAGE");
-        const brandId = data.brandId || await getZadLandBrandId();
+        if (!data.brandId) throw new Error("Brand is required");
+        const brandId = data.brandId;
         const slug = await generateUniqueCategorySlug(data.name);
 
         const category = await prisma.category.create({
@@ -1504,7 +1505,8 @@ export async function createCategory(data: CategoryInput) {
 export async function updateCategory(id: string, data: CategoryInput) {
     try {
         await requireAdminSession("CATEGORIES_MANAGE");
-        const brandId = data.brandId || await getZadLandBrandId();
+        if (!data.brandId) throw new Error("Brand is required");
+        const brandId = data.brandId;
         const slug = await generateUniqueCategorySlug(data.name, id);
 
         const category = await prisma.category.update({
@@ -1820,9 +1822,7 @@ export async function bulkFixCategoryNames(mapping: { id: string, newName: strin
 export async function bulkCreateProducts(products: ProductImportRow[]) {
     try {
         await requireAdminSession("PRODUCTS_IMPORT");
-        // getZadLandBrandId call if needed
-        await getZadLandBrandId();
-        
+
         // Cache main categories, brands, categories
         const mainCategories = await prisma.mainCategory.findMany();
         const mainCategoryMap = new Map(mainCategories.map(mc => [mc.name.trim().toLowerCase(), mc]));
@@ -1846,7 +1846,7 @@ export async function bulkCreateProducts(products: ProductImportRow[]) {
 
             const mainCategoryLabel = getVal(["Main Category", "mainCategory", "MainCategory", "main_category", "القسم الرئيسي"]);
             const subCategoryLabel = getVal(["Sub Category", "subCategory", "SubCategory", "Category", "category", "الفئة", "القسم الفرعي"]) || "General";
-            const brandLabel = getVal(["Brand Name", "brandName", "Brand", "brand", "الشركة", "الماركة", "العلامة التجارية"]) || "Zad Land";
+            const brandLabel = getVal(["Brand Name", "brandName", "Brand", "brand", "الشركة", "الماركة", "العلامة التجارية"]) || "Unbranded";
             const nameAr = getVal(["Name ar", "nameAr", "Name Ar", "Name AR", "الاسم بالعربي", "اسم المنتج بالعربي"]);
             const nameEn = getVal(["Name en", "nameEn", "Name En", "Name EN", "Name", "name", "الاسم بالانجليزي", "اسم المنتج بالانجليزي"]);
             const descriptionAr = getVal(["description ar", "descriptionAr", "Description Ar", "الوصف بالعربي", "وصف المنتج بالعربي"]);

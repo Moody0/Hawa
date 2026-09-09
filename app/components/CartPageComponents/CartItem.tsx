@@ -93,12 +93,23 @@ const CartItem = ({ item, removeItem, updateQuantity }: CartItemProps) => {
                     <div dir="ltr" className="flex h-10 w-[126px] shrink-0 items-center rounded-lg border border-slate-300 bg-white px-2 dark:border-white/15 dark:bg-zinc-800">
                         <button
                             onClick={() => {
-                                if (item.quantity <= minQuantity) return;
-                                updateQuantity(item.id, item.quantity - 1, item.selectedOption);
+                                if (item.quantity <= minQuantity) {
+                                    removeItem(item.id, item.selectedOption);
+                                } else {
+                                    updateQuantity(item.id, item.quantity - 1, item.selectedOption);
+                                }
                             }}
-                            disabled={item.quantity <= minQuantity}
-                            className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-[#8A6305] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-base cursor-pointer font-bold"
-                            aria-label="Decrease quantity"
+                            className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors text-base cursor-pointer font-bold"
+                            aria-label={
+                                item.quantity <= minQuantity
+                                    ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart')
+                                    : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')
+                            }
+                            title={
+                                item.quantity <= minQuantity
+                                    ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart')
+                                    : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')
+                            }
                         >−</button>
                         <span className="flex-1 text-center font-bold text-xs sm:text-sm text-[#0B192C] dark:text-white select-none whitespace-nowrap flex items-center justify-center gap-1">
                             <RollingNumber value={item.quantity} />

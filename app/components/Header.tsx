@@ -42,6 +42,7 @@ interface HeaderProps {
 
 const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) => {
     const pathname = usePathname();
+    const isHomePage = pathname === '/';
     const { dir, language: _language } = useLanguage();
     const isArabic = dir === 'rtl';
     const { totalItems, openDrawer } = useCart();
@@ -58,16 +59,10 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
         let ticking = false;
 
         const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            if (currentScrollY <= 15) {
-                setIsScrolled(false);
-                ticking = false;
-                return;
-            }
-
             if (!ticking) {
                 window.requestAnimationFrame(() => {
-                    setIsScrolled(window.scrollY > 15);
+                    // The cradle is visible only at the absolute top of the page.
+                    setIsScrolled(window.scrollY > 0);
                     ticking = false;
                 });
                 ticking = true;
@@ -101,19 +96,23 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
     return (
         <>
             {/* Stable Spacer prevents layout shift & matches header background to eliminate white gap on fast scroll */}
-            <div className="w-full h-16 xl:h-[72px] bg-[#0B192C] border-b border-white/10" aria-hidden="true" />
+            <div className="w-full h-16 xl:h-[72px] bg-[#0B192C] border-b border-[#E5B54A]/30" aria-hidden="true" />
+            {/* Inner pages need clearance for the curved cradle; the home hero intentionally sits behind it. */}
+            {!isHomePage && (
+                <div className="h-6 w-full bg-[#F6F7F9] dark:bg-[#09090b] xl:h-8" aria-hidden="true" />
+            )}
 
             <header
-                className={`fixed top-0 left-0 z-50 w-full transition-[background-color,border-color,box-shadow] duration-250 ease-out ${
+                className={`fixed top-0 left-0 z-50 w-full transition-[background-color,border-color,box-shadow] duration-300 ease-out ${
                     isScrolled
-                        ? 'bg-[#081524]/95 backdrop-blur-md border-b border-[#8A6305]/45 shadow-lg shadow-black/20'
-                        : 'bg-[#0B192C] border-b border-white/10'
+                        ? 'bg-[#081524] border-b border-[#8A6305]/45'
+                        : 'bg-[#0B192C] border-b border-[#E5B54A]/30'
                 }`}
             >
                 {/* 1. Desktop Header (xl and up) */}
                 <div className="hidden xl:block w-full">
                     <div className="container-custom">
-                        <div className={`flex items-center justify-between transition-[height] duration-300 ease-out ${isScrolled ? 'h-[60px]' : 'h-[72px]'}`}>
+                        <div className="flex h-[72px] items-center justify-between">
                             {/* Start Side: Logo with Centered Integrated Curved Cradle */}
                             <div className="relative flex items-center justify-center shrink-0 h-full">
                                 <Link
@@ -127,37 +126,41 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                                         width={120}
                                         height={65}
                                         priority
-                                        className={`w-auto object-contain transition-all duration-300 ease-out group-hover:scale-[1.03] ${
-                                            isScrolled ? 'h-11 translate-y-0' : 'h-[62px] translate-y-1.5'
+                                        className={`h-[62px] w-[120px] object-contain will-change-transform transition-transform duration-500 ease-in-out ${
+                                            isScrolled ? 'scale-[0.71] translate-y-0' : 'scale-100 translate-y-1.5'
                                         }`}
                                     />
                                 </Link>
 
-                                {/* Curved Logo Cradle Apron - Centered on Logo and Seamlessly Fused with Header */}
+                                {/* Curved logo cradle anchored to the live bottom edge of the header. */}
                                 <div
-                                    className={`absolute top-full -mt-[2px] left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 ease-out origin-top z-0 ${
+                                    className={`absolute top-full -mt-px left-1/2 -translate-x-1/2 pointer-events-none origin-top z-0 transition-transform duration-500 ease-in-out ${
                                         isScrolled
-                                            ? 'opacity-0 scale-y-0 -translate-y-2'
-                                            : 'opacity-100 scale-y-100 translate-y-0'
+                                            ? 'scale-y-0'
+                                            : 'scale-y-100'
                                     }`}
                                     aria-hidden="true"
                                 >
                                     <svg
-                                        viewBox="0 0 240 28"
-                                        className="w-[240px] h-[28px] block overflow-visible drop-shadow-[0_6px_12px_rgba(0,0,0,0.25)]"
+                                        viewBox="0 0 240 30"
+                                        className="block h-[30px] w-[240px] overflow-visible"
                                         fill="none"
                                         xmlns="http://www.w3.org/2000/svg"
                                     >
-                                        {/* Overlaps 2px into header body so they fuse into one solid shape */}
+                                        {/* A 2px overlap fuses the fill with the header at every scale. */}
                                         <path
-                                            d="M 0 -2 L 240 -2 L 240 0 L 220 0 C 175 0, 160 26, 120 26 C 80 26, 65 0, 20 0 L 0 0 Z"
-                                            fill="#0B192C"
+                                            d="M -3 -3 H 243 V 0 H 240 C 222 0, 185 28, 120 28 C 55 28, 18 0, 0 0 H -3 Z"
+                                            fill={isScrolled ? '#081524' : '#0B192C'}
+                                            className="transition-[fill] duration-300 ease-out"
                                         />
-                                        {/* Golden accent border running along the curved bottom edge */}
+                                        {/* Short tangent handles make the header line flow directly into the curve. */}
                                         <path
-                                            d="M 0 0 L 20 0 C 65 0, 80 26, 120 26 C 160 26, 175 0, 220 0 L 240 0"
-                                            stroke="rgba(229, 181, 74, 0.45)"
-                                            strokeWidth="1.5"
+                                            d="M -3 0.5 H 0 C 18 0.5, 55 28.5, 120 28.5 C 185 28.5, 222 0.5, 240 0.5 H 243"
+                                            stroke={isScrolled ? 'rgba(138, 99, 5, 0.45)' : 'rgba(229, 181, 74, 0.30)'}
+                                            strokeWidth="1"
+                                            vectorEffect="non-scaling-stroke"
+                                            shapeRendering="geometricPrecision"
+                                            className="transition-[stroke] duration-300 ease-out"
                                             fill="none"
                                         />
                                     </svg>
@@ -240,7 +243,11 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                 <div className="block xl:hidden w-full px-3 sm:px-6">
                     <div className="flex items-center justify-between h-16">
                         {/* Start Side: Brand Logo with Centered Integrated Curved Cradle */}
-                        <div className="relative flex items-center justify-center shrink-0 h-full">
+                        <div
+                            className={`relative ms-3 flex h-full shrink-0 items-center justify-center transition-transform duration-500 ease-in-out sm:ms-2 lg:ms-0 ${
+                                isScrolled ? 'translate-x-[13px]' : 'translate-x-0'
+                            }`}
+                        >
                             <Link
                                 href="/"
                                 className="relative flex items-center justify-center group py-1 z-10"
@@ -252,35 +259,40 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
                                     width={100}
                                     height={52}
                                     priority
-                                    className={`w-auto object-contain transition-all duration-300 ease-out group-hover:scale-[1.03] ${
-                                        isScrolled ? 'h-10 translate-y-0' : 'h-[50px] translate-y-1'
+                                    className={`h-[50px] w-[96px] object-contain will-change-transform transition-transform duration-500 ease-in-out ${
+                                        isScrolled ? 'scale-80 translate-y-0' : 'scale-100 translate-y-1'
                                     }`}
                                 />
                             </Link>
 
-                            {/* Mobile Curved Logo Cradle Apron - Centered & Seamlessly Aligned */}
+                            {/* Mobile cradle uses the same bottom-edge anchor as the desktop header. */}
                             <div
-                                className={`absolute top-full -mt-[2px] left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 ease-out origin-top z-0 ${
+                                className={`absolute top-full -mt-px left-1/2 -translate-x-1/2 pointer-events-none origin-top z-0 transition-transform duration-500 ease-in-out ${
                                     isScrolled
-                                        ? 'opacity-0 scale-y-0 -translate-y-2'
-                                        : 'opacity-100 scale-y-100 translate-y-0'
+                                        ? 'scale-y-0'
+                                        : 'scale-y-100'
                                 }`}
                                 aria-hidden="true"
                             >
                                 <svg
-                                    viewBox="0 0 190 22"
-                                    className="w-[190px] h-[22px] block overflow-visible drop-shadow-[0_4px_8px_rgba(0,0,0,0.2)]"
+                                    viewBox="0 0 190 24"
+                                    className="block h-auto w-[clamp(164px,42vw,190px)] overflow-visible"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg"
                                 >
+                                    {/* A 2px overlap prevents a seam on fractional mobile pixel ratios. */}
                                     <path
-                                        d="M 0 -2 L 190 -2 L 190 0 L 175 0 C 135 0, 120 20, 95 20 C 70 20, 55 0, 15 0 L 0 0 Z"
-                                        fill="#0B192C"
+                                        d="M -3 -2 H 193 V 0 H 190 C 145 0, 130 22, 95 22 C 60 22, 45 0, 0 0 H -3 Z"
+                                        fill={isScrolled ? '#081524' : '#0B192C'}
+                                        className="transition-[fill] duration-300 ease-out"
                                     />
+                                    {/* The gold contour continues the header border without a doubled edge. */}
                                     <path
-                                        d="M 0 0 L 15 0 C 55 0, 70 20, 95 20 C 120 20, 135 0, 175 0 L 190 0"
-                                        stroke="rgba(229, 181, 74, 0.45)"
-                                        strokeWidth="1.2"
+                                        d="M -3 0.5 H 0 C 45 0.5, 60 22.5, 95 22.5 C 130 22.5, 145 0.5, 190 0.5 H 193"
+                                        stroke={isScrolled ? 'rgba(138, 99, 5, 0.45)' : 'rgba(229, 181, 74, 0.30)'}
+                                        strokeWidth="1"
+                                        vectorEffect="non-scaling-stroke"
+                                        className="transition-[stroke] duration-300 ease-out"
                                         fill="none"
                                     />
                                 </svg>

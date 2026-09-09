@@ -495,7 +495,7 @@ export default function ProductsClient({
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Products");
 
-            XLSX.writeFile(wb, `zad_land_products_${new Date().toISOString().split('T')[0]}.xlsx`);
+            XLSX.writeFile(wb, `hawa_products_${new Date().toISOString().split('T')[0]}.xlsx`);
 
             toast.success(t('admin.exportSuccess') || "Exported successfully");
         } catch (error) {

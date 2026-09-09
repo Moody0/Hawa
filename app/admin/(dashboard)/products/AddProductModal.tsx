@@ -533,7 +533,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                             </label>
                             <input
                                 className="w-full h-12 rounded-xl border border-black/[0.04] dark:border-white/[0.04] bg-gray-50/50 dark:bg-black/20 focus:bg-white dark:focus:bg-surface-dark focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all px-4 text-sm font-medium dark:text-white outline-none"
-                                placeholder="ZAD-001"
+                                placeholder="HAWA-001"
                                 type="text"
                                 value={formData.sku}
                                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}

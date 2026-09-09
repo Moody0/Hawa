@@ -8,15 +8,18 @@ interface RollingNumberProps {
     className?: string;
 }
 
-const variants = {
+export const variants = {
     initial: (dir: number) => ({
-        y: dir > 0 ? "100%" : "-100%",
+        y: dir > 0 ? "150%" : "-150%",
+        opacity: 0,
     }),
     animate: {
         y: "0%",
+        opacity: 1,
     },
     exit: (dir: number) => ({
-        y: dir > 0 ? "-100%" : "100%",
+        y: dir > 0 ? "-150%" : "150%",
+        opacity: 0,
     }),
 };
 
@@ -57,10 +60,16 @@ export default function RollingNumber({ value, className = "" }: RollingNumberPr
                     animate="animate"
                     exit="exit"
                     transition={{
-                        type: "spring",
-                        stiffness: 450,
-                        damping: 32,
-                        mass: 0.6,
+                        y: {
+                            type: "spring",
+                            stiffness: 450,
+                            damping: 32,
+                            mass: 0.6,
+                        },
+                        opacity: {
+                            duration: 0.15,
+                            ease: "easeOut",
+                        },
                     }}
                     className="inline-flex items-center justify-center leading-none select-none"
                 >

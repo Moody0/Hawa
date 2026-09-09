@@ -14,21 +14,29 @@ if (!globalForPrisma.prisma) {
 function createPrismaClient() {
     const rawDatabaseUrl = process.env.DATABASE_URL;
 
-    // Supabase's transaction pooler is shared by many serverless instances.
-    // Prisma's default pool (up to 13 connections per instance) can exhaust
-    // the pooler and surface as intermittent P1001/P2024 errors. Keep one
-    // connection per runtime and let Prisma wait briefly for a free slot.
-    if (rawDatabaseUrl?.includes("pooler.supabase.com")) {
+    if (rawDatabaseUrl) {
         try {
             const databaseUrl = new URL(rawDatabaseUrl);
-            if (!databaseUrl.searchParams.has("connection_limit")) {
-                databaseUrl.searchParams.set("connection_limit", "10");
+
+            // In regions/ISPs where AWS eu-central-1 3.x.x.x IPs are blackholed/filtered,
+            // aws-0-eu-central-1.pooler.supabase.com round-robins to dead 3.x IPs.
+            // Using a known healthy pooler IP ensures instant and stable connections.
+            if (process.env.SUPABASE_POOLER_IP) {
+                databaseUrl.hostname = process.env.SUPABASE_POOLER_IP;
+            } else if (databaseUrl.hostname === "aws-0-eu-central-1.pooler.supabase.com") {
+                databaseUrl.hostname = "18.198.145.223";
             }
-            if (!databaseUrl.searchParams.has("pool_timeout")) {
-                databaseUrl.searchParams.set("pool_timeout", "30");
-            }
-            if (!databaseUrl.searchParams.has("connect_timeout")) {
-                databaseUrl.searchParams.set("connect_timeout", "30");
+
+            if (databaseUrl.searchParams.has("pgbouncer") || databaseUrl.hostname.includes("pooler") || databaseUrl.hostname === "18.198.145.223") {
+                if (!databaseUrl.searchParams.has("connection_limit")) {
+                    databaseUrl.searchParams.set("connection_limit", "10");
+                }
+                if (!databaseUrl.searchParams.has("pool_timeout")) {
+                    databaseUrl.searchParams.set("pool_timeout", "15");
+                }
+                if (!databaseUrl.searchParams.has("connect_timeout")) {
+                    databaseUrl.searchParams.set("connect_timeout", "15");
+                }
             }
 
             return new PrismaClient({ datasources: { db: { url: databaseUrl.toString() } } });

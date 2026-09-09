@@ -202,12 +202,23 @@ const CartDrawer = () => {
                                                 <button 
                                                     onClick={() => {
                                                         const minQty = Math.max(1, Number(item.minOrder) || 1);
-                                                        if (item.quantity <= minQty) return;
-                                                        updateQuantity(item.id, item.quantity - 1, item.selectedOption);
+                                                        if (item.quantity <= minQty) {
+                                                            removeItem(item.id, item.selectedOption);
+                                                        } else {
+                                                            updateQuantity(item.id, item.quantity - 1, item.selectedOption);
+                                                        }
                                                     }}
-                                                    disabled={item.quantity <= Math.max(1, Number(item.minOrder) || 1)}
-                                                    className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-[#8A6305] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-bold cursor-pointer"
-                                                    aria-label={language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity'}
+                                                    className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors text-sm font-bold cursor-pointer"
+                                                    aria-label={
+                                                        item.quantity <= Math.max(1, Number(item.minOrder) || 1)
+                                                            ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart')
+                                                            : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')
+                                                    }
+                                                    title={
+                                                        item.quantity <= Math.max(1, Number(item.minOrder) || 1)
+                                                            ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart')
+                                                            : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')
+                                                    }
                                                 >-</button>
                                                 <span className="px-2 text-center text-xs font-bold text-[#0B192C] dark:text-white select-none whitespace-nowrap flex items-center gap-1">
                                                     <RollingNumber value={item.quantity} />
