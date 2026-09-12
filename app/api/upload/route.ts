@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
         
         // Return public URL
         const key = `${safeFolder}/${filename}`;
-        const imageUrl = `/media/${key}`;
+        const imageUrl = `/uploads/${key}`;
         
         return NextResponse.json({
             url: imageUrl,

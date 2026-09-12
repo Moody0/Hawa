@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { ShoppingCart, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface Banner {
     id: string;
@@ -179,7 +179,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             title: b.title || 'Your Trusted Partner in Wholesale',
             titleAr: b.titleAr || 'شريكك الموثوق في التوزيع والتجارة',
             subtitle: b.subtitle || 'We supply leading global brands and provide integrated distribution solutions.',
-            subtitleAr: b.subtitleAr || 'نوفر أفضل العلامات التجارية العالمية ونقدم حلول توزيع متكاملة تغطي الأسواق والمتاجر',
+            subtitleAr: 'نوفر أفضل العلامات التجارية العالمية ونقدم حلول توزيع متكاملة تغطي الأسواق والمتاجر',
             buttonText: b.buttonText || 'Browse Products',
             buttonTextAr: b.buttonTextAr || 'تصفح المنتجات',
             link: b.link || '/products',
@@ -187,10 +187,9 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             secondaryButtonTextAr: 'اكتشف وكالاتنا',
             secondaryLink: '/brands',
             secondaryIcon: 'agencies',
-            image: b.image || '/images/hero-showcase-perfect.webp',
+            image: b.image ? b.image.replace(/^\/media\//, '/uploads/') : '/images/hero-showcase-perfect.webp',
         }));
 
-        // If only 1 banner is configured in DB, append supplementary slides so carousel is lively
         if (mapped.length === 1) {
             return [mapped[0], ...DEFAULT_SLIDES.slice(1)];
         }
@@ -199,6 +198,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     }, [banners]);
 
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [prevIndex, setPrevIndex] = useState<number | null>(null);
     const [isHoverPaused, setIsHoverPaused] = useState(false);
     const [isFocusPaused, setIsFocusPaused] = useState(false);
     const [isDragPaused, setIsDragPaused] = useState(false);
@@ -207,8 +207,6 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     const [animKey, setAnimKey] = useState(0);
 
     const heroContainerRef = useRef<HTMLDivElement>(null);
-    const isFirstRender = useRef(true);
-
     const touchStartX = useRef<number | null>(null);
     const touchEndX = useRef<number | null>(null);
 
@@ -231,41 +229,33 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
         };
     }, []);
 
-    // Auto-advance / slide transition physics (only runs when slide changes, avoiding initial SSR flash)
-    useGSAP(() => {
-        if (isFirstRender.current) {
-            isFirstRender.current = false;
-            return;
-        }
-        if (prefersReducedMotion()) return;
-
-        gsap.fromTo(
-            '.hero-eyebrow, .hero-headline-line, .hero-subtitle, .hero-cta-button',
-            { opacity: 0, y: 14 },
-            { opacity: 1, y: 0, duration: 0.45, stagger: 0.05, ease: 'power3.out' }
-        );
-
-        gsap.fromTo(
-            '.hero-active-slide-img',
-            { opacity: 0, scale: 1.04 },
-            { opacity: 1, scale: 1, duration: 0.8, ease: 'power2.out' }
-        );
-    }, { dependencies: [currentIndex], scope: heroContainerRef });
+    // Clean up previous index after crossfade transition duration
+    useEffect(() => {
+        if (prevIndex === null) return;
+        const timer = setTimeout(() => {
+            setPrevIndex(null);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [prevIndex, currentIndex]);
 
     const goToNext = useCallback(() => {
+        setPrevIndex(currentIndex);
         setCurrentIndex((prev) => (prev + 1) % slides.length);
         setAnimKey((prev) => prev + 1);
-    }, [slides.length]);
+    }, [currentIndex, slides.length]);
 
     const goToPrev = useCallback(() => {
+        setPrevIndex(currentIndex);
         setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
         setAnimKey((prev) => prev + 1);
-    }, [slides.length]);
+    }, [currentIndex, slides.length]);
 
     const goToSlide = useCallback((index: number) => {
+        if (index === currentIndex) return;
+        setPrevIndex(currentIndex);
         setCurrentIndex(index);
         setAnimKey((prev) => prev + 1);
-    }, []);
+    }, [currentIndex]);
 
     // Auto-advance carousel timer
     useEffect(() => {
@@ -310,14 +300,14 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
 
         if (touchStartX.current !== null && touchEndX.current !== null) {
             const distance = touchStartX.current - touchEndX.current;
-            const threshold = 30;
+            const threshold = 35;
 
             if (Math.abs(distance) > threshold) {
                 if (distance > 0) {
-                    // Swiped Left
+                    // Swiped left
                     goToNext();
                 } else {
-                    // Swiped Right
+                    // Swiped right
                     goToPrev();
                 }
             }
@@ -386,39 +376,48 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             `}</style>
 
             <div dir="ltr" className="relative grid h-[440px] grid-cols-1 sm:h-auto sm:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
-                {/* Physical left: photography only */}
+                {/* Physical left: cinematic photography crossfade */}
                 <div className="absolute inset-0 h-full overflow-hidden bg-slate-100 sm:relative sm:inset-auto sm:h-[290px] md:h-[330px] lg:h-full dark:bg-slate-900">
                     {slides.map((slide, index) => {
                         const isActive = index === currentIndex;
+                        const isPrev = index === prevIndex;
+                        const zIndexClass = isActive ? 'z-20' : isPrev ? 'z-10' : 'z-0';
+
                         return (
                             <div
                                 key={slide.id}
-                                className={`hero-slide-item absolute inset-0 transition-[opacity,transform] duration-700 ease-out ${
+                                className={`hero-slide-item absolute inset-0 transition-opacity duration-700 ease-in-out ${zIndexClass} ${
                                     isActive
-                                        ? 'hero-active-slide-img opacity-100 scale-100 z-10 pointer-events-auto'
-                                        : 'opacity-0 scale-[1.025] z-0 pointer-events-none'
+                                        ? 'opacity-100 pointer-events-auto'
+                                        : 'opacity-0 pointer-events-none'
                                 }`}
                                 aria-hidden={!isActive}
                             >
-                                <Image
-                                    src={slide.image}
-                                    alt={isArabic ? (slide.titleAr || 'بنر الصفحة الرئيسية') : (slide.title || 'Hero banner')}
-                                    fill
-                                    priority={index === 0}
-                                    loading={index === 0 ? "eager" : "lazy"}
-                                    sizes="(max-width: 640px) 100vw, (max-width: 1023px) 100vw, (max-width: 1536px) 58vw, 850px"
-                                    className="object-cover object-center w-full h-full pointer-events-none"
-                                />
+                                <div
+                                    className={`w-full h-full transform-gpu transition-transform duration-1000 ease-out ${
+                                        isActive ? 'scale-100' : 'scale-[1.035]'
+                                    }`}
+                                >
+                                    <Image
+                                        src={slide.image}
+                                        alt={isArabic ? (slide.titleAr || 'بنر الصفحة الرئيسية') : (slide.title || 'Hero banner')}
+                                        fill
+                                        priority={index === 0}
+                                        loading={index === 0 ? "eager" : "lazy"}
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1023px) 100vw, (max-width: 1536px) 58vw, 850px"
+                                        className="object-cover object-center w-full h-full pointer-events-none"
+                                    />
+                                </div>
                             </div>
                         );
                     })}
 
-                    {/* A localized mobile scrim protects text contrast without muting the full photograph. */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[52%] bg-gradient-to-t from-[#071522]/90 via-[#071522]/50 to-transparent sm:hidden" aria-hidden="true" />
+                    {/* Localized mobile scrim protects text contrast without muting the full photograph */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[55%] bg-gradient-to-t from-[#071522]/95 via-[#071522]/60 to-transparent sm:hidden" aria-hidden="true" />
 
-                    {/* Compact mobile controls stay with the image and do not add hero height. */}
+                    {/* Compact mobile controls */}
                     <div dir={dir} className="absolute bottom-3 inset-x-0 z-30 flex items-center justify-center gap-2 sm:hidden" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
-                        <div dir={dir} className="flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white/95 px-2.5" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
+                        <div dir={dir} className="flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white/95 px-2.5 shadow-xs" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
                             {slides.map((_, idx) => {
                                 const isActive = idx === currentIndex;
                                 return (
@@ -448,63 +447,95 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                     </div>
                 </div>
 
-                {/* Physical right: clean HTML content panel */}
+                {/* Physical right: clean animated editorial content panel */}
                 <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-5 pb-14 pt-14 sm:relative sm:inset-auto sm:min-h-[270px] sm:items-center sm:bg-white sm:px-10 sm:pb-14 sm:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:sm:bg-[#0B192C]">
-                    <div className="w-full max-w-xl text-center lg:text-start">
-                        {badgeText && (
-                            <span className="hero-eyebrow mb-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.1em] text-[#8A6305] sm:mb-2.5 sm:text-xs sm:tracking-[0.14em] dark:text-[#E5B54A]">
-                                <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
-                                {badgeText}
-                            </span>
-                        )}
-
-                        <h1 className="hero-headline mx-auto max-w-[25rem] text-[1.5rem] font-black leading-[1.18] tracking-tight text-white sm:max-w-none sm:text-4xl sm:text-[#0B192C] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
-                            <span className="hero-headline-line block">{headline.part1}</span>
-                            {headline.part2 && (
-                                <span className="hero-headline-line block text-[#A8750A] dark:text-[#E5B54A] mt-1">
-                                    {headline.part2}
-                                </span>
-                            )}
-                        </h1>
-
-                        {subtitleText && (
-                            <p className="hero-subtitle mx-auto mt-2.5 line-clamp-2 max-w-lg text-xs font-medium leading-[1.65] text-slate-100 sm:mt-3 sm:text-sm sm:leading-relaxed sm:text-slate-600 lg:mx-0 lg:text-base dark:text-slate-300">
-                                {subtitleText}
-                            </p>
-                        )}
-
-                        <div className="mt-4 grid grid-cols-2 items-stretch gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5 lg:justify-start">
-                            <Link
-                                href={currentSlide.link}
-                                prefetch={false}
-                                className="hero-cta-button group/btn inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#B68012] bg-[#B68012] px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#946809] active:scale-[0.98] sm:gap-2 sm:px-6 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
-                            >
-                                <span>{primaryButtonText}</span>
-                                <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
-                            </Link>
-
-                            {secondaryButtonText && (
-                                <Link
-                                    href={secondaryLink}
-                                    prefetch={false}
-                                    target={secondaryLink.startsWith('http') ? '_blank' : undefined}
-                                    rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
-                                    className="hero-cta-button inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-white/70 bg-[#0B192C]/75 px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] sm:gap-2 sm:border-[#0B192C] sm:bg-[#0B192C] sm:px-6 sm:text-sm sm:hover:bg-[#152841] dark:sm:border-white dark:sm:bg-white dark:sm:text-[#0B192C] dark:sm:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] sm:focus-visible:ring-[#8A6305] sm:focus-visible:ring-offset-white"
+                    <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
+                            key={currentSlide.id}
+                            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+                            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                            transition={{
+                                duration: reduceMotion ? 0.15 : 0.32,
+                                ease: [0.16, 1, 0.3, 1],
+                            }}
+                            className="w-full max-w-xl text-center lg:text-start"
+                        >
+                            {badgeText && (
+                                <motion.span
+                                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+                                    animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.28, delay: 0.02, ease: [0.16, 1, 0.3, 1] }}
+                                    className="hero-eyebrow mb-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.1em] text-[#8A6305] sm:mb-2.5 sm:text-xs sm:tracking-[0.14em] dark:text-[#E5B54A]"
                                 >
-                                    <span>{secondaryButtonText}</span>
-                                    {currentSlide.secondaryIcon === 'whatsapp' ? (
-                                        <FaWhatsapp className="w-4 h-4 text-emerald-500" aria-hidden="true" />
-                                    ) : (
-                                        <Building2 className="w-4 h-4" aria-hidden="true" />
-                                    )}
-                                </Link>
+                                    <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+                                    {badgeText}
+                                </motion.span>
                             )}
-                        </div>
-                    </div>
+
+                            <motion.h1
+                                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                transition={{ duration: 0.32, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+                                className="hero-headline mx-auto max-w-[25rem] text-[1.5rem] font-black leading-[1.18] tracking-tight text-white sm:max-w-none sm:text-4xl sm:text-[#0B192C] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white"
+                            >
+                                <span className="hero-headline-line block">{headline.part1}</span>
+                                {headline.part2 && (
+                                    <span className="hero-headline-line block text-[#A8750A] dark:text-[#E5B54A] mt-1">
+                                        {headline.part2}
+                                    </span>
+                                )}
+                            </motion.h1>
+
+                            {subtitleText && (
+                                <motion.p
+                                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                                    animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.32, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+                                    className="hero-subtitle mx-auto mt-2.5 line-clamp-2 max-w-lg text-xs font-medium leading-[1.65] text-slate-100 sm:mt-3 sm:text-sm sm:leading-relaxed sm:text-slate-600 lg:mx-0 lg:text-base dark:text-slate-300"
+                                >
+                                    {subtitleText}
+                                </motion.p>
+                            )}
+
+                            <motion.div
+                                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                transition={{ duration: 0.32, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+                                className="mt-4 grid grid-cols-2 items-stretch gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5 lg:justify-start"
+                            >
+                                <Link
+                                    href={currentSlide.link}
+                                    prefetch={false}
+                                    className="hero-cta-button group/btn inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#B68012] bg-[#B68012] px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#946809] active:scale-[0.98] sm:gap-2 sm:px-6 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
+                                >
+                                    <span>{primaryButtonText}</span>
+                                    <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
+                                </Link>
+
+                                {secondaryButtonText && (
+                                    <Link
+                                        href={secondaryLink}
+                                        prefetch={false}
+                                        target={secondaryLink.startsWith('http') ? '_blank' : undefined}
+                                        rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
+                                        className="hero-cta-button inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-white/70 bg-[#0B192C]/75 px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] sm:gap-2 sm:border-[#0B192C] sm:bg-[#0B192C] sm:px-6 sm:text-sm sm:hover:bg-[#152841] dark:sm:border-white dark:sm:bg-white dark:sm:text-[#0B192C] dark:sm:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] sm:focus-visible:ring-[#8A6305] sm:focus-visible:ring-offset-white"
+                                    >
+                                        <span>{secondaryButtonText}</span>
+                                        {currentSlide.secondaryIcon === 'whatsapp' ? (
+                                            <FaWhatsapp className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+                                        ) : (
+                                            <Building2 className="w-4 h-4" aria-hidden="true" />
+                                        )}
+                                    </Link>
+                                )}
+                            </motion.div>
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </div>
 
-            {/* Circular Floating Left Arrow Button (Physically on left side with arrow pointing left) */}
+            {/* Circular Floating Left Arrow Button */}
             <button
                 type="button"
                 onClick={isArabic ? goToNext : goToPrev}
@@ -514,7 +545,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            {/* Circular Floating Right Arrow Button (Physically on right side with arrow pointing right) */}
+            {/* Circular Floating Right Arrow Button */}
             <button
                 type="button"
                 onClick={isArabic ? goToPrev : goToNext}

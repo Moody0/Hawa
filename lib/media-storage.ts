@@ -6,7 +6,6 @@ export function getMediaStorageRoot(): string {
     if (!path.isAbsolute(configured)) throw new Error("MEDIA_STORAGE_DIR must be absolute");
     return path.resolve(configured);
   }
-  if (process.env.NODE_ENV === "production") throw new Error("MEDIA_STORAGE_DIR is required in production");
   return path.resolve(process.cwd(), "public", "uploads");
 }
 
