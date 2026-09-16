@@ -2,6 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import slugify from 'slugify';
 
+// Load environment variables from .env files if present via @next/env
+try {
+    const { loadEnvConfig } = require('@next/env');
+    loadEnvConfig(path.join(__dirname, '..'));
+} catch {
+    // Ignore if @next/env is not available
+}
+
 // RFC 4180 compliant CSV parser supporting multiline quoted strings
 export function parseCSV(csvText: string): string[][] {
     const rows: string[][] = [];
@@ -229,22 +237,38 @@ export async function importHawaCatalogToDatabase(options: { dryRun?: boolean } 
     for (const mcName of uniqueMainCatNames) {
         const slug = getPlaceholderSafeSlug('mc', mcName);
         const isPlaceholder = mcName === '0';
-        const mc = await prisma.mainCategory.upsert({
-            where: { slug },
-            update: {
-                name: mcName,
-                isActive: true,
-                showInNav: !isPlaceholder
-            },
-            create: {
-                name: mcName,
-                slug,
-                description: isPlaceholder ? '0' : `${mcName} Collection`,
-                isActive: true,
-                showInNav: !isPlaceholder,
-                isFeatured: false
+
+        const existing = await prisma.mainCategory.findFirst({
+            where: {
+                OR: [
+                    { name: mcName },
+                    { slug }
+                ]
             }
         });
+
+        let mc;
+        if (existing) {
+            mc = await prisma.mainCategory.update({
+                where: { id: existing.id },
+                data: {
+                    name: mcName,
+                    isActive: true,
+                    showInNav: !isPlaceholder
+                }
+            });
+        } else {
+            mc = await prisma.mainCategory.create({
+                data: {
+                    name: mcName,
+                    slug,
+                    description: isPlaceholder ? '0' : `${mcName} Collection`,
+                    isActive: true,
+                    showInNav: !isPlaceholder,
+                    isFeatured: false
+                }
+            });
+        }
         mainCatMap.set(mcName, { id: mc.id, slug: mc.slug });
     }
 
@@ -261,23 +285,38 @@ export async function importHawaCatalogToDatabase(options: { dryRun?: boolean } 
         const sampleProduct = products.find(p => p.brandName === bName);
         const mcRecord = sampleProduct ? mainCatMap.get(sampleProduct.mainCatName) : undefined;
 
-        const brand = await prisma.brand.upsert({
-            where: { slug },
-            update: {
-                name: bName,
-                isActive: true,
-                mainCategoryId: mcRecord?.id || null
-            },
-            create: {
-                name: bName,
-                slug,
-                description: isPlaceholder ? '0' : `Products for ${bName}`,
-                group: isPlaceholder ? 'DIFFERENT' : 'MAIN',
-                isActive: true,
-                isFeatured: !isPlaceholder,
-                mainCategoryId: mcRecord?.id || null
+        const existing = await prisma.brand.findFirst({
+            where: {
+                OR: [
+                    { name: bName },
+                    { slug }
+                ]
             }
         });
+
+        let brand;
+        if (existing) {
+            brand = await prisma.brand.update({
+                where: { id: existing.id },
+                data: {
+                    name: bName,
+                    isActive: true,
+                    mainCategoryId: mcRecord?.id || existing.mainCategoryId || null
+                }
+            });
+        } else {
+            brand = await prisma.brand.create({
+                data: {
+                    name: bName,
+                    slug,
+                    description: isPlaceholder ? '0' : `Products for ${bName}`,
+                    group: isPlaceholder ? 'DIFFERENT' : 'MAIN',
+                    isActive: true,
+                    isFeatured: !isPlaceholder,
+                    mainCategoryId: mcRecord?.id || null
+                }
+            });
+        }
         brandMap.set(bName, { id: brand.id, slug: brand.slug });
     }
 
@@ -295,22 +334,37 @@ export async function importHawaCatalogToDatabase(options: { dryRun?: boolean } 
         const slug = getPlaceholderSafeSlug('category', p.subCatName, brand.slug);
         const mc = mainCatMap.get(p.mainCatName);
 
-        const category = await prisma.category.upsert({
-            where: { slug },
-            update: {
-                name: p.subCatName,
-                brandId: brand.id,
-                mainCategoryId: mc?.id || null
-            },
-            create: {
-                name: p.subCatName,
-                slug,
-                description: p.subCatName === '0' ? '0' : `Products for ${p.subCatName}`,
-                brandId: brand.id,
-                mainCategoryId: mc?.id || null,
-                isFeatured: p.subCatName !== '0'
+        const existing = await prisma.category.findFirst({
+            where: {
+                OR: [
+                    { slug },
+                    { brandId: brand.id, name: p.subCatName }
+                ]
             }
         });
+
+        let category;
+        if (existing) {
+            category = await prisma.category.update({
+                where: { id: existing.id },
+                data: {
+                    name: p.subCatName,
+                    brandId: brand.id,
+                    mainCategoryId: mc?.id || existing.mainCategoryId || null
+                }
+            });
+        } else {
+            category = await prisma.category.create({
+                data: {
+                    name: p.subCatName,
+                    slug,
+                    description: p.subCatName === '0' ? '0' : `Products for ${p.subCatName}`,
+                    brandId: brand.id,
+                    mainCategoryId: mc?.id || null,
+                    isFeatured: p.subCatName !== '0'
+                }
+            });
+        }
         categoryKeyMap.set(key, category.id);
     }
 
