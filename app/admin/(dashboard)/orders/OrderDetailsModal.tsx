@@ -206,7 +206,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, canDelete, o
                                                         <span className="text-xs font-bold text-text-main dark:text-white line-clamp-1">
                                                             {item.product?.name || 'Deleted Product'}
                                                         </span>
-                                                        {item.options && (
+                                                        {item.options && item.options !== "0" && (
                                                             <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded w-fit mt-0.5">
                                                                 {item.options}
                                                             </span>

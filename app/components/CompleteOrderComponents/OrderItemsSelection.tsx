@@ -69,7 +69,7 @@ const OrderItemsSelection = ({ items, showPrices = true }: OrderItemsSelectionPr
                                         <span className="font-semibold text-[#0B192C] dark:text-[#8A6305]">
                                             {item.quantity} {packagingUnit}
                                         </span>
-                                        {item.options && (
+                                        {item.options && item.options !== "0" && (
                                             <span className="bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded text-[10px] font-bold">
                                                 {item.options}
                                             </span>

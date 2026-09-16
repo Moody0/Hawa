@@ -35,10 +35,10 @@ const ProductHeader = ({
     const { language, dir } = useLanguage();
     const isArabic = language === "ar";
 
-    const brandName = brand?.name || fallbackBrandName || "";
-    const categoryName = category?.name || fallbackCategoryName || "";
-    const brandSlug = brand?.slug;
-    const categorySlug = category?.slug;
+    const brandName = (brand?.name !== "0" && brand?.name) || (fallbackBrandName !== "0" && fallbackBrandName) || "";
+    const categoryName = (category?.name !== "0" && category?.name) || (fallbackCategoryName !== "0" && fallbackCategoryName) || "";
+    const brandSlug = brand?.slug && !brand.slug.startsWith("brand-0") ? brand.slug : undefined;
+    const categorySlug = category?.slug && !category.slug.startsWith("cat-0") ? category.slug : undefined;
 
     const rawDisplayName = isArabic
         ? (nameAr || name)

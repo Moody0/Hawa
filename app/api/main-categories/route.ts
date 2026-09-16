@@ -6,7 +6,11 @@ export const revalidate = 3600;
 export async function GET() {
     try {
         const mainCategories = await prisma.mainCategory.findMany({
-            where: { isActive: true, archivedAt: null },
+            where: {
+                isActive: true,
+                archivedAt: null,
+                NOT: [{ name: "0" }, { slug: "mc-0" }],
+            },
             orderBy: [
                 { navOrder: "asc" },
                 { name: "asc" },
@@ -21,7 +25,6 @@ export async function GET() {
                     select: {
                         products: {
                             where: {
-                                stock: { gt: 0 },
                                 archivedAt: null,
                                 brand: { isActive: true, archivedAt: null },
                             },

@@ -10,6 +10,7 @@ import { formatPackaging } from "@/lib/packaging";
 import RollingNumber from "@/app/components/RollingNumber";
 import toast from 'react-hot-toast';
 import { useProductPurchase } from "@/app/context/ProductPurchaseContext";
+import { parseProductOptions } from "@/lib/product-options";
 
 interface MobileStickyOrderBarProps {
     product: {
@@ -47,9 +48,7 @@ export default function MobileStickyOrderBar({ product, stock }: MobileStickyOrd
     const minimumQuantity = product.minOrder || 1;
     const isOutOfStock = typeof stock === 'number' && stock <= 0;
 
-    const parsedOptions = purchaseContext?.parsedOptions ?? (product.options 
-        ? product.options.split(',').map(o => o.trim()).filter(Boolean)
-        : []);
+    const parsedOptions = purchaseContext?.parsedOptions ?? parseProductOptions(product.options);
     const hasOptions = parsedOptions.length > 0;
 
     const quantity = purchaseContext ? purchaseContext.quantity : localQuantity;

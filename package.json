@@ -18,7 +18,8 @@
     "images:prewarm": "node scripts/prewarm-images.js",
     "quality-gate": "npm run typecheck && npm run lint && npm run test:run && npm run test:smoke",
     "ci": "npm run quality-gate && npm run test:e2e",
-    "db:import": "node scripts/importData.js"
+    "db:import": "node scripts/importData.js",
+    "db:import:hawa": "tsx scripts/import-hawa-catalog.ts --execute"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

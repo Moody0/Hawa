@@ -159,6 +159,7 @@ export const getHomeRailBrands = unstable_cache(
             const brands = await prisma.brand.findMany({
                 where: {
                     isActive: true,
+                    NOT: [{ name: '0' }, { slug: 'brand-0' }],
                     products: {
                         some: {
                             NOT: [
@@ -426,6 +427,7 @@ export const getFeaturedCategories = unstable_cache(
                 where: {
                     isFeatured: true,
                     brand: { isActive: true },
+                    NOT: [{ name: "0" }, { slug: { startsWith: "cat-0" } }],
                 },
                 take: 12,
                 orderBy: { updatedAt: 'desc' },
@@ -536,6 +538,7 @@ export const getMainCategoryBrands = unstable_cache(
                     group: BrandGroup.MAIN,
                     isActive: true,
                     archivedAt: null,
+                    NOT: [{ name: '0' }, { slug: 'brand-0' }],
                 },
                 take: 4,
                 orderBy: [
@@ -573,7 +576,6 @@ export const getBestSellerProducts = unstable_cache(
                     isTrending: true,
                     archivedAt: null,
                     brand: { isActive: true, archivedAt: null },
-                    stock: { gt: 0 },
                     price: { gte: 0 },
                     NOT: [
                         { images: '/placeholder.svg' },
@@ -622,7 +624,6 @@ export const getNewArrivalProducts = unstable_cache(
                 where: {
                     archivedAt: null,
                     brand: { isActive: true, archivedAt: null },
-                    stock: { gt: 0 },
                     price: { gte: 0 },
                     NOT: [
                         { images: '/placeholder.svg' },
@@ -671,7 +672,6 @@ export const getTrendingWeeklyProducts = unstable_cache(
                 where: {
                     archivedAt: null,
                     brand: { isActive: true, archivedAt: null },
-                    stock: { gt: 0 },
                     price: { gte: 0 },
                     NOT: [
                         { images: '/placeholder.svg' },

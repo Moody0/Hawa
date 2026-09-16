@@ -14,6 +14,14 @@ const http = require('http');
 const { spawn, execSync } = require('child_process');
 const path = require('path');
 
+// Load environment variables from .env files if present via @next/env
+try {
+    const { loadEnvConfig } = require('@next/env');
+    loadEnvConfig(path.join(__dirname, '..'));
+} catch {
+    // Ignore if @next/env is not available
+}
+
 function ensureBuildId() {
     const buildIdPath = path.join(__dirname, '..', '.next', 'BUILD_ID');
     if (!fs.existsSync(buildIdPath)) {
@@ -33,9 +41,9 @@ const ROUTES = [
     { path: '/place-order', expectedStatus: [200], contentType: 'text/html', type: 'page' },
 
     // Public & Customer APIs (Expected 200 / 401, Content-Type: application/json)
-    { path: '/api/products', expectedStatus: [200], contentType: 'application/json', type: 'api' },
-    { path: '/api/categories', expectedStatus: [200], contentType: 'application/json', type: 'api' },
-    { path: '/api/main-categories', expectedStatus: [200], contentType: 'application/json', type: 'api' },
+    { path: '/api/products', expectedStatus: [200], contentType: 'application/json', type: 'api', requiresDb: true },
+    { path: '/api/categories', expectedStatus: [200], contentType: 'application/json', type: 'api', requiresDb: true },
+    { path: '/api/main-categories', expectedStatus: [200], contentType: 'application/json', type: 'api', requiresDb: true },
     { path: '/api/navigation', expectedStatus: [200], contentType: 'application/json', type: 'api' },
     { path: '/api/settings', expectedStatus: [200], contentType: 'application/json', type: 'api' },
     { path: '/api/customer/auth/me', expectedStatus: [200, 401], contentType: 'application/json', type: 'api' },
@@ -180,11 +188,25 @@ async function runSmokeTests() {
 
     let passedCount = 0;
     let failedCount = 0;
+    let skippedCount = 0;
     const failures = [];
+    const skippedRoutes = [];
+
+    const hasDatabaseUrl = Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.trim());
+    if (!hasDatabaseUrl) {
+        console.log('⚠ DATABASE_URL is not configured. DB-dependent API smoke tests will be skipped.');
+    }
 
     for (const route of ROUTES) {
         const fullUrl = `${baseUrl}${route.path}`;
         const label = `${route.type.toUpperCase()} ${route.path}`;
+
+        if (route.requiresDb && !hasDatabaseUrl) {
+            console.log(`  ⚠ ${label} -> SKIPPED (DATABASE_URL not configured)`);
+            skippedCount++;
+            skippedRoutes.push(route.path);
+            continue;
+        }
 
         try {
             const response = await fetchRoute(fullUrl);
@@ -229,15 +251,20 @@ async function runSmokeTests() {
     }
 
     console.log('\n========================================');
-    console.log(`Smoke Test Results: ${passedCount} passed, ${failedCount} failed (${ROUTES.length} total)`);
+    console.log(`Smoke Test Results: ${passedCount} passed, ${failedCount} failed, ${skippedCount} skipped (${ROUTES.length} total)`);
     console.log('========================================');
+
+    if (skippedCount > 0) {
+        console.log('ℹ Skipped DB-dependent API smoke tests (DATABASE_URL missing):');
+        skippedRoutes.forEach((routePath) => console.log(`   - ${routePath}`));
+    }
 
     if (failedCount > 0) {
         console.error('❌ Smoke tests failed on routes:');
         failures.forEach((f) => console.error(`   - ${f.route}: ${f.reasons.join(', ')}`));
         process.exit(1);
     } else {
-        console.log('🎉 All production smoke routes and APIs verified successfully!');
+        console.log('🎉 All available production smoke routes and APIs verified successfully!');
         process.exit(0);
     }
 }

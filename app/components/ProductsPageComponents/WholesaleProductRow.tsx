@@ -11,6 +11,7 @@ import { Plus, Minus, ShoppingBag, Lock } from 'lucide-react';
 import ResilientImage from "@/app/components/ResilientImage";
 import RollingNumber from "@/app/components/RollingNumber";
 import { motion, AnimatePresence } from "framer-motion";
+import { parseProductOptions } from "@/lib/product-options";
 import { Product } from "./ProductCard";
 
 interface WholesaleProductRowProps {
@@ -33,7 +34,7 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
         : product.descriptionEn || product.description;
 
     // Clean redundant brand prefix if title starts with the brand name (e.g. "بوفالو صابون..." -> "صابون...")
-    const brandName = product.brand?.name || '';
+    const brandName = product.brand?.name && product.brand.name !== "0" ? product.brand.name : '';
     const cleanDisplayName = useMemo(() => {
         if (!brandName || !displayName) return displayName;
         const brandParts = brandName.split('-').map(s => s.trim()).filter(Boolean);
@@ -47,12 +48,11 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
         return displayName;
     }, [displayName, brandName]);
 
+    const isOutOfStock = typeof product.stock === "number" && product.stock <= 0;
     const cartItem = items.find((item) => item.id === product.id);
     const quantityInCart = cartItem ? cartItem.quantity : 0;
 
-    const parsedOptions = product.options
-        ? product.options.split(",").map((o) => o.trim()).filter(Boolean)
-        : [];
+    const parsedOptions = parseProductOptions(product.options);
     const defaultOption = parsedOptions.length > 0 ? parsedOptions[0] : undefined;
 
     const images = typeof product.images === "string"
@@ -67,6 +67,7 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
     const handleInitialAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (isOutOfStock) return;
         addItem({
             id: product.id,
             name: displayName,
@@ -120,7 +121,7 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
 
                 <div className="min-w-0 flex-1">
                     {/* Brand Pill */}
-                    {product.brand && (
+                    {product.brand && product.brand.name !== "0" && (
                         <span className="inline-block text-[10px] font-bold text-[#8A6305] dark:text-[#E5B54A] uppercase tracking-wider mb-0.5">
                             {product.brand.name}
                         </span>
@@ -218,7 +219,15 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
                         }}
                     >
                         <AnimatePresence mode="popLayout" initial={false}>
-                            {quantityInCart === 0 ? (
+                            {isOutOfStock ? (
+                                <button
+                                    type="button"
+                                    disabled
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-slate-500 text-xs font-bold rounded-xl cursor-not-allowed select-none border border-slate-200 dark:border-white/5"
+                                >
+                                    <span>{isArabic ? "غير متوفر" : "Out of Stock"}</span>
+                                </button>
+                            ) : quantityInCart === 0 ? (
                                 !isPriceOnInquiry ? (
                                     <motion.button
                                         key="ws-add"

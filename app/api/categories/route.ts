@@ -19,6 +19,7 @@ export async function GET(request: Request) {
         const where: Prisma.CategoryWhereInput = {
             archivedAt: null,
             brand: { isActive: true, archivedAt: null },
+            NOT: [{ name: "0" }, { slug: { startsWith: "cat-0" } }],
         };
 
         if (brandIdsParam) {
@@ -58,7 +59,6 @@ export async function GET(request: Request) {
                     select: {
                         products: {
                             where: {
-                                stock: { gt: 0 },
                                 archivedAt: null,
                                 brand: { isActive: true, archivedAt: null },
                             },

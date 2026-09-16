@@ -22,8 +22,8 @@ export function formatPackaging(
     const isAr = language === 'ar';
     const raw = (packaging || '').trim();
 
-    // Default packaging when empty or null
-    if (!raw) {
+    // Default packaging when empty or null or "0"
+    if (!raw || raw === '0') {
         if (isAr) return 'طرد';
         return options?.short ? 'ctn' : 'Carton';
     }
@@ -92,10 +92,10 @@ export function formatPackageItems(
     language: string,
     options?: FormatPackageItemsOptions
 ): string {
-    if (!itemsPerPackage) return '';
+    if (!itemsPerPackage || itemsPerPackage === '0') return '';
     const isAr = language === 'ar';
     const str = String(itemsPerPackage).trim();
-    if (!str) return '';
+    if (!str || str === '0') return '';
 
     const mode = options?.mode || 'badge';
 

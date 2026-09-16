@@ -108,7 +108,10 @@ export const getCatalogBrands = cache(
         async () => {
             try {
                 const brands = await prisma.brand.findMany({
-                    where: { isActive: true },
+                    where: {
+                        isActive: true,
+                        NOT: [{ name: "0" }, { slug: "brand-0" }],
+                    },
                     orderBy: [
                         { isFeatured: "desc" },
                         { name: "asc" },
@@ -192,6 +195,7 @@ export const getCatalogCategories = cache(async (brandId?: string) => {
                     where: {
                         brand: { isActive: true },
                         ...(brandId ? { brandId } : {}),
+                        NOT: [{ name: "0" }, { slug: { startsWith: "cat-0" } }],
                     },
                     orderBy: [
                         { isFeatured: "desc" },
@@ -320,6 +324,7 @@ export const getCatalogCategoriesByMainCategory = cache(async (mainCategoryId: s
                     where: {
                         mainCategoryId,
                         brand: { isActive: true },
+                        NOT: [{ name: "0" }, { slug: { startsWith: "cat-0" } }],
                     },
                     orderBy: [
                         { isFeatured: "desc" },
@@ -344,6 +349,7 @@ export const getCatalogMainCategories = cache(
                 const mainCategories = await prisma.mainCategory.findMany({
                     where: {
                         isActive: true,
+                        NOT: [{ name: "0" }, { slug: "mc-0" }],
                     },
                     orderBy: [
                         { navOrder: "asc" },
@@ -359,7 +365,7 @@ export const getCatalogMainCategories = cache(
                             select: {
                                 products: {
                                     where: {
-                                        stock: { gt: 0 },
+                                        archivedAt: null,
                                         brand: { isActive: true },
                                     },
                                 },
@@ -388,14 +394,14 @@ export const getCatalogMainCategories = cache(
 );
 
 export const getCatalogInitialData = cache(
-    async (categoryId?: string, brandId?: string, mainCategoryId?: string, search?: string) => {
+    async (categoryId?: string, brandId?: string, mainCategoryId?: string, search?: string, inStock?: boolean) => {
         const cleanSearch = search ? search.trim().slice(0, 100) : "";
-        const cacheKey = `catalog-initial-${categoryId || 'none'}-${brandId || 'none'}-${mainCategoryId || 'none'}-${cleanSearch ? encodeURIComponent(cleanSearch) : 'none'}`;
+        const cacheKey = `catalog-initial-v4-${categoryId || 'none'}-${brandId || 'none'}-${mainCategoryId || 'none'}-${cleanSearch ? encodeURIComponent(cleanSearch) : 'none'}-${inStock ? 'instock' : 'all'}`;
         return unstable_cache(
             async () => {
                 try {
                     const whereClause: {
-                        stock: { gt: number };
+                        stock?: { gt: number };
                         categoryId?: string;
                         brandId?: string;
                         mainCategoryId?: string;
@@ -404,11 +410,14 @@ export const getCatalogInitialData = cache(
                         category: { archivedAt: null };
                         OR?: Array<Record<string, unknown>>;
                     } = {
-                        stock: { gt: 0 },
                         archivedAt: null,
                         brand: { isActive: true, archivedAt: null },
                         category: { archivedAt: null },
                     };
+
+                    if (inStock) {
+                        whereClause.stock = { gt: 0 };
+                    }
 
                     if (categoryId) {
                         whereClause.categoryId = categoryId;
