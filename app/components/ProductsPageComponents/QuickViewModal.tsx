@@ -11,6 +11,7 @@ import { useCustomer } from '@/app/context/CustomerContext';
 import { X, Lock } from 'lucide-react';
 import { formatPackaging, formatPackageItems } from '@/lib/packaging';
 import RollingNumber from '@/app/components/RollingNumber';
+import { parseProductOptions } from '@/lib/product-options';
 
 interface Product {
     id: string;
@@ -90,10 +91,9 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
     }, [isOpen, mounted, onClose]);
 
     const isLockedForGuest = !customer;
-
-    const parsedOptions = product.options 
-        ? product.options.split(',').map(o => o.trim()).filter(Boolean)
-        : [];
+    const isPriceOnInquiry = Boolean(product.hidePrice || Number(product.price) <= 0);
+    const isOutOfStock = typeof product.stock === 'number' && product.stock <= 0;
+    const parsedOptions = parseProductOptions(product.options);
     const [selectedOption, setSelectedOption] = useState<string>(parsedOptions[0] || "");
     
     if (!isOpen || !mounted) return null;
@@ -111,6 +111,7 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
     const primaryImage = images[0] || '';
 
     const handleAddToCart = () => {
+        if (isOutOfStock) return;
         addItem({
             id: product.id,
             name: displayName,
@@ -245,7 +246,7 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                                     </div>
                                 </Link>
                             </div>
-                        ) : !product.hidePrice && Number(product.price) > 0 ? (
+                        ) : !isPriceOnInquiry ? (
                             <div className="text-2xl font-black text-[#0B192C] dark:text-white">
                                 {product.discountPrice && Number(product.discountPrice) < Number(product.price) ? (
                                     <div className="flex items-center gap-3">
@@ -268,9 +269,10 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                     <div className="flex items-center gap-3 sm:gap-4 mb-4">
                             <button 
                                 onClick={handleAddToCart}
-                                className="flex-1 bg-[#0B192C] hover:bg-[#8A6305] text-white py-3 rounded-xl font-bold transition-colors text-xs sm:text-sm cursor-pointer active:scale-[0.98] dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white"
+                                disabled={isOutOfStock}
+                                className="flex-1 bg-[#0B192C] hover:bg-[#8A6305] text-white py-3 rounded-xl font-bold transition-colors text-xs sm:text-sm cursor-pointer active:scale-[0.98] dark:bg-[#FAF6EC] dark:text-[#0B192C] dark:hover:bg-[#8A6305] dark:hover:text-white disabled:bg-slate-300 disabled:text-slate-600 disabled:cursor-not-allowed dark:disabled:bg-zinc-700 dark:disabled:text-slate-400"
                             >
-                                {language === 'ar' ? 'إضافة للسلة' : 'Add to Cart'}
+                                {isOutOfStock ? (language === 'ar' ? 'غير متوفر حالياً' : 'Out of stock') : (language === 'ar' ? 'إضافة للسلة' : 'Add to Cart')}
                             </button>
                             
                             <div dir="ltr" className="flex items-center justify-between border border-gray-200 dark:border-white/10 rounded-xl px-2 py-1.5 w-32 sm:w-36 bg-gray-50 dark:bg-zinc-800">

@@ -49,7 +49,12 @@ export interface NavMainCategory {
 async function fetchNavigationData(): Promise<NavMainCategory[]> {
     try {
         const mainCategories = await prisma.mainCategory.findMany({
-            where: { isActive: true, showInNav: true, archivedAt: null },
+            where: {
+                isActive: true,
+                showInNav: true,
+                archivedAt: null,
+                NOT: [{ name: "0" }, { slug: "mc-0" }],
+            },
             orderBy: { navOrder: "asc" },
             select: {
                 id: true,
@@ -58,7 +63,11 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                 description: true,
                 image: true,
                 brands: {
-                    where: { isActive: true, archivedAt: null },
+                    where: {
+                        isActive: true,
+                        archivedAt: null,
+                        NOT: [{ name: "0" }, { slug: "brand-0" }],
+                    },
                     orderBy: { name: "asc" },
                     select: {
                         id: true,
@@ -68,7 +77,11 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                     },
                 },
                 categories: {
-                    where: { archivedAt: null, brand: { archivedAt: null, isActive: true } },
+                    where: {
+                        archivedAt: null,
+                        brand: { archivedAt: null, isActive: true },
+                        NOT: [{ name: "0" }, { slug: { startsWith: "cat-0" } }],
+                    },
                     orderBy: { name: "asc" },
                     select: {
                         id: true,
@@ -122,7 +135,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
 
             // 2. Brands linked through categories in this MainCategory
             for (const cat of mc.categories) {
-                if (cat.brand && cat.brand.isActive && !brandMap.has(cat.brand.id)) {
+                if (cat.brand && cat.brand.isActive && cat.brand.name !== "0" && cat.brand.slug !== "brand-0" && !brandMap.has(cat.brand.id)) {
                     brandMap.set(cat.brand.id, {
                         id: cat.brand.id,
                         name: cat.brand.name,
@@ -134,7 +147,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
 
             // 3. Brands linked through products in this MainCategory
             for (const prod of mc.products) {
-                if (prod.brand && prod.brand.isActive && !brandMap.has(prod.brand.id)) {
+                if (prod.brand && prod.brand.isActive && prod.brand.name !== "0" && prod.brand.slug !== "brand-0" && !brandMap.has(prod.brand.id)) {
                     brandMap.set(prod.brand.id, {
                         id: prod.brand.id,
                         name: prod.brand.name,
@@ -156,7 +169,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                 images: p.images,
                 price: null,
                 discountPrice: null,
-                brand: p.brand ? { name: p.brand.name } : null,
+                brand: p.brand && p.brand.name !== "0" ? { name: p.brand.name } : null,
             });
 
             const trendingProducts = mc.products

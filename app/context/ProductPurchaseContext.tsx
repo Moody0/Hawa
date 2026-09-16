@@ -6,6 +6,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { formatPackaging } from '@/lib/packaging';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { parseProductOptions } from '@/lib/product-options';
 
 export interface PurchaseProduct {
     id: string;
@@ -66,9 +67,7 @@ export function ProductPurchaseProvider({
     const [quantity, setQuantity] = useState(minimumQuantity);
 
     const parsedOptions = useMemo(() => {
-        return product.options
-            ? product.options.split(',').map((o) => o.trim()).filter(Boolean)
-            : [];
+        return parseProductOptions(product.options);
     }, [product.options]);
 
     const hasOptions = parsedOptions.length > 0;

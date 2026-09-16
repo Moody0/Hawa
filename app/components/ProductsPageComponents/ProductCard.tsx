@@ -65,7 +65,7 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
     const isPriceOnInquiry = Boolean(product.hidePrice || Number(product.price) <= 0);
 
     const displayName = (language === 'ar' ? product.nameAr : product.nameEn) || product.name || product.nameAr || '';
-    const brandName = product.brand?.name || '';
+    const brandName = product.brand?.name && product.brand.name !== "0" ? product.brand.name : '';
 
     const cleanDisplayName = useMemo(() => {
         if (!brandName || !displayName) return displayName;
@@ -80,6 +80,7 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
         return displayName;
     }, [displayName, brandName]);
 
+    const isOutOfStock = typeof product.stock === "number" && product.stock <= 0;
     const cartItem = items.find(item => item.id === product.id);
     const quantityInCart = cartItem ? cartItem.quantity : 0;
 
@@ -95,6 +96,7 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
     const handleInitialAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (isOutOfStock) return;
         addItem({
             id: product.id,
             name: displayName,
@@ -188,6 +190,11 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
 
                     {/* Quick Add Floating Button & Stepper */}
                     <div className="absolute bottom-2.5 left-2.5 z-20">
+                        {isOutOfStock ? (
+                            <span className="inline-flex items-center px-2 py-1 text-[10px] font-bold bg-white/95 dark:bg-zinc-900/95 text-slate-500 dark:text-slate-400 rounded-md border border-slate-200/80 dark:border-zinc-700 select-none shadow-sm">
+                                {isArabic ? "غير متوفر" : "Out of Stock"}
+                            </span>
+                        ) : (
                         <motion.div
                             layout
                             transition={{
@@ -250,6 +257,7 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                                 )}
                             </AnimatePresence>
                         </motion.div>
+                        )}
                     </div>
                 </div>
 
@@ -259,7 +267,7 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                     {/* Packaging & Unit Tag Row */}
                     <div className="flex items-center justify-between gap-1 mb-1">
                         <span className="text-[11px] font-bold text-[#8A6305] dark:text-[#E5B54A]">
-                            {product.brand?.name || (isArabic ? 'شركة حوا' : 'Hawa Distribution')}
+                            {brandName || (isArabic ? 'شركة حوا' : 'Hawa Distribution')}
                         </span>
                         <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-white/5">
                             {formatPackaging(product.packaging, language)}

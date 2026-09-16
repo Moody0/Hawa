@@ -135,8 +135,8 @@ export default async function ProductsPage({
 
     const [{ categories: catalogCategories, products, totalProducts }, brands, allCategories] = await Promise.all([
         activeCategory
-            ? getCatalogInitialData(activeCategory.id, activeCategory.brandId, undefined, parsed.search)
-            : getCatalogInitialData(undefined, activeBrand?.id, undefined, parsed.search),
+            ? getCatalogInitialData(activeCategory.id, activeCategory.brandId, undefined, parsed.search, parsed.inStock)
+            : getCatalogInitialData(undefined, activeBrand?.id, undefined, parsed.search, parsed.inStock),
         getCatalogBrands(),
         parsed.categories.length > 0 ? getCatalogCategories() : Promise.resolve([]),
     ]);

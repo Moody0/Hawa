@@ -13,6 +13,7 @@ import { formatPackaging } from "@/lib/packaging";
 import RollingNumber from "@/app/components/RollingNumber";
 import toast from 'react-hot-toast';
 import { useProductPurchase } from "@/app/context/ProductPurchaseContext";
+import { parseProductOptions } from "@/lib/product-options";
 
 interface ProductActionsProps {
     product: {
@@ -50,9 +51,7 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
     const isOutOfStock = typeof stock === 'number' && stock <= 0;
 
     // Options parsing
-    const parsedOptions = purchaseContext?.parsedOptions ?? (product.options 
-        ? product.options.split(',').map(o => o.trim()).filter(Boolean)
-        : []);
+    const parsedOptions = purchaseContext?.parsedOptions ?? parseProductOptions(product.options);
     const hasOptions = parsedOptions.length > 0;
 
     const [localQuantity, setLocalQuantity] = useState(product.minOrder || 1);

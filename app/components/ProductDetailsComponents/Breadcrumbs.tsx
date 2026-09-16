@@ -21,7 +21,7 @@ const Breadcrumbs = ({ productName, categoryName, categorySlug }: BreadcrumbsPro
         },
     ];
 
-    if (categoryName && categorySlug) {
+    if (categoryName && categoryName !== "0" && categorySlug && !categorySlug.startsWith("cat-0")) {
         items.push({
             label: categoryName,
             href: `/categories/${categorySlug}`,
