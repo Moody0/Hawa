@@ -294,7 +294,7 @@ export interface DashboardStats {
 }
 
 let cachedDashboardStats: { data: DashboardStats; timestamp: number } | null = null;
-const DASHBOARD_CACHE_TTL_MS = 15_000;
+const DASHBOARD_CACHE_TTL_MS = 60_000;
 
 function invalidateDashboardCache() {
     cachedDashboardStats = null;
@@ -1040,7 +1040,7 @@ export async function getAdminProducts(options?: {
 }) {
     try {
         await requireAdminSession("PRODUCTS_VIEW");
-        const limit = options?.limit ? Math.min(Math.max(1, options.limit), 500) : 100;
+        const limit = options?.limit ? Math.min(Math.max(1, options.limit), 500) : 50;
         const cursor = options?.cursor;
 
         const where: any = { archivedAt: null };

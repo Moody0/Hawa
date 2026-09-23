@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -40,12 +41,12 @@ export interface AdminUserSession {
 
 const liveUserInclude = { permissions: { select: { permission: true } } } as const;
 
-async function loadAdminUser(id: string) {
+const loadAdminUser = cache(async (id: string) => {
   return prisma.user.findFirst({
     where: { id, archivedAt: null, disabledAt: null },
     include: liveUserInclude,
   });
-}
+});
 
 type LiveAdminUser = NonNullable<Awaited<ReturnType<typeof loadAdminUser>>>;
 
@@ -81,7 +82,7 @@ function toAdminSession(dbUser: LiveAdminUser, iat?: number): AdminUserSession {
   };
 }
 
-export async function getValidAdminSession(): Promise<AdminUserSession | null> {
+export const getValidAdminSession = cache(async (): Promise<AdminUserSession | null> => {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return null;
@@ -93,7 +94,7 @@ export async function getValidAdminSession(): Promise<AdminUserSession | null> {
   } catch {
     return null;
   }
-}
+});
 
 export async function requireAdminSession(requiredPermission?: AdminPermission | LegacyAdminPermission) {
   const session = await getServerSession(authOptions);

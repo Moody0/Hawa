@@ -1,8 +1,9 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutDashboard, ShoppingBag, Store, FolderTree, Package, Users, Settings, X, LogOut, FileText, Network, GalleryHorizontal, FileEdit, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Store, FolderTree, Package, Users, Settings, X, LogOut, FileText, Network, GalleryHorizontal, FileEdit, MessageSquare, Loader2 } from 'lucide-react';
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -28,6 +29,11 @@ interface NavSection {
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     const pathname = usePathname();
+    const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+    useEffect(() => {
+        setPendingHref(null);
+    }, [pathname]);
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
     const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
@@ -147,24 +153,38 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                                         <div className="flex flex-col gap-0.5">
                                             {visibleItems.map((item) => {
                                                 const isActive = pathname === item.href;
+                                                const isPending = pendingHref === item.href && !isActive;
+
                                                 return (
                                                     <Link
                                                         key={item.href}
                                                         href={item.href}
-                                                        onClick={onClose}
+                                                        prefetch={true}
+                                                        onClick={() => {
+                                                            if (item.href !== pathname) {
+                                                                setPendingHref(item.href);
+                                                            }
+                                                            onClose();
+                                                        }}
                                                         className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group ${
                                                             isActive
                                                                 ? "bg-[#0B192C] text-white shadow-xs font-semibold"
-                                                                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100/90 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white font-medium"
+                                                                : isPending
+                                                                    ? "bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium ring-1 ring-[#8A6305]/30"
+                                                                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100/90 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white font-medium"
                                                         }`}
                                                     >
-                                                        <item.icon
-                                                            className={`text-[19px] shrink-0 transition-colors ${
-                                                                isActive
-                                                                    ? "text-[#8A6305]"
-                                                                    : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200"
-                                                            }`}
-                                                        />
+                                                        {isPending ? (
+                                                            <Loader2 className="text-[19px] shrink-0 animate-spin text-[#8A6305]" />
+                                                        ) : (
+                                                            <item.icon
+                                                                className={`text-[19px] shrink-0 transition-colors ${
+                                                                    isActive
+                                                                        ? "text-[#8A6305]"
+                                                                        : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200"
+                                                                }`}
+                                                            />
+                                                        )}
                                                         <span className="text-[13.5px] leading-tight">
                                                             {item.label}
                                                         </span>

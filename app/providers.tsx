@@ -10,6 +10,23 @@ import { CustomerProvider } from "./context/CustomerContext";
 import { Toaster } from "react-hot-toast";
 import { WebQualityMonitor } from "./components/WebQualityMonitor";
 
+// Suppress benign React 19 dev warning caused by next-themes ThemeProvider script tag
+if (process.env.NODE_ENV === "development") {
+    const origError = console.error;
+    if (!(console.error as any).__scriptWarningSuppressed) {
+        console.error = (...args: unknown[]) => {
+            if (
+                typeof args[0] === "string" &&
+                args[0].includes("Encountered a script tag while rendering React component")
+            ) {
+                return;
+            }
+            origError.apply(console, args);
+        };
+        (console.error as any).__scriptWarningSuppressed = true;
+    }
+}
+
 const CartDrawer = dynamic(() => import("./components/CartDrawer"), {
     ssr: false,
 });
