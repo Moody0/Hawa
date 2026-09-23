@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
-import { getValidAdminSession, requireAdminSession } from "@/lib/admin-auth";
+import { put } from "@vercel/blob";
+import { adminErrorStatus, AdminAuthorizationError, getValidAdminSession, requireAdminSession } from "@/lib/admin-auth";
 import { getAuthenticatedCustomer } from "@/lib/customer-auth";
 import sharp from "sharp";
 import { checkUploadQuota } from "@/lib/upload-quota";
@@ -15,6 +16,13 @@ const MAX_INPUT_PIXELS = 16777216; // 16 Megapixels limit to prevent decompressi
 
 const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp"]);
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+function hasBlobStorageCredentials(): boolean {
+    return Boolean(
+        process.env.BLOB_READ_WRITE_TOKEN ||
+        (process.env.VERCEL_OIDC_TOKEN && process.env.BLOB_STORE_ID)
+    );
+}
 
 // Magic byte verification for common image types
 function validateImageMagicBytes(buffer: Buffer, ext: string): boolean {
@@ -73,12 +81,27 @@ export async function POST(request: NextRequest) {
                 products: "PRODUCTS_MANAGE",
                 brands: "BRANDS_MANAGE",
                 categories: "CATEGORIES_MANAGE",
+                "main-categories": "MAIN_CATEGORIES_MANAGE",
                 banners: "BANNERS_MANAGE",
                 blog: "BLOG_MANAGE",
             };
             await requireAdminSession(permissionByFolder[folder] || "SITE_CONTENT_MANAGE");
         } else if (folder !== "reviews") {
             return NextResponse.json({ error: "Customers may only upload review images." }, { status: 403 });
+        }
+
+        const useBlobStorage = hasBlobStorageCredentials();
+        if (process.env.VERCEL === "1" && !useBlobStorage) {
+            return NextResponse.json(
+                { error: "Image uploads need a Vercel Blob store connected to this project." },
+                { status: 503 }
+            );
+        }
+        if (process.env.NODE_ENV === "production" && !useBlobStorage && !process.env.MEDIA_STORAGE_DIR) {
+            return NextResponse.json(
+                { error: "Image uploads need persistent media storage configured." },
+                { status: 503 }
+            );
         }
 
         if (!file) {
@@ -163,24 +186,31 @@ export async function POST(request: NextRequest) {
 
         // Sanitize folder name
         const safeFolder = folder.replace(/[^a-zA-Z0-9_-]/g, "") || "general";
-        const baseUploadDir = getMediaStorageRoot();
-        const uploadDir = join(/*turbopackIgnore: true*/ baseUploadDir, safeFolder);
-        
-        // Ensure directory exists
-        if (!existsSync(/*turbopackIgnore: true*/ uploadDir)) {
-            await mkdir(uploadDir, { recursive: true });
-        }
-
         // Create a unique filename with normalized extension
         const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
         const filename = `${uniqueSuffix}.${finalExt}`;
-        
-        const filePath = join(uploadDir, filename);
-        await writeFile(filePath, processedBuffer);
-        
-        // Return public URL
         const key = `${safeFolder}/${filename}`;
-        const imageUrl = `/uploads/${key}`;
+
+        let imageUrl: string;
+        if (useBlobStorage) {
+            const blob = await put(key, processedBuffer, {
+                access: "public",
+                addRandomSuffix: false,
+                contentType: "image/webp",
+            });
+            imageUrl = blob.url;
+        } else {
+            const baseUploadDir = getMediaStorageRoot();
+            const uploadDir = join(/*turbopackIgnore: true*/ baseUploadDir, safeFolder);
+
+            // Ensure directory exists
+            if (!existsSync(/*turbopackIgnore: true*/ uploadDir)) {
+                await mkdir(uploadDir, { recursive: true });
+            }
+
+            await writeFile(join(uploadDir, filename), processedBuffer);
+            imageUrl = `/media/${key}`;
+        }
         
         return NextResponse.json({
             url: imageUrl,
@@ -193,6 +223,9 @@ export async function POST(request: NextRequest) {
         });
     } catch (error) {
         console.error("Error uploading file:", error);
+        if (error instanceof AdminAuthorizationError) {
+            return NextResponse.json({ error: error.message }, { status: adminErrorStatus(error) });
+        }
         return NextResponse.json({ error: "Failed to upload file." }, { status: 500 });
     }
 }

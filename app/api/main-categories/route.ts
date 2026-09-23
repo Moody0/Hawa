@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getMainCategoryProductCounts } from "@/lib/main-category-product-counts";
 
 export const revalidate = 3600;
 
@@ -17,19 +18,13 @@ export async function GET() {
                 slug: true,
                 description: true,
                 image: true,
-                _count: {
-                    select: {
-                        products: {
-                            where: {
-                                stock: { gt: 0 },
-                                archivedAt: null,
-                                brand: { isActive: true, archivedAt: null },
-                            },
-                        },
-                    },
-                },
             },
         });
+
+        const productCounts = await getMainCategoryProductCounts(
+            mainCategories.map((mainCategory) => mainCategory.id),
+            true,
+        );
 
         const formatted = mainCategories.map((mc) => ({
             id: mc.id,
@@ -38,7 +33,7 @@ export async function GET() {
             slug: mc.slug,
             description: mc.description,
             image: mc.image,
-            _count: mc._count,
+            _count: { products: productCounts.get(mc.id) ?? 0 },
         }));
 
         const response = NextResponse.json(formatted);

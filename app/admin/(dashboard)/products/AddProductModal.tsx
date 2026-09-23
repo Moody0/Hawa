@@ -99,14 +99,23 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
             const uploadedUrls: string[] = [];
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                if (!file.type.startsWith("image/")) continue;
+                if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+                    toast.error(language === 'ar' ? "يرجى اختيار PNG أو JPG أو WEBP" : "Choose a PNG, JPG, or WEBP image");
+                    continue;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    toast.error(language === 'ar' ? "حجم الصورة يجب ألا يتجاوز 5 ميجابايت" : "Image must be 5MB or smaller");
+                    continue;
+                }
                 const fd = new FormData();
                 fd.append("file", file);
                 fd.append("folder", "products");
                 const res = await fetch("/api/upload", { method: "POST", body: fd });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (res.ok && data.url) {
                     uploadedUrls.push(data.url);
+                } else {
+                    toast.error(data.error || (language === 'ar' ? "فشل رفع الصورة" : "Image upload failed"));
                 }
             }
             if (uploadedUrls.length > 0) {
@@ -351,7 +360,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                     ref={fileInputRef}
                                     type="file"
                                     multiple
-                                    accept="image/*"
+                                    accept="image/png,image/jpeg,image/webp"
                                     onChange={(e) => handleProductFileUpload(e.target.files)}
                                     className="hidden"
                                 />

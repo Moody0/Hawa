@@ -6,11 +6,13 @@ import BrandMasthead from "./BrandMasthead";
 import BrandCatalogToolbar, { CategoryItem } from "./BrandCatalogToolbar";
 import EditorialProductCard, { Product as BrandProductItem } from "@/app/components/ProductsPageComponents/EditorialProductCard";
 import { SearchX, RotateCw } from 'lucide-react';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface BrandShowcaseClientProps {
     brand: {
         id: string;
         name: string;
+        nameEn?: string | null;
         slug: string;
         description: string | null;
         image: string | null;
@@ -185,7 +187,7 @@ export default function BrandShowcaseClient({
                 sort={sort}
                 onSortChange={setSort}
                 totalResults={totalProducts}
-                brandName={brand.name}
+                brandName={getBrandDisplayName(brand, isArabic ? "ar" : "en")}
             />
 
             {/* Empty State */}
@@ -216,7 +218,7 @@ export default function BrandShowcaseClient({
 
             {/* Wholesale Product Grid */}
             <h2 className="sr-only">
-                {isArabic ? `منتجات ${brand.name} بالجملة` : `${brand.name} Wholesale Products`}
+                {isArabic ? `منتجات ${getBrandDisplayName(brand, "ar")} بالجملة` : `${getBrandDisplayName(brand, "en")} Wholesale Products`}
             </h2>
             {products.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">

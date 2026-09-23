@@ -6,35 +6,11 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import ResilientImage from '@/app/components/ResilientImage';
 import { ChevronRight } from 'lucide-react';
 import type { RailBrand } from '@/lib/public-queries';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface BrandsRailProps {
     brands?: RailBrand[];
 }
-
-// Specialization subtitles matching exact brand category mapping
-const BRAND_SUBTITLES: Record<string, { ar: string; en: string }> = {
-    'sanino-doro': { ar: 'سانينو دورو', en: 'Sanino D\'Oro' },
-    'captain-fisher': { ar: 'مفرزات كابتن فيشر', en: 'Captain Fisher Frozen' },
-    'de-cecco-italy': { ar: 'دي سيكو ايطالي', en: 'De Cecco Italian' },
-    'rio-mare': { ar: 'ريو ماري ايطالي', en: 'Rio Mare Italian' },
-    'americana': { ar: 'امريكانا مفرزات', en: 'Americana Quality' },
-    'ottima': { ar: 'اوتيما معكرونة إيطالي', en: 'Ottima Italian Pasta' },
-    'mr-brownie': { ar: 'مستر براوني', en: 'Mr. Brownie Cakes' },
-    'tat': { ar: 'تات تركي', en: 'Tat Turkish Goods' },
-    'american-garden': { ar: 'صوصات أميركان جاردن', en: 'American Garden Sauces' },
-    'alicafe': { ar: 'قهوة علي كافيه', en: 'Ali Cafe Coffee' },
-    'hygiene': { ar: 'هايجين', en: 'Hygiene Care' },
-    'milaf': { ar: 'مشروب ميلاف', en: 'Milaf Beverages' },
-    'sante': { ar: 'سانتي', en: 'Sante Healthy' },
-    'go-on': { ar: 'غو ان', en: 'Go On Protein' },
-    'nabil': { ar: 'نبيل مفرزات', en: 'Nabil Frozen Foods' },
-    'master-chef': { ar: 'ماستر شيف', en: 'Master Chef' },
-    'pepsi': { ar: 'بيبسي', en: 'Pepsi Beverages' },
-    'uludag': { ar: 'اولداغ تركي', en: 'Uludag Drinks' },
-    'lovege': { ar: 'حليب لوفيج', en: 'Lovege Plant Milk' },
-    'gourmet': { ar: 'غورمت', en: 'Gourmet Foods' },
-    'boom-boom': { ar: 'بوم بوم طاقة', en: 'Boom Boom Energy' },
-};
 
 export default function BrandsRail({ brands = [] }: BrandsRailProps) {
     const { dir, language } = useLanguage();
@@ -44,17 +20,8 @@ export default function BrandsRail({ brands = [] }: BrandsRailProps) {
         return null;
     }
 
-    const getBrandLabel = (brand: RailBrand) => {
-        if (brand.slug && BRAND_SUBTITLES[brand.slug]) {
-            return isArabic ? BRAND_SUBTITLES[brand.slug].ar : BRAND_SUBTITLES[brand.slug].en;
-        }
-
-        const nameParts = (brand.name || '').split('-');
-        if (isArabic && nameParts.length > 1) {
-            return nameParts[1].trim();
-        }
-        return nameParts[0]?.trim() || brand.name;
-    };
+    const getBrandLabel = (brand: RailBrand) =>
+        getBrandDisplayName(brand, isArabic ? 'ar' : 'en');
 
     // On wide desktop: Display 16 premier brands in 2 balanced rows of 8
     const desktopBrands = brands.slice(0, 16);

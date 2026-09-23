@@ -10,21 +10,25 @@ import { updateOrderStatus, deleteOrder } from "../../../../lib/admin-actions";
 import { cleanWhatsAppNumber } from "../../../../lib/whatsapp-utils";
 import { useState, useRef, useEffect } from "react";
 import OrderDetailsModal from "./OrderDetailsModal";
+import CancelOrderDialog from "./CancelOrderDialog";
 import { OrderStatus } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { formatPackaging } from "@/lib/packaging";
+import { formatOrderNumber } from "@/lib/order-number";
 
 interface Order {
     id: string;
+    orderNumber: number;
     shopName?: string | null;
     Name: string;
     phone: string;
     streetAddress: string;
     city: string;
     notes?: string | null;
+    cancellationReason?: string | null;
     totalAmount: number;
     status: string;
     createdAt: string;
@@ -35,6 +39,8 @@ interface Order {
         options?: string | null;
         product: {
             name: string;
+            nameAr?: string | null;
+            nameEn?: string | null;
             images: string;
             packaging?: string | null;
             itemsPerPackage?: string | number | null;
@@ -55,6 +61,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [filter, setFilter] = useState<string>("ALL");
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'createdAt', direction: 'desc' });
@@ -89,12 +96,13 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
         const { key, direction } = sortConfig;
         
         let comparison = 0;
-        
-        if (key === 'totalAmount') {
+        if (key === 'orderNumber') {
+            comparison = a.orderNumber - b.orderNumber;
+        } else if (key === 'totalAmount') {
             comparison = Number(a.totalAmount) - Number(b.totalAmount);
         } else if (key === 'createdAt') {
             comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        } else if (key === 'id' || key === 'Name' || key === 'shopName' || key === 'status') {
+        } else if (key === 'Name' || key === 'shopName' || key === 'status') {
             const valA = String(a[key as keyof Order] || '').toLowerCase();
             const valB = String(b[key as keyof Order] || '').toLowerCase();
             comparison = valA.localeCompare(valB);
@@ -130,16 +138,28 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
         }
     };
 
-    const handleStatusUpdate = async (id: string, newStatus: string) => {
+    const handleStatusUpdate = async (id: string, newStatus: string, cancellationReason?: string) => {
+        if (newStatus === 'CANCELLED' && cancellationReason === undefined) {
+            setOrderToCancel(orders.find((order) => order.id === id) || null);
+            return;
+        }
         setUpdatingId(id);
         try {
-            const result = await updateOrderStatus(id, newStatus as OrderStatus);
-            if (!result.success) {
-                alert(result.error || "Failed to update status");
+            const result = await updateOrderStatus(id, newStatus as OrderStatus, cancellationReason);
+            if (result.success) {
+                toast.success(isArabic ? "تم تحديث حالة الطلب" : "Order status updated");
+                setOrderToCancel(null);
+                router.refresh();
+            } else {
+                toast.error(result.error === "orderPricesRequired"
+                    ? (isArabic
+                        ? "أدخل واحفظ سعراً لكل منتج قبل نقل الطلب إلى قيد التجهيز."
+                        : "Enter and save a price for every item before moving this order to Processing.")
+                    : result.error || "Failed to update status");
             }
         } catch (error) {
             console.error("Error updating status:", error);
-            alert("An error occurred");
+            toast.error(isArabic ? "تعذر تحديث حالة الطلب" : "Could not update order status");
         } finally {
             setUpdatingId(null);
         }
@@ -150,8 +170,9 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
         setIsDetailsModalOpen(true);
     };
 
-    const handleDeleteOrder = async (id: string) => {
-        const orderLabel = id.slice(-6).toUpperCase();
+    const handleDeleteOrder = async (order: Order) => {
+        const { id } = order;
+        const orderLabel = formatOrderNumber(order.orderNumber);
         const ok = await confirm({
             title: isArabic ? "حذف الطلب" : "Delete Order",
             message: t('admin.confirmDeleteOrder').replace('{id}', orderLabel),
@@ -292,6 +313,15 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                             </div>
                         </div>
 
+                        {orderToCancel && (
+                            <CancelOrderDialog
+                                orderNumber={orderToCancel.orderNumber}
+                                isSaving={updatingId === orderToCancel.id}
+                                onClose={() => setOrderToCancel(null)}
+                                onConfirm={(reason) => handleStatusUpdate(orderToCancel.id, 'CANCELLED', reason)}
+                            />
+                        )}
+
                         <OrderDetailsModal
                             isOpen={isDetailsModalOpen}
                             onClose={() => {
@@ -299,9 +329,21 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                 setSelectedOrder(null);
                             }}
                             order={selectedOrder}
+                            canManage={Boolean(canManage)}
                             canDelete={canDelete}
-                            onDelete={selectedOrder ? () => handleDeleteOrder(selectedOrder.id) : undefined}
+                            onDelete={selectedOrder ? () => handleDeleteOrder(selectedOrder) : undefined}
                             isDeleting={selectedOrder ? deletingId === selectedOrder.id : false}
+                            onPricingSaved={(result) => {
+                                setSelectedOrder((current) => current ? {
+                                    ...current,
+                                    totalAmount: result.totalAmount,
+                                    items: current.items.map((item) => {
+                                        const updatedPrice = result.itemPrices.find((pricedItem) => pricedItem.itemId === item.id)?.price;
+                                        return updatedPrice === undefined ? item : { ...item, price: updatedPrice };
+                                    }),
+                                } : current);
+                                router.refresh();
+                            }}
                         />
 
                         <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
@@ -309,12 +351,12 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                 <table className={`w-full border-collapse ${dir === 'rtl' ? 'text-end' : 'text-start'}`}>
                                     <thead>
                                         <tr className="border-b border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-slate-800/60">
-                                            <th className="p-4 text-[11px] font-extrabold uppercase tracking-widest text-slate-700 dark:text-slate-200 cursor-pointer select-none group" onClick={() => handleSort('id')}>
+                                            <th className="p-4 text-[11px] font-extrabold uppercase tracking-widest text-slate-700 dark:text-slate-200 cursor-pointer select-none group" onClick={() => handleSort('orderNumber')}>
                                                 <div className="flex items-center">
                                                     {t('admin.orderId')}
                                                     <span className={`flex flex-col ms-1 ${dir === 'rtl' ? 'me-1 ms-0' : 'ms-1'}`}>
-                                                        <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'id' && sortConfig.direction === 'asc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
-                                                        <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'id' && sortConfig.direction === 'desc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                        <ArrowUp className={`w-2.5 h-2.5 -mb-0.5 ${sortConfig.key === 'orderNumber' && sortConfig.direction === 'asc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
+                                                        <ArrowDown className={`w-2.5 h-2.5 ${sortConfig.key === 'orderNumber' && sortConfig.direction === 'desc' ? 'text-[#0B192C] dark:text-[#8A6305]' : 'text-slate-300'}`} />
                                                     </span>
                                                 </div>
                                             </th>
@@ -372,7 +414,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                             const statusColor = getStatusColor(order.status);
                                             return (
                                                 <tr key={order.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02]/50 transition-colors">
-                                                    <td className="p-4 text-sm font-bold text-text-main dark:text-white">#{order.id.slice(-6).toUpperCase()}</td>
+                                                    <td className="p-4 text-sm font-bold text-text-main dark:text-white">{formatOrderNumber(order.orderNumber)}</td>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-2">
                                                             <span className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -468,7 +510,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                                                             </button>
                                                             {canDelete && (
                                                                 <button
-                                                                    onClick={() => handleDeleteOrder(order.id)}
+                                                                    onClick={() => handleDeleteOrder(order)}
                                                                     disabled={deletingId === order.id}
                                                                     className="p-1.5 text-text-sub dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors disabled:opacity-50"
                                                                     title={t('admin.deleteOrder')}

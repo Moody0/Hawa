@@ -7,7 +7,8 @@ import { useCurrency } from '@/app/context/CurrencyContext';
 import { useCustomer } from '@/app/context/CustomerContext';
 import ResilientImage from '@/app/components/ResilientImage';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock } from 'lucide-react';
+import { Lock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface Product {
     id: string;
@@ -25,6 +26,7 @@ interface Product {
     brand?: {
         id: string;
         name: string;
+        nameEn?: string | null;
         slug: string;
         group?: string;
     } | null;
@@ -32,6 +34,7 @@ interface Product {
 
 interface TrendingWeeklyProps {
     products: Product[];
+    settings?: any;
 }
 
 const FALLBACK_TRENDING_PRODUCTS: Product[] = [
@@ -163,13 +166,29 @@ const FALLBACK_TRENDING_PRODUCTS: Product[] = [
     }
 ];
 
-const TrendingWeekly = ({ products = [] }: TrendingWeeklyProps) => {
+const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
     const { dir } = useLanguage();
     const isArabic = dir === 'rtl';
     const [showAll, setShowAll] = useState(false);
     const { formatPrice } = useCurrency();
     const { customer } = useCustomer();
     const isLockedForGuest = !customer;
+
+    if (settings?.homeTrendingWeeklyEnabled === false) {
+        return null;
+    }
+
+    const badgeText = isArabic
+        ? (settings?.homeTrendingWeeklyBadgeAr || settings?.homeTrendingWeeklyBadge || 'طلب السوق')
+        : (settings?.homeTrendingWeeklyBadge || settings?.homeTrendingWeeklyBadgeAr || 'Market demand');
+
+    const titleText = isArabic
+        ? (settings?.homeTrendingWeeklyTitleAr || settings?.homeTrendingWeeklyTitle || 'المنتجات الأكثر طلباً هذا الأسبوع')
+        : (settings?.homeTrendingWeeklyTitle || settings?.homeTrendingWeeklyTitleAr || 'Fast-Moving Weekly Products');
+
+    const descText = isArabic
+        ? (settings?.homeTrendingWeeklyDescAr || settings?.homeTrendingWeeklyDesc || 'الأصناف الأكثر حركة وسحباً من قبل المحلات والسوبرماركت بأسعار تفضيلية')
+        : (settings?.homeTrendingWeeklyDesc || settings?.homeTrendingWeeklyDescAr || 'Highest volume FMCG demands ordered by merchants this week');
 
     const displayProducts = (products && products.length > 0) ? products : FALLBACK_TRENDING_PRODUCTS;
     const initialCount = 8;
@@ -186,21 +205,34 @@ const TrendingWeekly = ({ products = [] }: TrendingWeeklyProps) => {
 
     return (
         <section className="container-custom py-12 md:py-16">
-            <div className="text-start mb-6 sm:mb-9">
-                <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    {isArabic ? 'طلب السوق' : 'Market demand'}
-                </span>
-                <div>
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight max-w-3xl" data-reveal-heading>
-                        {isArabic ? 'المنتجات الأكثر طلباً هذا الأسبوع' : 'Fast-Moving Weekly Products'}
-                    </h2>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-9">
+                <div className="text-start">
+                    <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        {badgeText}
+                    </span>
+                    <div>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight max-w-3xl" data-reveal-heading>
+                            {titleText}
+                        </h2>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mt-2 font-normal" data-reveal-copy>
+                        {descText}
+                    </p>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mt-2 font-normal" data-reveal-copy>
-                    {isArabic
-                        ? 'الأصناف الأكثر حركة وسحباً من قبل المحلات والسوبرماركت بأسعار تفضيلية'
-                        : 'Highest volume FMCG demands ordered by merchants this week'}
-                </p>
+
+                <Link
+                    href="/products"
+                    prefetch={false}
+                    className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-zinc-800 text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#E5B54A] shadow-xs transition-all active:scale-95 shrink-0 group"
+                >
+                    <span>{isArabic ? 'عرض جميع المنتجات' : 'View All Products'}</span>
+                    {isArabic ? (
+                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                    ) : (
+                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                    )}
+                </Link>
             </div>
 
             {/* Clean Product Grid: 2 cols on mobile, 3 cols on tablet, 4 cols on desktop */}
@@ -243,7 +275,7 @@ const TrendingWeekly = ({ products = [] }: TrendingWeeklyProps) => {
                                 <div className={`w-full flex flex-col ${isArabic ? 'text-right' : 'text-left'} mt-1`}>
                                     {product.brand && (
                                         <span className="text-[10px] sm:text-[11px] font-bold text-[#C28E2B] dark:text-[#E5B54A] uppercase tracking-wider block truncate mb-0.5">
-                                            {product.brand.name}
+                                            {getBrandDisplayName(product.brand, isArabic ? 'ar' : 'en')}
                                         </span>
                                     )}
                                     <h3 className="text-xs sm:text-sm md:text-[15px] font-bold text-[#0B192C] dark:text-white line-clamp-2 leading-snug group-hover:text-[#C28E2B] transition-colors min-h-[2.4rem] sm:min-h-[2.6rem]">
@@ -296,12 +328,12 @@ const TrendingWeekly = ({ products = [] }: TrendingWeeklyProps) => {
                 </AnimatePresence>
             </div>
 
-            {/* Show More / Less Toggle Button */}
-            {displayProducts.length > initialCount && (
-                <div className="flex justify-center mt-6 sm:mt-8">
+            {/* Show More / Less Toggle & View All Products */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 sm:mt-10">
+                {displayProducts.length > initialCount && (
                     <button
                         onClick={() => setShowAll(!showAll)}
-                        className="px-6 py-2.5 bg-white hover:bg-[#FAF6EC] dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#0B192C] dark:text-white border border-slate-200/90 dark:border-white/10 hover:border-[#C28E2B] rounded-full font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                        className="w-full sm:w-auto px-6 py-2.5 bg-white hover:bg-[#FAF6EC] dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#0B192C] dark:text-white border border-slate-200/90 dark:border-white/10 hover:border-[#C28E2B] rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                     >
                         <span>
                             {showAll
@@ -311,8 +343,21 @@ const TrendingWeekly = ({ products = [] }: TrendingWeeklyProps) => {
                         </span>
                         <span className="text-xs">{showAll ? '▲' : '▼'}</span>
                     </button>
-                </div>
-            )}
+                )}
+
+                <Link
+                    href="/products"
+                    prefetch={false}
+                    className="w-full sm:w-auto px-6 py-2.5 bg-[#0B192C] hover:bg-[#132845] text-white dark:bg-[#C28E2B] dark:hover:bg-[#a97920] rounded-xl font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 group"
+                >
+                    <span>{isArabic ? 'تصفح كافة منتجات الجملة' : 'Browse All Wholesale Products'}</span>
+                    {isArabic ? (
+                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                    ) : (
+                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                    )}
+                </Link>
+            </div>
         </section>
     );
 };

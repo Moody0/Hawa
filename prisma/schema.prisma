@@ -103,6 +103,7 @@ model Category {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   isFeatured     Boolean       @default(false)
+  isActive       Boolean       @default(true)
   slug           String        @unique
   brandId        String
   brand          Brand         @relation(fields: [brandId], references: [id])
@@ -114,6 +115,7 @@ model Category {
   @@unique([brandId, name])
   @@index([brandId])
   @@index([mainCategoryId])
+  @@index([isActive, archivedAt])
   @@index([isFeatured])
   @@index([isFeatured, updatedAt])
   @@index([archivedAt])
@@ -176,6 +178,7 @@ model Product {
 model Brand {
   id             String        @id @default(cuid())
   name           String        @unique
+  nameEn         String?
   slug           String        @unique
   description    String?
   image          String?
@@ -199,6 +202,7 @@ model Brand {
 
 model Order {
   id             String      @id @default(cuid())
+  orderNumber    Int         @unique @default(autoincrement())
   totalAmount    Decimal     @db.Decimal(10, 2)
   status         OrderStatus @default(PENDING)
   createdAt      DateTime    @default(now())
@@ -209,6 +213,7 @@ model Order {
   phone          String
   shopName       String?
   notes          String?
+  cancellationReason String? @db.Text
   discount       Decimal     @default(0) @db.Decimal(10, 2)
   promoCodeId    String?
   promoCode      PromoCode?  @relation(fields: [promoCodeId], references: [id])
@@ -297,6 +302,8 @@ model InventoryMovement {
 
 model Settings {
   id                        String   @id @default("site-settings")
+  shippingPolicyContent     Json?
+  contactPageContent        Json?
   categoriesCtaTitle        String?  @default("Looking for specific wholesale brands?")
   categoriesCtaDesc         String?  @default("Our wholesale team is ready to provide custom pricing and scheduled deliveries for your business.")
   categoriesCtaTitleAr      String?  @default("تبحث عن شركات أو منتجات محددة؟")
@@ -360,38 +367,61 @@ model Settings {
   aboutNarrativeFoundedAr   String?  @default("تأسست على الثقة")
   footerBrandTitle          String?  @default("Hawa Distribution")
   footerBrandTitleAr        String?  @default("حوا للتوزيع والتجارة")
+  footerBrandTagline        String?  @default("Wholesale Distribution — Syria")
+  footerBrandTaglineAr      String?  @default("توزيع وتجارة جملة — سورية")
   footerBrandDescription    String?  @default("Your trusted partner in wholesale food and consumer goods distribution from top brands.")
   footerBrandDescriptionAr  String?  @default("شريككم الموثوق لتوزيع البضائع والمواد الغذائية والاستهلاكية من أفضل الشركات.")
   footerCopyright           String?  @default("© 2026 Hawa Distribution & Trading. All rights reserved.")
   footerCopyrightAr         String?  @default("© 2026 حوا للتوزيع والتجارة. جميع الحقوق محفوظة.")
+  footerContactTitle        String?  @default("Contact Us")
+  footerContactTitleAr      String?  @default("تواصل معنا")
+  footerAddress             String?  @default("Homs Industrial Zone, Syria")
+  footerAddressAr           String?  @default("حمص، المنطقة الصناعية — سورية")
+  footerPhone               String?  @default("+963 993 443 901")
+  footerEmail               String?  @default("info@hawa-dist.com")
   footerInstagramUrl        String?  @default("#")
   footerFacebookUrl         String?  @default("#")
   footerWhatsappUrl         String?  @default("#")
-  whatsappNumber            String?  @default("+963900000000")
+  footerLinkedinUrl         String?  @default("#")
+  whatsappNumber            String?  @default("+963 993 443 901")
   footerShopTitle           String?  @default("Shop")
   footerShopTitleAr         String?  @default("المتجر")
-  footerSupportTitle        String?  @default("Support")
-  footerSupportTitleAr      String?  @default("الدعم")
-  footerCompanyTitle        String?  @default("Company")
-  footerCompanyTitleAr      String?  @default("الشركة")
-  footerSupportLink1Label   String?  @default("Help Center")
-  footerSupportLink1LabelAr String?  @default("مركز المساعدة")
-  footerSupportLink1Url     String?  @default("#")
-  footerSupportLink2Label   String?  @default("Shipping & Returns")
-  footerSupportLink2LabelAr String?  @default("التوزيع والتسليم")
-  footerSupportLink2Url     String?  @default("/shipping-returns")
-  footerSupportLink3Label   String?  @default("Contact Us")
-  footerSupportLink3LabelAr String?  @default("اتصل بنا")
-  footerSupportLink3Url     String?  @default("#")
-  footerCompanyLink1Label   String?  @default("About Us")
-  footerCompanyLink1LabelAr String?  @default("من نحن")
-  footerCompanyLink1Url     String?  @default("/about-us")
-  footerCompanyLink2Label   String?
-  footerCompanyLink2LabelAr String?
-  footerCompanyLink2Url     String?
-  footerCompanyLink3Label   String?
-  footerCompanyLink3LabelAr String?
-  footerCompanyLink3Url     String?
+  footerSupportTitle        String?  @default("Our Services")
+  footerSupportTitleAr      String?  @default("خدماتنا")
+  footerCompanyTitle        String?  @default("Quick Links")
+  footerCompanyTitleAr      String?  @default("روابط سريعة")
+  footerNewsletterTitle     String?  @default("Newsletter")
+  footerNewsletterTitleAr   String?  @default("النشرة البريدية")
+  footerNewsletterDesc      String?  @default("Subscribe to get the latest trade discounts, new arrivals & price lists.")
+  footerNewsletterDescAr    String?  @default("اشترك ليصلك كل جديد عن المنتجات والعروض والأسعار.")
+  footerJurisdiction        String?  @default("Syrian Arab Republic — Homs")
+  footerJurisdictionAr      String?  @default("الجمهورية العربية السورية — حمص")
+  footerTermsUrl            String?  @default("/shipping-returns")
+  footerPrivacyUrl          String?  @default("/shipping-returns")
+  footerSupportLink1Label   String?  @default("Nationwide Freight & Delivery")
+  footerSupportLink1LabelAr String?  @default("الشحن والتوصيل للمحافظات")
+  footerSupportLink1Url     String?  @default("/shipping-returns")
+  footerSupportLink2Label   String?  @default("Market Rates & Trade Blog")
+  footerSupportLink2LabelAr String?  @default("نشرة الأسعار والمدونة")
+  footerSupportLink2Url     String?  @default("/blog")
+  footerSupportLink3Label   String?  @default("Agency Partnership Inquiry")
+  footerSupportLink3LabelAr String?  @default("طلب تمثيل وكالة تجارية")
+  footerSupportLink3Url     String?  @default("/contact")
+  footerSupportLink4Label   String?  @default("Merchant Accounts Hub")
+  footerSupportLink4LabelAr String?  @default("بوابة حسابات التجار")
+  footerSupportLink4Url     String?  @default("/account/login")
+  footerCompanyLink1Label   String?  @default("Home")
+  footerCompanyLink1LabelAr String?  @default("الرئيسية")
+  footerCompanyLink1Url     String?  @default("/")
+  footerCompanyLink2Label   String?  @default("About Us")
+  footerCompanyLink2LabelAr String?  @default("من نحن")
+  footerCompanyLink2Url     String?  @default("/about-us")
+  footerCompanyLink3Label   String?  @default("Official Brands")
+  footerCompanyLink3LabelAr String?  @default("الوكالات والعلامات")
+  footerCompanyLink3Url     String?  @default("/brands")
+  footerCompanyLink4Label   String?  @default("Product Categories")
+  footerCompanyLink4LabelAr String?  @default("أقسام المنتجات")
+  footerCompanyLink4Url     String?  @default("/categories")
   footerCategory1Id         String?
   footerCategory2Id         String?
   footerCategory3Id         String?
@@ -411,6 +441,44 @@ model Settings {
   statBrands                String?  @default("+100")
   statProducts              String?  @default("+500")
   statClients               String?  @default("+300")
+  homeCategoriesBadge       String?  @default("Shop by category")
+  homeCategoriesBadgeAr     String?  @default("تسوق حسب القسم")
+  homeCategoriesTitle       String?  @default("Browse Key Wholesale Categories")
+  homeCategoriesTitleAr     String?  @default("تصفح تشكيلة واسعة من الأصناف والمجموعات")
+  homeCategoriesDesc        String?  @default("Comprehensive supply for supermarkets and grocery stores in one order")
+  homeCategoriesDescAr      String?  @default("توفير شامل لكافة احتياجات السوبرماركت ومحلات البقالة بطلب واحد")
+  homeCategoriesStats       String?
+  homeCategoriesIds         String?
+  homeFeaturedBadge         String?  @default("Hawa Selections")
+  homeFeaturedBadgeAr       String?  @default("مختارات حوا")
+  homeFeaturedTitle         String?  @default("Featured Wholesale Products")
+  homeFeaturedTitleAr       String?  @default("تشكيلة منتجات الجملة الأكثر طلباً")
+  homeFeaturedDesc          String?  @default("Curated wholesale selection of leading brand goods at direct trade prices")
+  homeFeaturedDescAr        String?  @default("تشكيلة مختارة من أفضل أصناف الوكالات المعتمدة بأسعار الجملة المباشرة")
+  homeFeaturedBestSellerIds String?
+  homeFeaturedNewArrivalIds String?
+  homeServicesEnabled       Boolean? @default(true)
+  homeServicesTitle         String?  @default("Our Comprehensive Distribution Services")
+  homeServicesTitleAr       String?  @default("خدمات التوزيع والتجارة المتكاملة")
+  homeServicesDesc          String?  @default("Delivering end-to-end supply chain, marketing, and distribution solutions for FMCG brands")
+  homeServicesDescAr        String?  @default("نقدم للشركات المنتجة وأصحاب المحلات منظومة متكاملة تشمل التخزين والتسويق والتوصيل")
+  homeServicesItems         String?  @db.Text
+  homeTrendingWeeklyEnabled       Boolean? @default(true)
+  homeTrendingWeeklyBadge         String?  @default("Market demand")
+  homeTrendingWeeklyBadgeAr       String?  @default("طلب السوق")
+  homeTrendingWeeklyTitle         String?  @default("Fast-Moving Weekly Products")
+  homeTrendingWeeklyTitleAr       String?  @default("المنتجات الأكثر طلباً هذا الأسبوع")
+  homeTrendingWeeklyDesc          String?  @default("Highest volume FMCG demands ordered by merchants this week")
+  homeTrendingWeeklyDescAr        String?  @default("الأصناف الأكثر حركة وسحباً من قبل المحلات والسوبرماركت بأسعار تفضيلية")
+  homeTrendingWeeklyProductIds    String?
+  homeTestimonialsEnabled         Boolean? @default(true)
+  homeTestimonialsBadge           String?  @default("Verified Endorsements")
+  homeTestimonialsBadgeAr         String?  @default("آراء شركائنا")
+  homeTestimonialsTitle           String?  @default("Verified Wholesale Buyer Reviews")
+  homeTestimonialsTitleAr         String?  @default("ثقة أصحاب المحلات والسوبرماركت")
+  homeTestimonialsDesc            String?  @default("Endorsements from verified retail merchants and grocery partners across Syria")
+  homeTestimonialsDescAr          String?  @default("آراء وتجارب شركائنا من تجار التجزئة وأصحاب البقاليات في مختلف المحافظات")
+  homeTestimonialsItems           String?  @db.Text
 }
 
 enum OrderStatus {
@@ -540,5 +608,26 @@ model Post {
 
   @@index([isPublished, createdAt])
   @@index([category])
+  @@index([archivedAt])
+}
+
+model ContactMessage {
+  id         String    @id @default(cuid())
+  name       String
+  phone      String
+  shopName   String?
+  city       String?
+  message    String    @db.Text
+  isRead     Boolean   @default(false)
+  notes      String?   @db.Text
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  archivedAt DateTime?
+
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([phone])
   @@index([archivedAt])
 }

@@ -6,10 +6,12 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import ResilientImage from '@/app/components/ResilientImage';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Search, X, Building2 } from 'lucide-react';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface Brand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     description: string | null;
     image: string | null;
@@ -31,24 +33,6 @@ interface BrandsClientProps {
     basePath?: string;
 }
 
-const BRAND_LATIN_NAMES: Record<string, string> = {
-    'rocavera': 'Rokavera',
-    'buffalo': 'Buffalo',
-    'alreef': 'Alreef',
-    'monda': 'Monda',
-    'moria': 'Moria',
-    'zwan': 'Zwan',
-    'haleebna': 'Haleebna',
-    'sunbell': 'Sunbell',
-    'silver-fish': 'Silver Fish',
-    'al-maghrabi': 'Al-Maghrabi',
-    'almaghrabi': 'Al-Maghrabi',
-    'americana': 'Americana',
-    'tat': 'Tat',
-    'de-cecco-italy': 'De Cecco',
-    'rio-mare': 'Rio Mare',
-};
-
 const BRAND_SPECIALTIES: Record<string, { ar: string; en: string; sector: string }> = {
     'rocavera': { ar: 'منظفات وعناية شخصية', en: 'Hygiene & Personal Care', sector: 'detergents' },
     'buffalo': { ar: 'سوائل جلي ومنظفات منزلية', en: 'Detergents & FMCG', sector: 'detergents' },
@@ -62,35 +46,6 @@ const BRAND_SPECIALTIES: Record<string, { ar: string; en: string; sector: string
     'al-maghrabi': { ar: 'سردين وبقوليات مختارة', en: 'Canned Sardines & Legumes', sector: 'food' },
     'almaghrabi': { ar: 'سردين وبقوليات مختارة', en: 'Canned Sardines & Legumes', sector: 'food' },
 };
-
-function getBrandLatinName(brand: Brand, isArabic: boolean): string {
-    const key = brand.slug?.toLowerCase();
-    if (key && BRAND_LATIN_NAMES[key]) {
-        return BRAND_LATIN_NAMES[key];
-    }
-    const nameParts = brand.name.split('-');
-    if (nameParts.length > 1) {
-        return isArabic ? nameParts[0].trim() : nameParts[1].trim();
-    }
-    if (/[a-zA-Z]/.test(brand.name)) {
-        return brand.name;
-    }
-    if (brand.slug) {
-        return brand.slug
-            .split('-')
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' ');
-    }
-    return brand.name;
-}
-
-function getBrandArabicName(brand: Brand, isArabic: boolean): string {
-    const nameParts = brand.name.split('-');
-    if (nameParts.length > 1) {
-        return isArabic ? nameParts[1].trim() : nameParts[0].trim();
-    }
-    return brand.name;
-}
 
 function getBrandSpecialty(brand: Brand, isArabic: boolean): string {
     if (brand.description && brand.description.trim()) {
@@ -121,14 +76,14 @@ export default function BrandsClient({ brands }: BrandsClientProps) {
     // Filter brands based on search query and sector filter
     const filteredBrands = useMemo(() => {
         return brands.filter((brand) => {
-            const latinName = getBrandLatinName(brand, isArabic).toLowerCase();
-            const arabicName = getBrandArabicName(brand, isArabic).toLowerCase();
+            const englishName = getBrandDisplayName(brand, 'en').toLowerCase();
+            const arabicName = getBrandDisplayName(brand, 'ar').toLowerCase();
             const specialty = getBrandSpecialty(brand, isArabic).toLowerCase();
             const query = searchQuery.trim().toLowerCase();
 
             const matchesSearch =
                 !query ||
-                latinName.includes(query) ||
+                englishName.includes(query) ||
                 arabicName.includes(query) ||
                 specialty.includes(query) ||
                 (brand.description && brand.description.toLowerCase().includes(query)) ||
@@ -212,7 +167,7 @@ export default function BrandsClient({ brands }: BrandsClientProps) {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder={isArabic ? 'ابحث عن وكالة أو علامة تجارية أو صنف...' : 'Search agencies, brands, or categories...'}
+                            placeholder={isArabic ? 'ابحث عن وكالة أو علامة تجارية...' : 'Search agencies or brands...'}
                             className="w-full h-10 sm:h-11 bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-white/10 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 ps-10 pe-10 focus:border-[#C28E2B] transition-colors"
                         />
                         {searchQuery && (
@@ -286,8 +241,8 @@ export default function BrandsClient({ brands }: BrandsClientProps) {
                 {filteredBrands.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4 md:gap-5">
                         {filteredBrands.map((brand) => {
-                            const latinName = getBrandLatinName(brand, isArabic);
-                            const arabicName = getBrandArabicName(brand, isArabic);
+                            const englishName = getBrandDisplayName(brand, 'en');
+                            const arabicName = getBrandDisplayName(brand, 'ar');
                             const specialty = getBrandSpecialty(brand, isArabic);
                             const productCount = brand._count?.products;
 
@@ -318,13 +273,13 @@ export default function BrandsClient({ brands }: BrandsClientProps) {
                                         {brand.image ? (
                                             <ResilientImage
                                                 src={brand.image}
-                                                alt={brand.name}
+                                                alt={englishName}
                                                 showSkeleton={false}
                                                 className="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-300"
                                             />
                                         ) : (
                                             <div className="w-16 h-16 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-800 dark:text-white font-bold text-lg">
-                                                {brand.name.charAt(0)}
+                                                {englishName.charAt(0)}
                                             </div>
                                         )}
                                     </div>
@@ -332,9 +287,9 @@ export default function BrandsClient({ brands }: BrandsClientProps) {
                                     {/* Brand Details */}
                                     <div className="w-full flex flex-col items-center mt-1">
                                         <h2 className="text-sm sm:text-base md:text-lg font-bold text-[#0B192C] dark:text-white group-hover:text-[#C28E2B] transition-colors truncate max-w-full">
-                                            {latinName}
+                                            {englishName}
                                         </h2>
-                                        {arabicName && arabicName !== latinName && (
+                                        {arabicName && arabicName !== englishName && (
                                             <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mt-0.5 truncate max-w-full">
                                                 {arabicName}
                                             </p>

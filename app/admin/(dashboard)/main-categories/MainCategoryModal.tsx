@@ -5,10 +5,12 @@ import { X, RefreshCw, Star, Info } from 'lucide-react';
 import { createMainCategory, updateMainCategory } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import ImageUploadField from "../../components/ImageUploadField";
+import CopyPublicLinkField from "../../components/CopyPublicLinkField";
 import { useLanguage } from "@/app/context/LanguageContext";
 
 interface MainCategory {
     id: string;
+    slug: string;
     name: string;
     description: string | null;
     image: string | null;
@@ -154,6 +156,14 @@ export default function MainCategoryModal({ isOpen, onClose, mainCategory }: Mai
                             {isArabic ? "يُستخدم كعنوان للقسم في وضع اللغة الإنجليزية ولتوليد رابط الصفحة" : "Used for English UI titles and SEO page slugs"}
                         </span>
                     </label>
+
+                    {mainCategory?.slug && (
+                        <CopyPublicLinkField
+                            label={isArabic ? "رابط صفحة القسم الرئيسي" : "Main category page link"}
+                            path={`/departments/${mainCategory.slug}`}
+                            isArabic={isArabic}
+                        />
+                    )}
 
                     {/* Image Upload */}
                     <ImageUploadField

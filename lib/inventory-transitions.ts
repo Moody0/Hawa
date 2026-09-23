@@ -1,3 +1,6 @@
+import { formatOrderNumber } from "./order-number";
+import { Prisma } from "@prisma/client";
+
 /**
  * Inventory Transition Contract & State Machine
  *
@@ -191,11 +194,16 @@ export function evaluateOrderDeletion(
  */
 export async function executeOrderStatusUpdate(
     orderId: string,
-    targetStatus: OrderStatusType
+    targetStatus: OrderStatusType,
+    cancellationReason?: string
 ): Promise<{ success: boolean; noOp: boolean; error?: string }> {
     const { prisma } = await import("./prisma");
 
     return await prisma.$transaction(async (tx) => {
+        if (targetStatus === "PROCESSING") {
+            await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${orderId} AND "archivedAt" IS NULL FOR UPDATE`;
+        }
+
         const order = await tx.order.findUnique({
             where: { id: orderId },
             include: { items: true },
@@ -217,12 +225,36 @@ export async function executeOrderStatusUpdate(
             return { success: true, noOp: true };
         }
 
+        let processingTotal: Prisma.Decimal | undefined;
+        if (targetStatus === "PROCESSING") {
+            if (order.items.length === 0 || order.items.some((item) => !new Prisma.Decimal(item.price).greaterThan(0))) {
+                throw new Error("orderPricesRequired");
+            }
+            processingTotal = order.items.reduce(
+                (total, item) => total.plus(new Prisma.Decimal(item.price).mul(item.quantity)),
+                new Prisma.Decimal(0),
+            );
+            if (!processingTotal.greaterThan(0) || processingTotal.greaterThan("99999999.99")) {
+                throw new Error("orderPricesRequired");
+            }
+        }
+
+        const reason = cancellationReason?.trim();
+        if (targetStatus === "CANCELLED" && (!reason || reason.length > 1000)) {
+            throw new Error("A cancellation reason between 1 and 1000 characters is required.");
+        }
+
         if (evaluation.inventoryAction === "RELEASE_RESERVATION") {
             // Atomically claim the active reservation before changing stock.
             // Only one request across all application instances can succeed.
             const claimed = await tx.order.updateMany({
                 where: { id: orderId, status: order.status, stockReserved: true, archivedAt: null },
-                data: { status: targetStatus, stockReserved: false },
+                data: {
+                    status: targetStatus,
+                    stockReserved: false,
+                    cancellationReason: reason,
+                    ...(processingTotal ? { totalAmount: processingTotal } : {}),
+                },
             });
             if (claimed.count !== 1) {
                 const latest = await tx.order.findUnique({ where: { id: orderId }, select: { status: true, stockReserved: true } });
@@ -246,7 +278,7 @@ export async function executeOrderStatusUpdate(
                         quantity: item.quantity,
                         type: "RELEASE",
                         deduplicationKey: `release:${order.id}:${item.productId}:reservation:v1`,
-                        reason: `إلغاء الطلب رقم ${order.id} وإعادة الكمية المحجوزة للمستودع`,
+                        reason: `إلغاء الطلب رقم ${formatOrderNumber(order.orderNumber)} وإعادة الكمية المحجوزة للمستودع`,
                     },
                 });
             }
@@ -258,6 +290,8 @@ export async function executeOrderStatusUpdate(
                 where: { id: orderId },
                 data: {
                     status: targetStatus,
+                    ...(processingTotal ? { totalAmount: processingTotal } : {}),
+                    ...(targetStatus === "CANCELLED" ? { cancellationReason: reason } : {}),
                     stockReserved: targetStatus === "DELIVERED" || targetStatus === "COMPLETED"
                         ? false
                         : order.stockReserved,
@@ -334,7 +368,7 @@ async function legacyExecuteOrderHardDeletion(
                         productId: item.productId,
                         quantity: item.quantity,
                         type: "RELEASE",
-                        reason: `حذف الطلب رقم ${order.id} وإعادة الكمية المحجوزة للمستودع`,
+                        reason: `حذف الطلب رقم ${formatOrderNumber(order.orderNumber)} وإعادة الكمية المحجوزة للمستودع`,
                     },
                 });
             }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutDashboard, ShoppingBag, Store, FolderTree, Package, Users, Settings, X, LogOut, Star, FileText, Network, GalleryHorizontal, FileEdit } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Store, FolderTree, Package, Users, Settings, X, LogOut, FileText, Network, GalleryHorizontal, FileEdit, MessageSquare } from 'lucide-react';
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -55,7 +55,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             items: [
                 { href: "/admin/orders", icon: Package, label: t('admin.orders'), permission: "ORDERS_VIEW" },
                 { href: "/admin/customers", icon: Users, label: t('admin.customers') || "Customers", permission: "CUSTOMERS_VIEW" },
-                { href: "/admin/reviews", icon: Star, label: t('admin.reviews'), permission: "REVIEWS_VIEW" }
+                { href: "/admin/messages", icon: MessageSquare, label: isArabic ? "رسائل العملاء" : "Customer Messages", permission: "SITE_CONTENT_VIEW" }
             ]
         },
         {
@@ -104,15 +104,15 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                             <Link href="/admin/dashboard" className="flex items-center gap-3 group">
                                 <Image
                                     src="/logo.png"
-                                    alt="Hawa Distribution"
+                                    alt={t('common.brandName')}
                                     width={140}
                                     height={44}
                                     priority
                                     className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
                                 />
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#0B192C] dark:text-[#8A6305]">
-                                        {isArabic ? "لوحة الإدارة" : "Admin Portal"}
+                                    <span className="text-[13px] font-bold uppercase tracking-wider text-[#0B192C] dark:text-[#8A6305]">
+                                        {t('admin.adminPanel')}
                                     </span>
                                 </div>
                             </Link>
@@ -122,7 +122,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                                 type="button"
                                 onClick={onClose}
                                 className="lg:hidden min-h-11 min-w-11 p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                aria-label="Close Sidebar"
+                                aria-label={t('admin.closeSidebar')}
                             >
                                 <X className="text-2xl" />
                             </button>
@@ -186,7 +186,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
                                 <p className="text-slate-900 dark:text-white text-[13px] font-bold leading-tight truncate">
-                                    {session?.user?.name || "Admin"}
+                                    {session?.user?.name || t('admin.adminRole')}
                                 </p>
                                 <p className="text-emerald-600 dark:text-emerald-400 text-[10.5px] font-bold tracking-tight uppercase truncate">
                                     {isSuperAdmin ? t('admin.superAdmin') : t('admin.editor')}

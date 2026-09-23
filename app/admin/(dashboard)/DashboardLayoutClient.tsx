@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import AdminSidebar from "../components/AdminSidebar";
 import { AdminSidebarProvider, useAdminSidebar } from "../context/AdminSidebarContext";
 import { ConfirmDialogProvider } from "../context/ConfirmDialogContext";
+import { LanguageProvider } from "@/app/context/LanguageContext";
 
 function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     const { isOpen, closeSidebar } = useAdminSidebar();
@@ -28,12 +29,14 @@ export default function DashboardLayoutClient({
     session?: any;
 }) {
     return (
-        <SessionProvider session={session}>
-            <AdminSidebarProvider>
-                <ConfirmDialogProvider>
-                    <DashboardLayoutInner>{children}</DashboardLayoutInner>
-                </ConfirmDialogProvider>
-            </AdminSidebarProvider>
-        </SessionProvider>
+        <LanguageProvider scope="admin">
+            <SessionProvider session={session}>
+                <AdminSidebarProvider>
+                    <ConfirmDialogProvider>
+                        <DashboardLayoutInner>{children}</DashboardLayoutInner>
+                    </ConfirmDialogProvider>
+                </AdminSidebarProvider>
+            </SessionProvider>
+        </LanguageProvider>
     );
 }

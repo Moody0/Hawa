@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import ar from '@/app/locales/ar.json';
+import en from '@/app/locales/en.json';
 
 type Language = 'en' | 'ar';
 
@@ -17,45 +18,50 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({
     children,
-    initialLanguage: _initialLanguage = 'ar'
+    initialLanguage = 'ar',
+    scope = 'site'
 }: {
     children: React.ReactNode;
     initialLanguage?: Language;
+    scope?: 'site' | 'admin';
 }) {
-    // Arabic is the single supported language. Keep the prop for backwards
-    // compatibility, but do not allow stale client preferences to override it.
-    const language: Language = 'ar';
+    // The public storefront stays Arabic; the admin has its own saved preference.
+    const [adminLanguage, setAdminLanguage] = useState<Language>(initialLanguage);
+    const language: Language = scope === 'admin' ? adminLanguage : 'ar';
     const [mounted, setMounted] = useState(false);
-    const translations = ar;
+    const translations = language === 'en' ? en : ar;
 
-    // Normalize preferences created by older bilingual builds without reloading.
-    // Reloading here could create a visible loop for users with an old `en` value.
     useEffect(() => {
+        if (scope === 'admin') {
+            try {
+                setAdminLanguage(localStorage.getItem('admin-language') === 'en' ? 'en' : 'ar');
+            } catch (e) {
+                console.warn('Could not read admin language preference', e);
+            }
+        }
         setMounted(true);
-        try {
-            localStorage.setItem('language', 'ar');
-            document.cookie = 'language=ar; path=/; max-age=31536000; SameSite=Lax';
-        } catch (e) {
-            console.warn('Could not normalize language preference', e);
-        }
+    }, [scope]);
+
+    useEffect(() => {
         document.documentElement.lang = language;
-        document.documentElement.dir = 'rtl';
-    }, [language]);
+        document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+        return () => {
+            if (scope === 'admin') {
+                document.documentElement.lang = 'ar';
+                document.documentElement.dir = 'rtl';
+            }
+        };
+    }, [language, scope]);
 
-    // Keep the public API stable for existing components, but always persist Arabic.
-    const setLanguage = useCallback((_lang: Language) => {
+    const setLanguage = useCallback((lang: Language) => {
+        if (scope !== 'admin') return;
+        setAdminLanguage(lang);
         try {
-            localStorage.setItem('language', 'ar');
-            document.cookie = 'language=ar; path=/; max-age=31536000; SameSite=Lax';
+            localStorage.setItem('admin-language', lang);
         } catch (e) {
-            console.warn('Could not persist language immediately', e);
+            console.warn('Could not save admin language preference', e);
         }
-
-        if (typeof window !== 'undefined') {
-            document.documentElement.lang = 'ar';
-            document.documentElement.dir = 'rtl';
-        }
-    }, []);
+    }, [scope]);
 
     // Translation function with fallback
     const t = useCallback((key: string): any => {

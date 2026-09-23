@@ -10,8 +10,9 @@ import { useCart } from '@/app/context/CartContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import ResilientImage from '@/app/components/ResilientImage';
 import toast from 'react-hot-toast';
-import { Store, Phone, ShoppingBag, Heart, Pencil, LogOut, CheckCircle2, Clock, Truck, Repeat, AlertCircle, RefreshCw, LogIn } from 'lucide-react';
+import { Store, Phone, ShoppingBag, Pencil, LogOut, CheckCircle2, Clock, Truck, Repeat, AlertCircle, RefreshCw, LogIn } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
+import { formatOrderNumber } from '@/lib/order-number';
 
 interface OrderItemProduct {
     id: string;
@@ -37,24 +38,15 @@ interface OrderItem {
 
 interface CustomerOrder {
     id: string;
+    orderNumber: number;
     totalAmount: number;
     status: string;
     createdAt: string;
     streetAddress: string;
     city: string;
     notes?: string | null;
+    cancellationReason?: string | null;
     items: OrderItem[];
-}
-
-interface WishlistProduct {
-    id: string;
-    name: string;
-    nameAr?: string | null;
-    slug: string;
-    images: string;
-    price: number;
-    packaging?: string | null;
-    brand?: { name: string } | null;
 }
 
 type SectionStatus = 'loading' | 'success' | 'error' | 'unauthorized';
@@ -72,12 +64,8 @@ export default function MerchantPortalPage() {
     const { language } = useLanguage();
     const isArabic = language === 'ar';
 
-    const [activeTab, setActiveTab] = useState<'orders' | 'wishlist' | 'profile' | 'track'>('orders');
+    const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
     const [ordersState, setOrdersState] = useState<SectionState<CustomerOrder>>({
-        status: 'loading',
-        data: [],
-    });
-    const [wishlistState, setWishlistState] = useState<SectionState<WishlistProduct>>({
         status: 'loading',
         data: [],
     });
@@ -123,7 +111,7 @@ export default function MerchantPortalPage() {
     const fetchOrders = useCallback(async () => {
         setOrdersState((prev) => ({ ...prev, status: 'loading', errorMessage: undefined }));
         try {
-            const res = await fetch('/api/customer/orders');
+            const res = await fetch('/api/customer/orders', { cache: 'no-store' });
             if (res.status === 401 || res.status === 403) {
                 setOrdersState({
                     status: 'unauthorized',
@@ -155,50 +143,11 @@ export default function MerchantPortalPage() {
             }));
         }
     }, [isArabic]);
-
-    // Fetch Wishlist
-    const fetchWishlist = useCallback(async () => {
-        setWishlistState((prev) => ({ ...prev, status: 'loading', errorMessage: undefined }));
-        try {
-            const res = await fetch('/api/customer/wishlist');
-            if (res.status === 401 || res.status === 403) {
-                setWishlistState({
-                    status: 'unauthorized',
-                    data: [],
-                    errorMessage: isArabic ? 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مجدداً لعرض المفضلة.' : 'Session expired. Please log in again to view your wishlist.',
-                });
-                return;
-            }
-            if (!res.ok) {
-                const errData = await res.json().catch(() => null);
-                setWishlistState((prev) => ({
-                    status: 'error',
-                    data: prev.data,
-                    errorMessage: errData?.error || (isArabic ? 'فشل جلب المفضلة، يرجى إعادة المحاولة.' : 'Failed to load wishlist. Please try again.'),
-                }));
-                return;
-            }
-            const data = await res.json();
-            setWishlistState({
-                status: 'success',
-                data: data.products || [],
-            });
-        } catch (err) {
-            console.error('Error fetching wishlist products:', err);
-            setWishlistState((prev) => ({
-                status: 'error',
-                data: prev.data,
-                errorMessage: isArabic ? 'تعذر الاتصال بالخادم، يرجى التحقق من الشبكة وإعادة المحاولة.' : 'Network error. Please check your connection and retry.',
-            }));
-        }
-    }, [isArabic]);
-
     useEffect(() => {
         if (customer) {
             fetchOrders();
-            fetchWishlist();
         }
-    }, [customer, fetchOrders, fetchWishlist]);
+    }, [customer, fetchOrders]);
 
     // Re-order handler: adds all items of past order into cart
     const handleReorder = (order: CustomerOrder) => {
@@ -277,8 +226,8 @@ export default function MerchantPortalPage() {
         }
     };
 
-    const handleTabKeyDown = (e: React.KeyboardEvent, currentTab: 'orders' | 'wishlist' | 'profile') => {
-        const tabOrder: Array<'orders' | 'wishlist' | 'profile'> = ['orders', 'wishlist', 'profile'];
+    const handleTabKeyDown = (e: React.KeyboardEvent, currentTab: 'orders' | 'profile') => {
+        const tabOrder: Array<'orders' | 'profile'> = ['orders', 'profile'];
         const currentIndex = tabOrder.indexOf(currentTab);
         let nextIndex = -1;
 
@@ -321,16 +270,21 @@ export default function MerchantPortalPage() {
                 };
             case 'PROCESSING':
                 return {
-                    label: isArabic ? 'قيد التجهيز بالمستودع' : 'Processing in Warehouse',
+                    label: isArabic ? 'قيد المعالجة' : 'Processing',
                     bg: 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border-purple-300',
                     icon: Clock,
                 };
             case 'SHIPPED':
-            case 'DELIVERED':
                 return {
                     label: isArabic ? 'مع سيارة التوزيع' : 'Out for Delivery',
                     bg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300',
                     icon: Truck,
+                };
+            case 'DELIVERED':
+                return {
+                    label: isArabic ? 'تم التوصيل' : 'Delivered',
+                    bg: 'bg-green-100 text-green-900 dark:bg-green-950/60 dark:text-green-300 border-green-400',
+                    icon: CheckCircle2,
                 };
             case 'COMPLETED':
                 return {
@@ -446,28 +400,6 @@ export default function MerchantPortalPage() {
                 </button>
 
                 <button
-                    ref={(el) => { tabButtonRefs.current['wishlist'] = el; }}
-                    role="tab"
-                    id="account-tab-wishlist"
-                    aria-controls="account-panel-wishlist"
-                    aria-selected={activeTab === 'wishlist'}
-                    tabIndex={activeTab === 'wishlist' ? 0 : -1}
-                    onClick={() => setActiveTab('wishlist')}
-                    onKeyDown={(e) => handleTabKeyDown(e, 'wishlist')}
-                    className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] ${
-                        activeTab === 'wishlist'
-                            ? 'bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white shadow-md'
-                            : 'bg-gray-100 dark:bg-white/5 text-slate-700 dark:text-gray-300 hover:bg-gray-200'
-                    }`}
-                >
-                    <Heart className="text-base text-rose-500" />
-                    <span>{isArabic ? 'المفضلة' : 'Saved Favorites'}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-black">
-                        {wishlistState.status === 'loading' ? '…' : wishlistState.status === 'success' ? wishlistState.data.length : '!'}
-                    </span>
-                </button>
-
-                <button
                     ref={(el) => { tabButtonRefs.current['profile'] = el; }}
                     role="tab"
                     id="account-tab-profile"
@@ -577,7 +509,7 @@ export default function MerchantPortalPage() {
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-xs font-bold text-slate-500 dark:text-gray-400">
-                                                        #{order.id.slice(-8).toUpperCase()}
+                                                        {formatOrderNumber(order.orderNumber)}
                                                     </span>
                                                     <span className={`text-[11px] font-extrabold px-3 py-0.5 rounded-full border inline-flex items-center gap-1.5 ${badge.bg}`}>
                                                         <StatusIcon className="text-xs" />
@@ -598,6 +530,13 @@ export default function MerchantPortalPage() {
                                                 <span>{isArabic ? 'إعادة طلب نفس المنتجات' : 'Re-order Items'}</span>
                                             </button>
                                         </div>
+
+                                        {order.status === 'CANCELLED' && order.cancellationReason && (
+                                            <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-200">
+                                                <p className="font-bold">{isArabic ? 'سبب إلغاء الطلب' : 'Reason for cancellation'}</p>
+                                                <p className="mt-1 whitespace-pre-wrap">{order.cancellationReason}</p>
+                                            </div>
+                                        )}
 
                                         {/* Items breakdown */}
                                         <div className="py-4 divide-y divide-gray-100 dark:divide-white/5">
@@ -646,132 +585,6 @@ export default function MerchantPortalPage() {
                                                 📝 {isArabic ? 'ملاحظات:' : 'Notes:'} {order.notes}
                                             </div>
                                         )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* TAB CONTENT: Wishlist */}
-            {activeTab === 'wishlist' && (
-                <div
-                    role="tabpanel"
-                    id="account-panel-wishlist"
-                    aria-labelledby="account-tab-wishlist"
-                    tabIndex={0}
-                    className="focus:outline-none"
-                >
-                    {wishlistState.status === 'loading' ? (
-                        <div className="py-16 text-center text-slate-400">
-                            <div className="w-8 h-8 mx-auto border-3 border-[#8A6305] border-t-transparent rounded-full animate-spin mb-3" />
-                            <span>{isArabic ? 'جاري جلب المفضلة...' : 'Loading saved items...'}</span>
-                        </div>
-                    ) : wishlistState.status === 'unauthorized' ? (
-                        <div className="bg-white dark:bg-[#132035] p-8 sm:p-10 rounded-3xl border border-amber-200/80 dark:border-amber-900/40 text-center max-w-md mx-auto">
-                            <div className="w-16 h-16 mx-auto rounded-full bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400">
-                                <LogIn className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-2">
-                                {isArabic ? 'انتهت صلاحية الجلسة' : 'Session Expired'}
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-gray-400 mb-6 leading-relaxed">
-                                {wishlistState.errorMessage || (isArabic ? 'يرجى تسجيل الدخول مجدداً لعرض المفضلة.' : 'Please log in again to view your saved items.')}
-                            </p>
-                            <Link
-                                href="/account/login"
-                                className="px-6 py-3 rounded-xl bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white font-bold text-xs inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
-                            >
-                                <LogIn className="w-4 h-4" />
-                                <span>{isArabic ? 'تسجيل الدخول' : 'Log In'}</span>
-                            </Link>
-                        </div>
-                    ) : wishlistState.status === 'error' ? (
-                        <div className="bg-white dark:bg-[#132035] p-8 sm:p-10 rounded-3xl border border-rose-200/80 dark:border-rose-900/40 text-center max-w-md mx-auto">
-                            <div className="w-16 h-16 mx-auto rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center mb-4 text-rose-600 dark:text-rose-400">
-                                <AlertCircle className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-2">
-                                {isArabic ? 'تعذر تحميل المفضلة' : 'Unable to Load Wishlist'}
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-gray-400 mb-6 leading-relaxed">
-                                {wishlistState.errorMessage || (isArabic ? 'حدث خطأ أثناء جلب قائمة المفضلة. يرجى إعادة المحاولة.' : 'An error occurred while fetching your wishlist. Please try again.')}
-                            </p>
-                            <button
-                                onClick={fetchWishlist}
-                                className="px-6 py-3 rounded-xl bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white font-bold text-xs inline-flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
-                            >
-                                <RefreshCw className="w-4 h-4" />
-                                <span>{isArabic ? 'إعادة المحاولة' : 'Retry'}</span>
-                            </button>
-                        </div>
-                    ) : wishlistState.data.length === 0 ? (
-                        <div className="bg-white dark:bg-[#132035] p-10 rounded-3xl border border-gray-100 dark:border-white/10 text-center max-w-md mx-auto">
-                            <div className="w-16 h-16 mx-auto rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center mb-4">
-                                <Heart className="text-3xl text-rose-400" />
-                            </div>
-                            <h3 className="text-lg font-bold text-[#0B192C] dark:text-white mb-1">
-                                {isArabic ? 'المفضلة فارغة' : 'Your wishlist is empty'}
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-gray-400 mb-6">
-                                {isArabic ? 'اضغط على زر القلب ❤️ على أي منتج لحفظه والوصول إليه بسرعة لاحقاً.' : 'Click the heart icon on any product to save it for quick re-ordering.'}
-                            </p>
-                            <Link
-                                href="/products"
-                                className="px-6 py-3 rounded-xl bg-[#0B192C] text-white dark:bg-[#8A6305] dark:text-white font-bold text-xs inline-flex items-center gap-2"
-                            >
-                                <span>{isArabic ? 'تصفح المنتجات' : 'Browse Products'}</span>
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {wishlistState.data.map((product) => {
-                                const primaryImg = product.images?.split(',')[0]?.trim() || '';
-                                const displayName = (isArabic ? product.nameAr : product.name) || product.name;
-                                return (
-                                    <div
-                                        key={product.id}
-                                        className="bg-white dark:bg-[#132035] rounded-2xl p-4 border border-gray-200/80 dark:border-white/10 flex flex-col justify-between"
-                                    >
-                                        <div>
-                                            <div className="w-full aspect-square rounded-xl bg-gray-50 dark:bg-white/5 p-2 mb-3 overflow-hidden">
-                                                <ResilientImage
-                                                    src={primaryImg}
-                                                    alt={displayName}
-                                                    className="w-full h-full object-contain"
-                                                />
-                                            </div>
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">
-                                                {product.brand?.name || 'Hawa'}
-                                            </span>
-                                            <h4 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white line-clamp-2 mb-1">
-                                                {displayName}
-                                            </h4>
-                                            <span className="inline-block text-[10px] font-bold text-slate-600 dark:text-gray-300 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-md mb-3">
-                                                📦 {product.packaging || 'طرد'}
-                                            </span>
-                                        </div>
-
-                                        <button
-                                            onClick={() => {
-                                                addItem({
-                                                    id: product.id,
-                                                    name: displayName,
-                                                    price: Number(product.price || 0),
-                                                    image: primaryImg,
-                                                    quantity: 1,
-                                                    slug: product.slug,
-                                                    packaging: product.packaging || 'طرد',
-                                                });
-                                                toast.success(isArabic ? `تمت إضافة ${displayName} إلى السلة` : `Added to cart`);
-                                                openDrawer();
-                                            }}
-                                            className="w-full py-2.5 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                                        >
-                                            <ShoppingBag className="text-sm" />
-                                            <span>{isArabic ? 'إضافة للسلة' : 'Add to Cart'}</span>
-                                        </button>
                                     </div>
                                 );
                             })}

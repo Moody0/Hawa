@@ -54,3 +54,10 @@ export function permissionImplies(granted: ReadonlySet<AdminPermission>, require
   return false;
 }
 
+export function hasAdminPermission(
+  granted: readonly AdminPermission[] | null | undefined,
+  required: AdminPermission,
+  isSuperAdmin = false,
+): boolean {
+  return isSuperAdmin || permissionImplies(new Set(granted ?? []), required);
+}

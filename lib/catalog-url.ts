@@ -5,7 +5,7 @@
  * for products and catalog views.
  *
  * Ensures:
- * 1. Documented parameters (search, brand, category, sort, page, inStock, onSale, isTrending, view).
+ * 1. Documented parameters (search, brand, category, mainCategory, sort, page, inStock, onSale, isTrending, view).
  * 2. Normalization: casing, whitespace, array deduplication/sorting, invalid value fallback.
  * 3. Deterministic query string output with sorted keys so identical filter states yield identical URLs.
  */
@@ -23,6 +23,7 @@ export interface CatalogUrlParams {
     search?: string;
     brand?: string; // single slug or comma-separated slugs/ids
     category?: string; // single slug or comma-separated slugs/ids
+    mainCategory?: string; // main department slug or id
     brandIds?: string[];
     categoryIds?: string[];
     sort?: CatalogSort;
@@ -37,6 +38,7 @@ export interface ParsedCatalogParams {
     search: string;
     brands: string[];
     categories: string[];
+    mainCategory: string;
     sort: CatalogSort;
     page: number;
     inStock: boolean;
@@ -157,6 +159,7 @@ export function parseCatalogUrlParams(
     const rawSearch = getParam("search") ?? getParam("q");
     const rawBrand = getParam("brand") ?? getParam("brandIds");
     const rawCategory = getParam("category") ?? getParam("categoryIds");
+    const rawMainCategory = getParam("mainCategory");
     const rawSort = getParam("sort");
     const rawPage = getParam("page");
     const rawInStock = getParam("inStock");
@@ -167,6 +170,7 @@ export function parseCatalogUrlParams(
     const search = normalizeSearchQuery(rawSearch);
     const brands = normalizeFilterTokens(rawBrand);
     const categories = normalizeFilterTokens(rawCategory);
+    const mainCategory = normalizeFilterTokens(rawMainCategory)[0] || "";
     const sort = normalizeCatalogSort(rawSort);
     const page = normalizeCatalogPage(rawPage);
     const inStock = normalizeCatalogBoolean(rawInStock);
@@ -178,6 +182,7 @@ export function parseCatalogUrlParams(
         search,
         brands,
         categories,
+        mainCategory,
         sort,
         page,
         inStock,
@@ -214,6 +219,10 @@ export function buildCatalogUrl(
 
     if (params.isTrending) {
         query.set("isTrending", "true");
+    }
+
+    if (params.mainCategory && params.mainCategory.trim()) {
+        query.set("mainCategory", params.mainCategory.trim());
     }
 
     if (params.onSale) {

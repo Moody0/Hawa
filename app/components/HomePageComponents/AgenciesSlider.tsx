@@ -8,6 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import { Autoplay, Navigation } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -15,6 +16,7 @@ import 'swiper/css/navigation';
 export interface AgencyBrand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     description?: string | null;
     image?: string | null;
@@ -27,27 +29,6 @@ interface AgenciesSliderProps {
     title?: string;
     subtitle?: string;
 }
-
-const BRAND_LATIN_NAMES: Record<string, string> = {
-    'rocavera': 'Rokavera',
-    'rokavera': 'Rokavera',
-    'buffalo': 'Buffalo',
-    'alreef': 'Alreef',
-    'monda': 'Monda',
-    'moria': 'Moria',
-    'zwan': 'Zwan',
-    'rona': 'Rona',
-    'haleebna': 'Haleebna',
-    'sunbell': 'Sunbell',
-    'silver-fish': 'Silver Fish',
-    'silverfish': 'Silver Fish',
-    'al-maghrabi': 'Al-Maghrabi',
-    'almaghrabi': 'Al-Maghrabi',
-    'americana': 'Americana',
-    'tat': 'Tat',
-    'de-cecco-italy': 'De Cecco',
-    'rio-mare': 'Rio Mare',
-};
 
 const BRAND_SPECIALTIES: Record<string, { ar: string; en: string }> = {
     'rocavera': { ar: 'منتجات غذائية متنوعة', en: 'Diverse Food Products' },
@@ -70,6 +51,7 @@ const FALLBACK_BRANDS: AgencyBrand[] = [
     {
         id: 'fb-rokavera',
         name: 'روكافيرا',
+        nameEn: 'Rokavera',
         slug: 'rocavera',
         image: '/images/brands/rokavera.webp',
         description: 'منتجات عناية شخصية ومنظفات',
@@ -77,6 +59,7 @@ const FALLBACK_BRANDS: AgencyBrand[] = [
     {
         id: 'fb-buffalo',
         name: 'بوفالو',
+        nameEn: 'Buffalo',
         slug: 'buffalo',
         image: '/images/brands/bufalo.webp',
         description: 'منتجات استهلاكية ومواد نظافة',
@@ -84,6 +67,7 @@ const FALLBACK_BRANDS: AgencyBrand[] = [
     {
         id: 'fb-alreef',
         name: 'الريف',
+        nameEn: 'Alreef',
         slug: 'alreef',
         image: '/images/brands/alreef.webp',
         description: 'منتجات غذائية وزيوت نقية',
@@ -91,6 +75,7 @@ const FALLBACK_BRANDS: AgencyBrand[] = [
     {
         id: 'fb-zwan',
         name: 'زوان',
+        nameEn: 'Zwan',
         slug: 'zwan',
         image: '/images/brands/zwan.webp',
         description: 'معلبات ولحوم فاخرة',
@@ -98,6 +83,7 @@ const FALLBACK_BRANDS: AgencyBrand[] = [
     {
         id: 'fb-haleebna',
         name: 'حليبنا',
+        nameEn: 'Haleebna',
         slug: 'haleebna',
         image: '/images/brands/halibna.webp',
         description: 'سمن بقري وألبان مجففة',
@@ -105,6 +91,7 @@ const FALLBACK_BRANDS: AgencyBrand[] = [
     {
         id: 'fb-sunbell',
         name: 'صن بل',
+        nameEn: 'Sunbell',
         slug: 'sunbell',
         image: 'https://i.postimg.cc/N0ftBHFq/data-bodour-(43).png',
         description: 'معلبات لحم بقري فاخر',
@@ -112,6 +99,7 @@ const FALLBACK_BRANDS: AgencyBrand[] = [
     {
         id: 'fb-silver-fish',
         name: 'سيلفر فيش',
+        nameEn: 'Silver Fish',
         slug: 'silver-fish',
         image: 'https://i.postimg.cc/X7zdwfMd/data-bodour-(44).png',
         description: 'معلبات تونة وسردين',
@@ -119,6 +107,7 @@ const FALLBACK_BRANDS: AgencyBrand[] = [
     {
         id: 'fb-almaghrabi',
         name: 'المغربي',
+        nameEn: 'Al Maghrabi',
         slug: 'al-maghrabi',
         image: 'https://i.postimg.cc/yNQDHBVN/data-bodour-(45).png',
         description: 'سردين معلب بالزيت النباتي',
@@ -152,20 +141,7 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
     const activeBrands = (brands && brands.length > 0) ? brands : FALLBACK_BRANDS;
 
     const getBrandLatinName = (brand: AgencyBrand) => {
-        const key = brand.slug?.toLowerCase();
-        if (key && BRAND_LATIN_NAMES[key]) {
-            return BRAND_LATIN_NAMES[key];
-        }
-        if (/[a-zA-Z]/.test(brand.name)) {
-            return brand.name;
-        }
-        if (brand.slug) {
-            return brand.slug
-                .split('-')
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(' ');
-        }
-        return brand.name;
+        return getBrandDisplayName(brand, 'en');
     };
 
     const getBrandSpecialty = (brand: AgencyBrand) => {
@@ -289,13 +265,13 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                                             {brand.image ? (
                                                 <ResilientImage
                                                     src={brand.image}
-                                                    alt={brand.name}
+                                                    alt={getBrandDisplayName(brand, isArabic ? 'ar' : 'en')}
                                                     showSkeleton={false}
                                                     className="object-contain filter group-hover:scale-105 transition-transform duration-300"
                                                 />
                                             ) : (
                                                 <span className="text-xl font-black text-[#0B192C] dark:text-white">
-                                                    {brand.name}
+                                                    {getBrandDisplayName(brand, isArabic ? 'ar' : 'en')}
                                                 </span>
                                             )}
                                         </div>

@@ -7,6 +7,7 @@ import { useCurrency } from "@/app/context/CurrencyContext";
 import { useCart } from "@/app/context/CartContext";
 import { useCustomer } from "@/app/context/CustomerContext";
 import { formatPackaging, formatPackageItems } from "@/lib/packaging";
+import { getBrandDisplayName } from "@/lib/brand-display";
 import { Plus, Minus, ShoppingBag, Lock } from 'lucide-react';
 import ResilientImage from "@/app/components/ResilientImage";
 import RollingNumber from "@/app/components/RollingNumber";
@@ -33,7 +34,7 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
         : product.descriptionEn || product.description;
 
     // Clean redundant brand prefix if title starts with the brand name (e.g. "بوفالو صابون..." -> "صابون...")
-    const brandName = product.brand?.name || '';
+    const brandName = product.brand ? getBrandDisplayName(product.brand, isArabic ? 'ar' : 'en') : '';
     const cleanDisplayName = useMemo(() => {
         if (!brandName || !displayName) return displayName;
         const brandParts = brandName.split('-').map(s => s.trim()).filter(Boolean);
@@ -122,7 +123,7 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
                     {/* Brand Pill */}
                     {product.brand && (
                         <span className="inline-block text-[10px] font-bold text-[#8A6305] dark:text-[#E5B54A] uppercase tracking-wider mb-0.5">
-                            {product.brand.name}
+                            {getBrandDisplayName(product.brand, isArabic ? 'ar' : 'en')}
                         </span>
                     )}
 

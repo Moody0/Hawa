@@ -2,11 +2,13 @@ import React from 'react';
 import ResilientImage from '@/app/components/ResilientImage';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { ShieldCheck, Package, Truck, MessageCircle } from 'lucide-react';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface BrandHeroHeaderProps {
     brand: {
         id: string;
         name: string;
+        nameEn?: string | null;
         slug: string;
         description: string | null;
         image: string | null;
@@ -21,15 +23,9 @@ export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeade
     const fallbackImage = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800";
     const brandImage = brand.image || fallbackImage;
 
-    // Parse bilingual name formatted as "Al Reef - الريف" or "Alicafe - علي كافيه"
-    const nameParts = brand.name.split("-");
-    const primaryName = isArabic && nameParts.length > 1
-        ? nameParts[1].trim()
-        : (nameParts[0]?.trim() || brand.name);
-
-    const secondaryName = nameParts.length > 1
-        ? (isArabic ? nameParts[0].trim() : nameParts[1].trim())
-        : null;
+    const primaryName = getBrandDisplayName(brand, isArabic ? "ar" : "en");
+    const alternateName = getBrandDisplayName(brand, isArabic ? "en" : "ar");
+    const secondaryName = alternateName !== primaryName ? alternateName : null;
 
     const whatsappMessage = encodeURIComponent(
         isArabic
@@ -46,7 +42,7 @@ export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeade
                     <div className="shrink-0 w-20 h-20 sm:w-22 sm:h-22 rounded-xl p-2.5 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-white/10 flex items-center justify-center relative">
                         <ResilientImage
                             src={brandImage}
-                            alt={brand.name}
+                            alt={primaryName}
                             showSkeleton={false}
                             className="max-w-full max-h-full object-contain"
                             priority

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { useConfirm } from "../../context/ConfirmDialogContext";
@@ -11,10 +12,12 @@ import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { Plus, Trash2, Pencil, Image, Search, Star, RefreshCw, ToggleLeft, ToggleRight, Eye, Store, ShoppingBag, FolderTree, Network } from 'lucide-react';
 import RelatedItemsModal from "../components/RelatedItemsModal";
+import { hasAdminPermission } from "@/lib/admin-permissions";
 
 interface Brand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     description: string | null;
     image: string | null;
@@ -34,14 +37,17 @@ interface Brand {
 
 export default function BrandsClient({ brands: initialBrands }: { brands: Brand[] }) {
     const { openSidebar } = useAdminSidebar();
+    const router = useRouter();
     const { data: session } = useSession() || {};
     const { t, language } = useLanguage();
     const isArabic = language === 'ar';
     const confirm = useConfirm();
-    const canManage = session?.user?.role === "SUPER_ADMIN" || session?.user?.canManageBrands;
-    const canDelete = session?.user?.role === "SUPER_ADMIN" || session?.user?.canDeleteBrands;
+    const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
+    const canManage = hasAdminPermission(session?.user?.permissions, "BRANDS_MANAGE", isSuperAdmin) || session?.user?.canManageBrands;
+    const canDelete = hasAdminPermission(session?.user?.permissions, "BRANDS_ARCHIVE", isSuperAdmin) || session?.user?.canDeleteBrands;
 
     const [brands, setBrands] = useState<Brand[]>(initialBrands);
+    useEffect(() => setBrands(initialBrands), [initialBrands]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
@@ -74,6 +80,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
         return brands.filter((brand) => {
             const matchesSearch = 
                 brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (brand.nameEn || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (brand.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (brand.mainCategory?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
                 brand.slug.toLowerCase().includes(searchQuery.toLowerCase());
@@ -112,7 +119,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
             setBrands(prev => prev.filter(b => b.id !== brand.id));
             toast.success(t("admin.brandDeleted") || "Brand deleted");
         } else {
-            toast.error(result.error || "Failed to delete brand");
+            toast.error(result.error === 'deleteBrandWithCatalog' ? t('admin.deleteBrandWithCatalog') : result.error || "Failed to delete brand");
         }
     };
 
@@ -264,6 +271,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                     <BrandModal
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
+                        onSaved={() => router.refresh()}
                         brand={selectedBrand}
                     />
 
@@ -343,6 +351,11 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                     <h3 className="text-base sm:text-lg font-extrabold text-[#0B192C] dark:text-white truncate">
                                                         {brand.name}
                                                     </h3>
+                                                    {brand.nameEn && (
+                                                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate" dir="ltr">
+                                                            {brand.nameEn}
+                                                        </p>
+                                                    )}
                                                     {brand.description && (
                                                         <p className="text-xs font-semibold text-[#8A6305] dark:text-[#8A6305] truncate">
                                                             {brand.description}
@@ -399,15 +412,17 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                         {/* Actions Bar */}
                                         <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-3 mt-auto">
                                             {/* Preview Link */}
-                                            <a
-                                                href={`/products?brand=${brand.slug}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"
-                                            >
-                                                <Eye className="text-sm" />
-                                                <span>{isArabic ? 'معاينة المتجر' : 'Preview Store'}</span>
-                                            </a>
+                                            {brand.isActive && (
+                                                <a
+                                                    href={`/products?brand=${brand.slug}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"
+                                                >
+                                                    <Eye className="text-sm" />
+                                                    <span>{isArabic ? 'معاينة المتجر' : 'Preview Store'}</span>
+                                                </a>
+                                            )}
 
                                             {/* Edit / Active / Delete Buttons */}
                                             <div className="flex items-center gap-1">

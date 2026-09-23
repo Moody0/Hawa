@@ -164,7 +164,7 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
             className="w-full flex flex-col gap-3.5 sm:gap-4 my-1 sm:my-2"
         >
             {/* 1. Price & Wholesale Merchant Access Header */}
-            {isLockedForGuest ? (
+            {isLockedForGuest && !product.hidePrice ? (
                 <div className="flex flex-col gap-2.5 pb-3.5 border-b border-slate-200/80 dark:border-white/10">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">

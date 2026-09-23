@@ -4,11 +4,13 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/app/context/LanguageContext";
 import ResilientImage from "@/app/components/ResilientImage";
+import { getBrandDisplayName } from "@/lib/brand-display";
 import { Search, X, Filter, Check, RotateCw, Store, FolderTree, Zap, Tag, CheckCircle2 } from 'lucide-react';
 
 export interface FilterBrandCategory {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     mainCategoryId?: string | null;
 }
@@ -16,6 +18,7 @@ export interface FilterBrandCategory {
 export interface FilterBrand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     image?: string | null;
     mainCategoryId?: string | null;
@@ -388,7 +391,7 @@ export default function ProductsSidebarFilter({
                                     <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-100 bg-white lg:h-5 lg:w-5">
                                         <ResilientImage
                                             src={brand.image}
-                                            alt={brand.name}
+                                            alt={getBrandDisplayName(brand, language === 'ar' ? 'ar' : 'en')}
                                             className="object-contain p-0.5"
                                             sizes="(max-width: 1023px) 28px, 20px"
                                             showSkeleton={false}
@@ -396,7 +399,7 @@ export default function ProductsSidebarFilter({
                                     </span>
                                 )}
 
-                                <span className="truncate">{brand.name}</span>
+                                <span className="truncate">{getBrandDisplayName(brand, language === 'ar' ? 'ar' : 'en')}</span>
                             </div>
 
                             {count !== undefined && (

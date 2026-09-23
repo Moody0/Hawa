@@ -18,9 +18,6 @@ export interface CustomerData {
 interface CustomerContextType {
     customer: CustomerData | null;
     isLoading: boolean;
-    wishlistIds: string[];
-    isFavorite: (productId: string) => boolean;
-    toggleWishlist: (productId: string, productName?: string) => Promise<boolean>;
     login: (phone: string, password: string) => Promise<{ success: boolean; isPending?: boolean; error?: string; shopName?: string; phone?: string }>;
     register: (formData: {
         shopName: string;
@@ -38,29 +35,15 @@ interface CustomerContextType {
 
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
 
-const LOCAL_WISHLIST_KEY = 'hawa_local_wishlist';
-
 export function CustomerProvider({ children }: { children: React.ReactNode }) {
     const [customer, setCustomer] = useState<CustomerData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [wishlistIds, setWishlistIds] = useState<string[]>([]);
     const { language } = useLanguage();
     const isArabic = language === 'ar';
 
-    // Load local wishlist if guest
-    useEffect(() => {
-        try {
-            const saved = localStorage.getItem(LOCAL_WISHLIST_KEY);
-            if (saved) {
-                setWishlistIds(JSON.parse(saved));
-            }
-        } catch {}
-    }, []);
-
     const abortRef = useRef<AbortController | null>(null);
-    const mergedCustomerIdsRef = useRef<Set<string>>(new Set());
 
-    // Fetch authenticated customer and merge guest wishlist once
+    // Fetch authenticated customer session
     const fetchSession = useCallback(async () => {
         if (abortRef.current) {
             abortRef.current.abort();
@@ -69,59 +52,13 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         abortRef.current = controller;
 
         try {
-            const res = await fetch('/api/customer/auth/me?includeWishlist=true', {
+            const res = await fetch('/api/customer/auth/me', {
                 signal: controller.signal,
             });
             if (res.ok) {
                 const data = await res.json();
                 if (data.authenticated && data.customer) {
                     setCustomer(data.customer);
-
-                    const customerId = data.customer.id;
-                    if (!mergedCustomerIdsRef.current.has(customerId)) {
-                        mergedCustomerIdsRef.current.add(customerId);
-
-                        let localGuestIds: string[] = [];
-                        try {
-                            const local = localStorage.getItem(LOCAL_WISHLIST_KEY);
-                            if (local) {
-                                const parsed = JSON.parse(local);
-                                if (Array.isArray(parsed)) localGuestIds = parsed;
-                            }
-                        } catch {}
-
-                        if (localGuestIds.length > 0) {
-                            try {
-                                const mergeRes = await fetch('/api/customer/wishlist', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        action: 'merge',
-                                        productIds: localGuestIds,
-                                    }),
-                                });
-                                if (mergeRes.ok) {
-                                    const mergeData = await mergeRes.json();
-                                    if (Array.isArray(mergeData.wishlistIds)) {
-                                        setWishlistIds(mergeData.wishlistIds);
-                                        try {
-                                            localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(mergeData.wishlistIds));
-                                        } catch {}
-                                    }
-                                }
-                            } catch (mergeErr) {
-                                console.error('Failed to merge guest wishlist:', mergeErr);
-                                mergedCustomerIdsRef.current.delete(customerId);
-                            }
-                        } else if (Array.isArray(data.wishlistIds)) {
-                            setWishlistIds(data.wishlistIds);
-                            try {
-                                localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(data.wishlistIds));
-                            } catch {}
-                        }
-                    } else if (Array.isArray(data.wishlistIds)) {
-                        setWishlistIds(data.wishlistIds);
-                    }
                 } else {
                     setCustomer(null);
                 }
@@ -147,69 +84,6 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             }
         };
     }, [fetchSession]);
-
-    const isFavorite = useCallback(
-        (productId: string) => wishlistIds.includes(productId),
-        [wishlistIds]
-    );
-
-    const toggleWishlist = async (productId: string, productName?: string): Promise<boolean> => {
-        const currentlyFav = wishlistIds.includes(productId);
-        const nextFav = !currentlyFav;
-
-        // Optimistic update
-        const updatedIds = nextFav
-            ? [...wishlistIds, productId]
-            : wishlistIds.filter((id) => id !== productId);
-
-        setWishlistIds(updatedIds);
-        try {
-            localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(updatedIds));
-        } catch {}
-
-        if (customer) {
-            try {
-                const res = await fetch('/api/customer/wishlist', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: nextFav ? 'add' : 'remove',
-                        productId,
-                    }),
-                });
-                if (!res.ok) {
-                    // Revert if failed
-                    setWishlistIds(wishlistIds);
-                    try {
-                        localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(wishlistIds));
-                    } catch {}
-                }
-            } catch {
-                setWishlistIds(wishlistIds);
-                try {
-                    localStorage.setItem(LOCAL_WISHLIST_KEY, JSON.stringify(wishlistIds));
-                } catch {}
-            }
-        }
-
-        if (nextFav) {
-            toast.success(
-                isArabic
-                    ? `تم حفظ ${productName || 'المنتج'} في المفضلة ❤️`
-                    : `Saved ${productName || 'product'} to favorites ❤️`,
-                { duration: 2500 }
-            );
-        } else {
-            toast(
-                isArabic
-                    ? `تمت إزالة ${productName || 'المنتج'} من المفضلة`
-                    : `Removed ${productName || 'product'} from favorites`,
-                { icon: '🤍', duration: 2000 }
-            );
-        }
-
-        return nextFav;
-    };
 
     const login = async (phone: string, password: string) => {
         try {
@@ -281,12 +155,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         try {
             await fetch('/api/customer/auth/logout', { method: 'POST' });
         } catch {}
-        mergedCustomerIdsRef.current.clear();
         setCustomer(null);
-        setWishlistIds([]);
-        try {
-            localStorage.removeItem(LOCAL_WISHLIST_KEY);
-        } catch {}
         toast(isArabic ? 'تم تسجيل الخروج بنجاح' : 'Logged out successfully');
     };
 
@@ -314,9 +183,6 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             value={{
                 customer,
                 isLoading,
-                wishlistIds,
-                isFavorite,
-                toggleWishlist,
                 login,
                 register,
                 logout,

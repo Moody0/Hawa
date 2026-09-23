@@ -164,7 +164,7 @@ export async function GET(request: Request) {
                 isActive: true,
                 archivedAt: null,
             },
-            category: { archivedAt: null },
+            category: { archivedAt: null, isActive: true },
         };
 
         const andConditions: Prisma.ProductWhereInput[] = [];
@@ -200,6 +200,7 @@ export async function GET(request: Request) {
                 OR: [
                     { mainCategoryId: mainCategoryIdParam },
                     { category: { mainCategoryId: mainCategoryIdParam } },
+                    { brand: { mainCategoryId: mainCategoryIdParam } },
                 ],
             });
         }
@@ -261,6 +262,7 @@ export async function GET(request: Request) {
                         select: {
                             id: true,
                             name: true,
+                            nameEn: true,
                             slug: true,
                             group: true,
                         }

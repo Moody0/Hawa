@@ -10,7 +10,7 @@ interface AdminHeaderProps {
 }
 
 export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
-    const { t } = useLanguage();
+    const { t, language, setLanguage } = useLanguage();
 
     return (
         <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-3.5 bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 shadow-2xs">
@@ -18,7 +18,7 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
                 <button
                     onClick={onMenuClick}
                     className="lg:hidden text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-xl transition-colors"
-                    aria-label="Toggle Navigation"
+                    aria-label={t("admin.toggleNavigation")}
                 >
                     <Menu className="text-[22px]" />
                 </button>
@@ -40,15 +40,16 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
                     <span>{t("admin.visitStore") || "Visit Store"}</span>
                 </Link>
 
-                <span
-                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 rounded-xl border border-slate-200/80 dark:border-white/10"
-                    title="Arabic"
-                    aria-label="Arabic language"
-                    role="status"
+                <button
+                    type="button"
+                    onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 rounded-xl border border-slate-200/80 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title={t("admin.switchLanguage")}
+                    aria-label={t("admin.switchLanguage")}
                 >
-                    <span aria-hidden="true" className="text-[15px] text-[#8A6305]">AR</span>
-                    <span>Arabic</span>
-                </span>
+                    <span aria-hidden="true" className="text-[15px] text-[#8A6305]">{language === 'ar' ? 'AR' : 'EN'}</span>
+                    <span>{t(`language.${language === 'ar' ? 'arabic' : 'english'}`)}</span>
+                </button>
             </div>
         </header>
     );

@@ -134,7 +134,7 @@ export default async function CategoryPage(
     if (mainCategory) {
         const [{ categories, products, totalProducts }, brands] = await Promise.all([
             getCatalogInitialData(undefined, undefined, mainCategory.id),
-            getCatalogBrands(),
+            getCatalogBrands(mainCategory.id),
         ]);
 
         return (

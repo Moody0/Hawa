@@ -8,6 +8,7 @@ import { useState, useMemo } from "react";
 import OrderDetailsModal from "../orders/OrderDetailsModal";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { DashboardStats } from "@/lib/admin-actions";
+import { formatOrderNumber } from "@/lib/order-number";
 import { DollarSign, ShoppingBag, Package, ChevronRight, ChevronLeft, TrendingUp, Plus, Store, Truck, AlertTriangle, MapPin, CheckCircle2, Inbox, GalleryHorizontal } from 'lucide-react';
 
 export default function DashboardClient({ stats }: { stats: DashboardStats }) {
@@ -19,6 +20,10 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
     const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
 
     const isArabic = language === 'ar';
+    const localizedProductName = (product: { name: string; nameAr?: string | null; nameEn?: string | null }) =>
+        (isArabic ? product.nameAr : product.nameEn) || (product.name === 'Unknown' ? t('admin.unknown') : product.name);
+    const formatTrendDate = (date: string, options: Intl.DateTimeFormatOptions) =>
+        new Date(`${date}T00:00:00`).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', options);
 
     const handleViewDetails = (order: DashboardStats['recentOrders'][0]) => {
         setSelectedOrder(order);
@@ -440,7 +445,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                         fontWeight="600"
                                                         className={`fill-slate-400 dark:fill-slate-500 ${isMobileKey ? 'block' : 'hidden sm:inline'}`}
                                                     >
-                                                        {p.data.label}
+                                                        {formatTrendDate(p.data.date, { month: 'short', day: 'numeric' })}
                                                     </text>
                                                 );
                                             })}
@@ -500,7 +505,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                 }}
                                             >
                                                 <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                                                    {chartPoints[hoveredPointIndex].data.date}
+                                                    {formatTrendDate(chartPoints[hoveredPointIndex].data.date, { year: 'numeric', month: 'long', day: 'numeric' })}
                                                 </p>
                                                 <p className="font-extrabold text-xs sm:text-sm">
                                                     {chartMode === 'revenue' 
@@ -523,7 +528,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                 {hasSalesData && peakDay && (peakDay.revenue > 0 || peakDay.orders > 0) ? (
                                     <>
                                         <span className="font-medium">
-                                            {t('admin.peakDay')}: <strong className="text-slate-800 dark:text-slate-200">{peakDay.label}</strong>
+                                            {t('admin.peakDay')}: <strong className="text-slate-800 dark:text-slate-200">{formatTrendDate(peakDay.date, { month: 'short', day: 'numeric' })}</strong>
                                         </span>
                                         <span className="font-bold text-emerald-600 dark:text-emerald-400">
                                             ${peakDay.revenue.toFixed(2)} ({peakDay.orders} {t('admin.totalOrders')})
@@ -531,7 +536,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                     </>
                                 ) : (
                                     <span className="text-slate-400 dark:text-slate-500 font-medium italic">
-                                        {isArabic ? "لا توجد حركات بيع مسجلة في آخر 14 يوماً" : "No sales activity in the last 14 days"}
+                                        {t('admin.noSalesActivity')}
                                     </span>
                                 )}
                             </div>
@@ -719,7 +724,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                     {product.image ? (
                                                         <Image
                                                             src={product.image}
-                                                            alt={product.name}
+                                                            alt={localizedProductName(product)}
                                                             fill
                                                             className="object-cover"
                                                             sizes="40px"
@@ -732,7 +737,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                 {/* Product Details */}
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                                                        {isArabic && product.nameAr ? product.nameAr : product.name}
+                                                        {localizedProductName(product)}
                                                     </p>
                                                     <p className="text-[11px] text-slate-500 font-medium">
                                                         ${product.price.toFixed(2)} • {product.stock} {t('admin.stockRemaining')}
@@ -802,7 +807,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                         {p.image ? (
                                                             <Image
                                                                 src={p.image}
-                                                                alt={p.name}
+                                                                alt={localizedProductName(p)}
                                                                 fill
                                                                 className="object-cover"
                                                                 sizes="32px"
@@ -813,21 +818,21 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                     </div>
                                                     <div className="min-w-0">
                                                         <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                                                            {isArabic && p.nameAr ? p.nameAr : p.name}
+                                                            {localizedProductName(p)}
                                                         </p>
                                                         <p className="text-[10px] text-slate-500 font-medium">
-                                                            {p.categoryName}
+                                                            {p.categoryName === 'Uncategorized' ? t('admin.uncategorized') : p.categoryName}
                                                         </p>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex items-center gap-2 shrink-0">
                                                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
-                                                        p.stock === 0 
+                                                        p.stock <= 0
                                                             ? 'bg-rose-600 text-white' 
                                                             : 'bg-amber-500 text-white'
                                                     }`}>
-                                                        {p.stock === 0 ? t('admin.outOfStock') : `${p.stock} ${t('admin.unitsLeft')}`}
+                                                        {p.stock <= 0 ? t('admin.outOfStock') : `${p.stock} ${t('admin.unitsLeft')}`}
                                                     </span>
                                                 </div>
                                             </div>
@@ -861,7 +866,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                 className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5"
                                             >
                                                 <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                                                    {city.city}
+                                                    {city.city === 'Unknown' ? t('admin.unknown') : city.city}
                                                 </p>
                                                 <div className="flex justify-between items-center text-[10px] font-semibold text-slate-500 mt-1">
                                                     <span>{city.orderCount} {t('admin.totalOrders')}</span>
@@ -941,7 +946,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                     className="hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition-colors group"
                                                 >
                                                     <td className="px-6 py-4 text-xs font-bold text-slate-900 dark:text-white">
-                                                        #{order.id.slice(-6).toUpperCase()}
+                                                        {formatOrderNumber(order.orderNumber)}
                                                     </td>
                                                     <td className="px-6 py-4 text-xs font-semibold text-slate-800 dark:text-slate-200">
                                                         <div>{order.customer}</div>
@@ -949,7 +954,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                                                     </td>
                                                     <td className="px-6 py-4 text-xs text-slate-600 dark:text-slate-400">
                                                         {order.items.length > 0
-                                                            ? (order.items[0]?.product?.name || t('admin.unknown')) + (order.items.length > 1 ? ` + ${order.items.length - 1} ${t('common.more')}` : '')
+                                                            ? (order.items[0]?.product ? localizedProductName(order.items[0].product) : t('admin.unknown')) + (order.items.length > 1 ? ` + ${order.items.length - 1} ${t('common.more')}` : '')
                                                             : t('admin.unknown')}
                                                     </td>
                                                     <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400 font-medium">

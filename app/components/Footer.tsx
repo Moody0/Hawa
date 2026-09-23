@@ -36,6 +36,10 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
         getLocalizedValue(language, settings?.footerBrandTitle, settings?.footerBrandTitleAr) ||
         (isArabic ? 'شركة حـوا للتوزيع والتجارة' : 'Hawa Distribution & Trading');
 
+    const brandTagline =
+        getLocalizedValue(language, settings?.footerBrandTagline, settings?.footerBrandTaglineAr) ||
+        (isArabic ? 'توزيع وتجارة جملة — سورية' : 'Wholesale Distribution — Syria');
+
     const brandDescription =
         getLocalizedValue(language, settings?.footerBrandDescription, settings?.footerBrandDescriptionAr) ||
         (isArabic
@@ -49,32 +53,117 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
             : '© 2026 Hawa Distribution & Trading. All rights reserved.');
 
     // Direct Contacts
-    const wholesalePhone = '+963 993 443 901';
-    const emailAddress = 'info@hawa-dist.com';
-    const whatsappClean = '963993443901';
+    const contactTitle =
+        getLocalizedValue(language, settings?.footerContactTitle, settings?.footerContactTitleAr) ||
+        (isArabic ? 'تواصل معنا' : 'Contact Us');
 
-    // 1. Column 3: Wholesale Services Links (using real platform routes & names)
-    const servicesLinks = [
-        { label: isArabic ? 'الشحن والتوصيل للمحافظات' : 'Nationwide Freight & Delivery', href: '/shipping-returns' },
-        { label: isArabic ? 'نشرة الأسعار والمدونة' : 'Market Rates & Trade Blog', href: '/blog' },
-        { label: isArabic ? 'طلب تمثيل وكالة تجارية' : 'Agency Partnership Inquiry', href: '/contact' },
-        { label: isArabic ? 'بوابة حسابات التجار' : 'Merchant Accounts Hub', href: '/account/login' },
+    const contactAddress =
+        getLocalizedValue(language, settings?.footerAddress, settings?.footerAddressAr) ||
+        (isArabic ? 'حمص، المنطقة الصناعية — سورية' : 'Homs Industrial Zone, Syria');
+
+    const wholesalePhone = settings?.footerPhone || settings?.whatsappNumber || '+963 993 443 901';
+    const emailAddress = settings?.footerEmail || 'info@hawa-dist.com';
+    const whatsappClean = wholesalePhone.replace(/\D/g, '') || '963993443901';
+
+    // Column Titles
+    const supportTitle =
+        getLocalizedValue(language, settings?.footerSupportTitle, settings?.footerSupportTitleAr) ||
+        (isArabic ? 'خدماتنا' : 'Our Services');
+
+    const companyTitle =
+        getLocalizedValue(language, settings?.footerCompanyTitle, settings?.footerCompanyTitleAr) ||
+        (isArabic ? 'روابط سريعة' : 'Quick Links');
+
+    const newsletterTitle =
+        getLocalizedValue(language, settings?.footerNewsletterTitle, settings?.footerNewsletterTitleAr) ||
+        (isArabic ? 'النشرة البريدية' : 'Newsletter');
+
+    const newsletterDesc =
+        getLocalizedValue(language, settings?.footerNewsletterDesc, settings?.footerNewsletterDescAr) ||
+        (isArabic
+            ? 'اشترك ليصلك كل جديد عن المنتجات والعروض والأسعار.'
+            : 'Subscribe to get the latest trade discounts, new arrivals & price lists.');
+
+    const jurisdictionText =
+        getLocalizedValue(language, settings?.footerJurisdiction, settings?.footerJurisdictionAr) ||
+        (isArabic ? 'الجمهورية العربية السورية — حمص' : 'Syrian Arab Republic — Homs');
+
+    const termsUrl = settings?.footerTermsUrl || '/shipping-returns';
+    const privacyUrl = settings?.footerPrivacyUrl || '/shipping-returns';
+
+    // 1. Column 3: Wholesale Services Links (dynamic settings with fallbacks)
+    const rawServicesLinks = [
+        {
+            label: getLocalizedValue(language, settings?.footerSupportLink1Label, settings?.footerSupportLink1LabelAr),
+            href: settings?.footerSupportLink1Url || '/shipping-returns',
+            defaultLabel: isArabic ? 'الشحن والتوصيل للمحافظات' : 'Nationwide Freight & Delivery',
+        },
+        {
+            label: getLocalizedValue(language, settings?.footerSupportLink2Label, settings?.footerSupportLink2LabelAr),
+            href: settings?.footerSupportLink2Url || '/blog',
+            defaultLabel: isArabic ? 'نشرة الأسعار والمدونة' : 'Market Rates & Trade Blog',
+        },
+        {
+            label: getLocalizedValue(language, settings?.footerSupportLink3Label, settings?.footerSupportLink3LabelAr),
+            href: settings?.footerSupportLink3Url || '/contact',
+            defaultLabel: isArabic ? 'طلب تمثيل وكالة تجارية' : 'Agency Partnership Inquiry',
+        },
+        {
+            label: getLocalizedValue(language, settings?.footerSupportLink4Label, settings?.footerSupportLink4LabelAr),
+            href: settings?.footerSupportLink4Url || '/account/login',
+            defaultLabel: isArabic ? 'بوابة حسابات التجار' : 'Merchant Accounts Hub',
+        },
     ];
 
-    // 2. Column 4: Quick Links (using real platform routes & names)
-    const quickLinks = [
-        { label: isArabic ? 'الرئيسية' : 'Home', href: '/' },
-        { label: isArabic ? 'من نحن' : 'About Us', href: '/about-us' },
-        { label: isArabic ? 'الوكالات والعلامات' : 'Official Brands', href: '/brands' },
-        { label: isArabic ? 'أقسام المنتجات' : 'Product Categories', href: '/categories' },
-        { label: isArabic ? 'كتالوج المنتجات' : 'Full Catalog', href: '/products' },
-        { label: isArabic ? 'اتصل بنا' : 'Contact Us', href: '/contact' },
+    const servicesLinks = rawServicesLinks
+        .map((link) => ({
+            label: link.label || link.defaultLabel,
+            href: link.href,
+        }))
+        .filter((link) => Boolean(link.href && link.href.trim()));
+
+    // 2. Column 4: Quick Links (dynamic settings with fallbacks)
+    const rawQuickLinks = [
+        {
+            label: getLocalizedValue(language, settings?.footerCompanyLink1Label, settings?.footerCompanyLink1LabelAr),
+            href: settings?.footerCompanyLink1Url || '/',
+            defaultLabel: isArabic ? 'الرئيسية' : 'Home',
+        },
+        {
+            label: getLocalizedValue(language, settings?.footerCompanyLink2Label, settings?.footerCompanyLink2LabelAr),
+            href: settings?.footerCompanyLink2Url || '/about-us',
+            defaultLabel: isArabic ? 'من نحن' : 'About Us',
+        },
+        {
+            label: getLocalizedValue(language, settings?.footerCompanyLink3Label, settings?.footerCompanyLink3LabelAr),
+            href: settings?.footerCompanyLink3Url || '/brands',
+            defaultLabel: isArabic ? 'الوكالات والعلامات' : 'Official Brands',
+        },
+        {
+            label: getLocalizedValue(language, settings?.footerCompanyLink4Label, settings?.footerCompanyLink4LabelAr),
+            href: settings?.footerCompanyLink4Url || '/categories',
+            defaultLabel: isArabic ? 'أقسام المنتجات' : 'Product Categories',
+        },
     ];
+
+    const quickLinks = rawQuickLinks
+        .map((link) => ({
+            label: link.label || link.defaultLabel,
+            href: link.href,
+        }))
+        .filter((link) => Boolean(link.href && link.href.trim()));
 
     // 3. Social Media Links
+    const whatsappUrl =
+        settings?.footerWhatsappUrl && settings.footerWhatsappUrl !== '#'
+            ? settings.footerWhatsappUrl
+            : `https://wa.me/${whatsappClean}?text=${encodeURIComponent(
+                  isArabic ? 'مرحباً شركة حوا للتوزيع، أود الاستفسار عن بضائع الجملة.' : 'Hello Hawa Distribution, I would like to inquire about wholesale goods.'
+              )}`;
+
     const socialLinks = [
         {
-            href: `https://wa.me/${whatsappClean}?text=${encodeURIComponent(isArabic ? 'مرحباً شركة حوا للتوزيع، أود الاستفسار عن بضائع الجملة.' : 'Hello Hawa Distribution, I would like to inquire about wholesale goods.')}`,
+            href: whatsappUrl,
             icon: FaWhatsapp,
             label: 'WhatsApp',
         },
@@ -89,7 +178,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
             label: 'Instagram',
         },
         {
-            href: 'https://linkedin.com',
+            href: settings?.footerLinkedinUrl && settings.footerLinkedinUrl !== '#' ? settings.footerLinkedinUrl : 'https://linkedin.com',
             icon: FaLinkedin,
             label: 'LinkedIn',
         },
@@ -141,7 +230,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                                     {brandTitle}
                                 </span>
                                 <span className="text-[10px] font-bold text-[#E5B54A] tracking-wider uppercase mt-0.5">
-                                    {isArabic ? 'توزيع وتجارة جملة — سورية' : 'Wholesale Distribution — Syria'}
+                                    {brandTagline}
                                 </span>
                             </div>
                         </Link>
@@ -154,7 +243,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                     {/* Column 2: Contact & Working Hours (lg:col-span-3 lg:px-6) */}
                     <div className="lg:col-span-3 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
                         <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider flex items-center gap-2">
-                            <span>{isArabic ? 'تواصل معنا' : 'Contact Us'}</span>
+                            <span>{contactTitle}</span>
                         </h5>
 
                         <div className="flex flex-col gap-3 text-xs sm:text-[13px] text-slate-300">
@@ -162,7 +251,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                             <div className="flex items-start gap-2.5">
                                 <MapPin className="w-4 h-4 text-[#E5B54A] shrink-0 mt-0.5" aria-hidden="true" />
                                 <span className="leading-snug">
-                                    {isArabic ? 'حمص، المنطقة الصناعية — سورية' : 'Homs Industrial Zone, Syria'}
+                                    {contactAddress}
                                 </span>
                             </div>
 
@@ -199,7 +288,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                     {/* Column 3: Wholesale Services (lg:col-span-2 lg:px-6) */}
                     <div className="lg:col-span-2 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
                         <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
-                            {isArabic ? 'خدماتنا' : 'Our Services'}
+                            {supportTitle}
                         </h5>
                         <ul className="flex flex-col gap-2.5">
                             {servicesLinks.map((link, idx) => (
@@ -213,7 +302,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                     {/* Column 4: Quick Links (lg:col-span-2 lg:px-6) */}
                     <div className="lg:col-span-2 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
                         <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
-                            {isArabic ? 'روابط سريعة' : 'Quick Links'}
+                            {companyTitle}
                         </h5>
                         <ul className="flex flex-col gap-2.5">
                             {quickLinks.map((link, idx) => (
@@ -227,13 +316,11 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                     {/* Column 5: Newsletter & Community (lg:col-span-2 lg:ps-6) */}
                     <div className="lg:col-span-2 flex flex-col gap-3.5 lg:ps-6">
                         <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
-                            {isArabic ? 'النشرة البريدية' : 'Newsletter'}
+                            {newsletterTitle}
                         </h5>
 
                         <p className="text-xs text-slate-300 leading-relaxed">
-                            {isArabic
-                                ? 'اشترك ليصلك كل جديد عن المنتجات والعروض والأسعار.'
-                                : 'Subscribe to get the latest trade discounts, new arrivals & price lists.'}
+                            {newsletterDesc}
                         </p>
 
                         {/* Interactive Newsletter Subscription */}
@@ -271,14 +358,14 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                     {/* Legal Links */}
                     <div className="flex items-center gap-3">
                         <Link
-                            href="/shipping-returns"
+                            href={termsUrl}
                             className="hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                         >
                             {isArabic ? 'الشروط والأحكام' : 'Terms & Conditions'}
                         </Link>
                         <span className="text-white/20">•</span>
                         <Link
-                            href="/shipping-returns"
+                            href={privacyUrl}
                             className="hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                         >
                             {isArabic ? 'سياسة الخصوصية' : 'Privacy Policy'}
@@ -290,9 +377,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                         <p className="text-slate-300">{copyright}</p>
                         <span className="hidden sm:inline text-white/20">•</span>
                         <p className="text-slate-400 text-[11px]">
-                            {isArabic
-                                ? 'الجمهورية العربية السورية — حمص'
-                                : 'Syrian Arab Republic — Homs'}
+                            {jurisdictionText}
                         </p>
                     </div>
                 </div>

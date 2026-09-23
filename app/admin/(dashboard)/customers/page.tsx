@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Store, Phone, MapPin, ShoppingBag, Search, CheckCircle2, Ban, Trash2, RotateCw, ShieldCheck, Check, X, Hourglass } from 'lucide-react';
+import { Store, Phone, MapPin, ShoppingBag, Search, CheckCircle2, Ban, Trash2, RotateCw, ShieldCheck, Check, X, Hourglass, Pencil, Save } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import AdminHeader from '../../components/AdminHeader';
@@ -23,6 +23,158 @@ interface AdminCustomer {
     totalSpent: number;
 }
 
+type EditableCustomer = Pick<AdminCustomer, 'id' | 'shopName' | 'ownerName' | 'phone' | 'city' | 'address' | 'notes' | 'isActive' | 'createdAt'>;
+
+function CustomerEditModal({
+    customer,
+    onClose,
+    onSaved,
+}: {
+    customer: EditableCustomer;
+    onClose: () => void;
+    onSaved: (updated: EditableCustomer) => void;
+}) {
+    const [form, setForm] = useState({
+        shopName: customer.shopName,
+        ownerName: customer.ownerName,
+        phone: customer.phone,
+        city: customer.city,
+        address: customer.address,
+        notes: customer.notes || '',
+        isActive: customer.isActive,
+    });
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const [error, setError] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+    const firstFieldRef = React.useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        firstFieldRef.current?.focus();
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && !isSaving) onClose();
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isSaving, onClose]);
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        setError('');
+        setFieldErrors({});
+        setIsSaving(true);
+
+        try {
+            const response = await fetch('/api/admin/customers', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: customer.id,
+                    ...form,
+                    notes: form.notes.trim() || null,
+                }),
+            });
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                const nextFieldErrors: Record<string, string> = {};
+                for (const [field, messages] of Object.entries(data?.fieldErrors || {})) {
+                    if (Array.isArray(messages) && typeof messages[0] === 'string') nextFieldErrors[field] = messages[0];
+                }
+                setFieldErrors(nextFieldErrors);
+                setError(typeof data?.error === 'string'
+                    ? data.error
+                    : data?.code === 'PHONE_IN_USE'
+                        ? 'رقم الهاتف مستخدم لحساب تاجر آخر'
+                        : 'تعذر حفظ البيانات. تحقق من الحقول وحاول مجدداً.');
+                return;
+            }
+
+            onSaved(data.customer as EditableCustomer);
+            toast.success('تم تحديث بيانات حساب التاجر');
+        } catch {
+            setError('تعذر الاتصال بالخادم. حاول مجدداً.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const inputClass = 'mt-1.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/20';
+    const fieldError = (field: string) => fieldErrors[field] ? <span className="mt-1 block text-xs font-medium text-rose-600">{fieldErrors[field]}</span> : null;
+
+    return (
+        <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-3 sm:p-6"
+            onMouseDown={(event) => { if (event.target === event.currentTarget && !isSaving) onClose(); }}
+        >
+            <section role="dialog" aria-modal="true" aria-labelledby="customer-edit-title" dir="rtl" className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl bg-white dark:bg-[#132035] shadow-2xl">
+                <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 dark:border-white/10 bg-white dark:bg-[#132035] px-5 py-4 sm:px-7">
+                    <div>
+                        <h2 id="customer-edit-title" className="text-lg font-black text-[#0B192C] dark:text-white">تعديل بيانات حساب التاجر</h2>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">يمكن تحديث رقم الدخول وبيانات المحل وحالة الحساب.</p>
+                    </div>
+                    <button type="button" onClick={onClose} disabled={isSaving} aria-label="إغلاق" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-50">
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4 px-5 py-5 sm:px-7 sm:py-6">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                            اسم المحل / المتجر
+                            <input ref={firstFieldRef} required minLength={2} maxLength={100} value={form.shopName} onChange={(event) => setForm((current) => ({ ...current, shopName: event.target.value }))} className={inputClass} />
+                            {fieldError('shopName')}
+                        </label>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                            رقم حساب التاجر / هاتف تسجيل الدخول
+                            <input type="tel" dir="ltr" required maxLength={50} autoComplete="tel" value={form.phone} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} className={`${inputClass} text-left font-mono`} />
+                            <span className="mt-1 block text-[11px] font-normal text-slate-500">هذا هو الرقم الذي يستخدمه التاجر لتسجيل الدخول.</span>
+                            {fieldError('phone')}
+                        </label>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                            اسم صاحب الطلب / المسؤول
+                            <input required minLength={2} maxLength={100} value={form.ownerName} onChange={(event) => setForm((current) => ({ ...current, ownerName: event.target.value }))} className={inputClass} />
+                            {fieldError('ownerName')}
+                        </label>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                            المحافظة / المنطقة
+                            <input required minLength={2} maxLength={50} value={form.city} onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))} className={inputClass} />
+                            {fieldError('city')}
+                        </label>
+                    </div>
+
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                        العنوان بالتفصيل
+                        <input required minLength={4} maxLength={300} value={form.address} onChange={(event) => setForm((current) => ({ ...current, address: event.target.value }))} className={inputClass} />
+                        {fieldError('address')}
+                    </label>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                        ملاحظات التوصيل
+                        <textarea rows={3} maxLength={500} value={form.notes} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} className={`${inputClass} resize-y`} />
+                        {fieldError('notes')}
+                    </label>
+                    <label className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 text-sm font-bold text-slate-800 dark:text-slate-100">
+                        <span>حالة الحساب</span>
+                        <select value={form.isActive ? 'active' : 'pending'} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.value === 'active' }))} className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B192C] px-3 py-2 outline-none">
+                            <option value="active">مفعل</option>
+                            <option value="pending">بانتظار التفعيل</option>
+                        </select>
+                    </label>
+
+                    {error && <p role="alert" className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-300">{error}</p>}
+
+                    <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-start">
+                        <button type="submit" disabled={isSaving} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0B192C] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#1e293b] disabled:cursor-wait disabled:opacity-60">
+                            <Save className="h-4 w-4" />
+                            {isSaving ? 'جاري الحفظ...' : 'حفظ بيانات التاجر'}
+                        </button>
+                        <button type="button" onClick={onClose} disabled={isSaving} className="rounded-xl border border-slate-200 dark:border-white/10 px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50">إلغاء</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    );
+}
+
 type TabType = 'pending' | 'active' | 'all';
 
 export default function AdminCustomersPage() {
@@ -33,6 +185,7 @@ export default function AdminCustomersPage() {
     const [search, setSearch] = useState('');
     const [activeTab, setActiveTab] = useState<TabType>('pending');
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+    const [editingCustomer, setEditingCustomer] = useState<AdminCustomer | null>(null);
 
     const fetchCustomers = async () => {
         setLoading(true);
@@ -47,6 +200,13 @@ export default function AdminCustomersPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCustomerSaved = (updated: EditableCustomer) => {
+        setCustomers((current) => current.map((customer) => (
+            customer.id === updated.id ? { ...customer, ...updated } : customer
+        )));
+        setEditingCustomer(null);
     };
 
     useEffect(() => {
@@ -154,7 +314,7 @@ export default function AdminCustomersPage() {
                         <span>إدارة طلبات وحسابات التجار</span>
                     </h1>
                     <p className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 mt-1">
-                        مراجعة واعتماد طلبات تسجيل المحلات الجديدة، وتفعيل الحسابات للاطلاع على أسعار الجملة.
+                        مراجعة الطلبات وتعديل رقم دخول التاجر وكافة بيانات المحل وإدارة حالة الحساب.
                     </p>
                 </div>
 
@@ -257,12 +417,12 @@ export default function AdminCustomersPage() {
                                 <tr>
                                     <th className="p-3.5 text-start">المحل / المتجر</th>
                                     <th className="p-3.5 text-start">صاحب الطلب</th>
-                                    <th className="p-3.5 text-start">الهاتف</th>
+                                    <th className="p-3.5 text-start">رقم الحساب / الهاتف</th>
                                     <th className="p-3.5 text-start">المحافظة والعنوان</th>
                                     <th className="p-3.5 text-center">الطلبيات</th>
                                     <th className="p-3.5 text-center">الحالة</th>
                                     <th className="p-3.5 text-center">تواصل سريع</th>
-                                    <th className="p-3.5 text-center">إجراءات الاعتماد</th>
+                                    <th className="p-3.5 text-center">إدارة الحساب</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-white/5 font-medium text-slate-800 dark:text-gray-200">
@@ -332,6 +492,16 @@ export default function AdminCustomersPage() {
                                             </td>
                                             <td className="p-3.5 text-center">
                                                 <div className="inline-flex items-center gap-1.5">
+                                                    <button
+                                                        disabled={isProcessing}
+                                                        onClick={() => setEditingCustomer(c)}
+                                                        className="p-1.5 rounded-lg text-[#8A6305] hover:bg-[#FAF6EC] dark:hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50"
+                                                        title="تعديل بيانات الحساب ورقم تسجيل الدخول"
+                                                        aria-label={`تعديل حساب ${c.shopName}`}
+                                                    >
+                                                        <Pencil className="text-lg" />
+                                                    </button>
+
                                                     {!c.isActive ? (
                                                         <button
                                                             disabled={isProcessing}
@@ -372,6 +542,13 @@ export default function AdminCustomersPage() {
                 )}
             </div>
             </div>
+            {editingCustomer && (
+                <CustomerEditModal
+                    customer={editingCustomer}
+                    onClose={() => setEditingCustomer(null)}
+                    onSaved={handleCustomerSaved}
+                />
+            )}
         </div>
     );
 }

@@ -17,8 +17,9 @@ export async function generateMetadata(
         };
     }
 
-    const title = `${brand.name} | Hawa Distribution - حوا للتوزيع`;
-    const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
+    const displayName = brand.nameEn?.trim() || brand.name;
+    const title = `${displayName} | Hawa Distribution - حوا للتوزيع`;
+    const description = brand.description || `تصفح كتالوج منتجات وكالة ${displayName} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
     const image = brand.image || '/og-image.jpg';
 
     return {
@@ -37,7 +38,7 @@ export async function generateMetadata(
                     url: image,
                     width: 1200,
                     height: 630,
-                    alt: brand.name,
+                    alt: displayName,
                 },
             ],
         },

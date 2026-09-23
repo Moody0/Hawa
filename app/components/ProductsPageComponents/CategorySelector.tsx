@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useRef, useEffect, useState } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { Grid, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface CategoryItem {
     id: string;
@@ -18,7 +19,7 @@ interface CategorySelectorProps {
     categories: CategoryItem[];
     activeCategory?: { id: string; name: string; slug: string } | null;
     activeMainCategory?: { id: string; name: string; slug: string } | null;
-    activeBrand?: { id: string; name: string; slug: string; image?: string | null } | null;
+    activeBrand?: { id: string; name: string; nameEn?: string | null; slug: string; image?: string | null } | null;
 }
 
 const CategorySelector = ({ 
@@ -37,7 +38,7 @@ const CategorySelector = ({
     const isAllActive = !activeCategory && !activeMainCategory;
 
     const allHref = activeBrand ? `/brands/${activeBrand.slug}` : "/products";
-    const brandShortName = activeBrand ? activeBrand.name.split('-')[0].trim() : '';
+    const brandShortName = activeBrand ? getBrandDisplayName(activeBrand, isArabic ? 'ar' : 'en') : '';
     const allLabel = activeBrand 
         ? (isArabic ? `كافة منتجات ${brandShortName}` : `All ${brandShortName}`)
         : t("products.allProducts");

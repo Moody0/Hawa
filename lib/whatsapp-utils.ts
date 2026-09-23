@@ -1,4 +1,5 @@
 import { formatPackaging } from './packaging';
+import { formatOrderNumber } from './order-number';
 
 /**
  * Utilities for formatting WhatsApp orders and messages for Hawa Distribution
@@ -29,7 +30,7 @@ export interface WhatsAppOrderItem {
 }
 
 export interface WhatsAppOrderData {
-    id: string;
+    orderNumber: number;
     shopName?: string | null;
     Name?: string | null;
     phone: string;
@@ -49,7 +50,7 @@ export function generateWhatsAppOrderMessage(order: WhatsAppOrderData): string {
         ? `🛒 *طلب توريد جملة للمراجعة – شركة حوا للتوزيع والتجارة*`
         : `🛒 *طلب جملة جديد – شركة حوا للتوزيع والتجارة*`);
     lines.push(`━━━━━━━━━━━━━━━━━━`);
-    lines.push(`📦 *رقم الطلبية:* #${order.id.slice(-8).toUpperCase()}`);
+    lines.push(`📦 *رقم الطلبية:* ${formatOrderNumber(order.orderNumber)}`);
     if (order.shopName) {
         lines.push(`🏪 *اسم المحل / المتجر:* ${order.shopName}`);
     }

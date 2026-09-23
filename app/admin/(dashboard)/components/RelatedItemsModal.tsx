@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { X, Search, Image } from 'lucide-react';
 import { getRelatedProducts, getRelatedCategories, getRelatedBrands } from "../actions/related";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -14,6 +15,14 @@ interface RelatedItemsModalProps {
     entityName: string;
 }
 
+interface RelatedItem {
+    id: string;
+    name: string;
+    image?: string | null;
+    images?: string | null;
+    stock?: number;
+}
+
 export default function RelatedItemsModal({
     isOpen,
     onClose,
@@ -24,7 +33,7 @@ export default function RelatedItemsModal({
 }: RelatedItemsModalProps) {
     const { t, dir } = useLanguage();
     const [searchQuery, setSearchQuery] = useState("");
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<RelatedItem[]>([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -39,7 +48,7 @@ export default function RelatedItemsModal({
                         setItems(res.data);
                     }
                 } else if (type === "categories" && entityType !== "categoryId") {
-                    const res = await getRelatedCategories(entityType as any, entityId, searchQuery);
+                    const res = await getRelatedCategories(entityType, entityId, searchQuery);
                     if (res.success && res.data) {
                         setItems(res.data);
                     }
@@ -81,6 +90,7 @@ export default function RelatedItemsModal({
                     </div>
                     <button
                         onClick={onClose}
+                        aria-label={t('admin.close')}
                         className="rounded-xl p-2 text-text-sub hover:bg-black/5 hover:text-text-main dark:hover:bg-white/5 dark:hover:text-white transition-colors"
                     >
                         <X className="text-2xl" />
@@ -111,8 +121,8 @@ export default function RelatedItemsModal({
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-3">
-                            {items.map((item) => (
-                                <div key={item.id} className="flex items-center gap-4 p-3 rounded-xl border border-black/[0.04] dark:border-white/[0.04] bg-white dark:bg-surface-dark hover:shadow-md transition-shadow">
+                            {items.map((item) => {
+                                const content = <>
                                     <div className="w-12 h-12 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0 overflow-hidden">
                                         {item.images ? (
                                             <img src={item.images.split(',')[0]} alt={item.name} className="w-full h-full object-cover" />
@@ -130,8 +140,16 @@ export default function RelatedItemsModal({
                                             </p>
                                         )}
                                     </div>
-                                </div>
-                            ))}
+                                </>;
+                                const className = "flex items-center gap-4 p-3 rounded-xl border border-black/[0.04] dark:border-white/[0.04] bg-white dark:bg-surface-dark hover:shadow-md transition-shadow";
+                                return type === "categories" ? (
+                                    <Link key={item.id} href={`/admin/categories?categoryId=${encodeURIComponent(item.id)}`} onClick={onClose} className={`${className} focus-visible:outline-2 focus-visible:outline-primary`}>
+                                        {content}
+                                    </Link>
+                                ) : (
+                                    <div key={item.id} className={className}>{content}</div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

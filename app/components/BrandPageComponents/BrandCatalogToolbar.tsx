@@ -40,7 +40,7 @@ export default function BrandCatalogToolbar({
     const isArabic = language === "ar";
     const isRtl = dir === "rtl";
 
-    const brandShortName = brandName.split("-")[0]?.trim() || brandName;
+    const brandShortName = brandName;
 
     const sortOptions = [
         { id: "best_sellers", label: t("products.bestSellers") },

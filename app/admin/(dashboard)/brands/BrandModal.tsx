@@ -6,10 +6,13 @@ import { createBrand, updateBrand } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import ImageUploadField from "../../components/ImageUploadField";
+import CopyPublicLinkField from "../../components/CopyPublicLinkField";
 
 interface Brand {
     id: string;
+    slug: string;
     name: string;
+    nameEn?: string | null;
     description: string | null;
     image: string | null;
     group?: "MAIN" | "DIFFERENT";
@@ -26,16 +29,18 @@ interface MainCategoryOption {
 interface BrandModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSaved?: () => void;
     brand?: Brand | null;
 }
 
-export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) {
+export default function BrandModal({ isOpen, onClose, onSaved, brand }: BrandModalProps) {
     const { t, language } = useLanguage();
     const isArabic = language === 'ar';
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [mainCategories, setMainCategories] = useState<MainCategoryOption[]>([]);
     const [formData, setFormData] = useState({
         name: "",
+        nameEn: "",
         description: "",
         image: "",
         group: "MAIN" as "MAIN" | "DIFFERENT",
@@ -55,6 +60,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
         if (brand) {
             setFormData({
                 name: brand.name,
+                nameEn: brand.nameEn || "",
                 description: brand.description || "",
                 image: brand.image || "",
                 group: brand.group || "MAIN",
@@ -65,6 +71,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
         } else {
             setFormData({
                 name: "",
+                nameEn: "",
                 description: "",
                 image: "",
                 group: "MAIN",
@@ -84,6 +91,7 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
         try {
             const payload = {
                 ...formData,
+                nameEn: formData.nameEn.trim(),
                 group: "MAIN" as const,
                 isFeatured: formData.isFeatured,
                 mainCategoryId: formData.mainCategoryId || undefined,
@@ -96,9 +104,10 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                         ? (isArabic ? 'تم تحديث الماركة بنجاح' : 'Brand updated successfully') 
                         : (isArabic ? 'تم إنشاء الماركة بنجاح' : 'Brand created successfully')
                 );
+                onSaved?.();
                 onClose();
             } else {
-                toast.error(result.error || t("admin.brandSaveError") || "Failed to save");
+                toast.error(result.error === 'englishBrandNameRequired' ? t('admin.englishBrandNameRequired') : result.error || t("admin.brandSaveError") || "Failed to save");
             }
         } catch (error) {
             console.error("Error saving brand:", error);
@@ -137,16 +146,40 @@ export default function BrandModal({ isOpen, onClose, brand }: BrandModalProps) 
                     {/* Brand Name */}
                     <div className="flex flex-col gap-1.5">
                         <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-gray-300">
-                            {isArabic ? 'اسم العلامة التجارية' : 'Brand Name'}
+                            {isArabic ? 'اسم العلامة التجارية بالعربية' : 'Arabic Brand Name'}
                         </label>
                         <input
                             required
                             value={formData.name}
                             onChange={(event) => setFormData({ ...formData, name: event.target.value })}
-                            placeholder="e.g. Captain Fisher / De Cecco / Tat"
+                            placeholder={isArabic ? 'مثال: المغربي' : 'e.g. المغربي'}
                             className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 px-4 py-2.5 text-sm text-[#0B192C] dark:text-white outline-none transition-all focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/20"
                         />
                     </div>
+
+                    <div className="flex flex-col gap-1.5">
+                        <label htmlFor="brand-name-en" className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-gray-300">
+                            {isArabic ? 'اسم العلامة التجارية بالإنجليزية' : 'English Brand Name'}
+                        </label>
+                        <input
+                            id="brand-name-en"
+                            required
+                            maxLength={120}
+                            dir="ltr"
+                            value={formData.nameEn}
+                            onChange={(event) => setFormData({ ...formData, nameEn: event.target.value })}
+                            placeholder="e.g. Al Maghrabi"
+                            className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 px-4 py-2.5 text-sm text-[#0B192C] dark:text-white outline-none transition-all focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/20"
+                        />
+                    </div>
+
+                    {brand?.slug && (
+                        <CopyPublicLinkField
+                            label={isArabic ? "رابط صفحة الماركة" : "Brand page link"}
+                            path={`/brands/${brand.slug}`}
+                            isArabic={isArabic}
+                        />
+                    )}
 
                     {/* Department Linked */}
                     <div className="flex flex-col gap-1.5">

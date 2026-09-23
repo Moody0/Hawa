@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { X, Home, ShoppingBag, Store, Info, FileText, Headphones, ChevronLeft, ChevronRight, Plus, Minus, FolderTree, ArrowRight, ArrowLeft } from 'lucide-react';
+import { X, Home, ShoppingBag, Store, Truck, Info, FileText, Headphones, ChevronLeft, ChevronRight, Plus, Minus, FolderTree, ArrowRight, ArrowLeft } from 'lucide-react';
 import { FaInstagram, FaFacebook, FaWhatsapp } from 'react-icons/fa';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface MobileCategory {
     id: string;
@@ -17,6 +19,7 @@ interface MobileCategory {
     brand?: {
         id: string;
         name: string;
+        nameEn?: string | null;
         slug: string;
         group: string;
     } | null;
@@ -25,6 +28,7 @@ interface MobileCategory {
 interface NavBrand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
 }
 
@@ -58,6 +62,7 @@ const MobileMenu = ({
     setIsOpen: externalSetIsOpen,
 }: MobileMenuProps) => {
     const { t, dir, language } = useLanguage();
+    const pathname = usePathname();
     const isRtl = dir === 'rtl' || language === 'ar';
 
     const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -160,6 +165,11 @@ const MobileMenu = ({
             label: isRtl ? 'وكالاتنا الحصرية' : 'Exclusive Brands',
             badge: isRtl ? 'معتمدة' : 'Official',
             icon: Store,
+        },
+        {
+            href: '/shipping-returns',
+            label: isRtl ? 'خدمات التوزيع' : 'Distribution Services',
+            icon: Truck,
         },
         {
             href: '/about-us',
@@ -282,15 +292,27 @@ const MobileMenu = ({
                             <div className="bg-gray-50/70 dark:bg-zinc-800/40 rounded-2xl p-1.5 border border-gray-100 dark:border-white/5 space-y-0.5">
                                 {mainNavItems.map((item) => {
                                     const IconComponent = item.icon;
+                                    const isActive = item.href === '/'
+                                        ? pathname === '/'
+                                        : pathname.startsWith(item.href);
+
                                     return (
                                         <Link
                                             key={item.href}
                                             href={item.href}
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-[#0B192C] dark:text-gray-200 hover:bg-white dark:hover:bg-zinc-700/60 hover:text-[#8A6305] dark:hover:text-[#8A6305] transition-all group"
+                                            className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all group ${
+                                                isActive
+                                                    ? 'bg-white dark:bg-zinc-700/80 text-[#8A6305] dark:text-[#E5B54A] shadow-xs font-extrabold'
+                                                    : 'text-[#0B192C] dark:text-gray-200 hover:bg-white dark:hover:bg-zinc-700/60 hover:text-[#8A6305] dark:hover:text-[#8A6305]'
+                                            }`}
                                         >
                                             <div className="flex items-center gap-2.5">
-                                                <IconComponent className="text-lg text-gray-400 dark:text-gray-400 group-hover:text-[#8A6305] transition-colors shrink-0" />
+                                                <IconComponent className={`text-lg transition-colors shrink-0 ${
+                                                    isActive
+                                                        ? 'text-[#8A6305] dark:text-[#E5B54A]'
+                                                        : 'text-gray-400 dark:text-gray-400 group-hover:text-[#8A6305]'
+                                                }`} />
                                                 <span className="text-sm font-bold">{item.label}</span>
                                             </div>
                                             {item.badge && (
@@ -480,7 +502,7 @@ const MobileMenu = ({
                                                             onClick={() => setIsMobileMenuOpen(false)}
                                                             className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-zinc-700 hover:text-[#8A6305] transition-colors"
                                                         >
-                                                            <span>{brand.name}</span>
+                                                            <span>{getBrandDisplayName(brand, language === 'ar' ? 'ar' : 'en')}</span>
                                                             {isRtl ? <ChevronLeft className="text-sm text-gray-400" /> : <ChevronRight className="text-sm text-gray-400" />}
                                                         </Link>
                                                     ))}

@@ -2,6 +2,7 @@ import React from "react";
 import { getSiteSettings } from "@/lib/public-queries";
 import ShippingReturnsContent from "./ShippingReturnsContent";
 import { Metadata } from "next";
+import { getShippingPolicyContent } from "@/lib/shipping-policy-content";
 
 export const revalidate = 60; // 1 minute ISR revalidation
 
@@ -34,8 +35,9 @@ export const metadata: Metadata = {
 
 export default async function ShippingReturnsPage() {
     const siteSettings = await getSiteSettings();
+    const content = getShippingPolicyContent(siteSettings?.shippingPolicyContent, siteSettings);
 
     return (
-        <ShippingReturnsContent siteSettings={siteSettings} />
+        <ShippingReturnsContent siteSettings={siteSettings} content={content} />
     );
 }

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession, type AdminUserSession } from "@/lib/admin-auth";
 import { adminApiError, validationError } from "@/lib/admin-api";
-import { customerStatusSchema, identifierSchema, zodFieldErrors } from "@/lib/admin-validation";
+import { customerAdminUpdateSchema, customerStatusSchema, identifierSchema, zodFieldErrors } from "@/lib/admin-validation";
 import { writeAdminAuditLog } from "@/lib/admin-audit";
 
 export async function GET(request: Request) {
@@ -30,7 +31,18 @@ export async function GET(request: Request) {
         skip: cursor ? 1 : 0,
         cursor: cursor ? { id: cursor } : undefined,
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        include: { _count: { select: { orders: true, wishlist: true } } },
+        select: {
+          id: true,
+          shopName: true,
+          ownerName: true,
+          phone: true,
+          city: true,
+          address: true,
+          notes: true,
+          isActive: true,
+          createdAt: true,
+          _count: { select: { orders: true, wishlist: true } },
+        },
       }),
       prisma.customer.count({ where }),
     ]);
@@ -73,7 +85,11 @@ export async function PATCH(request: Request) {
     const session = await requireAdminSession("CUSTOMERS_MANAGE");
     const parsed = customerStatusSchema.safeParse(await request.json());
     if (!parsed.success) return validationError(zodFieldErrors(parsed.error));
-    const customer = await prisma.customer.update({ where: { id: parsed.data.id, archivedAt: null }, data: { isActive: parsed.data.isActive } });
+    const customer = await prisma.customer.update({
+      where: { id: parsed.data.id, archivedAt: null },
+      data: { isActive: parsed.data.isActive },
+      select: { id: true, shopName: true, ownerName: true, phone: true, isActive: true },
+    });
     const audit = await writeAdminAuditLog({
       actorId: (session.user as AdminUserSession).id,
       action: parsed.data.isActive ? "ENABLE" : "DISABLE",
@@ -82,6 +98,58 @@ export async function PATCH(request: Request) {
     });
     return NextResponse.json({ ok: true, success: true, data: customer, customer, auditId: audit.id });
   } catch (error) {
+    return adminApiError(error);
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const session = await requireAdminSession("CUSTOMERS_MANAGE");
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ ok: false, error: "صيغة البيانات غير صحيحة." }, { status: 400 });
+    }
+
+    const parsed = customerAdminUpdateSchema.safeParse(body);
+    if (!parsed.success) return validationError(zodFieldErrors(parsed.error));
+
+    const { id, ...data } = parsed.data;
+    const customer = await prisma.customer.update({
+      where: { id, archivedAt: null },
+      data,
+      select: {
+        id: true,
+        shopName: true,
+        ownerName: true,
+        phone: true,
+        city: true,
+        address: true,
+        notes: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+    const audit = await writeAdminAuditLog({
+      actorId: (session.user as AdminUserSession).id,
+      action: "UPDATE",
+      entityType: "Customer",
+      entityId: customer.id,
+      metadata: { fields: Object.keys(data) },
+    });
+
+    return NextResponse.json({ ok: true, success: true, customer, auditId: audit.id });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json(
+        { ok: false, code: "PHONE_IN_USE", error: "رقم الهاتف مستخدم بالفعل لحساب تاجر آخر." },
+        { status: 409 },
+      );
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ ok: false, code: "CUSTOMER_NOT_FOUND", error: "لم يتم العثور على حساب التاجر." }, { status: 404 });
+    }
     return adminApiError(error);
   }
 }
@@ -98,4 +166,3 @@ export async function DELETE(request: Request) {
     return adminApiError(error);
   }
 }
-

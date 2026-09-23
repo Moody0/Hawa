@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { ShieldCheck, Layers } from "lucide-react";
+import { getBrandDisplayName } from "@/lib/brand-display";
 
 interface ProductHeaderProps {
     name: string;
@@ -12,6 +13,7 @@ interface ProductHeaderProps {
     brand?: {
         id?: string;
         name: string;
+        nameEn?: string | null;
         slug: string;
     } | null;
     category?: {
@@ -35,7 +37,7 @@ const ProductHeader = ({
     const { language, dir } = useLanguage();
     const isArabic = language === "ar";
 
-    const brandName = brand?.name || fallbackBrandName || "";
+    const brandName = brand ? getBrandDisplayName(brand, isArabic ? "ar" : "en") : fallbackBrandName || "";
     const categoryName = category?.name || fallbackCategoryName || "";
     const brandSlug = brand?.slug;
     const categorySlug = category?.slug;

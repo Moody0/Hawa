@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import ProductsClient from "./ProductsClient";
-import { getCatalogInitialData, getCatalogBrands, getBrandBySlug, getCategoryBySlug, getCatalogCategories } from "@/lib/catalog";
+import { getCatalogInitialData, getCatalogBrands, getBrandBySlug, getCategoryBySlug, getCatalogCategories, getCatalogMainCategoryBySlug } from "@/lib/catalog";
 import { parseCatalogUrlParams, buildCatalogUrl } from "@/lib/catalog-url";
 
 import { Metadata } from "next";
@@ -50,8 +50,9 @@ export async function generateMetadata({
     if (parsed.brands.length === 1) {
         const brand = await getBrandBySlug(parsed.brands[0]);
         if (brand) {
-            const title = `منتجات وكالة ${brand.name} بالجملة | Hawa Distribution - حوا للتوزيع`;
-            const description = brand.description || `تصفح كتالوج منتجات وكالة ${brand.name} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
+            const brandDisplayName = brand.nameEn?.trim() || brand.name;
+            const title = `منتجات وكالة ${brandDisplayName} بالجملة | Hawa Distribution - حوا للتوزيع`;
+            const description = brand.description || `تصفح كتالوج منتجات وكالة ${brandDisplayName} بأسعار الجملة المعتمدة لدى شركة حوا للتوزيع والتجارة.`;
             const image = brand.image || '/og-image.jpg';
             return {
                 title,
@@ -68,7 +69,7 @@ export async function generateMetadata({
                             url: image,
                             width: 1200,
                             height: 630,
-                            alt: brand.name,
+                            alt: brandDisplayName,
                         },
                     ],
                 },
@@ -120,6 +121,9 @@ export default async function ProductsPage({
 
     const firstBrandSlug = parsed.brands.length === 1 ? parsed.brands[0] : null;
     const activeBrand = firstBrandSlug ? await getBrandBySlug(firstBrandSlug) : null;
+    const activeMainCategory = parsed.mainCategory
+        ? await getCatalogMainCategoryBySlug(parsed.mainCategory)
+        : null;
 
     // Resolve category slugs on the server so category links can use the same
     // products page as every other catalog view. This also makes old links
@@ -129,15 +133,17 @@ export default async function ProductsPage({
             (category): category is NonNullable<typeof category> => Boolean(category)
         )
         : [];
-    const activeCategory = parsed.categories.length === 1 && parsed.brands.length === 0 && !parsed.search
+    const activeCategory = parsed.categories.length === 1 && parsed.brands.length === 0 && !parsed.search && !activeMainCategory
         ? resolvedCategories[0] || null
         : null;
 
     const [{ categories: catalogCategories, products, totalProducts }, brands, allCategories] = await Promise.all([
         activeCategory
             ? getCatalogInitialData(activeCategory.id, activeCategory.brandId, undefined, parsed.search)
-            : getCatalogInitialData(undefined, activeBrand?.id, undefined, parsed.search),
-        getCatalogBrands(),
+            : activeMainCategory
+                ? getCatalogInitialData(undefined, undefined, activeMainCategory.id, parsed.search)
+                : getCatalogInitialData(undefined, activeBrand?.id, undefined, parsed.search),
+        getCatalogBrands(activeMainCategory?.id),
         parsed.categories.length > 0 ? getCatalogCategories() : Promise.resolve([]),
     ]);
 
@@ -146,13 +152,14 @@ export default async function ProductsPage({
     return (
         <Suspense fallback={<CatalogLoadingFallback />}>
             <ProductsClient
-                key={activeCategory ? `category-${activeCategory.id}` : activeBrand ? `brand-${activeBrand.id}` : parsed.search ? `search-${parsed.search}` : "all-products"}
+                key={activeCategory ? `category-${activeCategory.id}` : activeMainCategory ? `main-category-${activeMainCategory.id}` : activeBrand ? `brand-${activeBrand.id}` : parsed.search ? `search-${parsed.search}` : "all-products"}
                 initialCategories={categories}
                 initialBrands={brands}
                 initialProducts={products}
                 initialTotal={totalProducts}
                 activeCategory={activeCategory}
                 activeBrand={activeCategory ? null : activeBrand}
+                activeMainCategory={activeMainCategory}
                 initialSearch={parsed.search}
                 initialSort={parsed.sort}
                 initialPage={parsed.page}

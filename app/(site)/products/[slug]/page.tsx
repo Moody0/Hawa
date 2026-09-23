@@ -18,20 +18,18 @@ import { canViewWholesalePrices, projectProductPrices, projectProductsPrices } f
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
 const getProduct = cache((slug: string) =>
-    unstable_cache(
-        () => prisma.product.findFirst({
-            where: {
-                slug,
-                brand: { isActive: true },
-            },
-            include: {
-                brand: true,
-                category: true,
-            },
-        }),
-        [`product-detail-v2-${encodeURIComponent(slug)}`],
-        { tags: ['products'], revalidate: 60 }
-    )()
+    prisma.product.findFirst({
+        where: {
+            slug,
+            archivedAt: null,
+            brand: { isActive: true },
+            category: { isActive: true, archivedAt: null },
+        },
+        include: {
+            brand: true,
+            category: true,
+        },
+    })
 );
 
 const getRelatedProducts = cache((productId: string, categoryId: string, brandId: string) =>
@@ -40,8 +38,10 @@ const getRelatedProducts = cache((productId: string, categoryId: string, brandId
             const categoryProducts = await prisma.product.findMany({
                 where: {
                     categoryId,
+                    archivedAt: null,
                     id: { not: productId },
                     brand: { isActive: true },
+                    category: { isActive: true, archivedAt: null },
                 },
                 include: {
                     brand: true,
@@ -58,7 +58,9 @@ const getRelatedProducts = cache((productId: string, categoryId: string, brandId
             const additionalProducts = await prisma.product.findMany({
                 where: {
                     id: { notIn: existingIds },
+                    archivedAt: null,
                     brand: { isActive: true },
+                    category: { isActive: true, archivedAt: null },
                     OR: [
                         { brandId },
                         { isTrending: true },
@@ -91,7 +93,7 @@ export async function generateMetadata(
     }
 
     const title = `${product.name} | Hawa Distribution - حوا للتوزيع`;
-    const brandName = product.brand?.name ? product.brand.name.split('-')[0].trim() : 'Hawa';
+    const brandName = product.brand?.nameEn?.trim() || product.brand?.name || 'Hawa';
     const description = product.description 
         ? `${product.name} من وكالة ${brandName}. متوفر للطلب والبيع بالجملة مع شحن موثوق عبر شركة حوا للتوزيع والتجارة. ${product.description.slice(0, 120)}`
         : `اشترِ ${product.name} من وكالة ${brandName} بأفضل أسعار الجملة المعتمدة من شركة حوا للتوزيع والتجارة.`;
@@ -168,7 +170,7 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
         },
     };
 
-    if (canViewPrices && (safeProduct.price || safeProduct.discountPrice)) {
+    if (canViewPrices && !safeProduct.hidePrice && (safeProduct.price || safeProduct.discountPrice)) {
         productSchema.offers = {
             "@type": "Offer",
             "url": `https://hawatrading.com/products/${safeProduct.slug}`,

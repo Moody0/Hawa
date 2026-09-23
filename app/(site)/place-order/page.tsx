@@ -222,7 +222,7 @@ const PlaceOrderPage = () => {
 
                 // Prepare WhatsApp message
                 const waMessage = generateWhatsAppOrderMessage({
-                    id: data.id,
+                    orderNumber: data.orderNumber,
                     shopName: cleanData.shopName,
                     Name: cleanData.ownerName,
                     phone: cleanData.phone,

@@ -57,7 +57,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         // 2. Fetch all active products
         const products = await prisma.product.findMany({
             where: {
-                brand: { isActive: true },
+                archivedAt: null,
+                brand: { isActive: true, archivedAt: null },
+                category: { isActive: true, archivedAt: null },
             },
             select: {
                 slug: true,
@@ -106,7 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         // 5. Fetch all active Categories
         const categories = await prisma.category.findMany({
-            where: { brand: { isActive: true } },
+            where: { isActive: true, archivedAt: null, brand: { isActive: true, archivedAt: null } },
             select: {
                 slug: true,
                 updatedAt: true,

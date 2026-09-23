@@ -31,6 +31,7 @@ interface OrderItem {
 
 interface Order {
     id: string;
+    orderNumber: number;
     shopName?: string | null;
     Name: string;
     phone: string;
@@ -100,7 +101,7 @@ const CompleteOrderContent = () => {
     if (!order) return null;
 
     const waMessage = generateWhatsAppOrderMessage({
-        id: order.id,
+        orderNumber: order.orderNumber,
         shopName: order.shopName,
         Name: order.Name,
         phone: order.phone,
@@ -155,7 +156,7 @@ const CompleteOrderContent = () => {
 
             <div className="w-full bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
                 <OrderBasicInfo
-                    orderId={order.id}
+                    orderNumber={order.orderNumber}
                     totalAmount={order.totalAmount}
                     isQuoteRequest={isQuoteRequest}
                 />

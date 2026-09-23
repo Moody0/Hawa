@@ -65,12 +65,27 @@ export function getSearchVariants(rawQuery: string): string[] {
         variants.add(trimmed.replace(/[ىي]/g, "ى"));
     }
 
+    // Common synonyms in local food & beverage catalog
+    if (trimmed === "تونة" || trimmed === "تونا" || trimmed === "طون") {
+        variants.add("تونا");
+        variants.add("تونة");
+        variants.add("طون");
+    }
+    if (trimmed === "زيت" || trimmed === "زيوت") {
+        variants.add("زيت");
+        variants.add("زيوت");
+    }
+    if (trimmed === "سمن" || trimmed === "سمنة") {
+        variants.add("سمن");
+        variants.add("سمنة");
+    }
+
     return Array.from(variants).filter(v => v.length >= MIN_SEARCH_QUERY_LENGTH);
 }
 
 /**
  * Builds Prisma OR conditions for search querying products, brands, categories, and SKU.
- * Optimized for pg_trgm indexed fields.
+ * Optimized for pg_trgm indexed fields and multi-word token matching.
  */
 export function buildSearchWhereConditions(rawQuery: string): Prisma.ProductWhereInput[] {
     const variants = getSearchVariants(rawQuery);
@@ -78,6 +93,7 @@ export function buildSearchWhereConditions(rawQuery: string): Prisma.ProductWher
 
     const conditions: Prisma.ProductWhereInput[] = [];
 
+    // 1. Direct phrase matching across all searchable text fields
     for (const term of variants) {
         conditions.push(
             { name: { contains: term, mode: "insensitive" } },
@@ -92,6 +108,27 @@ export function buildSearchWhereConditions(rawQuery: string): Prisma.ProductWher
             { category: { name: { contains: term, mode: "insensitive" } } },
             { mainCategory: { name: { contains: term, mode: "insensitive" } } }
         );
+    }
+
+    // 2. Tokenized multi-word search (e.g. "زيت الريف", "صابون بوفالو", "سائل جلي بوفالو")
+    const words = rawQuery.trim().split(/\s+/).filter(w => w.length >= 2);
+    if (words.length > 1 && words.length <= 5) {
+        conditions.push({
+            AND: words.map(w => {
+                const wVariants = getSearchVariants(w);
+                return {
+                    OR: wVariants.flatMap(v => [
+                        { name: { contains: v, mode: "insensitive" as const } },
+                        { nameAr: { contains: v, mode: "insensitive" as const } },
+                        { nameEn: { contains: v, mode: "insensitive" as const } },
+                        { brand: { name: { contains: v, mode: "insensitive" as const } } },
+                        { brand: { slug: { contains: v, mode: "insensitive" as const } } },
+                        { category: { name: { contains: v, mode: "insensitive" as const } } },
+                        { mainCategory: { name: { contains: v, mode: "insensitive" as const } } },
+                    ]),
+                };
+            }),
+        });
     }
 
     return conditions;

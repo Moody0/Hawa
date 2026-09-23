@@ -9,6 +9,7 @@ import WholesaleProductRow from "@/app/components/ProductsPageComponents/Wholesa
 import CustomSortDropdown from "@/app/components/ProductsPageComponents/CustomSortDropdown";
 import ProductsSidebarFilter, { FilterState, reconcileCategoriesWithBrands } from "@/app/components/ProductsPageComponents/ProductsSidebarFilter";
 import { useLanguage } from "@/app/context/LanguageContext";
+import { getBrandDisplayName } from "@/lib/brand-display";
 import { buildCatalogUrl, parseCatalogUrlParams, normalizeCatalogSort, CatalogSort } from "@/lib/catalog-url";
 import { SearchX, Search, X, Grid, List, SlidersHorizontal, RotateCw } from 'lucide-react';
 
@@ -61,6 +62,7 @@ interface BrandCategoryInfo {
 interface Brand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     description: string | null;
     image: string | null;
@@ -214,6 +216,7 @@ const ProductsClient = ({
             {
                 brands: brandSlugs,
                 categories: catSlugs,
+                mainCategory: activeMainCategory?.slug,
                 search: debouncedSearch,
                 sort,
                 page: page > 1 ? page : undefined,
@@ -242,6 +245,7 @@ const ProductsClient = ({
         initialBrands,
         categories,
         initialCategories,
+        activeMainCategory,
     ]);
 
     // Handle browser Back / Forward (popstate) to restore filter/search state
@@ -291,7 +295,7 @@ const ProductsClient = ({
             try {
                 let url = "";
                 if (filters.brandIds.length > 0) {
-                    url = `/api/categories?brandIds=${filters.brandIds.join(",")}`;
+                    url = `/api/categories?brandIds=${filters.brandIds.join(",")}${activeMainCategory ? `&mainCategoryId=${activeMainCategory.id}` : ""}`;
                 } else if (activeMainCategory) {
                     url = `/api/categories?mainCategoryId=${activeMainCategory.id}`;
                 } else if (!activeBrand) {
@@ -569,7 +573,7 @@ const ProductsClient = ({
                 : activeMainCategory.description || activeMainCategory.name;
         }
         if (singleSelectedBrand) {
-            return singleSelectedBrand.name;
+            return getBrandDisplayName(singleSelectedBrand, isArabic ? "ar" : "en");
         }
         if (filters.brandIds.length > 1) {
             return isArabic
@@ -579,13 +583,24 @@ const ProductsClient = ({
         return t("products.allProducts");
     };
 
+    // Scoped brands list: when on a department page, filter out brands that don't belong to it
+    const displayBrands = useMemo(() => {
+        if (!activeMainCategory) return initialBrands;
+        return initialBrands.filter((b) =>
+            !b.mainCategoryId ||
+            b.mainCategoryId === activeMainCategory.id ||
+            b.mainCategory?.id === activeMainCategory.id ||
+            (b.categories && b.categories.some((c) => c.mainCategoryId === activeMainCategory.id))
+        );
+    }, [initialBrands, activeMainCategory]);
+
     // Single selected brand object (only when EXACTLY ONE brand is selected)
     const singleSelectedBrand = useMemo(() => {
         if (filters.brandIds.length === 1) {
-            return initialBrands.find((b) => b.id === filters.brandIds[0]) || activeBrand || null;
+            return displayBrands.find((b) => b.id === filters.brandIds[0]) || activeBrand || null;
         }
         return null;
-    }, [filters.brandIds, initialBrands, activeBrand]);
+    }, [filters.brandIds, displayBrands, activeBrand]);
 
     // Total count of products for the selected brand (persists even when filtering by category)
     const brandTotalCount = useMemo(() => {
@@ -599,8 +614,8 @@ const ProductsClient = ({
 
     // Find brand / category names for active filter chips
     const selectedBrandObjects = useMemo(() => {
-        return initialBrands.filter((b) => filters.brandIds.includes(b.id));
-    }, [initialBrands, filters.brandIds]);
+        return displayBrands.filter((b) => filters.brandIds.includes(b.id));
+    }, [displayBrands, filters.brandIds]);
 
     const selectedCategoryObjects = useMemo(() => {
         return categories.filter((c) => filters.categoryIds.includes(c.id));
@@ -623,7 +638,7 @@ const ProductsClient = ({
             <div className="flex items-start gap-6 mt-2">
                 {/* Faceted Filter Sidebar (Desktop & Mobile Drawer) */}
                 <ProductsSidebarFilter
-                    brands={initialBrands}
+                    brands={displayBrands}
                     categories={categories}
                     filters={filters}
                     onFiltersChange={setFilters}

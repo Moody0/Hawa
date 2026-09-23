@@ -318,9 +318,34 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         type="text"
                                         value={link}
                                         onChange={(e) => setLink(e.target.value)}
-                                        placeholder="e.g. /products or /department/beverages"
+                                        placeholder="e.g. /products or /department/detergents"
                                         className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0B192C] focus:ring-2 focus:ring-[#0B192C]/15 transition-all"
                                     />
+                                    {/* Quick Link Presets */}
+                                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                        <span className="text-[10px] text-slate-400 font-medium">
+                                            {isArabic ? "روابط سريعة:" : "Presets:"}
+                                        </span>
+                                        {[
+                                            { label: isArabic ? "كل المنتجات" : "All Products", url: "/products" },
+                                            { label: isArabic ? "الغذائيات" : "Food", url: "/products?mainCategory=food" },
+                                            { label: isArabic ? "المنظفات" : "Detergents", url: "/products?mainCategory=detergents" },
+                                            { label: isArabic ? "الوكالات" : "Brands", url: "/brands" },
+                                        ].map((preset) => (
+                                            <button
+                                                key={preset.url}
+                                                type="button"
+                                                onClick={() => setLink(preset.url)}
+                                                className={`text-[10px] px-2 py-0.5 rounded-md border font-medium transition-colors cursor-pointer ${
+                                                    link === preset.url
+                                                        ? "bg-[#0B192C] text-white border-[#0B192C] dark:bg-white dark:text-[#0B192C]"
+                                                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400"
+                                                }`}
+                                            >
+                                                {preset.label}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="flex flex-col justify-end">

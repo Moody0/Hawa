@@ -1,6 +1,7 @@
 import { prisma } from "./prisma";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
+import { getMainCategoryProductCounts } from "./main-category-product-counts";
 
 export interface CatalogCategory {
     id: string;
@@ -30,6 +31,7 @@ export interface CatalogProduct {
 export interface CatalogBrand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     description: string | null;
     image: string | null;
@@ -54,6 +56,7 @@ const catalogCategorySelect = {
         select: {
             id: true,
             name: true,
+            nameEn: true,
             slug: true,
             description: true,
             image: true,
@@ -65,6 +68,7 @@ const catalogCategorySelect = {
 const catalogBrandSelect = {
     id: true,
     name: true,
+    nameEn: true,
     slug: true,
     description: true,
     image: true,
@@ -94,6 +98,10 @@ const catalogBrandSelect = {
         },
     },
     categories: {
+        where: {
+            isActive: true,
+            archivedAt: null,
+        },
         select: {
             id: true,
             name: true,
@@ -104,32 +112,42 @@ const catalogBrandSelect = {
 };
 
 export const getCatalogBrands = cache(
-    unstable_cache(
-        async () => {
-            try {
-                const brands = await prisma.brand.findMany({
-                    where: { isActive: true },
-                    orderBy: [
-                        { isFeatured: "desc" },
-                        { name: "asc" },
-                    ],
-                    select: catalogBrandSelect,
-                });
-                return brands.map(b => {
-                    const prodImg = (b as any).products?.[0]?.images ? (b as any).products[0].images.split(',')[0].trim() : null;
-                    return {
-                        ...b,
-                        image: b.image && b.image !== '/placeholder.svg' ? b.image : (prodImg || '/logo.png')
-                    };
-                });
-            } catch (error) {
-                console.warn("getCatalogBrands: DB unreachable, returning empty list");
-                return [];
-            }
-        },
-        ["catalog-brands-v2"],
-        { tags: ["catalog", "brands"], revalidate: 3600 }
-    )
+    async (mainCategoryId?: string) => {
+        return unstable_cache(
+            async () => {
+                try {
+                    const where: any = { isActive: true };
+                    if (mainCategoryId) {
+                        where.OR = [
+                            { mainCategoryId },
+                            { categories: { some: { mainCategoryId } } },
+                            { products: { some: { mainCategoryId } } },
+                        ];
+                    }
+                    const brands = await prisma.brand.findMany({
+                        where,
+                        orderBy: [
+                            { isFeatured: "desc" },
+                            { name: "asc" },
+                        ],
+                        select: catalogBrandSelect,
+                    });
+                    return brands.map(b => {
+                        const prodImg = (b as any).products?.[0]?.images ? (b as any).products[0].images.split(',')[0].trim() : null;
+                        return {
+                            ...b,
+                            image: b.image && b.image !== '/placeholder.svg' ? b.image : (prodImg || '/logo.png')
+                        };
+                    });
+                } catch (error) {
+                    console.warn("getCatalogBrands: DB unreachable, returning empty list");
+                    return [];
+                }
+            },
+            [`catalog-brands-${mainCategoryId || 'all'}-v3`],
+            { tags: ["catalog", "brands"], revalidate: 3600 }
+        )();
+    }
 );
 
 export const getBrandBySlug = cache(async (slug: string) => {
@@ -140,6 +158,8 @@ export const getBrandBySlug = cache(async (slug: string) => {
         decodedSlug = slug;
     }
     const cleanSlug = decodedSlug.trim();
+    const slugWithoutHyphens = cleanSlug.replace(/-/g, "");
+    const slugWithHyphens = cleanSlug.replace(/\s+/g, "-");
 
     return unstable_cache(
         async () => {
@@ -150,6 +170,8 @@ export const getBrandBySlug = cache(async (slug: string) => {
                         OR: [
                             { slug: cleanSlug },
                             { slug },
+                            { slug: slugWithoutHyphens },
+                            { slug: slugWithHyphens },
                             { slug: { equals: cleanSlug, mode: "insensitive" } },
                             { id: cleanSlug },
                             { name: { equals: cleanSlug, mode: "insensitive" } },
@@ -164,6 +186,8 @@ export const getBrandBySlug = cache(async (slug: string) => {
                             OR: [
                                 { slug: cleanSlug },
                                 { slug },
+                                { slug: slugWithoutHyphens },
+                                { slug: slugWithHyphens },
                                 { slug: { equals: cleanSlug, mode: "insensitive" } },
                                 { id: cleanSlug },
                                 { name: { equals: cleanSlug, mode: "insensitive" } },
@@ -190,6 +214,8 @@ export const getCatalogCategories = cache(async (brandId?: string) => {
             try {
                 return await prisma.category.findMany({
                     where: {
+                        isActive: true,
+                        archivedAt: null,
                         brand: { isActive: true },
                         ...(brandId ? { brandId } : {}),
                     },
@@ -219,6 +245,8 @@ export const getFooterCategories = cache(async (preferredIds: string[] = []) => 
                     id: {
                         in: sanitizedIds,
                     },
+                    isActive: true,
+                    archivedAt: null,
                     brand: { isActive: true },
                 },
                 select: {
@@ -240,6 +268,8 @@ export const getFooterCategories = cache(async (preferredIds: string[] = []) => 
 
         return await prisma.category.findMany({
             where: {
+                isActive: true,
+                archivedAt: null,
                 brand: { isActive: true },
             },
             take: 4,
@@ -274,6 +304,8 @@ export const getCategoryBySlug = cache(async (slug: string) => {
             try {
                 let category = await prisma.category.findFirst({
                     where: {
+                        isActive: true,
+                        archivedAt: null,
                         brand: { isActive: true },
                         OR: [
                             { slug: cleanSlug },
@@ -289,6 +321,8 @@ export const getCategoryBySlug = cache(async (slug: string) => {
                 if (!category) {
                     category = await prisma.category.findFirst({
                         where: {
+                            isActive: true,
+                            archivedAt: null,
                             OR: [
                                 { slug: cleanSlug },
                                 { slug },
@@ -319,6 +353,8 @@ export const getCatalogCategoriesByMainCategory = cache(async (mainCategoryId: s
                 return await prisma.category.findMany({
                     where: {
                         mainCategoryId,
+                        isActive: true,
+                        archivedAt: null,
                         brand: { isActive: true },
                     },
                     orderBy: [
@@ -344,6 +380,7 @@ export const getCatalogMainCategories = cache(
                 const mainCategories = await prisma.mainCategory.findMany({
                     where: {
                         isActive: true,
+                        archivedAt: null,
                     },
                     orderBy: [
                         { navOrder: "asc" },
@@ -355,18 +392,13 @@ export const getCatalogMainCategories = cache(
                         slug: true,
                         description: true,
                         image: true,
-                        _count: {
-                            select: {
-                                products: {
-                                    where: {
-                                        stock: { gt: 0 },
-                                        brand: { isActive: true },
-                                    },
-                                },
-                            },
-                        },
                     },
                 });
+
+                const productCounts = await getMainCategoryProductCounts(
+                    mainCategories.map((mainCategory) => mainCategory.id),
+                    true,
+                );
 
                 return mainCategories.map((mc) => ({
                     id: mc.id,
@@ -375,17 +407,59 @@ export const getCatalogMainCategories = cache(
                     slug: mc.slug,
                     description: mc.description,
                     image: mc.image,
-                    _count: mc._count,
+                    _count: { products: productCounts.get(mc.id) ?? 0 },
                 }));
             } catch (error) {
                 console.warn("getCatalogMainCategories: DB unreachable, returning empty list");
                 return [];
             }
         },
-        ["catalog-main-categories-v3"],
+        ["catalog-main-categories-v4"],
         { tags: ["catalog", "main-categories"], revalidate: 3600 }
     )
 );
+
+export const getCatalogMainCategoryBySlug = cache(async (slug: string) => {
+    let decodedSlug = slug;
+    try {
+        decodedSlug = decodeURIComponent(slug);
+    } catch {
+        decodedSlug = slug;
+    }
+    const cleanSlug = decodedSlug.trim();
+
+    return unstable_cache(
+        async () => {
+            try {
+                return await prisma.mainCategory.findFirst({
+                    where: {
+                        isActive: true,
+                        archivedAt: null,
+                        OR: [
+                            { slug: cleanSlug },
+                            { slug },
+                            { slug: { equals: cleanSlug, mode: "insensitive" } },
+                            { id: cleanSlug },
+                            { name: { equals: cleanSlug, mode: "insensitive" } },
+                        ],
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        description: true,
+                        image: true,
+                    },
+                });
+            } catch (error) {
+                console.warn(`getCatalogMainCategoryBySlug: DB unreachable (${slug}), returning null`);
+                return null;
+            }
+        },
+        [`catalog-main-category-${encodeURIComponent(cleanSlug)}`],
+        { tags: ["catalog", "main-categories"], revalidate: 3600 }
+    )();
+});
 
 export const getCatalogInitialData = cache(
     async (categoryId?: string, brandId?: string, mainCategoryId?: string, search?: string) => {
@@ -398,16 +472,16 @@ export const getCatalogInitialData = cache(
                         stock: { gt: number };
                         categoryId?: string;
                         brandId?: string;
-                        mainCategoryId?: string;
                         archivedAt: null;
                         brand: { isActive: boolean; archivedAt: null };
-                        category: { archivedAt: null };
+                        category: { archivedAt: null; isActive: boolean };
+                        AND?: Array<Record<string, unknown>>;
                         OR?: Array<Record<string, unknown>>;
                     } = {
                         stock: { gt: 0 },
                         archivedAt: null,
                         brand: { isActive: true, archivedAt: null },
-                        category: { archivedAt: null },
+                        category: { archivedAt: null, isActive: true },
                     };
 
                     if (categoryId) {
@@ -419,7 +493,15 @@ export const getCatalogInitialData = cache(
                     }
 
                     if (mainCategoryId) {
-                        whereClause.mainCategoryId = mainCategoryId;
+                        whereClause.AND = [
+                            {
+                                OR: [
+                                    { mainCategoryId },
+                                    { category: { mainCategoryId } },
+                                    { brand: { mainCategoryId } },
+                                ],
+                            },
+                        ];
                     }
 
                     if (cleanSearch) {
@@ -455,6 +537,7 @@ export const getCatalogInitialData = cache(
                                     select: {
                                         id: true,
                                         name: true,
+                                        nameEn: true,
                                         slug: true,
                                         description: true,
                                         image: true,
@@ -507,6 +590,7 @@ export const getCatalogInitialData = cache(
                             brand: product.brand ? {
                                 id: product.brand.id,
                                 name: product.brand.name,
+                                nameEn: product.brand.nameEn,
                                 slug: product.brand.slug,
                                 description: product.brand.description,
                                 image: product.brand.image,

@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { ShoppingCart, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export interface Banner {
     id: string;
@@ -164,7 +163,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     const { dir } = useLanguage();
     const isArabic = dir === 'rtl';
 
-    // Prepare slides: use dynamic banners from database, supplemented with fallbacks if needed
+    // Use the configured banner copy as-is. Built-in slides are only for an empty banner list.
     const slides: SlideItem[] = React.useMemo(() => {
         const activeBanners = (banners || []).filter((b) => b.isActive !== false);
 
@@ -178,27 +177,18 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             badgeAr: b.badgeAr || 'توزيع جملة معتمد',
             title: b.title || 'Your Trusted Partner in Wholesale',
             titleAr: b.titleAr || 'شريكك الموثوق في التوزيع والتجارة',
-            subtitle: b.subtitle || 'We supply leading global brands and provide integrated distribution solutions.',
-            subtitleAr: 'نوفر أفضل العلامات التجارية العالمية ونقدم حلول توزيع متكاملة تغطي الأسواق والمتاجر',
+            subtitle: b.subtitle || '',
+            subtitleAr: b.subtitleAr || '',
             buttonText: b.buttonText || 'Browse Products',
             buttonTextAr: b.buttonTextAr || 'تصفح المنتجات',
             link: b.link || '/products',
-            secondaryButtonText: 'Discover Agencies',
-            secondaryButtonTextAr: 'اكتشف وكالاتنا',
-            secondaryLink: '/brands',
-            secondaryIcon: 'agencies',
-            image: b.image ? b.image.replace(/^\/media\//, '/uploads/') : '/images/hero-showcase-perfect.webp',
+            image: b.image || '/images/hero-showcase-perfect.webp',
         }));
-
-        if (mapped.length === 1) {
-            return [mapped[0], ...DEFAULT_SLIDES.slice(1)];
-        }
 
         return mapped;
     }, [banners]);
 
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [prevIndex, setPrevIndex] = useState<number | null>(null);
     const [isHoverPaused, setIsHoverPaused] = useState(false);
     const [isFocusPaused, setIsFocusPaused] = useState(false);
     const [isDragPaused, setIsDragPaused] = useState(false);
@@ -207,10 +197,10 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     const [animKey, setAnimKey] = useState(0);
 
     const heroContainerRef = useRef<HTMLDivElement>(null);
+
     const touchStartX = useRef<number | null>(null);
     const touchEndX = useRef<number | null>(null);
 
-    const currentSlide = slides[currentIndex] || slides[0];
     const isPaused = isHoverPaused || isFocusPaused || isDragPaused || isDocumentHidden || reduceMotion;
 
     useEffect(() => {
@@ -229,33 +219,20 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
         };
     }, []);
 
-    // Clean up previous index after crossfade transition duration
-    useEffect(() => {
-        if (prevIndex === null) return;
-        const timer = setTimeout(() => {
-            setPrevIndex(null);
-        }, 800);
-        return () => clearTimeout(timer);
-    }, [prevIndex, currentIndex]);
-
     const goToNext = useCallback(() => {
-        setPrevIndex(currentIndex);
         setCurrentIndex((prev) => (prev + 1) % slides.length);
         setAnimKey((prev) => prev + 1);
-    }, [currentIndex, slides.length]);
+    }, [slides.length]);
 
     const goToPrev = useCallback(() => {
-        setPrevIndex(currentIndex);
         setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
         setAnimKey((prev) => prev + 1);
-    }, [currentIndex, slides.length]);
+    }, [slides.length]);
 
     const goToSlide = useCallback((index: number) => {
-        if (index === currentIndex) return;
-        setPrevIndex(currentIndex);
         setCurrentIndex(index);
         setAnimKey((prev) => prev + 1);
-    }, [currentIndex]);
+    }, []);
 
     // Auto-advance carousel timer
     useEffect(() => {
@@ -300,14 +277,14 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
 
         if (touchStartX.current !== null && touchEndX.current !== null) {
             const distance = touchStartX.current - touchEndX.current;
-            const threshold = 35;
+            const threshold = 30;
 
             if (Math.abs(distance) > threshold) {
                 if (distance > 0) {
-                    // Swiped left
+                    // Swiped Left
                     goToNext();
                 } else {
-                    // Swiped right
+                    // Swiped Right
                     goToPrev();
                 }
             }
@@ -328,13 +305,6 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     const onTouchEnd = () => {
         handleSwipeEnd();
     };
-
-    const headline = parseHeadline(isArabic ? currentSlide.titleAr : currentSlide.title, isArabic);
-    const badgeText = isArabic ? currentSlide.badgeAr : currentSlide.badge;
-    const subtitleText = isArabic ? currentSlide.subtitleAr : currentSlide.subtitle;
-    const primaryButtonText = isArabic ? currentSlide.buttonTextAr : currentSlide.buttonText;
-    const secondaryButtonText = isArabic ? currentSlide.secondaryButtonTextAr : currentSlide.secondaryButtonText;
-    const secondaryLink = currentSlide.secondaryLink || '/brands';
 
     return (
         <section
@@ -376,48 +346,39 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             `}</style>
 
             <div dir="ltr" className="relative grid h-[440px] grid-cols-1 sm:h-auto sm:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
-                {/* Physical left: cinematic photography crossfade */}
+                {/* Physical left: photography only with smooth crossfade */}
                 <div className="absolute inset-0 h-full overflow-hidden bg-slate-100 sm:relative sm:inset-auto sm:h-[290px] md:h-[330px] lg:h-full dark:bg-slate-900">
                     {slides.map((slide, index) => {
                         const isActive = index === currentIndex;
-                        const isPrev = index === prevIndex;
-                        const zIndexClass = isActive ? 'z-20' : isPrev ? 'z-10' : 'z-0';
-
                         return (
                             <div
                                 key={slide.id}
-                                className={`hero-slide-item absolute inset-0 transition-opacity duration-700 ease-in-out ${zIndexClass} ${
+                                className={`absolute inset-0 transition-opacity duration-700 ease-in-out motion-reduce:transition-none ${
                                     isActive
-                                        ? 'opacity-100 pointer-events-auto'
-                                        : 'opacity-0 pointer-events-none'
+                                        ? 'opacity-100 z-10 pointer-events-auto'
+                                        : 'opacity-0 z-0 pointer-events-none'
                                 }`}
                                 aria-hidden={!isActive}
                             >
-                                <div
-                                    className={`w-full h-full transform-gpu transition-transform duration-1000 ease-out ${
-                                        isActive ? 'scale-100' : 'scale-[1.035]'
-                                    }`}
-                                >
-                                    <Image
-                                        src={slide.image}
-                                        alt={isArabic ? (slide.titleAr || 'بنر الصفحة الرئيسية') : (slide.title || 'Hero banner')}
-                                        fill
-                                        priority={index === 0}
-                                        loading={index === 0 ? "eager" : "lazy"}
-                                        sizes="(max-width: 640px) 100vw, (max-width: 1023px) 100vw, (max-width: 1536px) 58vw, 850px"
-                                        className="object-cover object-center w-full h-full pointer-events-none"
-                                    />
-                                </div>
+                                <Image
+                                    src={slide.image}
+                                    alt={isArabic ? (slide.titleAr || 'بنر الصفحة الرئيسية') : (slide.title || 'Hero banner')}
+                                    fill
+                                    priority={index === 0}
+                                    loading={index === 0 ? "eager" : "lazy"}
+                                    sizes="(max-width: 640px) 100vw, (max-width: 1023px) 100vw, (max-width: 1536px) 58vw, 850px"
+                                    className="object-cover object-center w-full h-full pointer-events-none"
+                                />
                             </div>
                         );
                     })}
 
-                    {/* Localized mobile scrim protects text contrast without muting the full photograph */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[55%] bg-gradient-to-t from-[#071522]/95 via-[#071522]/60 to-transparent sm:hidden" aria-hidden="true" />
+                    {/* A localized mobile scrim protects text contrast without muting the full photograph. */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[56%] bg-gradient-to-t from-[#071522]/95 via-[#071522]/60 to-transparent sm:hidden" aria-hidden="true" />
 
-                    {/* Compact mobile controls */}
+                    {/* Compact mobile controls stay with the image and do not add hero height. */}
                     <div dir={dir} className="absolute bottom-3 inset-x-0 z-30 flex items-center justify-center gap-2 sm:hidden" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
-                        <div dir={dir} className="flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white/95 px-2.5 shadow-xs" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
+                        <div dir={dir} className="flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white/95 px-2.5 dark:border-white/10 dark:bg-slate-800/95" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
                             {slides.map((_, idx) => {
                                 const isActive = idx === currentIndex;
                                 return (
@@ -429,13 +390,13 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                         aria-label={isArabic ? `الانتقال إلى البنر ${idx + 1}` : `Go to banner ${idx + 1}`}
                                         onClick={() => goToSlide(idx)}
                                         className={`relative h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] ${
-                                            isActive ? 'w-7 bg-slate-300' : 'w-1.5 bg-slate-400'
+                                            isActive ? 'w-7 bg-slate-300 dark:bg-white/30' : 'w-1.5 bg-slate-400 dark:bg-white/50'
                                         }`}
                                     >
                                         {isActive && (
                                             <span
                                                 key={`mobile-prog-${animKey}`}
-                                                className={`absolute inset-y-0 start-0 rounded-full bg-[#8A6305] ${
+                                                className={`absolute inset-y-0 start-0 rounded-full bg-[#8A6305] dark:bg-[#E5B54A] ${
                                                     isPaused ? 'hero-progress-fill-paused' : 'hero-progress-fill'
                                                 }`}
                                             />
@@ -447,109 +408,101 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                     </div>
                 </div>
 
-                {/* Physical right: clean animated editorial content panel */}
+                {/* Physical right: clean HTML content panel with smooth crossfade */}
                 <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-5 pb-14 pt-14 sm:relative sm:inset-auto sm:min-h-[270px] sm:items-center sm:bg-white sm:px-10 sm:pb-14 sm:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:sm:bg-[#0B192C]">
-                    <AnimatePresence mode="wait" initial={false}>
-                        <motion.div
-                            key={currentSlide.id}
-                            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-                            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
-                            transition={{
-                                duration: reduceMotion ? 0.15 : 0.32,
-                                ease: [0.16, 1, 0.3, 1],
-                            }}
-                            className="w-full max-w-xl text-center lg:text-start"
-                        >
-                            {badgeText && (
-                                <motion.span
-                                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-                                    animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.28, delay: 0.02, ease: [0.16, 1, 0.3, 1] }}
-                                    className="hero-eyebrow mb-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.1em] text-[#8A6305] sm:mb-2.5 sm:text-xs sm:tracking-[0.14em] dark:text-[#E5B54A]"
+                    <div className="relative w-full max-w-xl h-full min-h-[210px] sm:min-h-[260px] lg:min-h-[280px]">
+                        {slides.map((slide, index) => {
+                            const isActive = index === currentIndex;
+                            const headline = parseHeadline(isArabic ? slide.titleAr : slide.title, isArabic);
+                            const badgeText = isArabic ? slide.badgeAr : slide.badge;
+                            const subtitleText = isArabic ? slide.subtitleAr : slide.subtitle;
+                            const primaryButtonText = isArabic ? slide.buttonTextAr : slide.buttonText;
+                            const secondaryButtonText = isArabic ? slide.secondaryButtonTextAr : slide.secondaryButtonText;
+                            const secondaryLink = slide.secondaryLink || '/brands';
+
+                            return (
+                                <div
+                                    key={slide.id}
+                                    className={`absolute inset-0 flex flex-col justify-end sm:justify-center text-center lg:text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
+                                        isActive
+                                            ? 'opacity-100 translate-y-0 z-10 pointer-events-auto'
+                                            : 'opacity-0 translate-y-2 pointer-events-none z-0'
+                                    }`}
+                                    aria-hidden={!isActive}
                                 >
-                                    <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
-                                    {badgeText}
-                                </motion.span>
-                            )}
+                                    {badgeText && (
+                                        <span className="mb-2 inline-flex items-center justify-center lg:justify-start gap-2 text-[10px] font-black uppercase tracking-[0.1em] text-[#8A6305] sm:mb-2.5 sm:text-xs sm:tracking-[0.14em] dark:text-[#E5B54A]">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+                                            {badgeText}
+                                        </span>
+                                    )}
 
-                            <motion.h1
-                                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
-                                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                transition={{ duration: 0.32, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-                                className="hero-headline mx-auto max-w-[25rem] text-[1.5rem] font-black leading-[1.18] tracking-tight text-white sm:max-w-none sm:text-4xl sm:text-[#0B192C] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white"
-                            >
-                                <span className="hero-headline-line block">{headline.part1}</span>
-                                {headline.part2 && (
-                                    <span className="hero-headline-line block text-[#A8750A] dark:text-[#E5B54A] mt-1">
-                                        {headline.part2}
-                                    </span>
-                                )}
-                            </motion.h1>
-
-                            {subtitleText && (
-                                <motion.p
-                                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
-                                    animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.32, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-                                    className="hero-subtitle mx-auto mt-2.5 line-clamp-2 max-w-lg text-xs font-medium leading-[1.65] text-slate-100 sm:mt-3 sm:text-sm sm:leading-relaxed sm:text-slate-600 lg:mx-0 lg:text-base dark:text-slate-300"
-                                >
-                                    {subtitleText}
-                                </motion.p>
-                            )}
-
-                            <motion.div
-                                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
-                                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                transition={{ duration: 0.32, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-                                className="mt-4 grid grid-cols-2 items-stretch gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5 lg:justify-start"
-                            >
-                                <Link
-                                    href={currentSlide.link}
-                                    prefetch={false}
-                                    className="hero-cta-button group/btn inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#B68012] bg-[#B68012] px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#946809] active:scale-[0.98] sm:gap-2 sm:px-6 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
-                                >
-                                    <span>{primaryButtonText}</span>
-                                    <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
-                                </Link>
-
-                                {secondaryButtonText && (
-                                    <Link
-                                        href={secondaryLink}
-                                        prefetch={false}
-                                        target={secondaryLink.startsWith('http') ? '_blank' : undefined}
-                                        rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
-                                        className="hero-cta-button inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-white/70 bg-[#0B192C]/75 px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] sm:gap-2 sm:border-[#0B192C] sm:bg-[#0B192C] sm:px-6 sm:text-sm sm:hover:bg-[#152841] dark:sm:border-white dark:sm:bg-white dark:sm:text-[#0B192C] dark:sm:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] sm:focus-visible:ring-[#8A6305] sm:focus-visible:ring-offset-white"
-                                    >
-                                        <span>{secondaryButtonText}</span>
-                                        {currentSlide.secondaryIcon === 'whatsapp' ? (
-                                            <FaWhatsapp className="w-4 h-4 text-emerald-500" aria-hidden="true" />
-                                        ) : (
-                                            <Building2 className="w-4 h-4" aria-hidden="true" />
+                                    <h1 className="mx-auto max-w-[25rem] text-[1.5rem] font-black leading-[1.18] tracking-tight text-white sm:max-w-none sm:text-4xl sm:text-[#0B192C] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
+                                        <span className="block">{headline.part1}</span>
+                                        {headline.part2 && (
+                                            <span className="block text-[#A8750A] dark:text-[#E5B54A] mt-1">
+                                                {headline.part2}
+                                            </span>
                                         )}
-                                    </Link>
-                                )}
-                            </motion.div>
-                        </motion.div>
-                    </AnimatePresence>
+                                    </h1>
+
+                                    {subtitleText && (
+                                        <p className="mx-auto mt-2.5 line-clamp-2 max-w-lg text-xs font-medium leading-[1.65] text-slate-100 sm:mt-3 sm:text-sm sm:leading-relaxed sm:text-slate-600 lg:mx-0 lg:text-base dark:text-slate-300">
+                                            {subtitleText}
+                                        </p>
+                                    )}
+
+                                    <div className="mt-4 grid grid-cols-2 items-stretch gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5 lg:justify-start">
+                                        <Link
+                                            href={slide.link}
+                                            prefetch={false}
+                                            tabIndex={isActive ? 0 : -1}
+                                            className="group/btn inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#B68012] bg-[#B68012] px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#946809] active:scale-[0.98] sm:gap-2 sm:px-6 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
+                                        >
+                                            <span>{primaryButtonText}</span>
+                                            <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
+                                        </Link>
+
+                                        {secondaryButtonText && (
+                                            <Link
+                                                href={secondaryLink}
+                                                prefetch={false}
+                                                tabIndex={isActive ? 0 : -1}
+                                                target={secondaryLink.startsWith('http') ? '_blank' : undefined}
+                                                rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
+                                                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-white/70 bg-[#0B192C]/75 px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] sm:gap-2 sm:border-[#0B192C] sm:bg-[#0B192C] sm:px-6 sm:text-sm sm:hover:bg-[#152841] dark:sm:border-white dark:sm:bg-white dark:sm:text-[#0B192C] dark:sm:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] sm:focus-visible:ring-[#8A6305] sm:focus-visible:ring-offset-white"
+                                            >
+                                                <span>{secondaryButtonText}</span>
+                                                {slide.secondaryIcon === 'whatsapp' ? (
+                                                    <FaWhatsapp className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+                                                ) : (
+                                                    <Building2 className="w-4 h-4" aria-hidden="true" />
+                                                )}
+                                            </Link>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
-            {/* Circular Floating Left Arrow Button */}
+            {/* Circular Floating Left Arrow Button (Physically on left side with arrow pointing left) */}
             <button
                 type="button"
                 onClick={isArabic ? goToNext : goToPrev}
-                aria-label={isArabic ? "الشريحة التالية" : "Previous slide"}
+                aria-label={isArabic ? "الشريحة السابقة" : "Previous slide"}
                 className="absolute left-3 top-[145px] md:top-[165px] lg:top-1/2 -translate-y-1/2 z-30 hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-xs transition-all duration-200 hover:bg-slate-100 active:scale-95 sm:flex cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] opacity-0 pointer-events-none group-hover/hero:opacity-100 group-hover/hero:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
                 <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            {/* Circular Floating Right Arrow Button */}
+            {/* Circular Floating Right Arrow Button (Physically on right side with arrow pointing right) */}
             <button
                 type="button"
                 onClick={isArabic ? goToPrev : goToNext}
-                aria-label={isArabic ? "الشريحة السابقة" : "Next slide"}
+                aria-label={isArabic ? "الشريحة التالية" : "Next slide"}
                 className="absolute right-3 top-[145px] md:top-[165px] lg:top-1/2 -translate-y-1/2 z-30 hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-xs transition-all duration-200 hover:bg-slate-100 active:scale-95 sm:flex cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] opacity-0 pointer-events-none group-hover/hero:opacity-100 group-hover/hero:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
                 <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />

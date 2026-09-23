@@ -31,14 +31,14 @@ export default function ImageUploadField({
     const handleFileUpload = async (file: File) => {
         if (!file) return;
 
-        // Validation for image type and size (< 10MB)
-        if (!file.type.startsWith("image/")) {
+        // Keep client validation aligned with the upload endpoint.
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
             toast.error(isArabic ? "يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP)" : "Please select a valid image file");
             return;
         }
 
-        if (file.size > 10 * 1024 * 1024) {
-            toast.error(isArabic ? "حجم الصورة كبير جداً (الحد الأقصى 10 ميجابايت)" : "File size is too large (max 10MB)");
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error(isArabic ? "حجم الصورة كبير جداً (الحد الأقصى 5 ميجابايت)" : "File size is too large (max 5MB)");
             return;
         }
 
@@ -212,7 +212,7 @@ export default function ImageUploadField({
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                accept="image/png,image/jpeg,image/webp"
                 onChange={handleFileChange}
                 className="hidden"
             />

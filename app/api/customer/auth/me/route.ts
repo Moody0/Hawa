@@ -7,7 +7,7 @@ export async function GET(req: Request) {
     try {
         const customer = await getAuthenticatedCustomer();
         if (!customer) {
-            return NextResponse.json({ authenticated: false, customer: null }, { status: 401 });
+            return NextResponse.json({ authenticated: false, customer: null }, { status: 200 });
         }
 
         const { searchParams } = new URL(req.url);

@@ -4,6 +4,7 @@ import { unstable_cache } from "next/cache";
 export interface NavBrand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     image?: string | null;
 }
@@ -31,7 +32,7 @@ export interface NavTrendingProduct {
     images: string;
     price: number | null;
     discountPrice: number | null;
-    brand?: { name: string } | null;
+    brand?: { name: string; nameEn?: string | null } | null;
 }
 
 export interface NavMainCategory {
@@ -63,12 +64,13 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                     select: {
                         id: true,
                         name: true,
+                        nameEn: true,
                         slug: true,
                         image: true,
                     },
                 },
                 categories: {
-                    where: { archivedAt: null, brand: { archivedAt: null, isActive: true } },
+                    where: { isActive: true, archivedAt: null, brand: { archivedAt: null, isActive: true } },
                     orderBy: { name: "asc" },
                     select: {
                         id: true,
@@ -78,6 +80,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                             select: {
                                 id: true,
                                 name: true,
+                                nameEn: true,
                                 slug: true,
                                 image: true,
                                 isActive: true,
@@ -87,7 +90,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                     take: 30,
                 },
                 products: {
-                    where: { archivedAt: null, brand: { archivedAt: null, isActive: true }, category: { archivedAt: null } },
+                    where: { archivedAt: null, brand: { archivedAt: null, isActive: true }, category: { archivedAt: null, isActive: true } },
                     orderBy: { createdAt: "desc" },
                     select: {
                         id: true,
@@ -101,6 +104,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                             select: {
                                 id: true,
                                 name: true,
+                                nameEn: true,
                                 slug: true,
                                 image: true,
                                 isActive: true,
@@ -126,6 +130,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                     brandMap.set(cat.brand.id, {
                         id: cat.brand.id,
                         name: cat.brand.name,
+                        nameEn: cat.brand.nameEn,
                         slug: cat.brand.slug,
                         image: cat.brand.image,
                     });
@@ -138,6 +143,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                     brandMap.set(prod.brand.id, {
                         id: prod.brand.id,
                         name: prod.brand.name,
+                        nameEn: prod.brand.nameEn,
                         slug: prod.brand.slug,
                         image: prod.brand.image,
                     });
@@ -156,7 +162,7 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
                 images: p.images,
                 price: null,
                 discountPrice: null,
-                brand: p.brand ? { name: p.brand.name } : null,
+                brand: p.brand ? { name: p.brand.name, nameEn: p.brand.nameEn } : null,
             });
 
             const trendingProducts = mc.products

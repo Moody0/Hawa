@@ -34,6 +34,7 @@ export async function GET() {
                                 brand: {
                                     select: {
                                         name: true,
+                                        nameEn: true,
                                         slug: true,
                                     },
                                 },
@@ -46,7 +47,10 @@ export async function GET() {
 
         const canViewPrices = Boolean(customer?.isActive);
         const safeOrders = projectOrdersPrices(orders, canViewPrices);
-        return NextResponse.json({ success: true, orders: safeOrders });
+        return NextResponse.json(
+            { success: true, orders: safeOrders },
+            { headers: { 'Cache-Control': 'private, no-store' } }
+        );
     } catch (error) {
         console.error('Customer orders error:', error);
         return NextResponse.json({ error: 'فشل جلب الطلبات' }, { status: 500 });

@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { Plus, Trash2, Pencil, Image, Search, RefreshCw, ToggleLeft, ToggleRight, Star, Eye, FolderTree, ShoppingBag, Tag } from 'lucide-react';
 import RelatedItemsModal from "../components/RelatedItemsModal";
+import { hasAdminPermission } from "@/lib/admin-permissions";
 
 interface MainCategory {
     id: string;
@@ -36,6 +37,8 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
     const isArabic = language === 'ar';
     const confirm = useConfirm();
     const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
+    const canManage = hasAdminPermission(session?.user?.permissions, "MAIN_CATEGORIES_MANAGE", isSuperAdmin);
+    const canDelete = hasAdminPermission(session?.user?.permissions, "MAIN_CATEGORIES_ARCHIVE", isSuperAdmin);
 
     const [mainCategories, setMainCategories] = useState<MainCategory[]>(initialMainCategories);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,7 +111,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
             setMainCategories(prev => prev.filter(item => item.id !== mc.id));
             toast.success(t("admin.mainCategoryDeleted") || "Deleted successfully");
         } else {
-            toast.error(result.error || "Failed to delete");
+            toast.error(result.error === 'deleteMainCategoryWithCatalog' ? t('admin.deleteMainCategoryWithCatalog') : result.error || "Failed to delete");
         }
     };
 
@@ -187,7 +190,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                 />
                             </div>
 
-                            {isSuperAdmin && (
+                            {canManage && (
                                 <button 
                                     onClick={handleAdd} 
                                     className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] dark:bg-[#8A6305] dark:hover:bg-[#725204] px-5 text-sm font-bold text-white transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
@@ -306,7 +309,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                         </div>
 
                                         {/* Star Toggle Button (Top Right) */}
-                                        {isSuperAdmin && (
+                                        {canManage && (
                                             <button
                                                 type="button"
                                                 onClick={() => handleToggleFeatured(mc)}
@@ -416,7 +419,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
 
                                             {/* Edit / Active / Delete Buttons */}
                                             <div className="flex items-center gap-1">
-                                                {isSuperAdmin && (
+                                                {canManage && (
                                                     <button 
                                                         type="button"
                                                         onClick={() => handleToggleActive(mc)} 
@@ -433,7 +436,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                     </button>
                                                 )}
 
-                                                {isSuperAdmin && (
+                                                {canManage && (
                                                     <button 
                                                         type="button"
                                                         onClick={() => handleEdit(mc)} 
@@ -444,7 +447,7 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
                                                     </button>
                                                 )}
 
-                                                {isSuperAdmin && (
+                                                {canDelete && (
                                                     <button 
                                                         type="button"
                                                         onClick={() => handleDelete(mc)} 

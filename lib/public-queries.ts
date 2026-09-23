@@ -7,6 +7,7 @@ import { getCategoryBundleImage } from "@/lib/category-images";
 export interface RailBrand {
     id: string;
     name: string;
+    nameEn?: string | null;
     nameAr: string;
     fullName: string;
     slug: string;
@@ -18,6 +19,7 @@ export interface RailBrand {
 export interface HomeBrand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     description: string | null;
     image: string | null;
@@ -28,47 +30,261 @@ export interface HomeBrand {
     };
 }
 
+export interface CompanyServiceItem {
+    id: string;
+    icon: string;
+    title: string;
+    titleAr: string;
+    desc: string;
+    descAr: string;
+    tag: string;
+    tagAr: string;
+    footerText: string;
+    footerTextAr: string;
+    link?: string;
+    accent?: string;
+    isFeatured?: boolean;
+    isActive?: boolean;
+}
+
+export const DEFAULT_COMPANY_SERVICES: CompanyServiceItem[] = [
+    {
+        id: "srv-support",
+        icon: "Headphones",
+        title: "Customer Support",
+        titleAr: "دعم العملاء",
+        desc: "Dedicated wholesale support team ready to assist your store orders.",
+        descAr: "فريق متخصص للرد على استفساراتكم ومساعدتكم وتسهيل طلبيات الجملة دورياً.",
+        tag: "Fast Response",
+        tagAr: "استجابة سريعة",
+        footerText: "Verified Service",
+        footerTextAr: "خدمة معتمدة",
+        accent: "blue",
+        isFeatured: false,
+        isActive: true,
+    },
+    {
+        id: "srv-quality",
+        icon: "ShieldCheck",
+        title: "Quality & Reliability",
+        titleAr: "الجودة والموثوقية",
+        desc: "100% authentic wholesale products conforming to global industry standards.",
+        descAr: "منتجات أصلية 100% مطابقة لأعلى المعايير والمواصفات القياسية مباشرة من مصادرها.",
+        tag: "Guaranteed Authentic",
+        tagAr: "أصالة مضمونة",
+        footerText: "Verified Service",
+        footerTextAr: "خدمة معتمدة",
+        accent: "gold",
+        isFeatured: false,
+        isActive: true,
+    },
+    {
+        id: "srv-marketing",
+        icon: "Megaphone",
+        title: "Trade Marketing",
+        titleAr: "التسويق التجاري",
+        desc: "Commercial advertising, retail expansion, and point-of-sale acceleration.",
+        descAr: "دعم العلامات التجارية بالإعلان والانتشار والمبيعات وتعزيز حضورها في نقاط البيع.",
+        tag: "Market Presence",
+        tagAr: "بناء حضور",
+        footerText: "Verified Service",
+        footerTextAr: "خدمة معتمدة",
+        accent: "amber",
+        isFeatured: false,
+        isActive: true,
+    },
+    {
+        id: "srv-inventory",
+        icon: "Warehouse",
+        title: "Inventory Management",
+        titleAr: "إدارة المخزون",
+        desc: "Temperature-controlled logistics warehouses and advanced inventory tracking.",
+        descAr: "أنظمة متطورة لإدارة المستودعات والتخزين وفق اشتراطات الحرارة والسلامة الغذائية.",
+        tag: "Safe Storage",
+        tagAr: "تخزين معياري",
+        footerText: "Verified Service",
+        footerTextAr: "خدمة معتمدة",
+        accent: "purple",
+        isFeatured: false,
+        isActive: true,
+    },
+    {
+        id: "srv-distribution",
+        icon: "Truck",
+        title: "Professional Distribution",
+        titleAr: "توزيع احترافي",
+        desc: "Equipped delivery vehicles covering stores with scheduled, dependable delivery.",
+        descAr: "شبكة توزيع واسعة وسيارات مجهزة تغطي مختلف المناطق والأسواق بدقة ومواعيد منتظمة.",
+        tag: "Equipped Delivery",
+        tagAr: "سيارات مجهزة",
+        footerText: "Verified distribution service",
+        footerTextAr: "خدمة توزيع معتمدة",
+        accent: "featured",
+        isFeatured: true,
+        isActive: true,
+    },
+];
+
+export interface PublicTestimonialItem {
+    id: string;
+    name: string;
+    feedback: string;
+    rating: number;
+    image?: string;
+    productNameAr?: string;
+    productNameEn?: string;
+    productSlug?: string;
+}
+
+export const DEFAULT_TESTIMONIALS: PublicTestimonialItem[] = [
+    {
+        id: 'rev-1',
+        name: 'سوبرماركت الشام الحديث (دمشق - كفرسوسة)',
+        feedback: 'أفضل موزع معتمد لوكالات زوان والريف. سرعة استثنائية في تلبية طلبيات الطرود وتأكيد مباشر وسلس عبر واتساب وبضاعة مضمونة.',
+        rating: 5,
+        image: 'https://i.postimg.cc/mgc4nXNC/data-bodour-2026-09-01T134612-915.png',
+        productNameAr: 'زوان لانشون دجاج 200 غرام',
+        productNameEn: 'Zwan Chicken Luncheon Meat 200g',
+        productSlug: 'zwan-chicken-luncheon-meat-200g',
+    },
+    {
+        id: 'rev-2',
+        name: 'ميني ماركت الهدى (المزة)',
+        feedback: 'التوريد منتظم جداً ومواصفات التعبئة واضحة بالطرود، مما يسهل جرد وتوزيع البضائع في المحل بدقة وبدون أي نقص.',
+        rating: 5,
+        image: 'https://i.postimg.cc/dQfzpfGv/data-bodour-(42).png',
+        productNameAr: 'حليبنا سمن بقري 1 كيلو',
+        productNameEn: 'Halibuna Ghee Clarified Butter 1kg',
+        productSlug: 'halibuna-made-with-ghee-clarified-butter-1-kg',
+    },
+    {
+        id: 'rev-3',
+        name: 'بقالة البركة التجارية (مشروع دمر)',
+        feedback: 'توفير كبرى الوكالات بطلب واحد وفر علينا وقتاً كبيراً في التواصل واللوجستيات مع الموزعين المتفرقين.',
+        rating: 5,
+        image: 'https://i.postimg.cc/N0ftBHFq/data-bodour-(43).png',
+        productNameAr: 'صن بل كورند بيف 240 جرام',
+        productNameEn: 'Sunbell Corned Beef 240g',
+        productSlug: 'sun-bull-corned-beef-240g',
+    },
+    {
+        id: 'rev-4',
+        name: 'سوبرماركت الواحة (القصاع)',
+        feedback: 'تواريخ الصلاحية حديثة جداً والتخزين المبرد يضمن وصول المنتجات بأفضل جودة لباب المحل دون أي تلف.',
+        rating: 5,
+        image: 'https://i.postimg.cc/X7zdwfMd/data-bodour-(44).png',
+        productNameAr: 'سيلفر فيش تونا خفيف 160 جرام',
+        productNameEn: 'Silver Fish Light Tuna 160g',
+        productSlug: 'silver-fish-light-tuna-160g',
+    },
+    {
+        id: 'rev-5',
+        name: 'مطعم ومقهى ديلايت (المالكي)',
+        feedback: 'اعتمادنا على شركة حوا في توريد الزيوت والمعلبات وفر لنا استقراراً كبيراً في الجودة وثبات الأسعار التنافسية.',
+        rating: 5,
+        image: 'https://i.postimg.cc/gjtXJT65/nskht-mn-nskht-mn-dwn-ʿnwan-2026-08-11T183631-628.png',
+        productNameAr: 'الريف زيت دوار الشمس حجم 1 لتر',
+        productNameEn: 'Al-Reef Sunflower Oil 1L',
+        productSlug: 'al-reef-sunflower-oil-liter-size',
+    },
+    {
+        id: 'rev-6',
+        name: 'ماركت المدينة المنورة (التجارة)',
+        feedback: 'خدمة التوصيل المباشر لباب السوبرماركت ممتازة، والشاحنات مجهزة ومبردة لنقل البضائع بأمان تام.',
+        rating: 5,
+        image: 'https://i.postimg.cc/yNQDHBVN/data-bodour-(45).png',
+        productNameAr: 'المغربي معلبات سمك السردين بالزيت 125 جرام',
+        productNameEn: 'Al-Maghrabi Canned Sardines 125g',
+        productSlug: 'moroccan-canned-sardines-in-vegetable-oil-and-chili-peppers-125g',
+    },
+    {
+        id: 'rev-7',
+        name: 'بقالة النجوم (الميدان)',
+        feedback: 'المعاملة راقية جداً والأسعار منافسة، وتسهيلات طلبات الجملة عبر المنصة ممتازة وسريعة.',
+        rating: 5,
+        image: 'https://i.postimg.cc/sDzdmf1M/data-bodour-2026-09-01T140727-827.png',
+        productNameAr: 'حليبنا قهوة سريعة التحضير بحجم 80 غراماً',
+        productNameEn: 'Halibuna Instant Coffee 80g',
+        productSlug: 'halibuna-instant-coffee-80-grams',
+    },
+    {
+        id: 'rev-8',
+        name: 'سوبرماركت الفصول الأربعة (أبو رمانة)',
+        feedback: 'بضاعة وكالات أصلية 100% مع فواتير نظامية وتوصيل في الموعد المحدد دائماً. نوصي بالتعامل معهم بشدة.',
+        rating: 5,
+        image: 'https://i.postimg.cc/7hqfkLF5/data-bodour-2026-09-01T140919-561.png',
+        productNameAr: 'حليبنا جبنة كريمية 240 جرام',
+        productNameEn: 'Halibuna Cream Cheese 240g',
+        productSlug: 'halibuna-cream-cheese-240g',
+    }
+];
+
 export const DEFAULT_SITE_SETTINGS = {
     id: "site-settings",
+    shippingPolicyContent: null,
+    contactPageContent: null,
     categoriesCtaTitle: "Looking for specific wholesale brands?",
     categoriesCtaDesc: "Our wholesale team is ready to provide custom pricing and scheduled deliveries for your business.",
     categoriesCtaTitleAr: "تبحث عن شركات أو منتجات محددة؟",
     categoriesCtaDescAr: "فريق المبيعات لدينا جاهز لتزويدكم بأفضل أسعار الجملة وجداول التوزيع المنتظمة.",
     categoriesCtaImage: "/uploads/banners/hawa-food-agencies-banner.jpg",
     footerBrandTitle: "Hawa Distribution",
-    footerBrandTitleAr: "شركة حوا للتوزيع والتجارة",
-    footerBrandDescription: "Your trusted partner in wholesale food and consumer goods distribution from top international brands.",
-    footerBrandDescriptionAr: "شريككم الموثوق لتوزيع البضائع والمواد الغذائية من أفضل الشركات العالمية.",
-    footerCopyright: "© 2026 Hawa Distribution. All rights reserved.",
-    footerCopyrightAr: "© 2026 شركة حوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
+    footerBrandTitleAr: "حوا للتوزيع والتجارة",
+    footerBrandTagline: "Wholesale Distribution — Syria",
+    footerBrandTaglineAr: "توزيع وتجارة جملة — سورية",
+    footerBrandDescription: "Your trusted partner in wholesale food and consumer goods distribution from top brands.",
+    footerBrandDescriptionAr: "شريككم الموثوق لتوزيع البضائع والمواد الغذائية والاستهلاكية من أفضل الشركات.",
+    footerCopyright: "© 2026 Hawa Distribution & Trading. All rights reserved.",
+    footerCopyrightAr: "© 2026 حوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
+    footerContactTitle: "Contact Us",
+    footerContactTitleAr: "تواصل معنا",
+    footerAddress: "Homs Industrial Zone, Syria",
+    footerAddressAr: "حمص، المنطقة الصناعية — سورية",
+    footerPhone: "+963 993 443 901",
+    footerEmail: "info@hawa-dist.com",
     footerInstagramUrl: "#",
     footerFacebookUrl: "#",
     footerWhatsappUrl: "#",
+    footerLinkedinUrl: "#",
     whatsappNumber: CONTACT_CONFIG.salesWhatsApp,
     footerShopTitle: "Shop",
     footerShopTitleAr: "المتجر",
-    footerSupportTitle: "Support",
-    footerSupportTitleAr: "الدعم",
-    footerCompanyTitle: "Company",
-    footerCompanyTitleAr: "الشركة",
-    footerSupportLink1Label: "Help Center",
-    footerSupportLink1LabelAr: "مركز المساعدة",
-    footerSupportLink1Url: "#",
-    footerSupportLink2Label: "Shipping & Returns",
-    footerSupportLink2LabelAr: "التوزيع والتسليم",
-    footerSupportLink2Url: "/shipping-returns",
-    footerSupportLink3Label: "Contact Us",
-    footerSupportLink3LabelAr: "اتصل بنا",
-    footerSupportLink3Url: "#",
-    footerCompanyLink1Label: "About Us",
-    footerCompanyLink1LabelAr: "من نحن",
-    footerCompanyLink1Url: "/about-us",
-    footerCompanyLink2Label: "",
-    footerCompanyLink2LabelAr: "",
-    footerCompanyLink2Url: "",
-    footerCompanyLink3Label: "",
-    footerCompanyLink3LabelAr: "",
-    footerCompanyLink3Url: "",
+    footerSupportTitle: "Our Services",
+    footerSupportTitleAr: "خدماتنا",
+    footerCompanyTitle: "Quick Links",
+    footerCompanyTitleAr: "روابط سريعة",
+    footerNewsletterTitle: "Newsletter",
+    footerNewsletterTitleAr: "النشرة البريدية",
+    footerNewsletterDesc: "Subscribe to get the latest trade discounts, new arrivals & price lists.",
+    footerNewsletterDescAr: "اشترك ليصلك كل جديد عن المنتجات والعروض والأسعار.",
+    footerJurisdiction: "Syrian Arab Republic — Homs",
+    footerJurisdictionAr: "الجمهورية العربية السورية — حمص",
+    footerTermsUrl: "/shipping-returns",
+    footerPrivacyUrl: "/shipping-returns",
+    footerSupportLink1Label: "Nationwide Freight & Delivery",
+    footerSupportLink1LabelAr: "الشحن والتوصيل للمحافظات",
+    footerSupportLink1Url: "/shipping-returns",
+    footerSupportLink2Label: "Market Rates & Trade Blog",
+    footerSupportLink2LabelAr: "نشرة الأسعار والمدونة",
+    footerSupportLink2Url: "/blog",
+    footerSupportLink3Label: "Agency Partnership Inquiry",
+    footerSupportLink3LabelAr: "طلب تمثيل وكالة تجارية",
+    footerSupportLink3Url: "/contact",
+    footerSupportLink4Label: "Merchant Accounts Hub",
+    footerSupportLink4LabelAr: "بوابة حسابات التجار",
+    footerSupportLink4Url: "/account/login",
+    footerCompanyLink1Label: "Home",
+    footerCompanyLink1LabelAr: "الرئيسية",
+    footerCompanyLink1Url: "/",
+    footerCompanyLink2Label: "About Us",
+    footerCompanyLink2LabelAr: "من نحن",
+    footerCompanyLink2Url: "/about-us",
+    footerCompanyLink3Label: "Official Brands",
+    footerCompanyLink3LabelAr: "الوكالات والعلامات",
+    footerCompanyLink3Url: "/brands",
+    footerCompanyLink4Label: "Product Categories",
+    footerCompanyLink4LabelAr: "أقسام المنتجات",
+    footerCompanyLink4Url: "/categories",
     footerCategory1Id: null,
     footerCategory2Id: null,
     footerCategory3Id: null,
@@ -96,7 +312,7 @@ export const DEFAULT_SITE_SETTINGS = {
     hygieneTitleAr: "بروتوكولات السلامة والتخزين",
     hygieneDescAr: "تضمن مستودعاتنا وشاحناتنا درجات حرارة وبيئة تخزين مثالية حتى نقطة التسليم.",
     shippingReturnsImage: "/images/hawa_hero.jpg",
-    
+
     aboutHeroTitle: "Our Story in Wholesale Food & FMCG Distribution",
     aboutHeroTitleAr: "قصتنا في ريادة وتوريد السلع الغذائية والاستهلاكية",
     aboutHeroSubtitle: "Hawa Distribution & Trading: Your certified trade partner bridging top food manufacturing brands with grocery retailers, supermarkets, and wholesalers across Syria.",
@@ -149,7 +365,87 @@ export const DEFAULT_SITE_SETTINGS = {
     aboutValue3TitleAr: "شبكة توزيع تغطي المحافظات",
     aboutValue3Desc: "Regular scheduled delivery runs directly to your storefront across all 14 governorates.",
     aboutValue3DescAr: "سيارات وشاحنات توزيع مجهزة تنطلق يومياً لخدمة كافة المحافظات بمواعيد تسليم منتظمة ودقيقة لباب المحل.",
+
+    homeCategoriesBadge: "Shop by category",
+    homeCategoriesBadgeAr: "تسوق حسب القسم",
+    homeCategoriesTitle: "Browse Key Wholesale Categories",
+    homeCategoriesTitleAr: "تصفح تشكيلة واسعة من الأصناف والمجموعات",
+    homeCategoriesDesc: "Comprehensive supply for supermarkets and grocery stores in one order",
+    homeCategoriesDescAr: "توفير شامل لكافة احتياجات السوبرماركت ومحلات البقالة بطلب واحد",
+    homeCategoriesStats: JSON.stringify([
+        {
+            value: '500+',
+            valueEn: '500+',
+            amount: 500,
+            suffixAr: '+',
+            suffixEn: '+',
+            labelAr: 'صنف متوفر بالمستودعات',
+            labelEn: 'Wholesale SKUs',
+        },
+        {
+            value: '8+',
+            valueEn: '8+',
+            amount: 8,
+            suffixAr: '+',
+            suffixEn: '+',
+            labelAr: 'وكالات تجارية حصرية',
+            labelEn: 'Exclusive Agencies',
+        },
+        {
+            value: '48 ساعة',
+            valueEn: '48h',
+            amount: 48,
+            suffixAr: ' ساعة',
+            suffixEn: 'h',
+            labelAr: 'أقصى مدة للتفريغ والتسليم',
+            labelEn: 'Max Delivery SLA',
+        },
+        {
+            value: '1,500+',
+            valueEn: '1.5K+',
+            amount: 1500,
+            suffixAr: '+',
+            suffixEn: '+',
+            labelAr: 'متجر وبقالية معتمدة',
+            labelEn: 'Active Retail Stores',
+        },
+    ]),
+    homeCategoriesIds: null,
     
+    homeFeaturedBadge: "Hawa Selections",
+    homeFeaturedBadgeAr: "مختارات حوا",
+    homeFeaturedTitle: "Featured Wholesale Products",
+    homeFeaturedTitleAr: "تشكيلة منتجات الجملة الأكثر طلباً",
+    homeFeaturedDesc: "Curated wholesale selection of leading brand goods at direct trade prices",
+    homeFeaturedDescAr: "تشكيلة مختارة من أفضل أصناف الوكالات المعتمدة ومواد الاستهلاك بأسعار الجملة المباشرة",
+    homeFeaturedBestSellerIds: null,
+    homeFeaturedNewArrivalIds: null,
+
+    homeServicesEnabled: true,
+    homeServicesTitle: "Our Comprehensive Distribution Services",
+    homeServicesTitleAr: "خدمات التوزيع والتجارة المتكاملة",
+    homeServicesDesc: "Delivering end-to-end supply chain, marketing, and distribution solutions for FMCG brands",
+    homeServicesDescAr: "نقدم للشركات المنتجة وأصحاب المحلات منظومة متكاملة تشمل التخزين والتسويق والتوصيل",
+    homeServicesItems: JSON.stringify(DEFAULT_COMPANY_SERVICES),
+
+    homeTrendingWeeklyEnabled: true,
+    homeTrendingWeeklyBadge: "Market demand",
+    homeTrendingWeeklyBadgeAr: "طلب السوق",
+    homeTrendingWeeklyTitle: "Fast-Moving Weekly Products",
+    homeTrendingWeeklyTitleAr: "المنتجات الأكثر طلباً هذا الأسبوع",
+    homeTrendingWeeklyDesc: "Highest volume FMCG demands ordered by merchants this week",
+    homeTrendingWeeklyDescAr: "الأصناف الأكثر حركة وسحباً من قبل المحلات والسوبرماركت بأسعار تفضيلية",
+    homeTrendingWeeklyProductIds: null,
+
+    homeTestimonialsEnabled: true,
+    homeTestimonialsBadge: "Verified Endorsements",
+    homeTestimonialsBadgeAr: "آراء شركائنا",
+    homeTestimonialsTitle: "Verified Wholesale Buyer Reviews",
+    homeTestimonialsTitleAr: "ثقة أصحاب المحلات والسوبرماركت",
+    homeTestimonialsDesc: "Endorsements from verified retail merchants and grocery partners across Syria",
+    homeTestimonialsDescAr: "آراء وتجارب شركائنا من تجار التجزئة وأصحاب البقاليات في مختلف المحافظات",
+    homeTestimonialsItems: JSON.stringify(DEFAULT_TESTIMONIALS),
+
     updatedAt: new Date(),
 };
 
@@ -175,6 +471,7 @@ export const getHomeRailBrands = unstable_cache(
                 select: {
                     id: true,
                     name: true,
+                    nameEn: true,
                     slug: true,
                     description: true,
                     image: true,
@@ -195,18 +492,15 @@ export const getHomeRailBrands = unstable_cache(
             });
 
             return brands.map(b => {
-                let en = b.name;
-                let ar = b.name;
-                if (b.name.includes(' - ')) {
-                    const parts = b.name.split(' - ').map(s => s.trim());
-                    en = parts[0] || b.name;
-                    ar = parts[1] || parts[0] || b.name;
-                }
+                const legacyParts = b.name.split(/\s+[–—-]\s+/).map((part) => part.trim()).filter(Boolean);
+                const legacyEnglish = legacyParts.find((part) => /[A-Za-z]/.test(part));
+                const legacyArabic = legacyParts.find((part) => /[\u0600-\u06FF]/.test(part));
                 const productImg = b.products[0]?.images ? b.products[0].images.split(',')[0].trim() : null;
                 return {
                     id: b.id,
-                    name: en,
-                    nameAr: ar,
+                    name: b.name,
+                    nameEn: b.nameEn?.trim() || legacyEnglish || null,
+                    nameAr: legacyArabic || b.name,
                     fullName: b.name,
                     slug: b.slug,
                     description: b.description,
@@ -314,21 +608,22 @@ export const getCategoryHighlightCardsData = unstable_cache(
                     },
                     brands: {
                         take: 2,
-                        select: { name: true }
+                        select: { name: true, nameEn: true }
                     }
                 }
             });
             return topMainCats.map(mc => {
                 const firstProd = mc.products[0];
-                const brandNames = mc.brands.map(b => b.name).join(' & ');
+                const brandNamesAr = mc.brands.map(b => b.name).join(' & ');
+                const brandNamesEn = mc.brands.map(b => b.nameEn?.trim() || b.name).join(' & ');
                 const prodImg = firstProd?.images ? firstProd.images.split(',')[0].trim() : (mc.image || '');
                 return {
                     id: mc.id,
                     slug: mc.slug,
                     subheadingAr: mc.name,
                     subheadingEn: mc.description || mc.name,
-                    headingAr: brandNames || mc.name,
-                    headingEn: brandNames || mc.description || mc.name,
+                    headingAr: brandNamesAr || mc.name,
+                    headingEn: brandNamesEn || mc.description || mc.name,
                     productNameAr: firstProd?.nameAr || firstProd?.name || mc.name,
                     productNameEn: firstProd?.nameEn || firstProd?.name || mc.description || mc.name,
                     priceText: firstProd?.price && Number(firstProd.price) > 0 ? `$${Number(firstProd.price).toFixed(2)}` : '',
@@ -349,6 +644,27 @@ export const getCategoryHighlightCardsData = unstable_cache(
 export const getApprovedReviews = unstable_cache(
     async () => {
         try {
+            const settings = await prisma.settings.findUnique({
+                where: { id: "site-settings" },
+                select: {
+                    homeTestimonialsEnabled: true,
+                    homeTestimonialsItems: true,
+                }
+            });
+
+            if (settings?.homeTestimonialsEnabled === false) {
+                return [];
+            }
+
+            if (settings?.homeTestimonialsItems) {
+                try {
+                    const parsed = JSON.parse(settings.homeTestimonialsItems);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed as PublicTestimonialItem[];
+                    }
+                } catch {}
+            }
+
             const reviews = await prisma.review.findMany({
                 where: { isApproved: true, archivedAt: null, product: { archivedAt: null } },
                 take: 12,
@@ -367,37 +683,7 @@ export const getApprovedReviews = unstable_cache(
                 }
             });
             if (reviews.length === 0) {
-                const sampleProducts = await prisma.product.findMany({
-                    where: { images: { not: '' }, archivedAt: null },
-                    take: 8,
-                    select: { name: true, nameAr: true, nameEn: true, images: true, slug: true }
-                });
-
-                const profiles = [
-                    { name: 'سوبرماركت الشام الحديث (دمشق - كفرسوسة)', feedback: 'أفضل موزع معتمد لوكالات زوان والريف. سرعة استثنائية في تلبية طلبيات الطرود وتأكيد مباشر وسلس عبر واتساب.' },
-                    { name: 'ميني ماركت الهدى (المزة)', feedback: 'التوريد منتظم جداً ومواصفات التعبئة واضحة بالطرود، مما يسهل جرد وتوزيع البضائع في المحل بدقة وبدون أي نقص.' },
-                    { name: 'بقالة البركة التجارية (مشروع دمر)', feedback: 'توفير كبرى الوكالات بطلب واحد وفر علينا وقتاً كبيراً في التواصل واللوجستيات مع الموزعين المتفرقين.' },
-                    { name: 'سوبرماركت الواحة (القصاع)', feedback: 'منتجات حليبنا المجففة وتونة سيلفر فيش دائماً متوفرة وتواريخ الصلاحية حديثة جداً ومضمونة من المستودعات.' },
-                    { name: 'مطعم ومقهى ديلايت (المالكي)', feedback: 'اعتمادنا على شركة حوا في توريد زيوت القلي ومعلبات اللحوم والصلصات وفر لنا استقراراً كبيراً في الجودة والأسعار.' },
-                    { name: 'ماركت المدينة المنورة (التجارة)', feedback: 'خدمة التوصيل المباشر لباب السوبرماركت ممتازة، والشاحنات مجهزة ومبردة لحفظ سلامة المعلبات والبضائع.' },
-                    { name: 'بقالة النجوم (الميدان)', feedback: 'المعاملة راقية جداً والأسعار منافسة مقارنة بالسوق، وتسهيلات طلبات الجملة عبر المنصة ممتازة وسريعة.' },
-                    { name: 'سوبرماركت الفصول الأربعة (أبو رمانة)', feedback: 'بضاعة وكالات أصلية 100% مع فواتير نظامية وتوصيل في الموعد المحدد دائماً. نوصي بالتعامل معهم بشدة.' }
-                ];
-
-                return sampleProducts.map((p, idx) => {
-                    const prof = profiles[idx % profiles.length];
-                    const img = p.images ? p.images.split(',')[0].trim() : '/placeholder.svg';
-                    return {
-                        id: `rev-fallback-${idx}`,
-                        name: prof.name,
-                        feedback: prof.feedback,
-                        rating: 5,
-                        image: img,
-                        productNameAr: p.nameAr || p.name,
-                        productNameEn: p.nameEn || p.name,
-                        productSlug: p.slug
-                    };
-                });
+                return DEFAULT_TESTIMONIALS;
             }
 
             return reviews.map(r => ({
@@ -412,74 +698,303 @@ export const getApprovedReviews = unstable_cache(
             }));
         } catch (error) {
             console.error("Failed to fetch reviews:", error);
-            return [];
+            return DEFAULT_TESTIMONIALS;
         }
     },
-    ["approved-reviews-v5"],
-    { tags: ["reviews", "products"], revalidate: 3600 }
+    ["approved-reviews-v6"],
+    { tags: ["reviews", "products", "settings"], revalidate: 3600 }
 );
 
+export interface PublicFeaturedCategory {
+    id: string;
+    name: string;
+    nameEn: string;
+    description: string | null;
+    image: string;
+    slug: string;
+    href?: string;
+    type?: 'category' | 'main-category';
+    brandId?: string;
+    isFeatured?: boolean;
+    brand?: {
+        id: string;
+        name: string;
+        nameEn?: string | null;
+        slug: string;
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export const getFeaturedCategories = unstable_cache(
-    async () => {
+    async (): Promise<PublicFeaturedCategory[]> => {
         try {
-            const categories = await prisma.category.findMany({
-                where: {
-                    isFeatured: true,
-                    brand: { isActive: true },
-                },
-                take: 12,
-                orderBy: { updatedAt: 'desc' },
-                include: {
-                    brand: {
-                        select: {
-                            id: true,
-                            name: true,
-                            slug: true,
-                        }
-                    },
-                    products: {
-                        where: {
-                            NOT: [
-                                { images: '/placeholder.svg' },
-                                { images: '' }
-                            ]
-                        },
-                        take: 1,
-                        select: { images: true }
-                    }
-                }
+            const settings = await prisma.settings.findUnique({
+                where: { id: "site-settings" },
+                select: { homeCategoriesIds: true }
             });
-            return categories.map(category => {
-                const prodImg = category.products[0]?.images ? category.products[0].images.split(',')[0].trim() : '/logo.png';
-                const bundleImg = getCategoryBundleImage(category.name, category.slug);
-                const finalImg = bundleImg !== '/placeholder.svg'
-                    ? bundleImg
-                    : (category.image && category.image !== '/placeholder.svg' ? category.image : prodImg);
+
+            let customIds: string[] = [];
+            if (settings?.homeCategoriesIds) {
+                try {
+                    const parsed = JSON.parse(settings.homeCategoriesIds);
+                    if (Array.isArray(parsed)) {
+                        customIds = parsed.filter(Boolean);
+                    }
+                } catch {
+                    customIds = settings.homeCategoriesIds.split(',').map(s => s.trim()).filter(Boolean);
+                }
+            }
+
+            if (customIds.length > 0) {
+                // Fetch both sub-categories and main categories that match custom IDs
+                const [fetchedSubCats, fetchedMainCats] = await Promise.all([
+                    prisma.category.findMany({
+                        where: {
+                            id: { in: customIds },
+                            isActive: true,
+                            archivedAt: null,
+                            brand: { isActive: true, archivedAt: null },
+                        },
+                        include: {
+                            brand: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    nameEn: true,
+                                    slug: true,
+                                }
+                            },
+                            products: {
+                                where: {
+                                    NOT: [
+                                        { images: '/placeholder.svg' },
+                                        { images: '' }
+                                    ]
+                                },
+                                take: 1,
+                                select: { images: true }
+                            }
+                        }
+                    }),
+                    prisma.mainCategory.findMany({
+                        where: {
+                            id: { in: customIds },
+                            archivedAt: null,
+                        },
+                        include: {
+                            products: {
+                                where: {
+                                    NOT: [
+                                        { images: '/placeholder.svg' },
+                                        { images: '' }
+                                    ]
+                                },
+                                take: 1,
+                                select: { images: true }
+                            }
+                        }
+                    })
+                ]);
+
+                // Map items preserving the admin's exact chosen custom sequence
+                const itemsMap = new Map<string, PublicFeaturedCategory>();
+
+                for (const cat of fetchedSubCats) {
+                    const prodImg = cat.products[0]?.images ? cat.products[0].images.split(',')[0].trim() : '/logo.png';
+                    const bundleImg = getCategoryBundleImage(cat.name, cat.slug);
+                    const finalImg = (cat.image && cat.image !== '/placeholder.svg')
+                        ? cat.image
+                        : (bundleImg !== '/placeholder.svg' ? bundleImg : prodImg);
+
+                    itemsMap.set(cat.id, {
+                        id: cat.id,
+                        name: cat.name,
+                        nameEn: cat.description || cat.name,
+                        description: cat.description,
+                        image: finalImg,
+                        slug: cat.slug,
+                        href: `/products?category=${encodeURIComponent(cat.slug)}`,
+                        type: 'category',
+                        brandId: cat.brandId,
+                        isFeatured: cat.isFeatured,
+                        brand: cat.brand ? {
+                            id: cat.brand.id,
+                            name: cat.brand.name,
+                            nameEn: cat.brand.nameEn,
+                            slug: cat.brand.slug,
+                        } : null,
+                        createdAt: cat.createdAt.toISOString(),
+                        updatedAt: cat.updatedAt.toISOString(),
+                    });
+                }
+
+                for (const mc of fetchedMainCats) {
+                    const prodImg = mc.products[0]?.images ? mc.products[0].images.split(',')[0].trim() : '/logo.png';
+                    const bundleImg = getCategoryBundleImage(mc.name, mc.slug);
+                    const finalImg = (mc.image && mc.image !== '/placeholder.svg')
+                        ? mc.image
+                        : (bundleImg !== '/placeholder.svg' ? bundleImg : prodImg);
+
+                    itemsMap.set(mc.id, {
+                        id: mc.id,
+                        name: mc.name,
+                        nameEn: mc.description || mc.name,
+                        description: mc.description,
+                        image: finalImg,
+                        slug: mc.slug,
+                        href: `/department/${encodeURIComponent(mc.slug)}`,
+                        type: 'main-category',
+                        isFeatured: mc.isFeatured,
+                        brand: null,
+                        createdAt: mc.createdAt.toISOString(),
+                        updatedAt: mc.updatedAt.toISOString(),
+                    });
+                }
+
+                return customIds
+                    .map(id => itemsMap.get(id))
+                    .filter((item): item is PublicFeaturedCategory => Boolean(item));
+            }
+
+            // Auto mode: fetch featured MainCategories (Departments) + featured Categories (Sub-categories)
+            const [mainCats, subCats] = await Promise.all([
+                prisma.mainCategory.findMany({
+                    where: {
+                        isFeatured: true,
+                        isActive: true,
+                        archivedAt: null,
+                    },
+                    orderBy: { navOrder: 'asc' },
+                    include: {
+                        products: {
+                            where: {
+                                NOT: [
+                                    { images: '/placeholder.svg' },
+                                    { images: '' }
+                                ]
+                            },
+                            take: 1,
+                            select: { images: true }
+                        }
+                    }
+                }),
+                prisma.category.findMany({
+                    where: {
+                        isFeatured: true,
+                        isActive: true,
+                        brand: { isActive: true },
+                        archivedAt: null,
+                    },
+                    take: 16,
+                    orderBy: { updatedAt: 'desc' },
+                    include: {
+                        brand: {
+                            select: {
+                                id: true,
+                                name: true,
+                                nameEn: true,
+                                slug: true,
+                            }
+                        },
+                        products: {
+                            where: {
+                                NOT: [
+                                    { images: '/placeholder.svg' },
+                                    { images: '' }
+                                ]
+                            },
+                            take: 1,
+                            select: { images: true }
+                        }
+                    }
+                })
+            ]);
+
+            const mappedMainCats: PublicFeaturedCategory[] = mainCats.map(mc => {
+                const prodImg = mc.products[0]?.images ? mc.products[0].images.split(',')[0].trim() : '/logo.png';
+                const bundleImg = getCategoryBundleImage(mc.name, mc.slug);
+                const finalImg = (mc.image && mc.image !== '/placeholder.svg')
+                    ? mc.image
+                    : (bundleImg !== '/placeholder.svg' ? bundleImg : prodImg);
+
                 return {
-                    id: category.id,
-                    name: category.name,
-                    nameEn: category.description || category.name,
-                    description: category.description,
+                    id: mc.id,
+                    name: mc.name,
+                    nameEn: mc.description || mc.name,
+                    description: mc.description,
                     image: finalImg,
-                    slug: category.slug,
-                    brandId: category.brandId,
-                    isFeatured: category.isFeatured,
-                    brand: category.brand ? {
-                        id: category.brand.id,
-                        name: category.brand.name.split('-')[0].trim(),
-                        slug: category.brand.slug,
-                    } : null,
-                    createdAt: category.createdAt.toISOString(),
-                    updatedAt: category.updatedAt.toISOString(),
+                    slug: mc.slug,
+                    href: `/department/${encodeURIComponent(mc.slug)}`,
+                    type: 'main-category',
+                    isFeatured: mc.isFeatured,
+                    brand: null,
+                    createdAt: mc.createdAt.toISOString(),
+                    updatedAt: mc.updatedAt.toISOString(),
                 };
             });
+
+            const mappedSubCats: PublicFeaturedCategory[] = subCats.map(cat => {
+                const prodImg = cat.products[0]?.images ? cat.products[0].images.split(',')[0].trim() : '/logo.png';
+                const bundleImg = getCategoryBundleImage(cat.name, cat.slug);
+                const finalImg = (cat.image && cat.image !== '/placeholder.svg')
+                    ? cat.image
+                    : (bundleImg !== '/placeholder.svg' ? bundleImg : prodImg);
+
+                return {
+                    id: cat.id,
+                    name: cat.name,
+                    nameEn: cat.description || cat.name,
+                    description: cat.description,
+                    image: finalImg,
+                    slug: cat.slug,
+                    href: `/products?category=${encodeURIComponent(cat.slug)}`,
+                    type: 'category',
+                    brandId: cat.brandId,
+                    isFeatured: cat.isFeatured,
+                    brand: cat.brand ? {
+                        id: cat.brand.id,
+                        name: cat.brand.name,
+                        nameEn: cat.brand.nameEn,
+                        slug: cat.brand.slug,
+                    } : null,
+                    createdAt: cat.createdAt.toISOString(),
+                    updatedAt: cat.updatedAt.toISOString(),
+                };
+            });
+
+            // Put featured main categories at the front, followed by featured sub-categories,
+            // while deduplicating identical concepts across brands (e.g. multiple 'معلبات' from different brands)
+            const allItems = [...mappedMainCats, ...mappedSubCats];
+            const seenKeys = new Set<string>();
+            const deduplicated: PublicFeaturedCategory[] = [];
+
+            const normalizeKey = (name: string) => {
+                return name
+                    .replace(/وال/g, 'و')
+                    .replace(/^ال/g, '')
+                    .replace(/[\s\-_]+/g, '')
+                    .toLowerCase()
+                    .trim();
+            };
+
+            for (const item of allItems) {
+                if (!item.name || item.name.trim() === 'عام') continue;
+                const key = normalizeKey(item.name);
+                if (!seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    deduplicated.push(item);
+                }
+            }
+
+            return deduplicated;
         } catch (error) {
             console.error("Failed to fetch featured categories:", error);
             return [];
         }
     },
-    ["featured-categories"],
-    { tags: ["categories", "catalog"], revalidate: 3600 }
+    ["featured-categories-v4"],
+    { tags: ["categories", "catalog", "settings", "main-categories"], revalidate: 3600 }
 );
 
 export const getOnSaleProducts = unstable_cache(
@@ -489,6 +1004,7 @@ export const getOnSaleProducts = unstable_cache(
                 where: {
                     archivedAt: null,
                     brand: { isActive: true, archivedAt: null },
+                    category: { isActive: true, archivedAt: null },
                     discountPrice: {
                         not: null
                     }
@@ -515,6 +1031,7 @@ export const getOnSaleProducts = unstable_cache(
                 brand: product.brand ? {
                     id: product.brand.id,
                     name: product.brand.name,
+                    nameEn: product.brand.nameEn,
                     slug: product.brand.slug,
                     group: product.brand.group,
                 } : null,
@@ -544,6 +1061,7 @@ export const getMainCategoryBrands = unstable_cache(
                 select: {
                     id: true,
                     name: true,
+                    nameEn: true,
                     slug: true,
                     description: true,
                     image: true,
@@ -568,22 +1086,53 @@ export const getMainCategoryBrands = unstable_cache(
 export const getBestSellerProducts = unstable_cache(
     async () => {
         try {
-            const products = await prisma.product.findMany({
-                where: {
-                    isTrending: true,
-                    archivedAt: null,
-                    brand: { isActive: true, archivedAt: null },
-                    stock: { gt: 0 },
-                    price: { gte: 0 },
-                    NOT: [
-                        { images: '/placeholder.svg' },
-                        { images: '' }
-                    ],
-                },
-                take: 10,
-                include: { category: true, brand: true },
-                orderBy: { updatedAt: 'desc' }
+            const settings = await prisma.settings.findUnique({
+                where: { id: "site-settings" },
+                select: { homeFeaturedBestSellerIds: true },
             });
+            let customIds: string[] = [];
+            if (settings?.homeFeaturedBestSellerIds) {
+                try {
+                    const parsed = JSON.parse(settings.homeFeaturedBestSellerIds);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        customIds = parsed;
+                    }
+                } catch {}
+            }
+
+            let products;
+            if (customIds.length > 0) {
+                const fetched = await prisma.product.findMany({
+                    where: {
+                        id: { in: customIds },
+                        archivedAt: null,
+                        brand: { isActive: true, archivedAt: null },
+                        category: { isActive: true, archivedAt: null },
+                    },
+                    include: { category: true, brand: true },
+                });
+                products = customIds
+                    .map(id => fetched.find(p => p.id === id))
+                    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+            } else {
+                products = await prisma.product.findMany({
+                    where: {
+                        isTrending: true,
+                        archivedAt: null,
+                        brand: { isActive: true, archivedAt: null },
+                        category: { isActive: true, archivedAt: null },
+                        stock: { gt: 0 },
+                        price: { gte: 0 },
+                        NOT: [
+                            { images: '/placeholder.svg' },
+                            { images: '' }
+                        ],
+                    },
+                    take: 10,
+                    include: { category: true, brand: true },
+                    orderBy: { updatedAt: 'desc' }
+                });
+            }
 
             return products.map(product => ({
                 ...product,
@@ -602,6 +1151,7 @@ export const getBestSellerProducts = unstable_cache(
                 brand: product.brand ? {
                     id: product.brand.id,
                     name: product.brand.name,
+                    nameEn: product.brand.nameEn,
                     slug: product.brand.slug,
                     group: product.brand.group,
                 } : null,
@@ -611,28 +1161,59 @@ export const getBestSellerProducts = unstable_cache(
             return [];
         }
     },
-    ["bestseller-products"],
-    { tags: ["products", "catalog"], revalidate: 3600 }
+    ["bestseller-products-v2"],
+    { tags: ["products", "catalog", "settings"], revalidate: 3600 }
 );
 
 export const getNewArrivalProducts = unstable_cache(
     async () => {
         try {
-            const products = await prisma.product.findMany({
-                where: {
-                    archivedAt: null,
-                    brand: { isActive: true, archivedAt: null },
-                    stock: { gt: 0 },
-                    price: { gte: 0 },
-                    NOT: [
-                        { images: '/placeholder.svg' },
-                        { images: '' }
-                    ],
-                },
-                take: 10,
-                include: { category: true, brand: true },
-                orderBy: { createdAt: 'desc' }
+            const settings = await prisma.settings.findUnique({
+                where: { id: "site-settings" },
+                select: { homeFeaturedNewArrivalIds: true },
             });
+            let customIds: string[] = [];
+            if (settings?.homeFeaturedNewArrivalIds) {
+                try {
+                    const parsed = JSON.parse(settings.homeFeaturedNewArrivalIds);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        customIds = parsed;
+                    }
+                } catch {}
+            }
+
+            let products;
+            if (customIds.length > 0) {
+                const fetched = await prisma.product.findMany({
+                    where: {
+                        id: { in: customIds },
+                        archivedAt: null,
+                        brand: { isActive: true, archivedAt: null },
+                        category: { isActive: true, archivedAt: null },
+                    },
+                    include: { category: true, brand: true },
+                });
+                products = customIds
+                    .map(id => fetched.find(p => p.id === id))
+                    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+            } else {
+                products = await prisma.product.findMany({
+                    where: {
+                        archivedAt: null,
+                        brand: { isActive: true, archivedAt: null },
+                        category: { isActive: true, archivedAt: null },
+                        stock: { gt: 0 },
+                        price: { gte: 0 },
+                        NOT: [
+                            { images: '/placeholder.svg' },
+                            { images: '' }
+                        ],
+                    },
+                    take: 10,
+                    include: { category: true, brand: true },
+                    orderBy: { createdAt: 'desc' }
+                });
+            }
 
             return products.map(product => ({
                 ...product,
@@ -651,6 +1232,7 @@ export const getNewArrivalProducts = unstable_cache(
                 brand: product.brand ? {
                     id: product.brand.id,
                     name: product.brand.name,
+                    nameEn: product.brand.nameEn,
                     slug: product.brand.slug,
                     group: product.brand.group,
                 } : null,
@@ -660,31 +1242,70 @@ export const getNewArrivalProducts = unstable_cache(
             return [];
         }
     },
-    ["new-arrival-products"],
-    { tags: ["products", "catalog"], revalidate: 3600 }
+    ["new-arrival-products-v2"],
+    { tags: ["products", "catalog", "settings"], revalidate: 3600 }
 );
 
 export const getTrendingWeeklyProducts = unstable_cache(
     async () => {
         try {
-            const products = await prisma.product.findMany({
-                where: {
-                    archivedAt: null,
-                    brand: { isActive: true, archivedAt: null },
-                    stock: { gt: 0 },
-                    price: { gte: 0 },
-                    NOT: [
-                        { images: '/placeholder.svg' },
-                        { images: '' }
-                    ],
+            const settings = await prisma.settings.findUnique({
+                where: { id: "site-settings" },
+                select: {
+                    homeTrendingWeeklyProductIds: true,
+                    homeTrendingWeeklyEnabled: true,
                 },
-                take: 9,
-                include: { category: true, brand: true },
-                orderBy: [
-                    { isTrending: 'desc' },
-                    { updatedAt: 'desc' },
-                ]
             });
+
+            if (settings?.homeTrendingWeeklyEnabled === false) {
+                return [];
+            }
+
+            let customIds: string[] = [];
+            if (settings?.homeTrendingWeeklyProductIds) {
+                try {
+                    const parsed = JSON.parse(settings.homeTrendingWeeklyProductIds);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        customIds = parsed;
+                    }
+                } catch {}
+            }
+
+            let products;
+            if (customIds.length > 0) {
+                const fetched = await prisma.product.findMany({
+                    where: {
+                        id: { in: customIds },
+                        archivedAt: null,
+                        brand: { isActive: true, archivedAt: null },
+                        category: { isActive: true, archivedAt: null },
+                    },
+                    include: { category: true, brand: true },
+                });
+                products = customIds
+                    .map(id => fetched.find(p => p.id === id))
+                    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+            } else {
+                products = await prisma.product.findMany({
+                    where: {
+                        archivedAt: null,
+                        brand: { isActive: true, archivedAt: null },
+                        category: { isActive: true, archivedAt: null },
+                        stock: { gt: 0 },
+                        price: { gte: 0 },
+                        NOT: [
+                            { images: '/placeholder.svg' },
+                            { images: '' }
+                        ],
+                    },
+                    take: 9,
+                    include: { category: true, brand: true },
+                    orderBy: [
+                        { isTrending: 'desc' },
+                        { updatedAt: 'desc' },
+                    ]
+                });
+            }
 
             return products.map(product => ({
                 ...product,
@@ -703,6 +1324,7 @@ export const getTrendingWeeklyProducts = unstable_cache(
                 brand: product.brand ? {
                     id: product.brand.id,
                     name: product.brand.name,
+                    nameEn: product.brand.nameEn,
                     slug: product.brand.slug,
                     group: product.brand.group,
                 } : null,
@@ -712,7 +1334,7 @@ export const getTrendingWeeklyProducts = unstable_cache(
             return [];
         }
     },
-    ["trending-weekly-products"],
+    ["trending-weekly-products-v3"],
     { tags: ["products", "catalog"], revalidate: 3600 }
 );
 
@@ -762,12 +1384,110 @@ export const getSiteSettings = unstable_cache(
                 statBrands: settings.statBrands || "+100",
                 statProducts: settings.statProducts || "+500",
                 statClients: settings.statClients || "+300",
+                homeCategoriesBadge: settings.homeCategoriesBadge || DEFAULT_SITE_SETTINGS.homeCategoriesBadge,
+                homeCategoriesBadgeAr: settings.homeCategoriesBadgeAr || DEFAULT_SITE_SETTINGS.homeCategoriesBadgeAr,
+                homeCategoriesTitle: settings.homeCategoriesTitle || DEFAULT_SITE_SETTINGS.homeCategoriesTitle,
+                homeCategoriesTitleAr: settings.homeCategoriesTitleAr || DEFAULT_SITE_SETTINGS.homeCategoriesTitleAr,
+                homeCategoriesDesc: settings.homeCategoriesDesc || DEFAULT_SITE_SETTINGS.homeCategoriesDesc,
+                homeCategoriesDescAr: settings.homeCategoriesDescAr || DEFAULT_SITE_SETTINGS.homeCategoriesDescAr,
+                homeCategoriesStats: settings.homeCategoriesStats || DEFAULT_SITE_SETTINGS.homeCategoriesStats,
+                homeCategoriesIds: settings.homeCategoriesIds || null,
+                homeFeaturedBadge: settings.homeFeaturedBadge || DEFAULT_SITE_SETTINGS.homeFeaturedBadge,
+                homeFeaturedBadgeAr: settings.homeFeaturedBadgeAr || DEFAULT_SITE_SETTINGS.homeFeaturedBadgeAr,
+                homeFeaturedTitle: settings.homeFeaturedTitle || DEFAULT_SITE_SETTINGS.homeFeaturedTitle,
+                homeFeaturedTitleAr: settings.homeFeaturedTitleAr || DEFAULT_SITE_SETTINGS.homeFeaturedTitleAr,
+                homeFeaturedDesc: settings.homeFeaturedDesc || DEFAULT_SITE_SETTINGS.homeFeaturedDesc,
+                homeFeaturedDescAr: settings.homeFeaturedDescAr || DEFAULT_SITE_SETTINGS.homeFeaturedDescAr,
+                homeFeaturedBestSellerIds: settings.homeFeaturedBestSellerIds || null,
+                homeFeaturedNewArrivalIds: settings.homeFeaturedNewArrivalIds || null,
+                homeServicesEnabled: settings.homeServicesEnabled !== null && settings.homeServicesEnabled !== undefined ? settings.homeServicesEnabled : true,
+                homeServicesTitle: settings.homeServicesTitle || DEFAULT_SITE_SETTINGS.homeServicesTitle,
+                homeServicesTitleAr: settings.homeServicesTitleAr || DEFAULT_SITE_SETTINGS.homeServicesTitleAr,
+                homeServicesDesc: settings.homeServicesDesc || DEFAULT_SITE_SETTINGS.homeServicesDesc,
+                homeServicesDescAr: settings.homeServicesDescAr || DEFAULT_SITE_SETTINGS.homeServicesDescAr,
+                homeServicesItems: settings.homeServicesItems || DEFAULT_SITE_SETTINGS.homeServicesItems,
+                homeTrendingWeeklyEnabled: settings.homeTrendingWeeklyEnabled !== null && settings.homeTrendingWeeklyEnabled !== undefined ? settings.homeTrendingWeeklyEnabled : true,
+                homeTrendingWeeklyBadge: settings.homeTrendingWeeklyBadge || DEFAULT_SITE_SETTINGS.homeTrendingWeeklyBadge,
+                homeTrendingWeeklyBadgeAr: settings.homeTrendingWeeklyBadgeAr || DEFAULT_SITE_SETTINGS.homeTrendingWeeklyBadgeAr,
+                homeTrendingWeeklyTitle: settings.homeTrendingWeeklyTitle || DEFAULT_SITE_SETTINGS.homeTrendingWeeklyTitle,
+                homeTrendingWeeklyTitleAr: settings.homeTrendingWeeklyTitleAr || DEFAULT_SITE_SETTINGS.homeTrendingWeeklyTitleAr,
+                homeTrendingWeeklyDesc: settings.homeTrendingWeeklyDesc || DEFAULT_SITE_SETTINGS.homeTrendingWeeklyDesc,
+                homeTrendingWeeklyDescAr: settings.homeTrendingWeeklyDescAr || DEFAULT_SITE_SETTINGS.homeTrendingWeeklyDescAr,
+                homeTrendingWeeklyProductIds: settings.homeTrendingWeeklyProductIds || null,
+                homeTestimonialsEnabled: settings.homeTestimonialsEnabled !== null && settings.homeTestimonialsEnabled !== undefined ? settings.homeTestimonialsEnabled : true,
+                homeTestimonialsBadge: settings.homeTestimonialsBadge || DEFAULT_SITE_SETTINGS.homeTestimonialsBadge,
+                homeTestimonialsBadgeAr: settings.homeTestimonialsBadgeAr || DEFAULT_SITE_SETTINGS.homeTestimonialsBadgeAr,
+                homeTestimonialsTitle: settings.homeTestimonialsTitle || DEFAULT_SITE_SETTINGS.homeTestimonialsTitle,
+                homeTestimonialsTitleAr: settings.homeTestimonialsTitleAr || DEFAULT_SITE_SETTINGS.homeTestimonialsTitleAr,
+                homeTestimonialsDesc: settings.homeTestimonialsDesc || DEFAULT_SITE_SETTINGS.homeTestimonialsDesc,
+                homeTestimonialsDescAr: settings.homeTestimonialsDescAr || DEFAULT_SITE_SETTINGS.homeTestimonialsDescAr,
+                homeTestimonialsItems: settings.homeTestimonialsItems || DEFAULT_SITE_SETTINGS.homeTestimonialsItems,
+                shippingPolicyContent: (settings as any)?.shippingPolicyContent || null,
+                contactPageContent: (settings as any)?.contactPageContent || null,
+
+                // Footer settings with defaults
+                footerBrandTitle: settings.footerBrandTitle || DEFAULT_SITE_SETTINGS.footerBrandTitle,
+                footerBrandTitleAr: settings.footerBrandTitleAr || DEFAULT_SITE_SETTINGS.footerBrandTitleAr,
+                footerBrandTagline: settings.footerBrandTagline || DEFAULT_SITE_SETTINGS.footerBrandTagline,
+                footerBrandTaglineAr: settings.footerBrandTaglineAr || DEFAULT_SITE_SETTINGS.footerBrandTaglineAr,
+                footerBrandDescription: settings.footerBrandDescription || DEFAULT_SITE_SETTINGS.footerBrandDescription,
+                footerBrandDescriptionAr: settings.footerBrandDescriptionAr || DEFAULT_SITE_SETTINGS.footerBrandDescriptionAr,
+                footerCopyright: settings.footerCopyright || DEFAULT_SITE_SETTINGS.footerCopyright,
+                footerCopyrightAr: settings.footerCopyrightAr || DEFAULT_SITE_SETTINGS.footerCopyrightAr,
+                footerContactTitle: settings.footerContactTitle || DEFAULT_SITE_SETTINGS.footerContactTitle,
+                footerContactTitleAr: settings.footerContactTitleAr || DEFAULT_SITE_SETTINGS.footerContactTitleAr,
+                footerAddress: settings.footerAddress || DEFAULT_SITE_SETTINGS.footerAddress,
+                footerAddressAr: settings.footerAddressAr || DEFAULT_SITE_SETTINGS.footerAddressAr,
+                footerPhone: settings.footerPhone || DEFAULT_SITE_SETTINGS.footerPhone,
+                footerEmail: settings.footerEmail || DEFAULT_SITE_SETTINGS.footerEmail,
+                footerInstagramUrl: settings.footerInstagramUrl || DEFAULT_SITE_SETTINGS.footerInstagramUrl,
+                footerFacebookUrl: settings.footerFacebookUrl || DEFAULT_SITE_SETTINGS.footerFacebookUrl,
+                footerWhatsappUrl: settings.footerWhatsappUrl || DEFAULT_SITE_SETTINGS.footerWhatsappUrl,
+                footerLinkedinUrl: settings.footerLinkedinUrl || DEFAULT_SITE_SETTINGS.footerLinkedinUrl,
+                footerShopTitle: settings.footerShopTitle || DEFAULT_SITE_SETTINGS.footerShopTitle,
+                footerShopTitleAr: settings.footerShopTitleAr || DEFAULT_SITE_SETTINGS.footerShopTitleAr,
+                footerSupportTitle: settings.footerSupportTitle || DEFAULT_SITE_SETTINGS.footerSupportTitle,
+                footerSupportTitleAr: settings.footerSupportTitleAr || DEFAULT_SITE_SETTINGS.footerSupportTitleAr,
+                footerCompanyTitle: settings.footerCompanyTitle || DEFAULT_SITE_SETTINGS.footerCompanyTitle,
+                footerCompanyTitleAr: settings.footerCompanyTitleAr || DEFAULT_SITE_SETTINGS.footerCompanyTitleAr,
+                footerNewsletterTitle: settings.footerNewsletterTitle || DEFAULT_SITE_SETTINGS.footerNewsletterTitle,
+                footerNewsletterTitleAr: settings.footerNewsletterTitleAr || DEFAULT_SITE_SETTINGS.footerNewsletterTitleAr,
+                footerNewsletterDesc: settings.footerNewsletterDesc || DEFAULT_SITE_SETTINGS.footerNewsletterDesc,
+                footerNewsletterDescAr: settings.footerNewsletterDescAr || DEFAULT_SITE_SETTINGS.footerNewsletterDescAr,
+                footerJurisdiction: settings.footerJurisdiction || DEFAULT_SITE_SETTINGS.footerJurisdiction,
+                footerJurisdictionAr: settings.footerJurisdictionAr || DEFAULT_SITE_SETTINGS.footerJurisdictionAr,
+                footerTermsUrl: settings.footerTermsUrl || DEFAULT_SITE_SETTINGS.footerTermsUrl,
+                footerPrivacyUrl: settings.footerPrivacyUrl || DEFAULT_SITE_SETTINGS.footerPrivacyUrl,
+                footerSupportLink1Label: settings.footerSupportLink1Label || DEFAULT_SITE_SETTINGS.footerSupportLink1Label,
+                footerSupportLink1LabelAr: settings.footerSupportLink1LabelAr || DEFAULT_SITE_SETTINGS.footerSupportLink1LabelAr,
+                footerSupportLink1Url: settings.footerSupportLink1Url || DEFAULT_SITE_SETTINGS.footerSupportLink1Url,
+                footerSupportLink2Label: settings.footerSupportLink2Label || DEFAULT_SITE_SETTINGS.footerSupportLink2Label,
+                footerSupportLink2LabelAr: settings.footerSupportLink2LabelAr || DEFAULT_SITE_SETTINGS.footerSupportLink2LabelAr,
+                footerSupportLink2Url: settings.footerSupportLink2Url || DEFAULT_SITE_SETTINGS.footerSupportLink2Url,
+                footerSupportLink3Label: settings.footerSupportLink3Label || DEFAULT_SITE_SETTINGS.footerSupportLink3Label,
+                footerSupportLink3LabelAr: settings.footerSupportLink3LabelAr || DEFAULT_SITE_SETTINGS.footerSupportLink3LabelAr,
+                footerSupportLink3Url: settings.footerSupportLink3Url || DEFAULT_SITE_SETTINGS.footerSupportLink3Url,
+                footerSupportLink4Label: settings.footerSupportLink4Label || DEFAULT_SITE_SETTINGS.footerSupportLink4Label,
+                footerSupportLink4LabelAr: settings.footerSupportLink4LabelAr || DEFAULT_SITE_SETTINGS.footerSupportLink4LabelAr,
+                footerSupportLink4Url: settings.footerSupportLink4Url || DEFAULT_SITE_SETTINGS.footerSupportLink4Url,
+                footerCompanyLink1Label: settings.footerCompanyLink1Label || DEFAULT_SITE_SETTINGS.footerCompanyLink1Label,
+                footerCompanyLink1LabelAr: settings.footerCompanyLink1LabelAr || DEFAULT_SITE_SETTINGS.footerCompanyLink1LabelAr,
+                footerCompanyLink1Url: settings.footerCompanyLink1Url || DEFAULT_SITE_SETTINGS.footerCompanyLink1Url,
+                footerCompanyLink2Label: settings.footerCompanyLink2Label || DEFAULT_SITE_SETTINGS.footerCompanyLink2Label,
+                footerCompanyLink2LabelAr: settings.footerCompanyLink2LabelAr || DEFAULT_SITE_SETTINGS.footerCompanyLink2LabelAr,
+                footerCompanyLink2Url: settings.footerCompanyLink2Url || DEFAULT_SITE_SETTINGS.footerCompanyLink2Url,
+                footerCompanyLink3Label: settings.footerCompanyLink3Label || DEFAULT_SITE_SETTINGS.footerCompanyLink3Label,
+                footerCompanyLink3LabelAr: settings.footerCompanyLink3LabelAr || DEFAULT_SITE_SETTINGS.footerCompanyLink3LabelAr,
+                footerCompanyLink3Url: settings.footerCompanyLink3Url || DEFAULT_SITE_SETTINGS.footerCompanyLink3Url,
+                footerCompanyLink4Label: settings.footerCompanyLink4Label || DEFAULT_SITE_SETTINGS.footerCompanyLink4Label,
+                footerCompanyLink4LabelAr: settings.footerCompanyLink4LabelAr || DEFAULT_SITE_SETTINGS.footerCompanyLink4LabelAr,
+                footerCompanyLink4Url: settings.footerCompanyLink4Url || DEFAULT_SITE_SETTINGS.footerCompanyLink4Url,
             };
         } catch (error) {
             console.error("Failed to fetch site settings, using fallback default settings:", error);
             return DEFAULT_SITE_SETTINGS;
         }
     },
-    ["site-settings-v2"],
+    ["site-settings-v4"],
     { tags: ["settings"], revalidate: 3600 }
 );

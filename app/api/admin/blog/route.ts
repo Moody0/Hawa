@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession, type AdminUserSession } from "@/lib/admin-auth";
 import { adminApiError, validationError } from "@/lib/admin-api";
 import { archiveReasonSchema, blogPostMutationSchema, identifierSchema, zodFieldErrors } from "@/lib/admin-validation";
 import { writeAdminAuditLog } from "@/lib/admin-audit";
+import { BLOG_SEED_ARTICLES } from "@/lib/blog-seed-posts";
 
 function actorId(session: Awaited<ReturnType<typeof requireAdminSession>>): string {
   return (session.user as AdminUserSession).id;
+}
+
+function revalidateBlogPost(slug: string) {
+  revalidatePath("/blog");
+  revalidatePath(`/blog/${slug}`);
 }
 
 export async function GET(request: Request) {
@@ -18,6 +25,24 @@ export async function GET(request: Request) {
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 25, 1), 100);
     const search = url.searchParams.get("search")?.trim().slice(0, 200);
     const includeArchived = url.searchParams.get("archived") === "true";
+    await Promise.all(Object.values(BLOG_SEED_ARTICLES).map((post) => prisma.post.upsert({
+      where: { slug: post.slug },
+      update: {},
+      create: {
+        title: post.title,
+        titleAr: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        excerptAr: post.excerpt,
+        content: post.content,
+        contentAr: post.content,
+        image: post.image,
+        category: post.category,
+        categoryAr: post.category,
+        isPublished: true,
+        createdAt: post.createdAt,
+      },
+    })));
     const where = {
       archivedAt: includeArchived ? { not: null } : null,
       ...(search ? { OR: [
@@ -67,6 +92,7 @@ export async function POST(request: Request) {
       image: data.image || null,
       isPublished: data.isPublished ?? true,
     } });
+    revalidateBlogPost(post.slug);
     const audit = await writeAdminAuditLog({ actorId: actorId(session), action: "CREATE", entityType: "Post", entityId: post.id });
     return NextResponse.json({ ok: true, data: post, post, auditId: audit.id }, { status: 201 });
   } catch (error) {
@@ -85,6 +111,7 @@ export async function PUT(request: Request) {
       titleAr: data.titleAr || data.title,
       image: data.image || null,
     } });
+    revalidateBlogPost(post.slug);
     const audit = await writeAdminAuditLog({ actorId: actorId(session), action: "UPDATE", entityType: "Post", entityId: id });
     return NextResponse.json({ ok: true, data: post, post, auditId: audit.id });
   } catch (error) {
@@ -99,6 +126,7 @@ export async function PATCH(request: Request) {
     const id = identifierSchema.safeParse(body.id);
     if (!id.success || body.restore !== true) return validationError({ id: ["A valid ID and restore=true are required"] });
     const post = await prisma.post.update({ where: { id: id.data }, data: { archivedAt: null } });
+    revalidateBlogPost(post.slug);
     const audit = await writeAdminAuditLog({ actorId: actorId(session), action: "RESTORE", entityType: "Post", entityId: id.data });
     return NextResponse.json({ ok: true, data: post, auditId: audit.id });
   } catch (error) {
@@ -114,6 +142,7 @@ export async function DELETE(request: Request) {
     const reason = archiveReasonSchema.safeParse(url.searchParams.get("reason") || "Archived by administrator");
     if (!id.success || !reason.success) return validationError({ _form: ["A valid ID and archive reason are required"] });
     const post = await prisma.post.update({ where: { id: id.data }, data: { archivedAt: new Date(), isPublished: false } });
+    revalidateBlogPost(post.slug);
     const audit = await writeAdminAuditLog({ actorId: actorId(session), action: "ARCHIVE", entityType: "Post", entityId: id.data, metadata: { reason: reason.data } });
     return NextResponse.json({ ok: true, data: post, auditId: audit.id });
   } catch (error) {

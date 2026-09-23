@@ -339,8 +339,16 @@ describe("Phase 3.6: Concurrency, Atomic Reservation & Inventory Tests", { timeo
         });
         assert.equal(currentProduct?.stock, 7);
 
-        // Cancel order: releases active reservation back to inventory
-        const cancelResult = await executeOrderStatusUpdate(order.id, "CANCELLED");
+        // A missing reason must not cancel or release the reservation.
+        await assert.rejects(executeOrderStatusUpdate(order.id, "CANCELLED"), /cancellation reason/i);
+        currentProduct = await prisma.product.findUnique({
+            where: { id: product.id },
+            select: { stock: true },
+        });
+        assert.equal(currentProduct?.stock, 7);
+
+        // Cancel order: save the customer-facing reason and release the reservation.
+        const cancelResult = await executeOrderStatusUpdate(order.id, "CANCELLED", "  Unable to deliver to this address  ");
         assert.equal(cancelResult.success, true);
 
         // Stock must be restored back to 10
@@ -353,10 +361,11 @@ describe("Phase 3.6: Concurrency, Atomic Reservation & Inventory Tests", { timeo
         // Check order stockReserved flag
         const dbOrder = await prisma.order.findUnique({
             where: { id: order.id },
-            select: { stockReserved: true, status: true },
+            select: { stockReserved: true, status: true, cancellationReason: true },
         });
         assert.equal(dbOrder?.status, "CANCELLED");
         assert.equal(dbOrder?.stockReserved, false);
+        assert.equal(dbOrder?.cancellationReason, "Unable to deliver to this address");
 
         // Check auditable inventory movement record
         const releaseMovements = await prisma.inventoryMovement.findMany({
@@ -393,7 +402,7 @@ describe("Phase 3.6: Concurrency, Atomic Reservation & Inventory Tests", { timeo
         createdOrderIds.push(order.id);
 
         // Cancel order once -> stock restored to 10
-        await executeOrderStatusUpdate(order.id, "CANCELLED");
+        await executeOrderStatusUpdate(order.id, "CANCELLED", "Customer requested cancellation");
         let currentProduct = await prisma.product.findUnique({
             where: { id: product.id },
             select: { stock: true },

@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../ProductsPageComponents/ProductCard';
 
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -45,6 +47,14 @@ interface FeaturedCollectionProps {
     newArrivals: Product[];
     bundles?: Product[];
     bestSellers: Product[];
+    settings?: {
+        homeFeaturedBadge?: string | null;
+        homeFeaturedBadgeAr?: string | null;
+        homeFeaturedTitle?: string | null;
+        homeFeaturedTitleAr?: string | null;
+        homeFeaturedDesc?: string | null;
+        homeFeaturedDescAr?: string | null;
+    } | null;
 }
 
 const FALLBACK_NEW_ARRIVALS: Product[] = [
@@ -253,10 +263,22 @@ const FALLBACK_BEST_SELLERS: Product[] = [
     }
 ];
 
-const FeaturedCollection = ({ newArrivals = [], bundles: _bundles = [], bestSellers = [] }: FeaturedCollectionProps) => {
+const FeaturedCollection = ({ newArrivals = [], bundles: _bundles = [], bestSellers = [], settings }: FeaturedCollectionProps) => {
     const { t, dir } = useLanguage();
     const [activeTab, setActiveTab] = useState(0);
     const isArabic = dir === 'rtl';
+
+    const badgeText = isArabic
+        ? (settings?.homeFeaturedBadgeAr || t('home.featuredCollectionBadge') || 'مختارات حوا')
+        : (settings?.homeFeaturedBadge || t('home.featuredCollectionBadge') || 'Hawa Selections');
+
+    const titleText = isArabic
+        ? (settings?.homeFeaturedTitleAr || t('home.featuredCollectionSubtitle') || 'تشكيلة منتجات الجملة الأكثر طلباً')
+        : (settings?.homeFeaturedTitle || t('home.featuredCollectionSubtitle') || 'Featured Wholesale & Fast-Moving Essentials');
+
+    const descText = isArabic
+        ? (settings?.homeFeaturedDescAr || t('home.featuredCollectionDesc') || 'تشكيلة مختارة من أفضل أصناف الوكالات المعتمدة ومواد الاستهلاك بأسعار الجملة المباشرة')
+        : (settings?.homeFeaturedDesc || t('home.featuredCollectionDesc') || 'Curated wholesale selection across leading agencies and essentials at direct trade prices');
 
     const safeNewArrivals = (newArrivals && newArrivals.length > 0) ? newArrivals : FALLBACK_NEW_ARRIVALS;
     const safeBestSellers = (bestSellers && bestSellers.length > 0) ? bestSellers : FALLBACK_BEST_SELLERS;
@@ -279,28 +301,42 @@ const FeaturedCollection = ({ newArrivals = [], bundles: _bundles = [], bestSell
 
     return (
         <section className="container-custom py-12 md:py-16">
-            {/* Editorial heading and product-view tabs */}
-            <div className="text-start mb-6 sm:mb-8">
-                <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    {isArabic ? 'مختارات حوا' : 'Hawa selections'}
-                </span>
-                <div>
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight max-w-3xl" data-reveal-heading>
-                        {t('home.featuredCollectionSubtitle') || (isArabic ? 'المواد الغذائية والتموينية الأكثر طلباً' : 'Featured Wholesale Products')}
-                    </h2>
+            {/* Editorial heading, tabs, and action button */}
+            <div className="mb-6 sm:mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-3">
+                    <div className="text-start">
+                        <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            {badgeText}
+                        </span>
+                        <div>
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight max-w-3xl" data-reveal-heading>
+                                {titleText}
+                            </h2>
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mt-2" data-reveal-copy>
+                            {descText}
+                        </p>
+                    </div>
+
+                    <Link
+                        href="/products"
+                        prefetch={false}
+                        className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-zinc-800 text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#E5B54A] shadow-xs transition-all active:scale-95 shrink-0 group"
+                    >
+                        <span>{isArabic ? 'عرض كافة المنتجات' : 'View All Products'}</span>
+                        {isArabic ? (
+                            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                        ) : (
+                            <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                        )}
+                    </Link>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mt-2 mb-4" data-reveal-copy>
-                    {isArabic
-                        ? 'تشكيلة مختارة من أفضل أصناف الوكالات المعتمدة بأسعار الجملة المباشرة'
-                        : 'Curated wholesale selection of leading brand goods at direct trade prices'}
-                </p>
-
-                {/* Segmented tabs retain the existing local Framer Motion transition */}
+                {/* Segmented tabs */}
                 <div
                     role="tablist"
-                    className="inline-flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/60 dark:border-white/10 shadow-2xs relative"
+                    className="inline-flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/60 dark:border-white/10 shadow-2xs relative mt-1"
                 >
                     {tabs.map((tab, index) => {
                         const isActive = activeTab === index;

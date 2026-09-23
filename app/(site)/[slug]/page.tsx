@@ -1,7 +1,6 @@
 import React from 'react';
 import { prisma } from "@/lib/prisma";
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import ProductGallery from '@/app/components/ProductDetailsComponents/ProductGallery';
 import ProductHeader from '@/app/components/ProductDetailsComponents/ProductHeader';
 import ProductActions from '@/app/components/ProductDetailsComponents/ProductActions';
@@ -18,6 +17,7 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
             slug: params.slug,
             archivedAt: null,
             brand: { isActive: true, archivedAt: null },
+            category: { isActive: true, archivedAt: null },
         },
         include: {
             brand: true,
@@ -36,6 +36,7 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
             id: { not: product.id },
             archivedAt: null,
             brand: { isActive: true, archivedAt: null },
+            category: { isActive: true, archivedAt: null },
         },
         take: 4,
     });
@@ -63,15 +64,8 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                             name={product.name}
                             nameAr={product.nameAr}
                             nameEn={product.nameEn}
+                            brand={product.brand}
                         />
-                        {product.brand && (
-                            <Link
-                                href={`/products?brand=${product.brand.slug}`}
-                                className="mb-4 mt-2 inline-flex w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary transition-colors hover:bg-primary/20"
-                            >
-                                {product.brand.name}
-                            </Link>
-                        )}
                     </div>
                     
                     <ProductActions product={{

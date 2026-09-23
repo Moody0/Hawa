@@ -3,6 +3,7 @@
 import React from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import Breadcrumb, { BreadcrumbItem } from '@/app/components/Breadcrumb';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface ProductsBreadcrumbsProps {
     activeCategory?: {
@@ -13,6 +14,7 @@ interface ProductsBreadcrumbsProps {
     } | null;
     activeBrand?: {
         name: string;
+        nameEn?: string | null;
         slug?: string;
     } | null;
     activeMainCategory?: {
@@ -53,7 +55,7 @@ const ProductsBreadcrumbs = ({
             href: '/brands',
         });
         items.push({
-            label: activeBrand.name,
+            label: getBrandDisplayName(activeBrand, isArabic ? 'ar' : 'en'),
             href: `/brands/${activeBrand.slug}`,
         });
         items.push({
@@ -65,7 +67,7 @@ const ProductsBreadcrumbs = ({
             href: '/brands',
         });
         items.push({
-            label: activeBrand.name,
+            label: getBrandDisplayName(activeBrand, isArabic ? 'ar' : 'en'),
         });
     } else if (activeMainCategory) {
         items.push({

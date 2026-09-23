@@ -5,10 +5,11 @@ import { requireAdminSession } from "@/lib/admin-auth";
 
 export async function getRelatedProducts(type: "brandId" | "mainCategoryId" | "categoryId", id: string, query: string) {
     try {
-        await requireAdminSession("canManageProducts");
+        await requireAdminSession("PRODUCTS_VIEW");
         const products = await prisma.product.findMany({
             where: {
                 [type]: id,
+                archivedAt: null,
                 name: { contains: query, mode: "insensitive" }
             },
             select: { id: true, name: true, images: true, price: true, stock: true },
@@ -24,14 +25,14 @@ export async function getRelatedProducts(type: "brandId" | "mainCategoryId" | "c
 
 export async function getRelatedCategories(type: "brandId" | "mainCategoryId", id: string, query: string) {
     try {
-        await requireAdminSession("canManageCategories");
+        await requireAdminSession("CATEGORIES_VIEW");
         const categories = await prisma.category.findMany({
             where: {
                 [type]: id,
+                archivedAt: null,
                 name: { contains: query, mode: "insensitive" }
             },
             select: { id: true, name: true, image: true },
-            take: 50,
             orderBy: { name: 'asc' }
         });
         return { success: true, data: categories };
@@ -43,14 +44,14 @@ export async function getRelatedCategories(type: "brandId" | "mainCategoryId", i
 
 export async function getRelatedBrands(id: string, query: string) {
     try {
-        await requireAdminSession("canManageBrands");
+        await requireAdminSession("BRANDS_VIEW");
         const brands = await prisma.brand.findMany({
             where: {
                 mainCategoryId: id,
+                archivedAt: null,
                 name: { contains: query, mode: "insensitive" }
             },
             select: { id: true, name: true, image: true },
-            take: 50,
             orderBy: { name: 'asc' }
         });
         return { success: true, data: brands };

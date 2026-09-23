@@ -8,6 +8,7 @@ import {
     getNewArrivalProducts,
     getTrendingWeeklyProducts,
     getFeaturedCategories,
+    getSiteSettings,
 } from "../../lib/public-queries";
 
 export const revalidate = 60; // Cache for 60s ISR
@@ -30,6 +31,7 @@ export default async function Home() {
         featuredNewArrivals,
         trendingWeekly,
         featuredCategories,
+        siteSettings,
     ] = await Promise.all([
         getActiveBanners(),
         getHomeRailBrands(),
@@ -38,6 +40,7 @@ export default async function Home() {
         getNewArrivalProducts(),
         getTrendingWeeklyProducts(),
         getFeaturedCategories(),
+        getSiteSettings(),
     ]);
 
     return (
@@ -50,6 +53,7 @@ export default async function Home() {
                 featuredBestSellers={featuredBestSellers}
                 trendingWeekly={trendingWeekly}
                 featuredCategories={featuredCategories}
+                siteSettings={siteSettings}
             />
         </section>
     );

@@ -3,11 +3,17 @@ import CategoriesClient from "./CategoriesClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminCategoriesPage() {
+export default async function AdminCategoriesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ categoryId?: string | string[] }>;
+}) {
+    const requestedId = (await searchParams).categoryId;
+    const categoryId = typeof requestedId === 'string' ? requestedId : undefined;
     const [data, brands] = await Promise.all([
-        getAdminCategories(),
+        getAdminCategories(1, 100, categoryId),
         getAdminBrands(),
     ]);
 
-    return <CategoriesClient categories={data.categories} brands={brands} />;
+    return <CategoriesClient key={categoryId ?? 'all'} categories={data.categories} brands={brands} focusedCategoryId={categoryId} />;
 }

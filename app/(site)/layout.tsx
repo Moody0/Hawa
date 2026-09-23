@@ -2,6 +2,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
 import { getI18n } from "@/lib/i18n";
+import { getNavigationData } from "@/lib/navigation";
 
 import React, { Suspense } from "react";
 import NavigationProgressBar from "../components/NavigationProgressBar";
@@ -13,6 +14,7 @@ export default async function SiteLayout({
     children: React.ReactNode;
 }) {
     const { t, dir, language } = await getI18n();
+    const navData = await getNavigationData();
 
     return (
         <div className="min-h-screen flex flex-col" dir={dir}>
@@ -26,6 +28,7 @@ export default async function SiteLayout({
             <Header
                 dir={dir}
                 language={language}
+                initialNavData={navData}
             />
 
             {/* Main Content */}

@@ -1,21 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { Image, Clock, Truck, AlertTriangle, ShieldCheck, Info, Save, Store, TrendingUp, RefreshCw, GalleryHorizontal } from 'lucide-react';
+import { useState, useMemo } from "react";
+import { Image, Clock, Truck, AlertTriangle, ShieldCheck, Info, Save, Store, TrendingUp, RefreshCw, GalleryHorizontal, FolderTree, Sparkles, Phone, Flame, MessageSquareQuote } from 'lucide-react';
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { updateSiteSettings } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import FooterContentSection from "./FooterContentSection";
-
-interface FooterCategoryOption {
-    id: string;
-    name: string;
-}
+import HomeCategoriesContentSection, { CategoryOption, StatMetricItem, DEFAULT_STATS } from "./HomeCategoriesContentSection";
+import HomeFeaturedContentSection, { ProductOption } from "./HomeFeaturedContentSection";
+import HomeTrendingContentSection from "./HomeTrendingContentSection";
+import HomeServicesContentSection from "./HomeServicesContentSection";
+import HomeTestimonialsContentSection from "./HomeTestimonialsContentSection";
+import ShippingPolicyEditor from "./ShippingPolicyEditor";
+import ContactContentSection from "./ContactContentSection";
+import { getShippingPolicyContent, ShippingPolicyContent } from "@/lib/shipping-policy-content";
+import { getContactPageContent, ContactPageContent } from "@/lib/contact-page-content";
+import { CompanyServiceItem, DEFAULT_COMPANY_SERVICES, PublicTestimonialItem, DEFAULT_TESTIMONIALS } from "@/lib/public-queries";
 
 interface SiteSettings {
     id: string;
+    shippingPolicyContent?: unknown;
+    contactPageContent?: unknown;
     categoriesCtaTitle: string | null;
     categoriesCtaDesc: string | null;
     categoriesCtaTitleAr: string | null;
@@ -23,13 +30,22 @@ interface SiteSettings {
     categoriesCtaImage: string | null;
     footerBrandTitle: string | null;
     footerBrandTitleAr: string | null;
+    footerBrandTagline: string | null;
+    footerBrandTaglineAr: string | null;
     footerBrandDescription: string | null;
     footerBrandDescriptionAr: string | null;
     footerCopyright: string | null;
     footerCopyrightAr: string | null;
+    footerContactTitle: string | null;
+    footerContactTitleAr: string | null;
+    footerAddress: string | null;
+    footerAddressAr: string | null;
+    footerPhone: string | null;
+    footerEmail: string | null;
     footerInstagramUrl: string | null;
     footerFacebookUrl: string | null;
     footerWhatsappUrl: string | null;
+    footerLinkedinUrl: string | null;
     whatsappNumber: string | null;
     footerShopTitle: string | null;
     footerShopTitleAr: string | null;
@@ -37,6 +53,14 @@ interface SiteSettings {
     footerSupportTitleAr: string | null;
     footerCompanyTitle: string | null;
     footerCompanyTitleAr: string | null;
+    footerNewsletterTitle: string | null;
+    footerNewsletterTitleAr: string | null;
+    footerNewsletterDesc: string | null;
+    footerNewsletterDescAr: string | null;
+    footerJurisdiction: string | null;
+    footerJurisdictionAr: string | null;
+    footerTermsUrl: string | null;
+    footerPrivacyUrl: string | null;
     footerSupportLink1Label: string | null;
     footerSupportLink1LabelAr: string | null;
     footerSupportLink1Url: string | null;
@@ -46,6 +70,9 @@ interface SiteSettings {
     footerSupportLink3Label: string | null;
     footerSupportLink3LabelAr: string | null;
     footerSupportLink3Url: string | null;
+    footerSupportLink4Label: string | null;
+    footerSupportLink4LabelAr: string | null;
+    footerSupportLink4Url: string | null;
     footerCompanyLink1Label: string | null;
     footerCompanyLink1LabelAr: string | null;
     footerCompanyLink1Url: string | null;
@@ -55,6 +82,9 @@ interface SiteSettings {
     footerCompanyLink3Label: string | null;
     footerCompanyLink3LabelAr: string | null;
     footerCompanyLink3Url: string | null;
+    footerCompanyLink4Label: string | null;
+    footerCompanyLink4LabelAr: string | null;
+    footerCompanyLink4Url: string | null;
     footerCategory1Id: string | null;
     footerCategory2Id: string | null;
     footerCategory3Id: string | null;
@@ -129,21 +159,172 @@ interface SiteSettings {
     statBrands?: string | null;
     statProducts?: string | null;
     statClients?: string | null;
+    homeCategoriesBadge?: string | null;
+    homeCategoriesBadgeAr?: string | null;
+    homeCategoriesTitle?: string | null;
+    homeCategoriesTitleAr?: string | null;
+    homeCategoriesDesc?: string | null;
+    homeCategoriesDescAr?: string | null;
+    homeCategoriesStats?: string | null;
+    homeCategoriesIds?: string | null;
+    homeFeaturedBadge?: string | null;
+    homeFeaturedBadgeAr?: string | null;
+    homeFeaturedTitle?: string | null;
+    homeFeaturedTitleAr?: string | null;
+    homeFeaturedDesc?: string | null;
+    homeFeaturedDescAr?: string | null;
+    homeFeaturedBestSellerIds?: string | null;
+    homeFeaturedNewArrivalIds?: string | null;
+    homeTrendingWeeklyEnabled?: boolean | null;
+    homeTrendingWeeklyBadge?: string | null;
+    homeTrendingWeeklyBadgeAr?: string | null;
+    homeTrendingWeeklyTitle?: string | null;
+    homeTrendingWeeklyTitleAr?: string | null;
+    homeTrendingWeeklyDesc?: string | null;
+    homeTrendingWeeklyDescAr?: string | null;
+    homeTrendingWeeklyProductIds?: string | null;
+    homeServicesEnabled?: boolean | null;
+    homeServicesTitle?: string | null;
+    homeServicesTitleAr?: string | null;
+    homeServicesDesc?: string | null;
+    homeServicesDescAr?: string | null;
+    homeServicesItems?: string | null;
+    homeTestimonialsEnabled?: boolean | null;
+    homeTestimonialsBadge?: string | null;
+    homeTestimonialsBadgeAr?: string | null;
+    homeTestimonialsTitle?: string | null;
+    homeTestimonialsTitleAr?: string | null;
+    homeTestimonialsDesc?: string | null;
+    homeTestimonialsDescAr?: string | null;
+    homeTestimonialsItems?: string | null;
 }
 
-type TabType = "currency" | "stats" | "footer" | "banners" | "shipping" | "about";
+type TabType = "currency" | "homeCategories" | "homeFeatured" | "homeTrending" | "homeServices" | "homeTestimonials" | "stats" | "footer" | "banners" | "shipping" | "about" | "contact";
 
 export default function SiteContentClient({ 
     initialSettings,
-    categories 
+    categories,
+    products = [],
 }: { 
     initialSettings: SiteSettings | null;
-    categories: FooterCategoryOption[];
+    categories: CategoryOption[];
+    products?: ProductOption[];
 }) {
     const { t, dir, language } = useLanguage();
     const { openSidebar } = useAdminSidebar();
     const [activeTab, setActiveTab] = useState<TabType>("currency");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Site Settings State - Home Categories & Wholesale Stats
+    const [homeCategoriesBadge, setHomeCategoriesBadge] = useState(initialSettings?.homeCategoriesBadge || "DIRECT WHOLESALE DISTRIBUTION");
+    const [homeCategoriesBadgeAr, setHomeCategoriesBadgeAr] = useState(initialSettings?.homeCategoriesBadgeAr || "توزيع جملة مباشر ومستودعات مركزية");
+    const [homeCategoriesTitle, setHomeCategoriesTitle] = useState(initialSettings?.homeCategoriesTitle || "Browse Key Wholesale Categories");
+    const [homeCategoriesTitleAr, setHomeCategoriesTitleAr] = useState(initialSettings?.homeCategoriesTitleAr || "تصفح تشكيلة واسعة من الأصناف والمجموعات");
+    const [homeCategoriesDesc, setHomeCategoriesDesc] = useState(initialSettings?.homeCategoriesDesc || "Reliable inventory across food supplies, premium oils, detergents, and baby care essentials with direct depot dispatch.");
+    const [homeCategoriesDescAr, setHomeCategoriesDescAr] = useState(initialSettings?.homeCategoriesDescAr || "نوفر لمتاجرك ومستودعاتك أفضل السلع الأساسية والمواد الاستهلاكية بأسعار جملة منافسة وجاهزية فورية للتسليم.");
+
+    const [homeStats, setHomeStats] = useState<StatMetricItem[]>(() => {
+        if (!initialSettings?.homeCategoriesStats) return DEFAULT_STATS;
+        try {
+            const parsed = JSON.parse(initialSettings.homeCategoriesStats);
+            return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_STATS;
+        } catch {
+            return DEFAULT_STATS;
+        }
+    });
+
+    const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(() => {
+        if (!initialSettings?.homeCategoriesIds) return [];
+        try {
+            const parsed = JSON.parse(initialSettings.homeCategoriesIds);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    });
+
+    // Site Settings State - Home Featured Wholesale Products
+    const [homeFeaturedBadge, setHomeFeaturedBadge] = useState(initialSettings?.homeFeaturedBadge || "Hawa Selections");
+    const [homeFeaturedBadgeAr, setHomeFeaturedBadgeAr] = useState(initialSettings?.homeFeaturedBadgeAr || "مختارات حوا");
+    const [homeFeaturedTitle, setHomeFeaturedTitle] = useState(initialSettings?.homeFeaturedTitle || "Featured Wholesale Products");
+    const [homeFeaturedTitleAr, setHomeFeaturedTitleAr] = useState(initialSettings?.homeFeaturedTitleAr || "تشكيلة منتجات الجملة الأكثر طلباً");
+    const [homeFeaturedDesc, setHomeFeaturedDesc] = useState(initialSettings?.homeFeaturedDesc || "Curated wholesale selection across leading agencies and essentials at direct trade prices");
+    const [homeFeaturedDescAr, setHomeFeaturedDescAr] = useState(initialSettings?.homeFeaturedDescAr || "تشكيلة مختارة من أفضل أصناف الوكالات المعتمدة ومواد الاستهلاك بأسعار الجملة المباشرة");
+
+    const [homeFeaturedBestSellerIds, setHomeFeaturedBestSellerIds] = useState<string[]>(() => {
+        if (!initialSettings?.homeFeaturedBestSellerIds) return [];
+        try {
+            const parsed = JSON.parse(initialSettings.homeFeaturedBestSellerIds);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    });
+
+    const [homeFeaturedNewArrivalIds, setHomeFeaturedNewArrivalIds] = useState<string[]>(() => {
+        if (!initialSettings?.homeFeaturedNewArrivalIds) return [];
+        try {
+            const parsed = JSON.parse(initialSettings.homeFeaturedNewArrivalIds);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    });
+
+    // Site Settings State - Home Trending Weekly FMCG Products
+    const [homeTrendingWeeklyEnabled, setHomeTrendingWeeklyEnabled] = useState<boolean>(initialSettings?.homeTrendingWeeklyEnabled !== false);
+    const [homeTrendingWeeklyBadge, setHomeTrendingWeeklyBadge] = useState(initialSettings?.homeTrendingWeeklyBadge || "TOP FMCG MOVERS");
+    const [homeTrendingWeeklyBadgeAr, setHomeTrendingWeeklyBadgeAr] = useState(initialSettings?.homeTrendingWeeklyBadgeAr || "أعلى السلع حركة وطلباً");
+    const [homeTrendingWeeklyTitle, setHomeTrendingWeeklyTitle] = useState(initialSettings?.homeTrendingWeeklyTitle || "Fast-Moving Weekly Products");
+    const [homeTrendingWeeklyTitleAr, setHomeTrendingWeeklyTitleAr] = useState(initialSettings?.homeTrendingWeeklyTitleAr || "المنتجات الأكثر طلباً هذا الأسبوع");
+    const [homeTrendingWeeklyDesc, setHomeTrendingWeeklyDesc] = useState(initialSettings?.homeTrendingWeeklyDesc || "High-velocity wholesale consumables with rapid warehouse turnaround and daily pallet dispatch.");
+    const [homeTrendingWeeklyDescAr, setHomeTrendingWeeklyDescAr] = useState(initialSettings?.homeTrendingWeeklyDescAr || "المواد الأكثر طلباً وسحباً في الأسواق السورية — جاهزية مستمرة للطلبيات التجارية الكبيرة وشحن فوري.");
+
+    const [homeTrendingWeeklyProductIds, setHomeTrendingWeeklyProductIds] = useState<string[]>(() => {
+        if (!initialSettings?.homeTrendingWeeklyProductIds) return [];
+        try {
+            const parsed = JSON.parse(initialSettings.homeTrendingWeeklyProductIds);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    });
+
+    // Site Settings State - Company Capabilities & Services
+    const [homeServicesEnabled, setHomeServicesEnabled] = useState<boolean>(initialSettings?.homeServicesEnabled !== false);
+    const [homeServicesTitle, setHomeServicesTitle] = useState(initialSettings?.homeServicesTitle || "Our Comprehensive Distribution Services");
+    const [homeServicesTitleAr, setHomeServicesTitleAr] = useState(initialSettings?.homeServicesTitleAr || "خدمات التوزيع والتجارة المتكاملة");
+    const [homeServicesDesc, setHomeServicesDesc] = useState(initialSettings?.homeServicesDesc || "Delivering end-to-end supply chain, marketing, and distribution solutions for FMCG brands");
+    const [homeServicesDescAr, setHomeServicesDescAr] = useState(initialSettings?.homeServicesDescAr || "نقدم للشركات المنتجة وأصحاب المحلات منظومة متكاملة تشمل التخزين والتسويق والتوصيل");
+
+    const [homeServices, setHomeServices] = useState<CompanyServiceItem[]>(() => {
+        if (!initialSettings?.homeServicesItems) return DEFAULT_COMPANY_SERVICES;
+        try {
+            const parsed = JSON.parse(initialSettings.homeServicesItems);
+            return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_COMPANY_SERVICES;
+        } catch {
+            return DEFAULT_COMPANY_SERVICES;
+        }
+    });
+
+    // Site Settings State - Merchant Endorsements & Testimonials
+    const [homeTestimonialsEnabled, setHomeTestimonialsEnabled] = useState<boolean>(initialSettings?.homeTestimonialsEnabled !== false);
+    const [homeTestimonialsBadge, setHomeTestimonialsBadge] = useState(initialSettings?.homeTestimonialsBadge || "Verified Endorsements");
+    const [homeTestimonialsBadgeAr, setHomeTestimonialsBadgeAr] = useState(initialSettings?.homeTestimonialsBadgeAr || "آراء شركائنا");
+    const [homeTestimonialsTitle, setHomeTestimonialsTitle] = useState(initialSettings?.homeTestimonialsTitle || "Verified Wholesale Buyer Reviews");
+    const [homeTestimonialsTitleAr, setHomeTestimonialsTitleAr] = useState(initialSettings?.homeTestimonialsTitleAr || "ثقة أصحاب المحلات والسوبرماركت");
+    const [homeTestimonialsDesc, setHomeTestimonialsDesc] = useState(initialSettings?.homeTestimonialsDesc || "Endorsements from verified retail merchants and grocery partners across Syria");
+    const [homeTestimonialsDescAr, setHomeTestimonialsDescAr] = useState(initialSettings?.homeTestimonialsDescAr || "آراء وتجارب شركائنا من تجار التجزئة وأصحاب البقاليات في مختلف المحافظات");
+
+    const [homeTestimonials, setHomeTestimonials] = useState<PublicTestimonialItem[]>(() => {
+        if (!initialSettings?.homeTestimonialsItems) return DEFAULT_TESTIMONIALS;
+        try {
+            const parsed = JSON.parse(initialSettings.homeTestimonialsItems);
+            return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_TESTIMONIALS;
+        } catch {
+            return DEFAULT_TESTIMONIALS;
+        }
+    });
 
     // Site Settings State - B2B Wholesale Statistics
     const [statsContent, setStatsContent] = useState({
@@ -162,40 +343,63 @@ export default function SiteContentClient({
 
     // Site Settings State - Footer Content
     const [footerContent, setFooterContent] = useState({
-        footerBrandTitle: initialSettings?.footerBrandTitle || "",
-        footerBrandTitleAr: initialSettings?.footerBrandTitleAr || "",
-        footerBrandDescription: initialSettings?.footerBrandDescription || "",
-        footerBrandDescriptionAr: initialSettings?.footerBrandDescriptionAr || "",
-        footerCopyright: initialSettings?.footerCopyright || "",
-        footerCopyrightAr: initialSettings?.footerCopyrightAr || "",
+        footerBrandTitle: initialSettings?.footerBrandTitle || "Hawa Distribution",
+        footerBrandTitleAr: initialSettings?.footerBrandTitleAr || "حوا للتوزيع والتجارة",
+        footerBrandTagline: initialSettings?.footerBrandTagline || "Wholesale Distribution — Syria",
+        footerBrandTaglineAr: initialSettings?.footerBrandTaglineAr || "توزيع وتجارة جملة — سورية",
+        footerBrandDescription: initialSettings?.footerBrandDescription || "Your trusted partner in wholesale food and consumer goods distribution from top brands.",
+        footerBrandDescriptionAr: initialSettings?.footerBrandDescriptionAr || "شريككم الموثوق لتوزيع البضائع والمواد الغذائية والاستهلاكية من أفضل الشركات.",
+        footerCopyright: initialSettings?.footerCopyright || "© 2026 Hawa Distribution & Trading. All rights reserved.",
+        footerCopyrightAr: initialSettings?.footerCopyrightAr || "© 2026 حوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
+        footerContactTitle: initialSettings?.footerContactTitle || "Contact Us",
+        footerContactTitleAr: initialSettings?.footerContactTitleAr || "تواصل معنا",
+        footerAddress: initialSettings?.footerAddress || "Homs Industrial Zone, Syria",
+        footerAddressAr: initialSettings?.footerAddressAr || "حمص، المنطقة الصناعية — سورية",
+        footerPhone: initialSettings?.footerPhone || "+963 993 443 901",
+        footerEmail: initialSettings?.footerEmail || "info@hawa-dist.com",
         footerInstagramUrl: initialSettings?.footerInstagramUrl || "",
         footerFacebookUrl: initialSettings?.footerFacebookUrl || "",
         footerWhatsappUrl: initialSettings?.footerWhatsappUrl || "",
-        whatsappNumber: initialSettings?.whatsappNumber || "+963900000000",
-        footerShopTitle: initialSettings?.footerShopTitle || "",
-        footerShopTitleAr: initialSettings?.footerShopTitleAr || "",
-        footerSupportTitle: initialSettings?.footerSupportTitle || "",
-        footerSupportTitleAr: initialSettings?.footerSupportTitleAr || "",
-        footerCompanyTitle: initialSettings?.footerCompanyTitle || "",
-        footerCompanyTitleAr: initialSettings?.footerCompanyTitleAr || "",
-        footerSupportLink1Label: initialSettings?.footerSupportLink1Label || "",
-        footerSupportLink1LabelAr: initialSettings?.footerSupportLink1LabelAr || "",
-        footerSupportLink1Url: initialSettings?.footerSupportLink1Url || "",
-        footerSupportLink2Label: initialSettings?.footerSupportLink2Label || "",
-        footerSupportLink2LabelAr: initialSettings?.footerSupportLink2LabelAr || "",
-        footerSupportLink2Url: initialSettings?.footerSupportLink2Url || "",
-        footerSupportLink3Label: initialSettings?.footerSupportLink3Label || "",
-        footerSupportLink3LabelAr: initialSettings?.footerSupportLink3LabelAr || "",
-        footerSupportLink3Url: initialSettings?.footerSupportLink3Url || "",
-        footerCompanyLink1Label: initialSettings?.footerCompanyLink1Label || "",
-        footerCompanyLink1LabelAr: initialSettings?.footerCompanyLink1LabelAr || "",
-        footerCompanyLink1Url: initialSettings?.footerCompanyLink1Url || "",
-        footerCompanyLink2Label: initialSettings?.footerCompanyLink2Label || "",
-        footerCompanyLink2LabelAr: initialSettings?.footerCompanyLink2LabelAr || "",
-        footerCompanyLink2Url: initialSettings?.footerCompanyLink2Url || "",
-        footerCompanyLink3Label: initialSettings?.footerCompanyLink3Label || "",
-        footerCompanyLink3LabelAr: initialSettings?.footerCompanyLink3LabelAr || "",
-        footerCompanyLink3Url: initialSettings?.footerCompanyLink3Url || "",
+        footerLinkedinUrl: initialSettings?.footerLinkedinUrl || "",
+        whatsappNumber: initialSettings?.whatsappNumber || "+963 993 443 901",
+        footerShopTitle: initialSettings?.footerShopTitle || "Shop",
+        footerShopTitleAr: initialSettings?.footerShopTitleAr || "المتجر",
+        footerSupportTitle: initialSettings?.footerSupportTitle || "Our Services",
+        footerSupportTitleAr: initialSettings?.footerSupportTitleAr || "خدماتنا",
+        footerCompanyTitle: initialSettings?.footerCompanyTitle || "Quick Links",
+        footerCompanyTitleAr: initialSettings?.footerCompanyTitleAr || "روابط سريعة",
+        footerNewsletterTitle: initialSettings?.footerNewsletterTitle || "Newsletter",
+        footerNewsletterTitleAr: initialSettings?.footerNewsletterTitleAr || "النشرة البريدية",
+        footerNewsletterDesc: initialSettings?.footerNewsletterDesc || "Subscribe to get the latest trade discounts, new arrivals & price lists.",
+        footerNewsletterDescAr: initialSettings?.footerNewsletterDescAr || "اشترك ليصلك كل جديد عن المنتجات والعروض والأسعار.",
+        footerJurisdiction: initialSettings?.footerJurisdiction || "Syrian Arab Republic — Homs",
+        footerJurisdictionAr: initialSettings?.footerJurisdictionAr || "الجمهورية العربية السورية — حمص",
+        footerTermsUrl: initialSettings?.footerTermsUrl || "/shipping-returns",
+        footerPrivacyUrl: initialSettings?.footerPrivacyUrl || "/shipping-returns",
+        footerSupportLink1Label: initialSettings?.footerSupportLink1Label || "Nationwide Freight & Delivery",
+        footerSupportLink1LabelAr: initialSettings?.footerSupportLink1LabelAr || "الشحن والتوصيل للمحافظات",
+        footerSupportLink1Url: initialSettings?.footerSupportLink1Url || "/shipping-returns",
+        footerSupportLink2Label: initialSettings?.footerSupportLink2Label || "Market Rates & Trade Blog",
+        footerSupportLink2LabelAr: initialSettings?.footerSupportLink2LabelAr || "نشرة الأسعار والمدونة",
+        footerSupportLink2Url: initialSettings?.footerSupportLink2Url || "/blog",
+        footerSupportLink3Label: initialSettings?.footerSupportLink3Label || "Agency Partnership Inquiry",
+        footerSupportLink3LabelAr: initialSettings?.footerSupportLink3LabelAr || "طلب تمثيل وكالة تجارية",
+        footerSupportLink3Url: initialSettings?.footerSupportLink3Url || "/contact",
+        footerSupportLink4Label: initialSettings?.footerSupportLink4Label || "Merchant Accounts Hub",
+        footerSupportLink4LabelAr: initialSettings?.footerSupportLink4LabelAr || "بوابة حسابات التجار",
+        footerSupportLink4Url: initialSettings?.footerSupportLink4Url || "/account/login",
+        footerCompanyLink1Label: initialSettings?.footerCompanyLink1Label || "Home",
+        footerCompanyLink1LabelAr: initialSettings?.footerCompanyLink1LabelAr || "الرئيسية",
+        footerCompanyLink1Url: initialSettings?.footerCompanyLink1Url || "/",
+        footerCompanyLink2Label: initialSettings?.footerCompanyLink2Label || "About Us",
+        footerCompanyLink2LabelAr: initialSettings?.footerCompanyLink2LabelAr || "من نحن",
+        footerCompanyLink2Url: initialSettings?.footerCompanyLink2Url || "/about-us",
+        footerCompanyLink3Label: initialSettings?.footerCompanyLink3Label || "Official Brands",
+        footerCompanyLink3LabelAr: initialSettings?.footerCompanyLink3LabelAr || "الوكالات والعلامات",
+        footerCompanyLink3Url: initialSettings?.footerCompanyLink3Url || "/brands",
+        footerCompanyLink4Label: initialSettings?.footerCompanyLink4Label || "Product Categories",
+        footerCompanyLink4LabelAr: initialSettings?.footerCompanyLink4LabelAr || "أقسام المنتجات",
+        footerCompanyLink4Url: initialSettings?.footerCompanyLink4Url || "/categories",
         footerCategory1Id: initialSettings?.footerCategory1Id || "",
         footerCategory2Id: initialSettings?.footerCategory2Id || "",
         footerCategory3Id: initialSettings?.footerCategory3Id || "",
@@ -251,6 +455,12 @@ export default function SiteContentClient({
     const [hygieneDescAr, setHygieneDescAr] = useState(initialSettings?.hygieneDescAr || "");
 
     const [shippingReturnsImage, setShippingReturnsImage] = useState(initialSettings?.shippingReturnsImage || "");
+    const [shippingPolicyContent, setShippingPolicyContent] = useState<ShippingPolicyContent>(
+        getShippingPolicyContent(initialSettings?.shippingPolicyContent, initialSettings),
+    );
+    const [contactPageContent, setContactPageContent] = useState<ContactPageContent>(
+        getContactPageContent(initialSettings?.contactPageContent, initialSettings),
+    );
 
     const [exchangeRate, setExchangeRate] = useState(initialSettings?.exchangeRate || 135);
 
@@ -315,6 +525,8 @@ export default function SiteContentClient({
                 hygieneTitleAr,
                 hygieneDescAr,
                 shippingReturnsImage,
+                shippingPolicyContent,
+                contactPageContent,
                 aboutHeroTitle,
                 aboutHeroTitleAr,
                 aboutHeroSubtitle,
@@ -342,6 +554,44 @@ export default function SiteContentClient({
                 middleBanner2ButtonText,
                 middleBanner2ButtonTextAr,
                 ...statsContent,
+                homeCategoriesBadge,
+                homeCategoriesBadgeAr,
+                homeCategoriesTitle,
+                homeCategoriesTitleAr,
+                homeCategoriesDesc,
+                homeCategoriesDescAr,
+                homeCategoriesStats: JSON.stringify(homeStats),
+                homeCategoriesIds: selectedCategoryIds.length > 0 ? JSON.stringify(selectedCategoryIds) : null,
+                homeFeaturedBadge,
+                homeFeaturedBadgeAr,
+                homeFeaturedTitle,
+                homeFeaturedTitleAr,
+                homeFeaturedDesc,
+                homeFeaturedDescAr,
+                homeFeaturedBestSellerIds: homeFeaturedBestSellerIds.length > 0 ? JSON.stringify(homeFeaturedBestSellerIds) : null,
+                homeFeaturedNewArrivalIds: homeFeaturedNewArrivalIds.length > 0 ? JSON.stringify(homeFeaturedNewArrivalIds) : null,
+                homeTrendingWeeklyEnabled,
+                homeTrendingWeeklyBadge,
+                homeTrendingWeeklyBadgeAr,
+                homeTrendingWeeklyTitle,
+                homeTrendingWeeklyTitleAr,
+                homeTrendingWeeklyDesc,
+                homeTrendingWeeklyDescAr,
+                homeTrendingWeeklyProductIds: homeTrendingWeeklyProductIds.length > 0 ? JSON.stringify(homeTrendingWeeklyProductIds) : null,
+                homeServicesEnabled,
+                homeServicesTitle,
+                homeServicesTitleAr,
+                homeServicesDesc,
+                homeServicesDescAr,
+                homeServicesItems: JSON.stringify(homeServices),
+                homeTestimonialsEnabled,
+                homeTestimonialsBadge,
+                homeTestimonialsBadgeAr,
+                homeTestimonialsTitle,
+                homeTestimonialsTitleAr,
+                homeTestimonialsDesc,
+                homeTestimonialsDescAr,
+                homeTestimonialsItems: JSON.stringify(homeTestimonials),
             });
 
             if (result.success) {
@@ -359,10 +609,16 @@ export default function SiteContentClient({
 
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
         { id: "currency", label: t('admin.tabCurrency') || "Currency & Rates", icon: <RefreshCw className="text-lg" /> },
-        { id: "stats", label: t('admin.companyStats') || (language === 'ar' ? "إحصائيات الشركة" : "Company Statistics"), icon: <TrendingUp className="text-lg" /> },
+        { id: "homeCategories", label: language === 'ar' ? "أقسام وإحصائيات الرئيسية" : "Home Categories & Stats", icon: <FolderTree className="text-lg" /> },
+        { id: "homeFeatured", label: language === 'ar' ? "مختارات الجملة (المميزة)" : "Featured Products", icon: <Sparkles className="text-lg" /> },
+        { id: "homeTrending", label: language === 'ar' ? "الأكثر طلباً هذا الأسبوع" : "Weekly Trending", icon: <Flame className="text-lg" /> },
+        { id: "homeServices", label: language === 'ar' ? "خدمات ومزايا الشركة" : "Company Services", icon: <Truck className="text-lg" /> },
+        { id: "homeTestimonials", label: language === 'ar' ? "آراء التجار (ثقة المحلات)" : "Merchant Reviews", icon: <MessageSquareQuote className="text-lg" /> },
+        { id: "stats", label: t('admin.companyStats') || (language === 'ar' ? "إحصائيات صفحة من نحن" : "About Us Stats"), icon: <TrendingUp className="text-lg" /> },
         { id: "footer", label: t('admin.tabFooter') || "Footer & Social", icon: <Store className="text-lg" /> },
         { id: "banners", label: t('admin.tabBanners') || "Promo Banners", icon: <GalleryHorizontal className="text-lg" /> },
         { id: "shipping", label: t('admin.tabShipping') || "Shipping & Policy", icon: <Truck className="text-lg" /> },
+        { id: "contact", label: language === 'ar' ? "صفحة تواصل معنا" : "Contact Us Page", icon: <Phone className="text-lg" /> },
         { id: "about", label: t('admin.tabAbout') || "About Us Story", icon: <Info className="text-lg" /> },
     ];
 
@@ -469,6 +725,125 @@ export default function SiteContentClient({
                         </div>
                     )}
 
+                    {/* TAB: HOME CATEGORIES & STATS */}
+                    {activeTab === "homeCategories" && (
+                        <HomeCategoriesContentSection
+                            badge={homeCategoriesBadge}
+                            setBadge={setHomeCategoriesBadge}
+                            badgeAr={homeCategoriesBadgeAr}
+                            setBadgeAr={setHomeCategoriesBadgeAr}
+                            title={homeCategoriesTitle}
+                            setTitle={setHomeCategoriesTitle}
+                            titleAr={homeCategoriesTitleAr}
+                            setTitleAr={setHomeCategoriesTitleAr}
+                            desc={homeCategoriesDesc}
+                            setDesc={setHomeCategoriesDesc}
+                            descAr={homeCategoriesDescAr}
+                            setDescAr={setHomeCategoriesDescAr}
+                            stats={homeStats}
+                            setStats={setHomeStats}
+                            categories={categories}
+                            selectedCategoryIds={selectedCategoryIds}
+                            setSelectedCategoryIds={setSelectedCategoryIds}
+                            isArabic={language === 'ar'}
+                            onSave={handleSaveAll}
+                            isSaving={isSubmitting}
+                        />
+                    )}
+
+                    {/* TAB: HOME FEATURED WHOLESALE PRODUCTS */}
+                    {activeTab === "homeFeatured" && (
+                        <HomeFeaturedContentSection
+                            badge={homeFeaturedBadge}
+                            setBadge={setHomeFeaturedBadge}
+                            badgeAr={homeFeaturedBadgeAr}
+                            setBadgeAr={setHomeFeaturedBadgeAr}
+                            title={homeFeaturedTitle}
+                            setTitle={setHomeFeaturedTitle}
+                            titleAr={homeFeaturedTitleAr}
+                            setTitleAr={setHomeFeaturedTitleAr}
+                            desc={homeFeaturedDesc}
+                            setDesc={setHomeFeaturedDesc}
+                            descAr={homeFeaturedDescAr}
+                            setDescAr={setHomeFeaturedDescAr}
+                            bestSellerIds={homeFeaturedBestSellerIds}
+                            setBestSellerIds={setHomeFeaturedBestSellerIds}
+                            newArrivalIds={homeFeaturedNewArrivalIds}
+                            setNewArrivalIds={setHomeFeaturedNewArrivalIds}
+                            products={products}
+                            isArabic={language === 'ar'}
+                        />
+                    )}
+
+                    {/* TAB: HOME TRENDING WEEKLY WHOLESALE PRODUCTS */}
+                    {activeTab === "homeTrending" && (
+                        <HomeTrendingContentSection
+                            enabled={homeTrendingWeeklyEnabled}
+                            setEnabled={setHomeTrendingWeeklyEnabled}
+                            badge={homeTrendingWeeklyBadge}
+                            setBadge={setHomeTrendingWeeklyBadge}
+                            badgeAr={homeTrendingWeeklyBadgeAr}
+                            setBadgeAr={setHomeTrendingWeeklyBadgeAr}
+                            title={homeTrendingWeeklyTitle}
+                            setTitle={setHomeTrendingWeeklyTitle}
+                            titleAr={homeTrendingWeeklyTitleAr}
+                            setTitleAr={setHomeTrendingWeeklyTitleAr}
+                            desc={homeTrendingWeeklyDesc}
+                            setDesc={setHomeTrendingWeeklyDesc}
+                            descAr={homeTrendingWeeklyDescAr}
+                            setDescAr={setHomeTrendingWeeklyDescAr}
+                            productIds={homeTrendingWeeklyProductIds}
+                            setProductIds={setHomeTrendingWeeklyProductIds}
+                            products={products}
+                            isArabic={language === 'ar'}
+                        />
+                    )}
+
+                    {/* TAB: HOME SERVICES & CAPABILITIES */}
+                    {activeTab === "homeServices" && (
+                        <HomeServicesContentSection
+                            enabled={homeServicesEnabled}
+                            setEnabled={setHomeServicesEnabled}
+                            title={homeServicesTitle}
+                            setTitle={setHomeServicesTitle}
+                            titleAr={homeServicesTitleAr}
+                            setTitleAr={setHomeServicesTitleAr}
+                            desc={homeServicesDesc}
+                            setDesc={setHomeServicesDesc}
+                            descAr={homeServicesDescAr}
+                            setDescAr={setHomeServicesDescAr}
+                            services={homeServices}
+                            setServices={setHomeServices}
+                            isArabic={language === 'ar'}
+                            onSave={handleSaveAll}
+                            isSaving={isSubmitting}
+                        />
+                    )}
+
+                    {/* TAB: MERCHANT REVIEWS & TESTIMONIALS */}
+                    {activeTab === "homeTestimonials" && (
+                        <HomeTestimonialsContentSection
+                            enabled={homeTestimonialsEnabled}
+                            setEnabled={setHomeTestimonialsEnabled}
+                            badge={homeTestimonialsBadge}
+                            setBadge={setHomeTestimonialsBadge}
+                            badgeAr={homeTestimonialsBadgeAr}
+                            setBadgeAr={setHomeTestimonialsBadgeAr}
+                            title={homeTestimonialsTitle}
+                            setTitle={setHomeTestimonialsTitle}
+                            titleAr={homeTestimonialsTitleAr}
+                            setTitleAr={setHomeTestimonialsTitleAr}
+                            desc={homeTestimonialsDesc}
+                            setDesc={setHomeTestimonialsDesc}
+                            descAr={homeTestimonialsDescAr}
+                            setDescAr={setHomeTestimonialsDescAr}
+                            testimonials={homeTestimonials}
+                            setTestimonials={setHomeTestimonials}
+                            products={products}
+                            isArabic={language === 'ar'}
+                        />
+                    )}
+
                     {/* TAB: B2B COMPANY STATISTICS */}
                     {activeTab === "stats" && (
                         <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
@@ -478,10 +853,10 @@ export default function SiteContentClient({
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                        {t('admin.companyStats') || "إحصائيات الشركة"}
+                                        {t('admin.companyStats') || (language === 'ar' ? "إحصائيات صفحة من نحن" : "About Us Stats")}
                                     </h3>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                        {t('admin.companyStatsDesc') || "الأرقام والإنجازات المعروضة في قسم إحصائيات الصفحة الرئيسية لتعزيز ثقة المحلات والزبائن."}
+                                        {t('admin.companyStatsDesc') || (language === 'ar' ? "الأرقام والإحصائيات المعروضة في صفحة من نحن (About Us) لتعزيز ثقة المحلات والعملاء." : "Key wholesale figures and milestones displayed on the About Us page.")}
                                     </p>
                                 </div>
                             </div>
@@ -715,96 +1090,12 @@ export default function SiteContentClient({
 
                     {/* TAB 4: SHIPPING & POLICIES */}
                     {activeTab === "shipping" && (
-                        <div className="space-y-8 animate-in fade-in-50 duration-200">
-                            {/* Shipping & Delivery Timelines */}
-                            <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs">
-                                <div className="mb-6">
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                        {t('admin.shippingSection') || "Shipping & Delivery Policy"}
-                                    </h3>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                        {t('admin.shippingSectionDesc') || "Configure customer-facing shipping timeline details and inspection instructions."}
-                                    </p>
-                                </div>
+                        <ShippingPolicyEditor value={shippingPolicyContent} onChange={setShippingPolicyContent} />
+                    )}
 
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">{t('admin.standardShippingTime') || "Standard Shipping Timeline"}</label>
-                                            <input type="text" value={standardShippingTime} onChange={(e) => setStandardShippingTime(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" placeholder="1-3 Business Days" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">{t('admin.expressShippingTime') || "Express Shipping Timeline"}</label>
-                                            <input type="text" value={expressShippingTime} onChange={(e) => setExpressShippingTime(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" placeholder="Within 24 Hours" />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-4">
-                                            <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">🇬🇧 English</span>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase">{t('admin.shippingTitle') || "Policy Title"}</label>
-                                                <input type="text" value={shippingTitle} onChange={(e) => setShippingTitle(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase">{t('admin.shippingDesc') || "Description"}</label>
-                                                <textarea rows={3} value={shippingDesc} onChange={(e) => setShippingDesc(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm resize-none" />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4" dir="rtl">
-                                            <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">🇸🇦 العربية</span>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase">{t('admin.shippingTitle') || "عنوان السياسة"}</label>
-                                                <input type="text" value={shippingTitleAr} onChange={(e) => setShippingTitleAr(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase">{t('admin.shippingDesc') || "الوصف"}</label>
-                                                <textarea rows={3} value={shippingDescAr} onChange={(e) => setShippingDescAr(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm resize-none" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Returns Policy */}
-                            <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs">
-                                <div className="mb-6">
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                        {t('admin.returnsSection') || "Quality & Claims Policy"}
-                                    </h3>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                        {t('admin.returnsSectionDesc') || "Explain terms for wholesale cases, packaging standards, and claim procedures."}
-                                    </p>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-4">
-                                        <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">🇬🇧 English</span>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">Heading</label>
-                                            <input type="text" value={returnsTitle} onChange={(e) => setReturnsTitle(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">Policy Content</label>
-                                            <textarea rows={4} value={returnsDesc} onChange={(e) => setReturnsDesc(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm resize-none" />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4" dir="rtl">
-                                        <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">🇸🇦 العربية</span>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">العنوان</label>
-                                            <input type="text" value={returnsTitleAr} onChange={(e) => setReturnsTitleAr(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">نص السياسة</label>
-                                            <textarea rows={4} value={returnsDescAr} onChange={(e) => setReturnsDescAr(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm resize-none" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {/* TAB: CONTACT US PAGE */}
+                    {activeTab === "contact" && (
+                        <ContactContentSection value={contactPageContent} onChange={setContactPageContent} />
                     )}
 
                     {/* TAB 5: ABOUT US STORY */}

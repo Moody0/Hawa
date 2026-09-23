@@ -11,8 +11,11 @@ import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { getSafeImageUrl } from '@/lib/image-utils';
-import { ChevronRight, ChevronLeft, Upload, Download, Plus, Search, ChevronDown, Flame, Tag, Trash2, Pencil, RefreshCw, ArrowUp, ArrowDown, Share2, Copy, TrendingDown, CircleSlash } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Upload, Download, Plus, Search, ChevronDown, Flame, Tag, Trash2, Pencil, RefreshCw, ArrowUp, ArrowDown, Share2, Copy, TrendingDown, CircleSlash, X } from 'lucide-react';
 import { FaFacebook, FaWhatsapp } from 'react-icons/fa';
+import { hasAdminPermission } from '@/lib/admin-permissions';
+
+const ALL_FILTER_VALUE = "__all__";
 
 interface Product {
     id: string;
@@ -95,16 +98,17 @@ export default function ProductsClient({
     const { t, dir, language } = useLanguage();
     const isArabic = language === 'ar';
     const confirm = useConfirm();
-    const canDelete = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canDeleteProducts;
-    const canEdit = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canManageProducts;
+    const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
+    const canDelete = hasAdminPermission(session?.user?.permissions, 'PRODUCTS_ARCHIVE', isSuperAdmin) || session?.user?.canDeleteProducts;
+    const canEdit = hasAdminPermission(session?.user?.permissions, 'PRODUCTS_MANAGE', isSuperAdmin) || session?.user?.canManageProducts;
 
     const { openSidebar } = useAdminSidebar();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedBrand, setSelectedBrand] = useState("All Brands");
-    const [selectedCategory, setSelectedCategory] = useState("All Categories");
-    const [selectedStockStatus, setSelectedStockStatus] = useState("Stock Status");
+    const [selectedBrand, setSelectedBrand] = useState(ALL_FILTER_VALUE);
+    const [selectedCategory, setSelectedCategory] = useState(ALL_FILTER_VALUE);
+    const [selectedStockStatus, setSelectedStockStatus] = useState(ALL_FILTER_VALUE);
     const [showTrendingOnly, setShowTrendingOnly] = useState(false);
     const [showOnSaleOnly, setShowOnSaleOnly] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -115,6 +119,22 @@ export default function ProductsClient({
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
     const [activeShareId, setActiveShareId] = useState<string | null>(null);
     const itemsPerPage = 20;
+
+    const hasActiveFilters = Boolean(searchQuery.trim()) ||
+        selectedBrand !== ALL_FILTER_VALUE ||
+        selectedCategory !== ALL_FILTER_VALUE ||
+        selectedStockStatus !== ALL_FILTER_VALUE ||
+        showTrendingOnly ||
+        showOnSaleOnly;
+
+    const clearFilters = () => {
+        setSearchQuery("");
+        setSelectedBrand(ALL_FILTER_VALUE);
+        setSelectedCategory(ALL_FILTER_VALUE);
+        setSelectedStockStatus(ALL_FILTER_VALUE);
+        setShowTrendingOnly(false);
+        setShowOnSaleOnly(false);
+    };
 
     const handleCopyLink = (slug: string) => {
         const url = `${window.location.origin}/products/${slug}`;
@@ -165,7 +185,7 @@ export default function ProductsClient({
     // Calculate stats
     const stats = useMemo(() => {
         const total = products.length;
-        const outOfStock = products.filter(p => Number(p.stock) === 0).length;
+        const outOfStock = products.filter(p => Number(p.stock) <= 0).length;
         const lowStock = products.filter(p => Number(p.stock) > 0 && Number(p.stock) <= 10).length;
         const categories = new Set(products.map(p => p.category?.name).filter(Boolean)).size;
         const onSale = products.filter(p => p.discountPrice !== null).length;
@@ -190,15 +210,13 @@ export default function ProductsClient({
                 (p.brand?.name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
                 (p.category?.name?.toLowerCase() || "").includes(searchQuery.toLowerCase());
 
-            const matchesBrand = selectedBrand === "All Brands" || selectedBrand === t('admin.allBrands') || p.brand?.name === selectedBrand;
-            // Handle "All Categories" for translations (this check might need to be robust)
-            // Ideally we check against the translation key or value? For now let's assume "All Categories" is the default state value.
-            const matchesCategory = selectedCategory === "All Categories" || selectedCategory === t('admin.allCategories') || p.category?.name === selectedCategory;
+            const matchesBrand = selectedBrand === ALL_FILTER_VALUE || p.brand?.id === selectedBrand;
+            const matchesCategory = selectedCategory === ALL_FILTER_VALUE || p.category?.name === selectedCategory;
 
             let matchesStock = true;
-            if (selectedStockStatus === "In Stock" || selectedStockStatus === t('admin.inStock')) matchesStock = Number(p.stock) > 10;
-            else if (selectedStockStatus === "Low Stock" || selectedStockStatus === t('admin.lowStock')) matchesStock = Number(p.stock) > 0 && Number(p.stock) <= 10;
-            else if (selectedStockStatus === "Out of Stock" || selectedStockStatus === t('admin.outOfStock')) matchesStock = Number(p.stock) === 0;
+            if (selectedStockStatus === "in-stock") matchesStock = Number(p.stock) > 10;
+            else if (selectedStockStatus === "low-stock") matchesStock = Number(p.stock) > 0 && Number(p.stock) <= 10;
+            else if (selectedStockStatus === "out-of-stock") matchesStock = Number(p.stock) <= 0;
 
             const matchesTrending = !showTrendingOnly || p.isTrending;
             const matchesOnSale = !showOnSaleOnly || p.discountPrice !== null;
@@ -242,7 +260,7 @@ export default function ProductsClient({
 
             return direction === 'asc' ? comparison : -comparison;
         });
-    }, [products, searchQuery, selectedBrand, selectedCategory, selectedStockStatus, showTrendingOnly, showOnSaleOnly, t, sortConfig]);
+    }, [products, searchQuery, selectedBrand, selectedCategory, selectedStockStatus, showTrendingOnly, showOnSaleOnly, sortConfig]);
 
     const handleSort = (key: string) => {
         setSortConfig(current => ({
@@ -730,44 +748,53 @@ export default function ProductsClient({
                     </div>
 
                     {/* Filters & Table Container */}
-                    <div className="bg-surface-light dark:bg-surface-dark border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-2xl shadow-sm">
+                    <div className="min-w-0 bg-surface-light dark:bg-surface-dark border border-black/[0.04] dark:border-white/[0.04] rounded-2xl shadow-sm">
                         {/* Toolbar */}
-                        <div className="p-5 border-b border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] flex flex-col lg:flex-row gap-4 lg:items-center justify-between">
-                            <div className="relative w-full lg:w-80">
-                                <span className={`absolute inset-y-0 ${dir === 'rtl' ? 'end-0 pe-3' : 'start-0 ps-3'} flex items-center pointer-events-none`}>
-                                    <Search className="text-text-sub dark:text-gray-400 text-[20px]" />
-                                </span>
-                                <input
-                                    className={`block w-full ${dir === 'rtl' ? 'pe-10 ps-3' : 'ps-10 pe-3'} py-2.5 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-xl bg-background-light dark:bg-gray-800 text-sm text-text-main dark:text-white placeholder-text-sub dark:placeholder-gray-500 focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none`}
-                                    placeholder={t('admin.searchPlaceholder')}
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+                        <div className="flex flex-col gap-4 p-4 sm:p-5 border-b border-black/[0.04] dark:border-white/[0.04]">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="relative w-full min-w-0 sm:max-w-xl">
+                                    <span className={`absolute inset-y-0 ${dir === 'rtl' ? 'end-0 pe-3' : 'start-0 ps-3'} flex items-center pointer-events-none`}>
+                                        <Search className="text-text-sub dark:text-gray-400 text-[20px]" />
+                                    </span>
+                                    <input
+                                        aria-label={t('admin.searchPlaceholder')}
+                                        className={`block w-full ${dir === 'rtl' ? 'pe-10 ps-3' : 'ps-10 pe-3'} py-2.5 border border-black/[0.08] dark:border-white/[0.12] rounded-xl bg-background-light dark:bg-gray-800 text-sm text-text-main dark:text-white placeholder-text-sub dark:placeholder-gray-500 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none`}
+                                        placeholder={t('admin.searchPlaceholder')}
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+                                <p aria-live="polite" className="shrink-0 text-xs font-medium text-text-sub dark:text-gray-400">
+                                    {isArabic ? `${filteredProducts.length} نتيجة` : `${filteredProducts.length} results`}
+                                </p>
                             </div>
-                            <div className="flex flex-wrap items-center gap-3">
+
+                            <div className="flex flex-wrap items-center gap-2.5">
                                 {/* Brand Filter */}
-                                <div className="relative flex-1 sm:flex-initial">
+                                <div className="relative w-full sm:w-auto">
                                     <select
-                                        className={`appearance-none w-full ${dir === 'rtl' ? 'pe-3 ps-10' : 'ps-3 pe-10'} py-2.5 bg-background-light dark:bg-gray-800 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-xl text-sm font-medium text-text-main dark:text-white focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer min-w-[140px] outline-none`}
+                                        aria-label={t('admin.allBrands')}
+                                        className={`appearance-none w-full sm:min-w-[160px] ${dir === 'rtl' ? 'pe-3 ps-10' : 'ps-3 pe-10'} py-2.5 bg-background-light dark:bg-gray-800 border border-black/[0.08] dark:border-white/[0.12] rounded-xl text-sm font-medium text-text-main dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer outline-none`}
                                         value={selectedBrand}
                                         onChange={(e) => setSelectedBrand(e.target.value)}
                                     >
-                                        <option>{t('admin.allBrands')}</option>
-                                        {brands.map(brand => <option key={brand.id} value={brand.name}>{brand.name}</option>)}
+                                        <option value={ALL_FILTER_VALUE}>{t('admin.allBrands')}</option>
+                                        {brands.map(brand => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
                                     </select>
                                     <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'start-0 ps-2' : 'end-0 pe-2'} flex items-center pointer-events-none text-text-sub dark:text-gray-400`}>
                                         <ChevronDown className="text-[20px]" />
                                     </div>
                                 </div>
                                 {/* Category Filter */}
-                                <div className="relative flex-1 sm:flex-initial">
+                                <div className="relative w-full sm:w-auto">
                                     <select
-                                        className={`appearance-none w-full ${dir === 'rtl' ? 'pe-3 ps-10' : 'ps-3 pe-10'} py-2.5 bg-background-light dark:bg-gray-800 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-xl text-sm font-medium text-text-main dark:text-white focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer min-w-[140px] outline-none`}
+                                        aria-label={t('admin.allCategories')}
+                                        className={`appearance-none w-full sm:min-w-[160px] ${dir === 'rtl' ? 'pe-3 ps-10' : 'ps-3 pe-10'} py-2.5 bg-background-light dark:bg-gray-800 border border-black/[0.08] dark:border-white/[0.12] rounded-xl text-sm font-medium text-text-main dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer outline-none`}
                                         value={selectedCategory}
                                         onChange={(e) => setSelectedCategory(e.target.value)}
                                     >
-                                        <option>{t('admin.allCategories')}</option>
+                                        <option value={ALL_FILTER_VALUE}>{t('admin.allCategories')}</option>
                                         {uniqueCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                     <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'start-0 ps-2' : 'end-0 pe-2'} flex items-center pointer-events-none text-text-sub dark:text-gray-400`}>
@@ -775,16 +802,17 @@ export default function ProductsClient({
                                     </div>
                                 </div>
                                 {/* Stock Filter */}
-                                <div className="relative flex-1 sm:flex-initial">
+                                <div className="relative w-full sm:w-auto">
                                     <select
-                                        className={`appearance-none w-full ${dir === 'rtl' ? 'pe-3 ps-10' : 'ps-3 pe-10'} py-2.5 bg-background-light dark:bg-gray-800 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-xl text-sm font-medium text-text-main dark:text-white focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer min-w-[140px] outline-none`}
+                                        aria-label={t('admin.stockStatus')}
+                                        className={`appearance-none w-full sm:min-w-[160px] ${dir === 'rtl' ? 'pe-3 ps-10' : 'ps-3 pe-10'} py-2.5 bg-background-light dark:bg-gray-800 border border-black/[0.08] dark:border-white/[0.12] rounded-xl text-sm font-medium text-text-main dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer outline-none`}
                                         value={selectedStockStatus}
                                         onChange={(e) => setSelectedStockStatus(e.target.value)}
                                     >
-                                        <option>{t('admin.stockStatus')}</option>
-                                        <option>{t('admin.inStock')}</option>
-                                        <option>{t('admin.lowStock')}</option>
-                                        <option>{t('admin.outOfStock')}</option>
+                                        <option value={ALL_FILTER_VALUE}>{t('admin.stockStatus')}</option>
+                                        <option value="in-stock">{t('admin.inStock')}</option>
+                                        <option value="low-stock">{t('admin.lowStock')}</option>
+                                        <option value="out-of-stock">{t('admin.outOfStock')}</option>
                                     </select>
                                     <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'start-0 ps-2' : 'end-0 pe-2'} flex items-center pointer-events-none text-text-sub dark:text-gray-400`}>
                                         <ChevronDown className="text-[20px]" />
@@ -793,27 +821,44 @@ export default function ProductsClient({
 
                                 {/* Trending Filter Toggle */}
                                 <button
+                                    type="button"
+                                    aria-label={t('admin.trendingOnly')}
+                                    aria-pressed={showTrendingOnly}
                                     onClick={() => setShowTrendingOnly(!showTrendingOnly)}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${showTrendingOnly
                                         ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
-                                        : 'bg-background-light dark:bg-gray-800 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] text-text-main dark:text-white hover:border-amber-500 hover:text-amber-500'
+                                        : 'bg-background-light dark:bg-gray-800 border border-black/[0.08] dark:border-white/[0.12] text-text-main dark:text-white hover:border-amber-500 hover:text-amber-500'
                                         }`}
                                 >
                                     <Flame className={`text-[20px] ${showTrendingOnly ? 'fill-1' : ''}`} />
-                                    <span className="hidden sm:inline">{t('admin.trendingOnly')}</span>
+                                    <span>{t('admin.trendingOnly')}</span>
                                 </button>
 
                                 {/* On Sale Filter Toggle */}
                                 <button
+                                    type="button"
+                                    aria-label={t('admin.onSaleOnly')}
+                                    aria-pressed={showOnSaleOnly}
                                     onClick={() => setShowOnSaleOnly(!showOnSaleOnly)}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${showOnSaleOnly
                                         ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                                        : 'bg-background-light dark:bg-gray-800 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] text-text-main dark:text-white hover:border-emerald-500 hover:text-emerald-500'
+                                        : 'bg-background-light dark:bg-gray-800 border border-black/[0.08] dark:border-white/[0.12] text-text-main dark:text-white hover:border-emerald-500 hover:text-emerald-500'
                                         }`}
                                 >
                                     <Tag className={`text-[20px] ${showOnSaleOnly ? 'fill-1' : ''}`} />
-                                    <span className="hidden sm:inline">{t('admin.onSaleOnly')}</span>
+                                    <span>{t('admin.onSaleOnly')}</span>
                                 </button>
+
+                                {hasActiveFilters && (
+                                    <button
+                                        type="button"
+                                        onClick={clearFilters}
+                                        className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+                                    >
+                                        <X className="size-4" />
+                                        <span>{isArabic ? 'مسح الفلاتر' : 'Clear filters'}</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -878,8 +923,13 @@ export default function ProductsClient({
                         )}
 
                         {/* Table */}
-                        <div className="overflow-visible">
-                            <table className={`w-full border-collapse min-w-[900px] ${dir === 'rtl' ? 'text-end' : 'text-start'}`}>
+                        <div
+                            role="region"
+                            aria-label={isArabic ? 'جدول المنتجات، مرر أفقياً لعرض كل الأعمدة' : 'Products table, scroll horizontally to view all columns'}
+                            tabIndex={0}
+                            className="max-w-full overflow-x-auto overscroll-x-contain focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                        >
+                            <table className={`w-full min-w-[1080px] border-collapse ${dir === 'rtl' ? 'text-end' : 'text-start'}`}>
                                 <thead>
                                     <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-white/10 text-[10px] sm:text-xs font-extrabold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                                         <th className="p-3 sm:p-5 w-10 sm:w-12 text-center text-[0px]">
@@ -1020,11 +1070,11 @@ export default function ProductsClient({
                                                 <td className="p-3 sm:p-5">
                                                     <div className="flex flex-col gap-1 w-full max-w-[140px]">
                                                         <div className="flex flex-wrap items-center text-[10px] sm:text-xs">
-                                                            <span className={`font-medium ${Number(product.stock) === 0 ? 'text-red-500' :
+                                                            <span className={`font-medium ${Number(product.stock) <= 0 ? 'text-red-500' :
                                                                 Number(product.stock) <= 10 ? 'text-orange-500' :
                                                                     'text-emerald-500'
                                                                 }`}>
-                                                                {Number(product.stock) === 0 ? t('admin.outOfStock') : `${product.stock} ${t('admin.inStock')}`}
+                                                                {Number(product.stock) <= 0 ? t('admin.outOfStock') : `${product.stock} ${t('admin.inStock')}`}
                                                             </span>
                                                             {Number(product.stock) > 0 && Number(product.stock) <= 10 && (
                                                                 <span className="text-orange-500 text-[10px] font-bold uppercase ms-1 sm:ml-2">Low</span>
@@ -1056,7 +1106,7 @@ export default function ProductsClient({
                                                     </span>
                                                 </td>
                                                 <td className={`p-3 sm:p-5 ${dir === 'rtl' ? 'text-start' : 'text-end'}`}>
-                                                    <div className={`flex items-center ${dir === 'rtl' ? 'justify-start' : 'justify-end'} gap-1 sm:gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity`}>
+                                                    <div className={`flex items-center ${dir === 'rtl' ? 'justify-start' : 'justify-end'} gap-1 sm:gap-2`}>
                                                         <div className="relative">
                                                             <button
                                                                 onClick={() => setActiveShareId(activeShareId === product.id ? null : product.id)}
@@ -1069,7 +1119,7 @@ export default function ProductsClient({
                                                             {activeShareId === product.id && (
                                                                 <>
                                                                     <div className="fixed inset-0 z-[9998]" onClick={() => setActiveShareId(null)} />
-                                                                    <div className={`absolute top-full mt-2 w-48 bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/[0.04] rounded-xl shadow-xl z-[9999] overflow-hidden animate-in fade-in zoom-in-95 duration-200 ${dir === 'rtl' ? 'start-0' : 'end-0'}`}>
+                                                                    <div className="absolute end-0 top-full z-[9999] mt-2 w-48 animate-in fade-in zoom-in-95 duration-200 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl dark:border-white/[0.04] dark:bg-[#1a1a1a]">
                                                                         <button
                                                                             onClick={() => handleCopyLink(product.slug)}
                                                                             className="w-full text-start px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 text-xs font-medium text-text-main dark:text-white transition-colors flex items-center gap-3 border-b border-gray-50 dark:border-white/5"

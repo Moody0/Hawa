@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import ResilientImage from '@/app/components/ResilientImage';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
@@ -12,18 +12,35 @@ interface Category {
     nameEn?: string;
     slug: string;
     image: string | null;
+    href?: string;
+    type?: 'category' | 'main-category';
+}
+
+interface StatItem {
+    amount: number;
+    suffixAr: string;
+    suffixEn: string;
+    labelAr: string;
+    labelEn: string;
 }
 
 interface FeaturedCategoriesGridProps {
     categories: Category[];
     language?: 'en' | 'ar';
     dir?: 'rtl' | 'ltr';
+    settings?: {
+        homeCategoriesBadge?: string | null;
+        homeCategoriesBadgeAr?: string | null;
+        homeCategoriesTitle?: string | null;
+        homeCategoriesTitleAr?: string | null;
+        homeCategoriesDesc?: string | null;
+        homeCategoriesDescAr?: string | null;
+        homeCategoriesStats?: string | null;
+    } | null;
 }
 
-const STATS_DATA = [
+const DEFAULT_STATS_DATA: StatItem[] = [
     {
-        value: '500+',
-        valueEn: '500+',
         amount: 500,
         suffixAr: '+',
         suffixEn: '+',
@@ -31,8 +48,6 @@ const STATS_DATA = [
         labelEn: 'Wholesale SKUs',
     },
     {
-        value: '8+',
-        valueEn: '8+',
         amount: 8,
         suffixAr: '+',
         suffixEn: '+',
@@ -40,8 +55,6 @@ const STATS_DATA = [
         labelEn: 'Exclusive Agencies',
     },
     {
-        value: '48 ساعة',
-        valueEn: '48h',
         amount: 48,
         suffixAr: ' ساعة',
         suffixEn: 'h',
@@ -49,8 +62,6 @@ const STATS_DATA = [
         labelEn: 'Max Delivery SLA',
     },
     {
-        value: '1,500+',
-        valueEn: '1.5K+',
         amount: 1500,
         suffixAr: '+',
         suffixEn: '+',
@@ -59,12 +70,44 @@ const STATS_DATA = [
     },
 ];
 
-const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl' }: FeaturedCategoriesGridProps) => {
+const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl', settings }: FeaturedCategoriesGridProps) => {
     const isArabic = language === 'ar' || dir === 'rtl';
     const sectionRef = useRef<HTMLElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [canScrollPrev, setCanScrollPrev] = useState(false);
     const [canScrollNext, setCanScrollNext] = useState(false);
+
+    const statsList: StatItem[] = useMemo(() => {
+        if (settings?.homeCategoriesStats) {
+            try {
+                const parsed = JSON.parse(settings.homeCategoriesStats);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed.map((item: any) => ({
+                        amount: Number(item.amount || 0),
+                        suffixAr: item.suffixAr ?? '+',
+                        suffixEn: item.suffixEn ?? '+',
+                        labelAr: item.labelAr || '',
+                        labelEn: item.labelEn || item.labelAr || '',
+                    }));
+                }
+            } catch {
+                // fallback to DEFAULT_STATS_DATA
+            }
+        }
+        return DEFAULT_STATS_DATA;
+    }, [settings?.homeCategoriesStats]);
+
+    const badgeText = isArabic
+        ? (settings?.homeCategoriesBadgeAr || 'تسوق حسب القسم')
+        : (settings?.homeCategoriesBadge || 'Shop by category');
+
+    const titleText = isArabic
+        ? (settings?.homeCategoriesTitleAr || 'تصفح تشكيلة واسعة من الأصناف والمجموعات')
+        : (settings?.homeCategoriesTitle || 'Browse Key Wholesale Categories');
+
+    const descText = isArabic
+        ? (settings?.homeCategoriesDescAr || 'توفير شامل لكافة احتياجات السوبرماركت ومحلات البقالة بطلب واحد')
+        : (settings?.homeCategoriesDesc || 'Comprehensive supply for supermarkets and grocery stores in one order');
 
     useEffect(() => {
         if (!sectionRef.current) return;
@@ -117,16 +160,36 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl' 
         return () => observer.disconnect();
     }, [isArabic]);
 
-    // تنظيف التكرارات وتوحيد المسميات
-    const normalizedMap = new Map<string, Category>();
-    categories.forEach((cat) => {
-        if (!cat.name || cat.name.trim() === 'عام') return;
-        const normalizedKey = cat.name.replace(/^ال/, '').replace(/\s+/g, '').trim();
-        if (!normalizedMap.has(normalizedKey)) {
-            normalizedMap.set(normalizedKey, cat);
+    // تنظيف التصنيفات وتوحيد المفاهيم المتكررة (مثل تكرار معلبات من عدة وكالات أو عناية بالجسم والشعر)
+    const cleanCategories = useMemo(() => {
+        const seenConcepts = new Map<string, Category>();
+
+        const normalizeKey = (name: string) => {
+            return name
+                .replace(/وال/g, 'و')
+                .replace(/^ال/g, '')
+                .replace(/[\s\-_]+/g, '')
+                .toLowerCase()
+                .trim();
+        };
+
+        for (const cat of categories) {
+            if (!cat || !cat.id || !cat.name || cat.name.trim() === 'عام') continue;
+
+            const key = normalizeKey(cat.name);
+            if (!seenConcepts.has(key)) {
+                seenConcepts.set(key, cat);
+            } else {
+                // Prioritize main department over sub-category for the same concept
+                const existing = seenConcepts.get(key)!;
+                if (existing.type !== 'main-category' && cat.type === 'main-category') {
+                    seenConcepts.set(key, cat);
+                }
+            }
         }
-    });
-    const cleanCategories = Array.from(normalizedMap.values());
+
+        return Array.from(seenConcepts.values());
+    }, [categories]);
 
     const updateScrollState = useCallback(() => {
         const el = scrollContainerRef.current;
@@ -153,8 +216,12 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl' 
     }, [setCanScrollNext, setCanScrollPrev]);
 
     useEffect(() => {
-        updateScrollState();
         const el = scrollContainerRef.current;
+        if (el) {
+            // Ensure carousel always starts at the initial beginning (0 in RTL)
+            el.scrollLeft = 0;
+        }
+        updateScrollState();
         if (!el) return;
 
         const handleScrollEvent = () => {
@@ -186,48 +253,65 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl' 
 
     return (
         <section ref={sectionRef} className="container-custom py-12 md:py-16">
-            {/* 1. Editorial, start-aligned section heading */}
-            <div className="text-start mb-6 md:mb-8">
-                <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    {isArabic ? 'تسوق حسب القسم' : 'Shop by category'}
-                </span>
-                <div>
-                    <h2 className="text-2xl sm:text-3xl md:text-[2rem] font-black text-[#0B192C] dark:text-white tracking-tight max-w-5xl" data-reveal-heading>
-                        {isArabic
-                            ? 'تصفح تشكيلة واسعة من الأصناف والمجموعات'
-                            : 'Browse Key Wholesale Categories'}
-                    </h2>
+            {/* 1. Editorial, start-aligned section heading & View All button */}
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 md:mb-8">
+                <div className="text-start">
+                    <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        {badgeText}
+                    </span>
+                    <div>
+                        <h2 className="text-2xl sm:text-3xl md:text-[2rem] font-black text-[#0B192C] dark:text-white tracking-tight max-w-5xl" data-reveal-heading>
+                            {titleText}
+                        </h2>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mt-2" data-reveal-copy>
+                        {descText}
+                    </p>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mt-2" data-reveal-copy>
-                    {isArabic
-                        ? 'توفير شامل لكافة احتياجات السوبرماركت ومحلات البقالة بطلب واحد'
-                        : 'Comprehensive supply for supermarkets and grocery stores in one order'}
-                </p>
+
+                <Link
+                    href="/categories"
+                    prefetch={false}
+                    className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-zinc-800 text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#E5B54A] shadow-xs transition-all active:scale-95 shrink-0 group"
+                >
+                    <span>{isArabic ? 'عرض جميع الأقسام' : 'View All Categories'}</span>
+                    {isArabic ? (
+                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                    ) : (
+                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                    )}
+                </Link>
             </div>
 
             {/* 2. Lightweight commercial proof metrics */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-6 mb-8 md:grid-cols-4 md:gap-x-8 md:gap-y-0 md:mb-10">
-                {STATS_DATA.map((stat, index) => (
-                    <div
-                        key={index}
-                        data-reveal-item
-                        className="flex min-h-[72px] flex-col justify-center border-s-[3px] border-[#B68012] ps-4 text-start sm:min-h-20"
-                    >
-                        <span
-                            className="text-2xl sm:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight leading-none mb-1.5 inline-flex items-baseline"
-                            dir={isArabic ? 'rtl' : 'ltr'}
-                            data-stat-number
-                            data-amount={stat.amount}
-                            data-suffix={isArabic ? stat.suffixAr : stat.suffixEn}
+                {statsList.map((stat, index) => {
+                    const suffix = isArabic ? stat.suffixAr : stat.suffixEn;
+                    const formatted = `${stat.amount.toLocaleString('en-US')}${suffix}`;
+                    const label = isArabic ? stat.labelAr : stat.labelEn;
+
+                    return (
+                        <div
+                            key={index}
+                            data-reveal-item
+                            className="flex min-h-[72px] flex-col justify-center border-s-[3px] border-[#B68012] ps-4 text-start sm:min-h-20"
                         >
-                            {isArabic ? stat.value : stat.valueEn}
-                        </span>
-                        <span className="text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 leading-tight">
-                            {isArabic ? stat.labelAr : stat.labelEn}
-                        </span>
-                    </div>
-                ))}
+                            <span
+                                className="text-2xl sm:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight leading-none mb-1.5 inline-flex items-baseline"
+                                dir={isArabic ? 'rtl' : 'ltr'}
+                                data-stat-number
+                                data-amount={stat.amount}
+                                data-suffix={suffix}
+                            >
+                                {formatted}
+                            </span>
+                            <span className="text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 leading-tight">
+                                {label}
+                            </span>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* 3. Category discovery rail */}
@@ -250,11 +334,12 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl' 
                 >
                     {cleanCategories.map((category) => {
                         const catImage = getCategoryBundleImage(category.name, category.slug, category.image);
+                        const catHref = category.href || `/products?category=${encodeURIComponent(category.slug)}`;
 
                         return (
                             <Link
                                 key={category.id}
-                                href={`/products?category=${encodeURIComponent(category.slug)}`}
+                                href={catHref}
                                 prefetch={false}
                                 data-reveal-item
                                 className="group flex-none w-[calc((100vw-3.5rem)/2)] min-w-[145px] max-w-[210px] md:w-[210px] snap-start flex flex-col rounded-xl bg-[#F1F2F4] dark:bg-zinc-800/70 border border-transparent hover:border-slate-300 dark:hover:border-zinc-600 overflow-hidden transition-colors duration-200"
@@ -296,6 +381,22 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl' 
                         {isArabic ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                     </button>
                 )}
+            </div>
+
+            {/* Mobile View All Categories CTA */}
+            <div className="flex justify-center mt-5 sm:hidden">
+                <Link
+                    href="/categories"
+                    prefetch={false}
+                    className="w-full text-center inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-zinc-800 text-xs font-bold text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] shadow-xs transition-all active:scale-95 group"
+                >
+                    <span>{isArabic ? 'عرض جميع الأقسام' : 'View All Categories'}</span>
+                    {isArabic ? (
+                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                    ) : (
+                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                    )}
+                </Link>
             </div>
 
         </section>

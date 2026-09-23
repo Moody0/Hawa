@@ -40,6 +40,7 @@ const parsed = parseCatalogUrlParams({
     search: "  halibna  ",
     brand: "zwan,alreef",
     category: "canned-goods",
+    mainCategory: "detergents",
     sort: "newest",
     page: "3",
     inStock: "true",
@@ -48,6 +49,7 @@ const parsed = parseCatalogUrlParams({
 assert.equal(parsed.search, "halibna");
 assert.deepEqual(parsed.brands, ["alreef", "zwan"]);
 assert.deepEqual(parsed.categories, ["canned-goods"]);
+assert.equal(parsed.mainCategory, "detergents");
 assert.equal(parsed.sort, "newest");
 assert.equal(parsed.page, 3);
 assert.equal(parsed.inStock, true);
@@ -58,6 +60,7 @@ const url1 = buildCatalogUrl({
     search: "zwan",
     brands: ["zwan", "alreef"],
     categories: ["dairy"],
+    mainCategory: "detergents",
     sort: "price_asc",
     page: 2,
     inStock: true,
@@ -65,7 +68,7 @@ const url1 = buildCatalogUrl({
 // Notice brands should be sorted deterministically: alreef,zwan
 assert.equal(
     url1,
-    "/products?brand=alreef%2Czwan&category=dairy&inStock=true&page=2&search=zwan&sort=price_asc"
+    "/products?brand=alreef%2Czwan&category=dairy&inStock=true&mainCategory=detergents&page=2&search=zwan&sort=price_asc"
 );
 
 // Deterministic: regardless of input brand order, output URL is identical
@@ -74,6 +77,7 @@ const url2 = buildCatalogUrl({
     search: "zwan",
     sort: "price_asc",
     categories: ["dairy"],
+    mainCategory: "detergents",
     inStock: true,
     page: 2,
 });

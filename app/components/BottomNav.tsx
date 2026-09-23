@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { Home, ShoppingCart, LayoutGrid, Heart, User } from 'lucide-react';
+import { Home, ShoppingCart, LayoutGrid, ShoppingBag, User } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
 
 const BottomNav = () => {
@@ -20,11 +20,10 @@ const BottomNav = () => {
             isActive: pathname === '/',
         },
         {
-            href: '/cart',
-            label: t('common.cart'),
-            icon: ShoppingCart,
-            isActive: pathname === '/cart',
-            badge: totalItems > 0 ? totalItems : null,
+            href: '/products',
+            label: language === 'ar' ? 'المنتجات' : 'Products',
+            icon: ShoppingBag,
+            isActive: pathname === '/products' || pathname.startsWith('/products/'),
         },
         {
             href: '/categories',
@@ -34,10 +33,11 @@ const BottomNav = () => {
             isCenter: true,
         },
         {
-            href: '/products?favorites=true',
-            label: t('nav.favorites'),
-            icon: Heart,
-            isActive: false,
+            href: '/cart',
+            label: t('common.cart'),
+            icon: ShoppingCart,
+            isActive: pathname === '/cart',
+            badge: totalItems > 0 ? totalItems : null,
         },
         {
             href: '/account',

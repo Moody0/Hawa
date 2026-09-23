@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidSyrianPhone, normalizeSyrianPhone } from "./order-validation";
 
 const rawHtmlTag = /<\/?[a-z][^>]*>/i;
 const safeOptionalUrl = z.string().trim().max(2048).refine(
@@ -25,6 +26,19 @@ export const blogPostMutationSchema = z.object({
 
 export const customerStatusSchema = z.object({
   id: identifierSchema,
+  isActive: z.boolean(),
+}).strict();
+
+export const customerAdminUpdateSchema = z.object({
+  id: identifierSchema,
+  shopName: z.string().trim().min(2, "يرجى إدخال اسم المحل (حرفين على الأقل). أقصى حد 100 حرف.").max(100, "اسم المحل يجب ألا يتجاوز 100 حرف."),
+  ownerName: z.string().trim().min(2, "يرجى إدخال اسم صاحب الحساب (حرفين على الأقل). أقصى حد 100 حرف.").max(100, "اسم صاحب الحساب يجب ألا يتجاوز 100 حرف."),
+  phone: z.string().trim().min(1, "يرجى إدخال رقم الهاتف.").max(50, "رقم الهاتف المدخل طويل جداً.")
+    .transform(normalizeSyrianPhone)
+    .refine(isValidSyrianPhone, "يرجى إدخال رقم هاتف سوري صالح."),
+  city: z.string().trim().min(2, "يرجى إدخال المحافظة أو المنطقة.").max(50, "اسم المحافظة أو المنطقة طويل جداً."),
+  address: z.string().trim().min(4, "يرجى إدخال العنوان بالتفصيل.").max(300, "العنوان طويل جداً."),
+  notes: z.string().trim().max(500, "ملاحظات التوصيل يجب ألا تتجاوز 500 حرف.").nullable(),
   isActive: z.boolean(),
 }).strict();
 

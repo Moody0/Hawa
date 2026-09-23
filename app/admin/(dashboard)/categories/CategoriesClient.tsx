@@ -4,13 +4,16 @@ import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { useConfirm } from "../../context/ConfirmDialogContext";
 import { useState, useMemo } from "react";
-import { Trash2, Search, Plus, Check, Image, Star, Pencil, SearchX, RefreshCw, Eye, ShoppingBag, Store, FolderTree, CheckSquare, Square } from 'lucide-react';
+import { Trash2, Search, Plus, Check, Image, Star, Pencil, SearchX, RefreshCw, Eye, ShoppingBag, Store, FolderTree, CheckSquare, Square, ToggleLeft, ToggleRight } from 'lucide-react';
 import CategoryModal from "./CategoryModal";
-import { deleteCategory, toggleCategoryFeatured, bulkDeleteCategories } from "../../../../lib/admin-actions";
+import { deleteCategory, toggleCategoryActive, toggleCategoryFeatured, bulkDeleteCategories } from "../../../../lib/admin-actions";
 import RelatedItemsModal from "../components/RelatedItemsModal";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/app/context/LanguageContext";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { hasAdminPermission } from "@/lib/admin-permissions";
 
 interface Category {
     id: string;
@@ -26,6 +29,7 @@ interface Category {
         group: string;
     } | null;
     isFeatured: boolean;
+    isActive: boolean;
     _count: {
         products: number;
     };
@@ -39,13 +43,15 @@ interface Brand {
     isActive: boolean;
 }
 
-export default function CategoriesClient({ categories: initialCategories, brands }: { categories: Category[], brands: Brand[] }) {
+export default function CategoriesClient({ categories: initialCategories, brands, focusedCategoryId }: { categories: Category[], brands: Brand[], focusedCategoryId?: string }) {
+    const router = useRouter();
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
     const isArabic = language === 'ar';
     const confirm = useConfirm();
-    const canManage = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canManageCategories;
-    const canDelete = session?.user?.role === 'SUPER_ADMIN' || session?.user?.canDeleteCategories;
+    const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
+    const canManage = hasAdminPermission(session?.user?.permissions, 'CATEGORIES_MANAGE', isSuperAdmin) || session?.user?.canManageCategories;
+    const canDelete = hasAdminPermission(session?.user?.permissions, 'CATEGORIES_ARCHIVE', isSuperAdmin) || session?.user?.canDeleteCategories;
 
     const { openSidebar } = useAdminSidebar();
     const [categories, setCategories] = useState<Category[]>(initialCategories);
@@ -131,9 +137,17 @@ export default function CategoriesClient({ categories: initialCategories, brands
         try {
             const result = await bulkDeleteCategories(ids);
             if (result.success) {
-                setCategories(prev => prev.filter(c => !selectedIds.has(c.id)));
+                const archivedIds = new Set(result.archivedIds || []);
+                setCategories(prev => prev.filter(c => !archivedIds.has(c.id)));
                 setSelectedIds(new Set());
-                toast.success(isArabic ? `تم حذف ${result.count} فئة بنجاح` : `Deleted ${result.count} categories`);
+                if (result.partial) {
+                    toast.error(isArabic
+                        ? `بقيت فئات مرتبطة بمنتجات: ${result.names}`
+                        : `Categories with products were kept: ${result.names}`);
+                } else {
+                    toast.success(isArabic ? `تم حذف ${result.count} فئة بنجاح` : `Deleted ${result.count} categories`);
+                }
+                if (focusedCategoryId && archivedIds.has(focusedCategoryId)) router.replace('/admin/categories');
             } else {
                 toast.error(result.error || "Failed to delete categories");
             }
@@ -170,8 +184,9 @@ export default function CategoriesClient({ categories: initialCategories, brands
             if (result.success) {
                 setCategories(prev => prev.filter(c => c.id !== id));
                 toast.success(t('admin.categoryDeleted') || "Category deleted");
+                if (focusedCategoryId === id) router.replace('/admin/categories');
             } else {
-                toast.error(result.error || "Failed to delete");
+                toast.error(result.error === 'deleteCategoryWithProducts' ? t('admin.deleteCategoryWithProducts') : result.error || "Failed to delete");
             }
         } catch (error) {
             console.error("Error deleting category:", error);
@@ -204,6 +219,37 @@ export default function CategoriesClient({ categories: initialCategories, brands
             toast.error("An unexpected error occurred");
         } finally {
             setLoadingMap(prev => ({ ...prev, [id]: false }));
+        }
+    };
+
+    const handleToggleActive = async (id: string, currentStatus: boolean) => {
+        const nextStatus = !currentStatus;
+        const currentFeaturedStatus = categories.find(category => category.id === id)?.isFeatured ?? false;
+        setLoadingMap(prev => ({ ...prev, [`active-${id}`]: true }));
+        setCategories(prev => prev.map(category => category.id === id
+            ? { ...category, isActive: nextStatus, ...(nextStatus ? {} : { isFeatured: false }) }
+            : category));
+
+        try {
+            const result = await toggleCategoryActive(id, nextStatus);
+            if (result.success) {
+                toast.success(nextStatus
+                    ? (isArabic ? "تم تفعيل الفئة" : "Category activated")
+                    : (isArabic ? "تم تعطيل الفئة" : "Category deactivated"));
+            } else {
+                setCategories(prev => prev.map(category => category.id === id
+                    ? { ...category, isActive: currentStatus, isFeatured: currentFeaturedStatus }
+                    : category));
+                toast.error(result.error || "Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error toggling category active status:", error);
+            setCategories(prev => prev.map(category => category.id === id
+                ? { ...category, isActive: currentStatus, isFeatured: currentFeaturedStatus }
+                : category));
+            toast.error("An unexpected error occurred");
+        } finally {
+            setLoadingMap(prev => ({ ...prev, [`active-${id}`]: false }));
         }
     };
 
@@ -268,6 +314,15 @@ export default function CategoriesClient({ categories: initialCategories, brands
                             )}
                         </div>
                     </div>
+
+                    {focusedCategoryId && (
+                        <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-900 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
+                            <span>{isArabic ? 'عرض الفئة الفرعية المحددة' : 'Viewing the selected subcategory'}</span>
+                            <Link href="/admin/categories" className="underline underline-offset-2 hover:no-underline">
+                                {isArabic ? 'عرض كل الفئات' : 'Show all categories'}
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Filter Tabs & Bulk Actions Bar */}
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
@@ -346,7 +401,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                     {/* Category Cards Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
                         {filteredCategories.map((category) => {
-                            const isFeatLoading = loadingMap[category.id];
+                            const isFeatLoading = loadingMap[category.id] || loadingMap[`active-${category.id}`];
                             const isSelected = selectedIds.has(category.id);
 
                             return (
@@ -434,6 +489,13 @@ export default function CategoriesClient({ categories: initialCategories, brands
 
                                             {/* Slug & Featured Pill */}
                                             <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                                                    category.isActive
+                                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/30"
+                                                        : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-zinc-800 dark:text-gray-400 dark:border-white/10"
+                                                }`}>
+                                                    {category.isActive ? (isArabic ? 'نشط' : 'Active') : (isArabic ? 'معطل' : 'Inactive')}
+                                                </span>
                                                 {category.slug && (
                                                     <span className="text-[10px] font-mono text-slate-500 dark:text-gray-400 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md truncate max-w-[200px]">
                                                         /categories/{category.slug}
@@ -485,6 +547,30 @@ export default function CategoriesClient({ categories: initialCategories, brands
 
                                             {/* Edit & Delete Buttons */}
                                             <div className="flex items-center gap-1">
+                                                {canManage && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleToggleActive(category.id, category.isActive)}
+                                                        disabled={loadingMap[`active-${category.id}`]}
+                                                        className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer disabled:cursor-wait"
+                                                        title={category.isActive
+                                                            ? (isArabic ? 'تعطيل الفئة' : 'Deactivate category')
+                                                            : (isArabic ? 'تفعيل الفئة' : 'Activate category')}
+                                                        aria-pressed={category.isActive}
+                                                        aria-label={category.isActive
+                                                            ? (isArabic ? `تعطيل ${category.name}` : `Deactivate ${category.name}`)
+                                                            : (isArabic ? `تفعيل ${category.name}` : `Activate ${category.name}`)}
+                                                    >
+                                                        {loadingMap[`active-${category.id}`] ? (
+                                                            <RefreshCw className="animate-spin text-lg" />
+                                                        ) : category.isActive ? (
+                                                            <ToggleRight className="text-2xl text-emerald-500" />
+                                                        ) : (
+                                                            <ToggleLeft className="text-2xl text-slate-400" />
+                                                        )}
+                                                    </button>
+                                                )}
+
                                                 {canManage && (
                                                     <button 
                                                         type="button"

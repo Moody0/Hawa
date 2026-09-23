@@ -80,7 +80,7 @@ export default async function DepartmentPage(props: { params: Promise<{ slug: st
     // 2. Fetch the catalog data and brands specifically for this department
     const [{ categories, products, totalProducts }, brands] = await Promise.all([
         getCatalogInitialData(undefined, undefined, department.id),
-        getCatalogBrands(),
+        getCatalogBrands(department.id),
     ]);
 
     return (

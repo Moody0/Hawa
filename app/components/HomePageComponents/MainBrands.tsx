@@ -8,6 +8,7 @@ import type { HomeBrand } from "@/lib/admin-actions";
 import { useProductRail } from './useProductRail';
 
 import { useLanguage } from "@/app/context/LanguageContext";
+import { getBrandDisplayName } from "@/lib/brand-display";
 
 interface MainBrandsProps {
     brands: HomeBrand[];
@@ -49,13 +50,13 @@ export default function MainBrands({ brands }: MainBrandsProps) {
                                 <div className="flex-1 flex items-center justify-center w-full h-[80px] md:h-[100px]">
                                     <ResilientImage
                                         src={brand.image || fallbackImage}
-                                        alt={brand.name}
+                                        alt={getBrandDisplayName(brand, dir === 'rtl' ? 'ar' : 'en')}
                                         className="w-full h-full object-contain mx-auto transition-transform duration-500 group-hover:scale-105"
                                     />
                                 </div>
                                 <div className="flex flex-col items-center justify-end w-full mt-2">
                                     <p className="text-sm font-bold text-text-main-light transition-colors group-hover-underline-animated dark:text-white truncate w-full text-center">
-                                        {brand.name}
+                                        {getBrandDisplayName(brand, dir === 'rtl' ? 'ar' : 'en')}
                                     </p>
                                     <p className="text-xs font-medium text-[#475569] dark:text-gray-400 mt-1">
                                         {brand._count.products} {t("home.productsLabel") || "منتج"}
@@ -90,4 +91,3 @@ export default function MainBrands({ brands }: MainBrandsProps) {
         </section>
     );
 }
-

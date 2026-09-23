@@ -66,8 +66,10 @@ interface FeaturedCategory {
     slug: string;
     description: string | null;
     image: string | null;
-    brandId: string;
-    isFeatured: boolean;
+    brandId?: string;
+    isFeatured?: boolean;
+    href?: string;
+    type?: 'category' | 'main-category';
 }
 
 interface MainProps {
@@ -78,6 +80,7 @@ interface MainProps {
     featuredBestSellers: Product[];
     trendingWeekly: Product[];
     featuredCategories: FeaturedCategory[];
+    siteSettings?: any;
 }
 
 const Main = async ({
@@ -88,6 +91,7 @@ const Main = async ({
     featuredBestSellers,
     trendingWeekly,
     featuredCategories,
+    siteSettings,
 }: MainProps) => {
     const { dir, language } = await getI18n();
 
@@ -108,7 +112,12 @@ const Main = async ({
             <ScrollReveal
                 className="bg-white dark:bg-[#0B192C]"
             >
-                <FeaturedCategoriesGrid categories={featuredCategories} language={language} dir={dir} />
+                <FeaturedCategoriesGrid
+                    categories={featuredCategories}
+                    language={language}
+                    dir={dir}
+                    settings={siteSettings}
+                />
             </ScrollReveal>
 
             {/* 5. Best sellers and new arrivals; product cards remain unchanged */}
@@ -118,29 +127,34 @@ const Main = async ({
                 <FeaturedCollection
                     newArrivals={featuredNewArrivals}
                     bestSellers={featuredBestSellers}
+                    settings={siteSettings}
                 />
             </ScrollReveal>
 
             {/* 6. Weekly demand; product card design remains unchanged */}
-            <ScrollReveal
-                className="bg-white dark:bg-[#0B192C]"
-            >
-                <TrendingWeekly products={trendingWeekly} />
-            </ScrollReveal>
+            {siteSettings?.homeTrendingWeeklyEnabled !== false && (
+                <ScrollReveal
+                    className="bg-white dark:bg-[#0B192C]"
+                >
+                    <TrendingWeekly products={trendingWeekly} settings={siteSettings} />
+                </ScrollReveal>
+            )}
 
             {/* 8. Corporate capabilities */}
             <ScrollReveal
                 className="bg-[#FAF7F0] dark:bg-[#101E32]"
             >
-                <CompanyServices />
+                <CompanyServices settings={siteSettings} />
             </ScrollReveal>
 
             {/* 9. Merchant endorsements */}
-            <ScrollReveal
-                className="bg-slate-50 dark:bg-[#0E1B2E]"
-            >
-                <TestimonialsMasonry reviews={reviews} products={featuredBestSellers} />
-            </ScrollReveal>
+            {siteSettings?.homeTestimonialsEnabled !== false && (
+                <ScrollReveal
+                    className="bg-slate-50 dark:bg-[#0E1B2E]"
+                >
+                    <TestimonialsMasonry reviews={reviews} products={featuredBestSellers} settings={siteSettings} />
+                </ScrollReveal>
+            )}
         </div>
     );
 };

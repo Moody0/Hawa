@@ -17,6 +17,7 @@ export async function GET(request: Request) {
         const take = limitParam ? parseInt(limitParam) : undefined;
 
         const where: Prisma.CategoryWhereInput = {
+            isActive: true,
             archivedAt: null,
             brand: { isActive: true, archivedAt: null },
         };
@@ -58,7 +59,6 @@ export async function GET(request: Request) {
                     select: {
                         products: {
                             where: {
-                                stock: { gt: 0 },
                                 archivedAt: null,
                                 brand: { isActive: true, archivedAt: null },
                             },
@@ -69,6 +69,7 @@ export async function GET(request: Request) {
                     select: {
                         id: true,
                         name: true,
+                        nameEn: true,
                         slug: true,
                         group: true,
                     },

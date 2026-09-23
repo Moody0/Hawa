@@ -9,10 +9,12 @@ import { useCustomer } from "@/app/context/CustomerContext";
 import ResilientImage from "@/app/components/ResilientImage";
 import { Search, Lock } from 'lucide-react';
 import toast from "react-hot-toast";
+import { getBrandDisplayName } from "@/lib/brand-display";
 
 interface Brand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
 }
 
@@ -37,7 +39,7 @@ interface TrendingProduct {
     images: string;
     price: number;
     discountPrice: number | null;
-    brand?: { name: string } | null;
+    brand?: { name: string; nameEn?: string | null } | null;
 }
 
 export interface NavMainCategory {
@@ -148,7 +150,7 @@ function MiniProductCard({ product, onClose }: { product: TrendingProduct; onClo
                 {/* Brand */}
                 {product.brand && (
                     <p className="text-[#475569] dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1 truncate">
-                        {product.brand.name}
+                        {getBrandDisplayName(product.brand, language === 'ar' ? 'ar' : 'en')}
                     </p>
                 )}
                 {/* Title */}
@@ -211,18 +213,6 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                             </h3>
                             <ul className="flex flex-col gap-2">
                                 {data.brands.length > 0 ? data.brands.map((brand) => {
-                                    const formatBrandName = (name: string) => {
-                                        if (!name.includes('-')) return name.trim();
-                                        const parts = name.split('-').map(s => s.trim());
-                                        if (parts.length >= 2) {
-                                             const arabicPart = parts.find(p => /[\u0600-\u06FF]/.test(p));
-                                             const englishPart = parts.find(p => !/[\u0600-\u06FF]/.test(p));
-                                             if (language === 'ar' && arabicPart) return arabicPart;
-                                             if (language !== 'ar' && englishPart) return englishPart;
-                                         }
-                                         return name;
-                                     };
-
                                      return (
                                          <li key={brand.id}>
                                              <Link 
@@ -230,7 +220,7 @@ export default function MegaMenu({ data, onClose, onMouseEnter, onMouseLeave }: 
                                                  onClick={onClose}
                                                  className="text-[15px] font-medium text-[#475569] dark:text-gray-300 hover:text-[#8A6305] dark:hover:text-[#8A6305] leading-relaxed inline hover-underline-animated"
                                              >
-                                                 {formatBrandName(brand.name)}
+                                                 {getBrandDisplayName(brand, language === 'ar' ? 'ar' : 'en')}
                                              </Link>
                                          </li>
                                      );

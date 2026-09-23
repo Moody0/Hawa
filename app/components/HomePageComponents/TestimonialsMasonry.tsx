@@ -127,9 +127,10 @@ interface Product {
 interface TestimonialsMasonryProps {
     reviews?: ReviewItem[];
     products?: Product[];
+    settings?: any;
 }
 
-const TestimonialsMasonry = ({ reviews = [] }: TestimonialsMasonryProps) => {
+const TestimonialsMasonry = ({ reviews = [], settings }: TestimonialsMasonryProps) => {
     const { language, dir } = useLanguage();
     const isArabic = language === 'ar' || dir === 'rtl';
     const swiperRef = React.useRef<SwiperType | null>(null);
@@ -151,6 +152,14 @@ const TestimonialsMasonry = ({ reviews = [] }: TestimonialsMasonryProps) => {
     }, []);
 
     const allReviews = React.useMemo(() => {
+        if (settings?.homeTestimonialsItems) {
+            try {
+                const parsed = JSON.parse(settings.homeTestimonialsItems);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed as ReviewItem[];
+                }
+            } catch {}
+        }
         if (!reviews || reviews.length === 0) {
             return DEFAULT_REVIEWS;
         }
@@ -158,11 +167,19 @@ const TestimonialsMasonry = ({ reviews = [] }: TestimonialsMasonryProps) => {
             return [...reviews, ...DEFAULT_REVIEWS.slice(reviews.length)];
         }
         return reviews;
-    }, [reviews]);
+    }, [reviews, settings?.homeTestimonialsItems]);
 
-    if (!allReviews || allReviews.length === 0) {
+    if (settings?.homeTestimonialsEnabled === false || !allReviews || allReviews.length === 0) {
         return null;
     }
+
+    const titleText = isArabic
+        ? (settings?.homeTestimonialsTitleAr || settings?.homeTestimonialsTitle || 'ثقة أصحاب المحلات والسوبرماركت')
+        : (settings?.homeTestimonialsTitle || settings?.homeTestimonialsTitleAr || 'Verified Wholesale Buyer Reviews');
+
+    const descText = isArabic
+        ? (settings?.homeTestimonialsDescAr || settings?.homeTestimonialsDesc || 'آراء وتجارب شركائنا من تجار التجزئة وأصحاب البقاليات في مختلف المحافظات')
+        : (settings?.homeTestimonialsDesc || settings?.homeTestimonialsDescAr || 'Endorsements from verified retail merchants and grocery partners');
 
     return (
         <section className="w-full py-12 md:py-16 border-t border-slate-200 dark:border-white/10">
@@ -172,14 +189,12 @@ const TestimonialsMasonry = ({ reviews = [] }: TestimonialsMasonryProps) => {
                     <div className="flex items-center justify-center gap-3 mb-1.5">
                         <span className="w-8 sm:w-12 h-0.5 bg-[#8A6305]/60 dark:bg-[#E5B54A]/60 rounded-full" />
                         <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight" data-reveal-heading>
-                            {isArabic ? 'ثقة أصحاب المحلات والسوبرماركت' : 'Verified Wholesale Buyer Reviews'}
+                            {titleText}
                         </h2>
                         <span className="w-8 sm:w-12 h-0.5 bg-[#8A6305]/60 dark:bg-[#E5B54A]/60 rounded-full" />
                     </div>
                     <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto" data-reveal-copy>
-                        {isArabic
-                            ? 'آراء وتجارب شركائنا من تجار التجزئة وأصحاب البقاليات في مختلف المحافظات'
-                            : 'Endorsements from verified retail merchants and grocery partners'}
+                        {descText}
                     </p>
                 </div>
 

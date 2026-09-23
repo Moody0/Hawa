@@ -3,13 +3,16 @@
 import { prisma } from "./prisma";
 import { requireAdminSession, requireSuperAdminSession } from "./admin-auth";
 import { revalidatePath, revalidateTag, updateTag, unstable_cache } from "next/cache";
-import { BrandGroup, OrderStatus } from "@prisma/client";
+import { BrandGroup, OrderStatus, Prisma } from "@prisma/client";
 import { generateUniqueCategorySlug } from "./category-utils";
 import { generateUniqueBrandSlug } from "./brand-utils";
 import { executeOrderStatusUpdate, executeOrderDeletion, OrderStatusType } from "./inventory-transitions";
 import { recordErrorEvent } from "./monitoring";
 import { clearProductsApiCache } from "./products-cache";
 import { writeAdminAuditLog } from "./admin-audit";
+import { normalizeShippingPolicyContent, ShippingPolicyContent } from "./shipping-policy-content";
+import { normalizeContactPageContent, ContactPageContent } from "./contact-page-content";
+import { getMainCategoryProductCounts } from "./main-category-product-counts";
 
 export type CacheEntity =
     | 'catalog'
@@ -25,7 +28,7 @@ export type CacheEntity =
 const ENTITY_CACHE_MAP: Record<CacheEntity, { tags: string[]; paths: string[] }> = {
     catalog: {
         tags: ['catalog', 'products', 'categories', 'brands', 'main-categories', 'navigation'],
-        paths: ['/', '/products', '/categories', '/brands', '/department', '/departments', '/admin/products', '/admin/categories', '/admin/brands', '/admin/main-categories'],
+        paths: ['/', '/products', '/categories', '/brands', '/department', '/departments', '/api/categories', '/api/main-categories', '/admin/products', '/admin/categories', '/admin/brands', '/admin/main-categories'],
     },
     products: {
         tags: ['catalog', 'products', 'navigation'],
@@ -33,11 +36,11 @@ const ENTITY_CACHE_MAP: Record<CacheEntity, { tags: string[]; paths: string[] }>
     },
     categories: {
         tags: ['catalog', 'categories', 'navigation'],
-        paths: ['/', '/categories', '/products', '/admin/categories'],
+        paths: ['/', '/categories', '/products', '/api/categories', '/api/main-categories', '/admin/categories'],
     },
     'main-categories': {
         tags: ['catalog', 'main-categories', 'categories', 'navigation'],
-        paths: ['/', '/categories', '/products', '/admin/main-categories'],
+        paths: ['/', '/categories', '/products', '/api/categories', '/api/main-categories', '/admin/main-categories'],
     },
     brands: {
         tags: ['catalog', 'brands', 'navigation'],
@@ -57,7 +60,7 @@ const ENTITY_CACHE_MAP: Record<CacheEntity, { tags: string[]; paths: string[] }>
     },
     reviews: {
         tags: ['reviews', 'products'],
-        paths: ['/', '/admin/reviews'],
+        paths: ['/'],
     },
 };
 
@@ -103,7 +106,7 @@ function invalidateCacheEntities(entities: CacheEntity[]) {
             });
         }
         try {
-            (revalidateTag as any)(tag, 'default');
+            revalidateTag(tag, 'default');
         } catch (err: any) {
             console.error(`[CacheInvalidation] Failed revalidateTag("${tag}"):`, err);
             recordErrorEvent({
@@ -115,7 +118,7 @@ function invalidateCacheEntities(entities: CacheEntity[]) {
 }
 
 function revalidateCatalogCache() {
-    invalidateCacheEntities(['catalog', 'navigation']);
+    invalidateCacheEntities(['catalog', 'navigation', 'categories', 'settings']);
     invalidateDashboardCache();
 }
 
@@ -153,6 +156,7 @@ interface CategoryInput {
 
 interface BrandInput {
     name: string;
+    nameEn: string;
     description?: string;
     image?: string;
     group?: BrandGroup | "MAIN" | "DIFFERENT";
@@ -197,6 +201,7 @@ export interface HomeCollectionSection {
 export interface HomeBrand {
     id: string;
     name: string;
+    nameEn?: string | null;
     slug: string;
     description: string | null;
     image: string | null;
@@ -231,6 +236,7 @@ export interface DashboardStats {
         id: string;
         name: string;
         nameAr: string | null;
+        nameEn: string | null;
         stock: number;
         price: number;
         image: string;
@@ -240,6 +246,7 @@ export interface DashboardStats {
         id: string;
         name: string;
         nameAr: string | null;
+        nameEn: string | null;
         image: string;
         unitsSold: number;
         revenue: number;
@@ -259,6 +266,7 @@ export interface DashboardStats {
     }[];
     recentOrders: {
         id: string;
+        orderNumber: number;
         Name: string;
         customer: string;
         phone: string;
@@ -277,6 +285,8 @@ export interface DashboardStats {
             price: number;
             product: {
                 name: string;
+                nameAr: string | null;
+                nameEn: string | null;
                 images: string;
             } | null;
         }[];
@@ -337,13 +347,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
             prisma.order.count({ where: { status: 'DELIVERED' } }),
             prisma.order.count({ where: { status: 'CANCELLED' } }),
             // Product inventory counts
-            prisma.product.count(),
-            prisma.product.count({ where: { stock: { lte: 0 } } }),
-            prisma.product.count({ where: { stock: { gt: 0, lte: 5 } } }),
+            prisma.product.count({ where: { archivedAt: null } }),
+            prisma.product.count({ where: { archivedAt: null, stock: { lte: 0 } } }),
+            prisma.product.count({ where: { archivedAt: null, stock: { gt: 0, lte: 10 } } }),
             prisma.category.count(),
             // Critical stock watchlist
             prisma.product.findMany({
-                where: { stock: { lte: 5 } },
+                where: { archivedAt: null, stock: { lte: 5 } },
                 orderBy: { stock: 'asc' },
                 take: 5,
                 include: {
@@ -459,6 +469,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
                     id: true,
                     name: true,
                     nameAr: true,
+                    nameEn: true,
                     images: true,
                     stock: true,
                     price: true
@@ -484,6 +495,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
                 id: g.productId,
                 name: product?.name || "Unknown",
                 nameAr: product?.nameAr || null,
+                nameEn: product?.nameEn || null,
                 image: firstImg || "",
                 unitsSold,
                 revenue: unitsSold * price,
@@ -508,6 +520,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
                 id: p.id,
                 name: p.name,
                 nameAr: p.nameAr,
+                nameEn: p.nameEn,
                 stock: p.stock,
                 price: Number(p.price),
                 image: firstImg || "",
@@ -552,6 +565,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
             topCities,
             recentOrders: recentOrders.map(order => ({
                 id: order.id,
+                orderNumber: order.orderNumber,
                 Name: order.Name,
                 customer: order.Name,
                 phone: order.phone,
@@ -574,6 +588,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
                     price: Number(item.price),
                     product: item.product ? {
                         name: item.product.name,
+                        nameAr: item.product.nameAr,
+                        nameEn: item.product.nameEn,
                         images: item.product.images
                     } : null
                 }))
@@ -637,8 +653,8 @@ export async function getAdminBrands() {
                 },
                 _count: {
                     select: {
-                        categories: true,
-                        products: true,
+                        categories: { where: { archivedAt: null } },
+                        products: { where: { archivedAt: null } },
                     },
                 },
             },
@@ -658,12 +674,15 @@ export async function getAdminBrands() {
 export async function createBrand(data: BrandInput) {
     try {
         await requireAdminSession("BRANDS_MANAGE");
-        const slug = await generateUniqueBrandSlug(data.name);
+        const nameEn = data.nameEn.trim();
+        if (!nameEn) return { success: false, error: "englishBrandNameRequired" };
+        const slug = await generateUniqueBrandSlug(nameEn);
         const group = data.group === "MAIN" ? BrandGroup.MAIN : BrandGroup.DIFFERENT;
 
         const brand = await prisma.brand.create({
             data: {
                 name: data.name.trim(),
+                nameEn,
                 slug,
                 description: data.description,
                 image: data.image,
@@ -696,14 +715,15 @@ export async function createBrand(data: BrandInput) {
 export async function updateBrand(id: string, data: BrandInput) {
     try {
         await requireAdminSession("BRANDS_MANAGE");
-        const slug = await generateUniqueBrandSlug(data.name, id);
+        const nameEn = data.nameEn.trim();
+        if (!nameEn) return { success: false, error: "englishBrandNameRequired" };
         const group = data.group === "MAIN" ? BrandGroup.MAIN : BrandGroup.DIFFERENT;
 
         const brand = await prisma.brand.update({
             where: { id },
             data: {
                 name: data.name.trim(),
-                slug,
+                nameEn,
                 description: data.description,
                 image: data.image,
                 group,
@@ -739,8 +759,8 @@ export async function deleteBrand(id: string) {
     try {
         const session = await requireAdminSession("BRANDS_ARCHIVE");
         const [productCount, categoryCount] = await Promise.all([
-            prisma.product.count({ where: { brandId: id } }),
-            prisma.category.count({ where: { brandId: id } }),
+            prisma.product.count({ where: { brandId: id, archivedAt: null } }),
+            prisma.category.count({ where: { brandId: id, archivedAt: null } }),
         ]);
 
         if (productCount > 0 || categoryCount > 0) {
@@ -823,16 +843,22 @@ export async function getAdminMainCategories() {
             include: {
                 _count: {
                     select: {
-                        brands: true,
-                        categories: true,
-                        products: true,
+                        brands: { where: { archivedAt: null } },
+                        categories: { where: { archivedAt: null } },
+                        products: { where: { archivedAt: null } },
                     },
                 },
             },
         });
 
-        return mainCategories.map((mc) => ({
+        const productCounts = await getMainCategoryProductCounts(mainCategories.map((mainCategory) => mainCategory.id));
+
+        return mainCategories.map((mc, index) => ({
             ...mc,
+            _count: {
+                ...mc._count,
+                products: productCounts.get(mc.id) ?? 0,
+            },
             createdAt: mc.createdAt.toISOString(),
             updatedAt: mc.updatedAt.toISOString(),
         }));
@@ -947,13 +973,13 @@ export async function deleteMainCategory(id: string) {
     try {
         const session = await requireAdminSession("MAIN_CATEGORIES_ARCHIVE");
         const [brandCount, categoryCount, productCount] = await Promise.all([
-            prisma.brand.count({ where: { mainCategoryId: id } }),
-            prisma.category.count({ where: { mainCategoryId: id } }),
-            prisma.product.count({ where: { mainCategoryId: id } }),
+            prisma.brand.count({ where: { mainCategoryId: id, archivedAt: null } }),
+            prisma.category.count({ where: { mainCategoryId: id, archivedAt: null } }),
+            prisma.product.count({ where: { mainCategoryId: id, archivedAt: null } }),
         ]);
 
         if (brandCount > 0 || categoryCount > 0 || productCount > 0) {
-            return { success: false, error: "Cannot delete a main category that has brands, categories, or products assigned to it. Please reassign them first." };
+            return { success: false, error: "deleteMainCategoryWithCatalog" };
         }
 
         await prisma.mainCategory.update({ where: { id, archivedAt: null }, data: { archivedAt: new Date(), isActive: false, showInNav: false } });
@@ -1068,6 +1094,7 @@ export async function getAdminProducts(options?: {
             brand: product.brand ? {
                 id: product.brand.id,
                 name: product.brand.name,
+                nameEn: product.brand.nameEn,
                 slug: product.brand.slug,
                 group: product.brand.group,
             } : null,
@@ -1094,7 +1121,7 @@ export async function getAdminProducts(options?: {
     }
 }
 
-export async function getAdminCategories(page = 1, limit = 100) {
+export async function getAdminCategories(page = 1, limit = 100, categoryId?: string) {
     try {
         await requireAdminSession("CATEGORIES_VIEW");
         const safeLimit = Math.min(Math.max(1, limit), 200);
@@ -1102,7 +1129,7 @@ export async function getAdminCategories(page = 1, limit = 100) {
         const skip = (safePage - 1) * safeLimit;
         const [categories, total] = await Promise.all([
             prisma.category.findMany({
-                where: { archivedAt: null },
+                where: { archivedAt: null, ...(categoryId ? { id: categoryId } : {}) },
                 select: {
                     id: true,
                     name: true,
@@ -1111,6 +1138,7 @@ export async function getAdminCategories(page = 1, limit = 100) {
                     image: true,
                     brandId: true,
                     isFeatured: true,
+                    isActive: true,
                     createdAt: true,
                     updatedAt: true,
                     brand: {
@@ -1122,7 +1150,7 @@ export async function getAdminCategories(page = 1, limit = 100) {
                         }
                     },
                     _count: {
-                        select: { products: true }
+                        select: { products: { where: { archivedAt: null } } }
                     }
                 },
                 skip,
@@ -1131,7 +1159,7 @@ export async function getAdminCategories(page = 1, limit = 100) {
                     name: 'asc'
                 }
             }),
-            prisma.category.count({ where: { archivedAt: null } })
+            prisma.category.count({ where: { archivedAt: null, ...(categoryId ? { id: categoryId } : {}) } })
         ]);
         
         return {
@@ -1162,12 +1190,14 @@ export async function getAdminOrders(page = 1, limit = 50) {
                 where: { archivedAt: null },
                 select: {
                     id: true,
+                    orderNumber: true,
                     shopName: true,
                     Name: true,
                     phone: true,
                     streetAddress: true,
                     city: true,
                     notes: true,
+                    cancellationReason: true,
                     totalAmount: true,
                     status: true,
                     createdAt: true,
@@ -1182,6 +1212,8 @@ export async function getAdminOrders(page = 1, limit = 50) {
                                 select: {
                                     id: true,
                                     name: true,
+                                    nameAr: true,
+                                    nameEn: true,
                                     images: true,
                                     price: true,
                                     packaging: true,
@@ -1203,12 +1235,14 @@ export async function getAdminOrders(page = 1, limit = 50) {
         return {
             orders: orders.map(order => ({
                 id: order.id,
+                orderNumber: order.orderNumber,
                 shopName: order.shopName,
                 Name: order.Name,
                 phone: order.phone,
                 streetAddress: order.streetAddress,
                 city: order.city,
                 notes: order.notes,
+                cancellationReason: order.cancellationReason,
                 totalAmount: Number(order.totalAmount),
                 status: order.status,
                 createdAt: order.createdAt.toISOString(),
@@ -1283,6 +1317,7 @@ export async function createProduct(data: ProductInput) {
 
         revalidatePath('/admin/products');
         revalidatePath('/products');
+        revalidatePath(`/products/${product.slug}`);
         revalidatePath('/');
         revalidateCatalogCache();
 
@@ -1367,6 +1402,7 @@ export async function updateProduct(id: string, data: ProductInput & { isTrendin
 
         revalidatePath('/admin/products');
         revalidatePath('/products');
+        revalidatePath(`/products/${product.slug}`);
         revalidatePath('/');
         revalidateCatalogCache();
 
@@ -1430,20 +1466,117 @@ export async function deleteProduct(id: string) {
     }
 }
 
-export async function updateOrderStatus(id: string, status: OrderStatus) {
+export async function updateOrderStatus(id: string, status: OrderStatus, cancellationReason?: string) {
     try {
         const session = await requireAdminSession("ORDERS_MANAGE");
-        await executeOrderStatusUpdate(id, status as OrderStatusType);
-        await writeAdminAuditLog({ actorId: session.user.id, action: "STATUS_TRANSITION", entityType: "Order", entityId: id, metadata: { status } });
+        await executeOrderStatusUpdate(id, status as OrderStatusType, cancellationReason);
+        await writeAdminAuditLog({ actorId: session.user.id, action: "STATUS_TRANSITION", entityType: "Order", entityId: id, metadata: { status, ...(status === "CANCELLED" ? { cancellationReason: cancellationReason?.trim() } : {}) } });
 
         revalidatePath('/admin/orders');
         revalidatePath('/admin/dashboard');
         revalidatePath('/admin/products');
+        revalidatePath('/account');
         invalidateDashboardCache();
         return { success: true };
     } catch (error) {
         console.error("Failed to update order status:", error);
         return { success: false, error: error instanceof Error ? error.message : "Failed to update order status" };
+    }
+}
+
+export async function updateOrderPricing(
+    id: string,
+    itemPrices: Array<{ itemId: string; price: number }>,
+): Promise<
+    | { success: true; totalAmount: number; itemPrices: Array<{ itemId: string; price: number }> }
+    | { success: false; error: string }
+> {
+    try {
+        const session = await requireAdminSession("ORDERS_MANAGE");
+        if (!Array.isArray(itemPrices) || itemPrices.length === 0) {
+            return { success: false, error: "invalidOrderPricing" };
+        }
+
+        const uniqueItemIds = new Set(itemPrices.map((item) => item?.itemId));
+        if (uniqueItemIds.size !== itemPrices.length || itemPrices.some((item) =>
+            typeof item?.itemId !== "string" ||
+            !item.itemId ||
+            typeof item.price !== "number" ||
+            !Number.isFinite(item.price) ||
+            item.price <= 0 ||
+            item.price > 99_999_999.99
+        )) {
+            return { success: false, error: "invalidOrderPricing" };
+        }
+
+        const result = await prisma.$transaction(async (tx) => {
+            const order = await tx.order.findFirst({
+                where: { id, archivedAt: null },
+                select: {
+                    status: true,
+                    items: { select: { id: true, quantity: true } },
+                },
+            });
+
+            if (!order) throw new Error("orderNotFound");
+            if (order.status !== "PENDING" && order.status !== "CONTACTED") {
+                throw new Error("orderPricingLocked");
+            }
+            if (order.items.length !== itemPrices.length || order.items.some((item) => !uniqueItemIds.has(item.id))) {
+                throw new Error("invalidOrderPricing");
+            }
+
+            const pricesByItemId = new Map(itemPrices.map((item) => [
+                item.itemId,
+                new Prisma.Decimal(item.price.toFixed(2)),
+            ]));
+            const totalAmount = order.items.reduce(
+                (total, item) => total.plus(pricesByItemId.get(item.id)!.mul(item.quantity)),
+                new Prisma.Decimal(0),
+            );
+            if (!totalAmount.greaterThan(0) || totalAmount.greaterThan("99999999.99")) {
+                throw new Error("invalidOrderPricing");
+            }
+
+            // Claim the editable order before updating lines so a simultaneous status
+            // change cannot commit a quote with an out-of-date total.
+            const claimed = await tx.order.updateMany({
+                where: { id, status: order.status, archivedAt: null },
+                data: { totalAmount },
+            });
+            if (claimed.count !== 1) throw new Error("orderPricingLocked");
+
+            await Promise.all(order.items.map((item) =>
+                tx.orderItem.update({
+                    where: { id: item.id },
+                    data: { price: pricesByItemId.get(item.id)! },
+                }),
+            ));
+
+            return {
+                totalAmount: Number(totalAmount),
+                itemPrices: order.items.map((item) => ({
+                    itemId: item.id,
+                    price: Number(pricesByItemId.get(item.id)),
+                })),
+            };
+        });
+
+        await writeAdminAuditLog({
+            actorId: session.user.id,
+            action: "UPDATE",
+            entityType: "Order",
+            entityId: id,
+            metadata: { totalAmount: result.totalAmount, itemPrices: result.itemPrices },
+        });
+        revalidatePath("/admin/orders");
+        revalidatePath("/admin/dashboard");
+        revalidatePath("/account");
+        invalidateDashboardCache();
+        return { success: true, ...result };
+    } catch (error) {
+        console.error("Failed to update order pricing:", error);
+        return { success: false, error: error instanceof Error ? error.message : "invalidOrderPricing" };
     }
 }
 
@@ -1545,6 +1678,10 @@ export async function updateCategory(id: string, data: CategoryInput) {
 export async function deleteCategory(id: string) {
     try {
         const session = await requireAdminSession("CATEGORIES_ARCHIVE");
+        const activeProductCount = await prisma.product.count({ where: { categoryId: id, archivedAt: null } });
+        if (activeProductCount > 0) {
+            return { success: false, error: "deleteCategoryWithProducts" };
+        }
         await prisma.category.update({
             where: { id, archivedAt: null },
             data: { archivedAt: new Date(), isFeatured: false },
@@ -1581,6 +1718,31 @@ export async function toggleCategoryFeatured(id: string, isFeatured: boolean) {
     } catch (error) {
         console.error("Failed to toggle category featured status:", error);
         return { success: false, error: "Failed to toggle category featured status" };
+    }
+}
+
+export async function toggleCategoryActive(id: string, isActive: boolean) {
+    try {
+        const session = await requireAdminSession("CATEGORIES_MANAGE");
+        await prisma.category.update({
+            where: { id, archivedAt: null },
+            data: {
+                isActive,
+                ...(!isActive ? { isFeatured: false } : {}),
+            },
+        });
+        await writeAdminAuditLog({
+            actorId: session.user.id,
+            action: isActive ? "ENABLE" : "DISABLE",
+            entityType: "Category",
+            entityId: id,
+        });
+
+        revalidateCatalogCache();
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to toggle category active status:", error);
+        return { success: false, error: "Failed to toggle active status" };
     }
 }
 
@@ -1627,6 +1789,8 @@ export async function getHomeCollectionSections(): Promise<HomeCollectionSection
         const featuredCategories = await prisma.category.findMany({
             where: {
                 isFeatured: true,
+                isActive: true,
+                archivedAt: null,
                 brand: { isActive: true },
             },
             orderBy: { updatedAt: "desc" },
@@ -1648,8 +1812,10 @@ export async function getHomeCollectionSections(): Promise<HomeCollectionSection
             by: ["categoryId"],
             where: {
                 categoryId: { in: featuredCategoryIds },
+                archivedAt: null,
                 stock: { gt: 0 },
                 brand: { isActive: true },
+                category: { isActive: true, archivedAt: null },
             },
             _count: {
                 _all: true,
@@ -1678,8 +1844,10 @@ export async function getHomeCollectionSections(): Promise<HomeCollectionSection
                 const products = await prisma.product.findMany({
                     where: {
                         categoryId: category.id,
+                        archivedAt: null,
                         stock: { gt: 0 },
                         brand: { isActive: true },
+                        category: { isActive: true, archivedAt: null },
                     },
                     include: {
                         brand: {
@@ -1753,7 +1921,9 @@ export async function getTrendingProducts() {
         const products = await prisma.product.findMany({
             where: {
                 isTrending: true,
+                archivedAt: null,
                 brand: { isActive: true },
+                category: { isActive: true, archivedAt: null },
             },
             // Removed limit to allow carousel to show all trending products
             include: { category: true, brand: true },
@@ -1777,6 +1947,7 @@ export async function getTrendingProducts() {
             brand: product.brand ? {
                 id: product.brand.id,
                 name: product.brand.name,
+                nameEn: product.brand.nameEn,
                 slug: product.brand.slug,
                 group: product.brand.group,
             } : null,
@@ -1949,6 +2120,8 @@ export async function bulkCreateProducts(products: ProductImportRow[]) {
         revalidatePath('/admin/main-categories');
         revalidatePath('/products');
         revalidatePath('/');
+        revalidateCatalogCache();
+        invalidateDashboardCache();
         return { success: true, count: results.length };
     } catch (error) {
         console.error("Bulk import failed:", error);
@@ -2342,6 +2515,8 @@ export async function updateAdminCredentials(data: {
 
 
 export async function updateSiteSettings(data: {
+    shippingPolicyContent?: ShippingPolicyContent;
+    contactPageContent?: ContactPageContent;
     categoriesCtaTitle?: string;
     categoriesCtaDesc?: string;
     categoriesCtaTitleAr?: string;
@@ -2349,13 +2524,22 @@ export async function updateSiteSettings(data: {
     categoriesCtaImage?: string;
     footerBrandTitle?: string;
     footerBrandTitleAr?: string;
+    footerBrandTagline?: string;
+    footerBrandTaglineAr?: string;
     footerBrandDescription?: string;
     footerBrandDescriptionAr?: string;
     footerCopyright?: string;
     footerCopyrightAr?: string;
+    footerContactTitle?: string;
+    footerContactTitleAr?: string;
+    footerAddress?: string;
+    footerAddressAr?: string;
+    footerPhone?: string;
+    footerEmail?: string;
     footerInstagramUrl?: string;
     footerFacebookUrl?: string;
     footerWhatsappUrl?: string;
+    footerLinkedinUrl?: string;
     whatsappNumber?: string;
     footerShopTitle?: string;
     footerShopTitleAr?: string;
@@ -2363,6 +2547,14 @@ export async function updateSiteSettings(data: {
     footerSupportTitleAr?: string;
     footerCompanyTitle?: string;
     footerCompanyTitleAr?: string;
+    footerNewsletterTitle?: string;
+    footerNewsletterTitleAr?: string;
+    footerNewsletterDesc?: string;
+    footerNewsletterDescAr?: string;
+    footerJurisdiction?: string;
+    footerJurisdictionAr?: string;
+    footerTermsUrl?: string;
+    footerPrivacyUrl?: string;
     footerSupportLink1Label?: string;
     footerSupportLink1LabelAr?: string;
     footerSupportLink1Url?: string;
@@ -2372,6 +2564,9 @@ export async function updateSiteSettings(data: {
     footerSupportLink3Label?: string;
     footerSupportLink3LabelAr?: string;
     footerSupportLink3Url?: string;
+    footerSupportLink4Label?: string;
+    footerSupportLink4LabelAr?: string;
+    footerSupportLink4Url?: string;
     footerCompanyLink1Label?: string;
     footerCompanyLink1LabelAr?: string;
     footerCompanyLink1Url?: string;
@@ -2381,6 +2576,9 @@ export async function updateSiteSettings(data: {
     footerCompanyLink3Label?: string;
     footerCompanyLink3LabelAr?: string;
     footerCompanyLink3Url?: string;
+    footerCompanyLink4Label?: string;
+    footerCompanyLink4LabelAr?: string;
+    footerCompanyLink4Url?: string;
     footerCategory1Id?: string | null;
     footerCategory2Id?: string | null;
     footerCategory3Id?: string | null;
@@ -2439,19 +2637,169 @@ export async function updateSiteSettings(data: {
     statBrands?: string;
     statProducts?: string;
     statClients?: string;
+    homeCategoriesBadge?: string;
+    homeCategoriesBadgeAr?: string;
+    homeCategoriesTitle?: string;
+    homeCategoriesTitleAr?: string;
+    homeCategoriesDesc?: string;
+    homeCategoriesDescAr?: string;
+    homeCategoriesStats?: string;
+    homeCategoriesIds?: string | null;
+    homeFeaturedBadge?: string;
+    homeFeaturedBadgeAr?: string;
+    homeFeaturedTitle?: string;
+    homeFeaturedTitleAr?: string;
+    homeFeaturedDesc?: string;
+    homeFeaturedDescAr?: string;
+    homeFeaturedBestSellerIds?: string | null;
+    homeFeaturedNewArrivalIds?: string | null;
+    homeServicesEnabled?: boolean;
+    homeServicesTitle?: string;
+    homeServicesTitleAr?: string;
+    homeServicesDesc?: string;
+    homeServicesDescAr?: string;
+    homeServicesItems?: string | null;
+    homeTrendingWeeklyEnabled?: boolean;
+    homeTrendingWeeklyBadge?: string;
+    homeTrendingWeeklyBadgeAr?: string;
+    homeTrendingWeeklyTitle?: string;
+    homeTrendingWeeklyTitleAr?: string;
+    homeTrendingWeeklyDesc?: string;
+    homeTrendingWeeklyDescAr?: string;
+    homeTrendingWeeklyProductIds?: string | null;
+    homeTestimonialsEnabled?: boolean;
+    homeTestimonialsBadge?: string;
+    homeTestimonialsBadgeAr?: string;
+    homeTestimonialsTitle?: string;
+    homeTestimonialsTitleAr?: string;
+    homeTestimonialsDesc?: string;
+    homeTestimonialsDescAr?: string;
+    homeTestimonialsItems?: string | null;
 }) {
     try {
-        await requireSuperAdminSession();
-        await prisma.settings.upsert({
-            where: { id: "site-settings" },
-            update: data,
-            create: {
-                id: "site-settings",
-                ...data
-            }
-        });
+        await requireAdminSession("SITE_CONTENT_MANAGE");
+        const shippingPolicyContent = data.shippingPolicyContent === undefined
+            ? undefined
+            : normalizeShippingPolicyContent(data.shippingPolicyContent);
 
-        invalidateCacheEntities(['settings']);
+        if (data.shippingPolicyContent !== undefined && !shippingPolicyContent) {
+            return { success: false, error: "Invalid shipping policy content" };
+        }
+
+        const contactPageContent = data.contactPageContent === undefined
+            ? undefined
+            : normalizeContactPageContent(data.contactPageContent);
+
+        if (data.contactPageContent !== undefined && !contactPageContent) {
+            return { success: false, error: "Invalid contact page content" };
+        }
+
+        const settingsData: any = {
+            ...data,
+            ...(shippingPolicyContent !== undefined ? { shippingPolicyContent } : {}),
+            ...(contactPageContent !== undefined ? { contactPageContent } : {}),
+        };
+
+        const validFields = Prisma?.dmmf?.datamodel?.models?.find((m: any) => m.name === 'Settings')?.fields?.map((f: any) => f.name);
+        const validFieldSet = validFields && validFields.length > 0 ? new Set(validFields) : null;
+
+        const cleanData: Record<string, any> = {};
+        for (const [key, value] of Object.entries(settingsData)) {
+            if (!validFieldSet || validFieldSet.has(key)) {
+                cleanData[key] = value;
+            }
+        }
+
+        const currentPayload = { ...cleanData };
+        let upsertSuccess = false;
+        let lastError: any = null;
+
+        // Try upserting up to 6 times, progressively stripping any column or argument that fails
+        for (let attempt = 0; attempt < 6; attempt++) {
+            try {
+                await prisma.settings.upsert({
+                    where: { id: "site-settings" },
+                    update: currentPayload,
+                    create: {
+                        id: "site-settings",
+                        ...currentPayload
+                    }
+                });
+                upsertSuccess = true;
+                break;
+            } catch (dbError: any) {
+                lastError = dbError;
+                const errorMsg = dbError?.message || "";
+                console.warn(`[updateSiteSettings] Upsert attempt ${attempt + 1} failed:`, errorMsg);
+
+                let fieldRemoved = false;
+
+                // Match Unknown argument `fieldName`
+                const argMatch = errorMsg.match(/Unknown argument [`"']([^`"']+)['"`]/i);
+                if (argMatch?.[1] && argMatch[1] in currentPayload) {
+                    console.warn(`[updateSiteSettings] Stripping unknown argument "${argMatch[1]}" and retrying...`);
+                    delete currentPayload[argMatch[1]];
+                    fieldRemoved = true;
+                }
+
+                // Match column "fieldName" does not exist
+                const colMatch = errorMsg.match(/column [`"']([^`"']+)['"`] does not exist/i);
+                if (colMatch?.[1] && colMatch[1] in currentPayload) {
+                    console.warn(`[updateSiteSettings] Stripping missing database column "${colMatch[1]}" and retrying...`);
+                    delete currentPayload[colMatch[1]];
+                    fieldRemoved = true;
+                }
+
+                // Defensively check for contactPageContent / shippingPolicyContent if mentioned in error
+                if (errorMsg.includes("contactPageContent") && "contactPageContent" in currentPayload) {
+                    delete currentPayload.contactPageContent;
+                    fieldRemoved = true;
+                }
+                if (errorMsg.includes("shippingPolicyContent") && "shippingPolicyContent" in currentPayload) {
+                    delete currentPayload.shippingPolicyContent;
+                    fieldRemoved = true;
+                }
+
+                if (!fieldRemoved) {
+                    break;
+                }
+            }
+        }
+
+        if (!upsertSuccess) {
+            throw lastError;
+        }
+
+        // If shippingPolicyContent was stripped from upsert but passed in, persist via raw SQL if column exists
+        if (shippingPolicyContent !== undefined && !("shippingPolicyContent" in currentPayload)) {
+            try {
+                await prisma.$executeRawUnsafe(
+                    `UPDATE "Settings" SET "shippingPolicyContent" = $1::jsonb WHERE id = 'site-settings'`,
+                    JSON.stringify(shippingPolicyContent)
+                );
+            } catch (e) {
+                console.warn("[updateSiteSettings] Raw SQL update for shippingPolicyContent skipped:", e);
+            }
+        }
+
+        // If contactPageContent was stripped from upsert but passed in, persist via raw SQL if column exists
+        if (contactPageContent !== undefined && !("contactPageContent" in currentPayload)) {
+            try {
+                await prisma.$executeRawUnsafe(
+                    `UPDATE "Settings" SET "contactPageContent" = $1::jsonb WHERE id = 'site-settings'`,
+                    JSON.stringify(contactPageContent)
+                );
+            } catch (e) {
+                console.warn("[updateSiteSettings] Raw SQL update for contactPageContent skipped:", e);
+            }
+        }
+
+        invalidateCacheEntities(['settings', 'categories', 'products', 'catalog']);
+        revalidatePath('/');
+        revalidatePath('/categories');
+        revalidatePath('/contact');
+        revalidatePath('/shipping-returns');
+        revalidatePath('/admin/site-content');
         return { success: true };
     } catch (error) {
         console.error("Failed to update site settings:", error);
@@ -2525,11 +2873,13 @@ export async function bulkDeleteProducts(ids: string[]) {
                 data: { archivedAt: new Date(), isTrending: false },
             });
             await writeAdminAuditLog({ actorId: session.user.id, action: "BULK_ARCHIVE", entityType: "Product", metadata: { ids: idsToDelete } });
+            invalidateDashboardCache();
         }
 
         revalidatePath('/');
         revalidatePath('/admin/products');
         revalidatePath('/admin/categories');
+        invalidateCacheEntities(['catalog', 'products']);
 
         if (idsWithOrders.size > 0) {
             const names = productsWithOrders.map(p => p.name).join(", ");
@@ -2551,22 +2901,26 @@ export async function bulkDeleteProducts(ids: string[]) {
 export async function bulkDeleteCategories(ids: string[]) {
     try {
         const session = await requireAdminSession("CATEGORIES_ARCHIVE");
-        // Find which categories have products
-        const categoriesWithProducts = await prisma.category.findMany({
+        const activeCategories = await prisma.category.findMany({
             where: {
                 id: { in: ids },
-                products: { some: {} }
+                archivedAt: null
             },
-            select: { id: true, name: true }
+            select: {
+                id: true,
+                name: true,
+                _count: { select: { products: { where: { archivedAt: null } } } }
+            }
         });
 
-        const idsWithProducts = new Set(categoriesWithProducts.map(c => c.id));
-        const idsToDelete = ids.filter(id => !idsWithProducts.has(id));
+        const categoriesWithProducts = activeCategories.filter(category => category._count.products > 0);
+        const idsToDelete = activeCategories.filter(category => category._count.products === 0).map(category => category.id);
 
         if (idsToDelete.length > 0) {
             await prisma.category.updateMany({
                 where: {
-                    id: { in: idsToDelete }
+                    id: { in: idsToDelete },
+                    archivedAt: null
                 },
                 data: { archivedAt: new Date(), isFeatured: false },
             });
@@ -2575,17 +2929,18 @@ export async function bulkDeleteCategories(ids: string[]) {
 
         invalidateCacheEntities(['categories', 'catalog', 'navigation']);
 
-        if (idsWithProducts.size > 0) {
+        if (categoriesWithProducts.length > 0) {
             const names = categoriesWithProducts.map(c => c.name).join(", ");
             return { 
                 success: true, 
                 partial: true,
                 count: idsToDelete.length,
+                archivedIds: idsToDelete,
                 names
             };
         }
 
-        return { success: true, count: idsToDelete.length };
+        return { success: true, count: idsToDelete.length, archivedIds: idsToDelete };
     } catch (error) {
         console.error("Detailed Bulk Delete Categories Error:", error);
         return { success: false, error: "bulkDeleteCategoriesError" };

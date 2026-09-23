@@ -14,6 +14,7 @@ import {
     recordSecurityMetric 
 } from "@/lib/rate-limit";
 import { recordErrorEvent } from "@/lib/monitoring";
+import { formatOrderNumber } from "@/lib/order-number";
 
 async function safelySetGuestSessionCookie(response: NextResponse, orderId: string, orderToken: string) {
     try {
@@ -332,7 +333,7 @@ export async function POST(request: Request) {
                         quantity: -item.quantity, // negative denotes reservation
                         type: "RESERVATION",
                         deduplicationKey: `reservation:${newOrder.id}:${item.productId}:v1`,
-                        reason: `حجز كمية للطلب رقم ${newOrder.id}`,
+                        reason: `حجز كمية للطلب رقم ${formatOrderNumber(newOrder.orderNumber)}`,
                     },
                 });
             }

@@ -11,6 +11,7 @@ import { useCustomer } from '@/app/context/CustomerContext';
 import { X, Lock } from 'lucide-react';
 import { formatPackaging, formatPackageItems } from '@/lib/packaging';
 import RollingNumber from '@/app/components/RollingNumber';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 interface Product {
     id: string;
@@ -33,6 +34,7 @@ interface Product {
     options?: string | null;
     brand?: {
         name: string;
+        nameEn?: string | null;
     } | null;
     [key: string]: any;
 }
@@ -170,7 +172,7 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                     
                     <div className="flex items-center gap-2 mb-3 text-xs font-semibold text-[#475569]">
                         {product.brand && (
-                            <span>{language === 'ar' ? 'الشركة / الماركة:' : 'Brand:'} <span className="font-bold text-[#0B192C] dark:text-white">{product.brand.name}</span></span>
+                            <span>{language === 'ar' ? 'الشركة / الماركة:' : 'Brand:'} <span className="font-bold text-[#0B192C] dark:text-white">{getBrandDisplayName(product.brand, language === 'ar' ? 'ar' : 'en')}</span></span>
                         )}
                     </div>
 

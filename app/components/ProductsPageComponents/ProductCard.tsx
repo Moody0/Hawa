@@ -38,6 +38,7 @@ export interface Product {
     brand?: {
         id: string;
         name: string;
+        nameEn?: string | null;
         slug: string;
         group?: string;
     } | null;
