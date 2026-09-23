@@ -241,14 +241,18 @@ export default function AdminBlogPage() {
                                             {new Date(p.createdAt).toLocaleDateString('ar-SY')}
                                         </td>
                                         <td className="p-3.5 text-center">
-                                            <Link
-                                                href={`/blog/${p.slug}`}
-                                                target="_blank"
-                                                className="p-1.5 rounded-lg text-slate-600 hover:text-[#8A6305] transition-colors inline-block"
-                                                title="عرض في الموقع"
-                                            >
-                                                <Eye className="text-lg" />
-                                            </Link>
+                                            {p.isPublished ? (
+                                                <Link
+                                                    href={`/blog/${p.slug}`}
+                                                    target="_blank"
+                                                    className="p-1.5 rounded-lg text-slate-600 hover:text-[#8A6305] transition-colors inline-block"
+                                                    title="عرض في الموقع"
+                                                >
+                                                    <Eye className="text-lg" />
+                                                </Link>
+                                            ) : (
+                                                <span className="text-xs text-slate-400 dark:text-slate-600 font-medium">-</span>
+                                            )}
                                         </td>
                                         <td className="p-3.5 text-center space-x-1 rtl:space-x-reverse">
                                             <button

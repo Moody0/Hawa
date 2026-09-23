@@ -14,34 +14,27 @@ import {
     MapPin,
     ArrowRight,
     ArrowLeft,
-    CheckCircle2,
     Building2,
     FileText,
     Truck,
     BadgeCheck,
-    Radio,
     ShieldAlert,
-    HelpCircle,
     UserCheck,
 } from "lucide-react";
-import { Settings } from "@prisma/client";
 import { PrivacyPolicyContent } from "@/lib/privacy-policy-content";
 
 interface PrivacyPageContentProps {
-    siteSettings: Settings | any | null;
     content: PrivacyPolicyContent;
 }
 
-export default function PrivacyPageContent({ siteSettings, content }: PrivacyPageContentProps) {
+export default function PrivacyPageContent({ content }: PrivacyPageContentProps) {
     const { dir, language } = useLanguage();
     const isAr = language === "ar" || dir === "rtl";
     const pageContent = isAr ? content.ar : content.en;
 
-    const phoneValue = siteSettings?.footerPhone || "+963993443901";
-    const emailValue = siteSettings?.footerEmail || "info@hawa.sy";
-    const addressValue =
-        (isAr ? siteSettings?.footerAddressAr : siteSettings?.footerAddress) ||
-        (isAr ? "سوريا - دمشق - شارع الثورة" : "Syria - Damascus - Al-Thawra St");
+    const phoneValue = pageContent.contactPhone;
+    const emailValue = pageContent.contactEmail;
+    const addressValue = pageContent.contactAddress;
 
     const cleanPhone = phoneValue.replace(/[^0-9+]/g, "");
     const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
@@ -163,7 +156,7 @@ export default function PrivacyPageContent({ siteSettings, content }: PrivacyPag
                         <div className="space-y-4">
                             <div className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                                 <div className="w-6 h-6 rounded-full bg-[#8A6305]/10 text-[#8A6305] dark:text-[#E5B54A] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                                    1
+                                    {pageContent.usageDeliveryNumber}
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-bold text-[#0B192C] dark:text-white mb-1">
@@ -177,7 +170,7 @@ export default function PrivacyPageContent({ siteSettings, content }: PrivacyPag
 
                             <div className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                                 <div className="w-6 h-6 rounded-full bg-[#8A6305]/10 text-[#8A6305] dark:text-[#E5B54A] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                                    2
+                                    {pageContent.usageVerificationNumber}
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-bold text-[#0B192C] dark:text-white mb-1">
@@ -191,7 +184,7 @@ export default function PrivacyPageContent({ siteSettings, content }: PrivacyPag
 
                             <div className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                                 <div className="w-6 h-6 rounded-full bg-[#8A6305]/10 text-[#8A6305] dark:text-[#E5B54A] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                                    3
+                                    {pageContent.usageCommunicationNumber}
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-bold text-[#0B192C] dark:text-white mb-1">
@@ -291,7 +284,7 @@ export default function PrivacyPageContent({ siteSettings, content }: PrivacyPag
                                 <Phone className="w-4 h-4 text-[#8A6305] dark:text-[#E5B54A] shrink-0" />
                                 <div className="truncate">
                                     <div className="text-[10px] font-bold text-slate-400 uppercase">
-                                        {isAr ? "الهاتف المباشر" : "Direct Phone"}
+                                        {pageContent.directPhoneLabel}
                                     </div>
                                     <div dir="ltr" className="text-xs font-bold text-[#0B192C] dark:text-white truncate">
                                         {phoneValue}
@@ -306,7 +299,7 @@ export default function PrivacyPageContent({ siteSettings, content }: PrivacyPag
                                 <Mail className="w-4 h-4 text-[#8A6305] dark:text-[#E5B54A] shrink-0" />
                                 <div className="truncate">
                                     <div className="text-[10px] font-bold text-slate-400 uppercase">
-                                        {isAr ? "البريد الإلكتروني" : "Email"}
+                                        {pageContent.emailLabel}
                                     </div>
                                     <div dir="ltr" className="text-xs font-bold text-[#0B192C] dark:text-white truncate">
                                         {emailValue}
@@ -318,7 +311,7 @@ export default function PrivacyPageContent({ siteSettings, content }: PrivacyPag
                                 <MapPin className="w-4 h-4 text-[#8A6305] dark:text-[#E5B54A] shrink-0" />
                                 <div className="truncate">
                                     <div className="text-[10px] font-bold text-slate-400 uppercase">
-                                        {isAr ? "المقر الرئيسي" : "Headquarters"}
+                                        {pageContent.addressLabel}
                                     </div>
                                     <div className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
                                         {addressValue}

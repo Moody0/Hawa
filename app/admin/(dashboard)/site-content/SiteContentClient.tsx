@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Image, Clock, Truck, AlertTriangle, ShieldCheck, Info, Save, Store, TrendingUp, RefreshCw, GalleryHorizontal, FolderTree, Sparkles, Phone, Flame, MessageSquareQuote } from 'lucide-react';
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
-import { updateSiteSettings } from "../../../../lib/admin-actions";
+import { updatePrivacyPolicyContent, updateSiteSettings } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import FooterContentSection from "./FooterContentSection";
@@ -491,6 +491,7 @@ export default function SiteContentClient({
     const [privacyPolicyContent, setPrivacyPolicyContent] = useState<PrivacyPolicyContent>(
         getPrivacyPolicyContent(initialSettings?.privacyPolicyContent, initialSettings),
     );
+    const [isSavingPrivacyPolicy, setIsSavingPrivacyPolicy] = useState(false);
 
     const [exchangeRate, setExchangeRate] = useState(initialSettings?.exchangeRate || 135);
 
@@ -557,7 +558,6 @@ export default function SiteContentClient({
                 shippingReturnsImage,
                 shippingPolicyContent,
                 contactPageContent,
-                privacyPolicyContent,
                 aboutHeroTitle,
                 aboutHeroTitleAr,
                 aboutHeroSubtitle,
@@ -635,6 +635,25 @@ export default function SiteContentClient({
             toast.error(t('admin.failedToUpdate') || "Failed to update");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleSavePrivacyPolicy = async () => {
+        if (isSavingPrivacyPolicy) return;
+        setIsSavingPrivacyPolicy(true);
+
+        try {
+            const result = await updatePrivacyPolicyContent(privacyPolicyContent);
+            if (result.success) {
+                toast.success(language === "ar" ? "تم حفظ سياسة الخصوصية بنجاح" : "Privacy policy saved successfully");
+            } else {
+                toast.error(result.error || (language === "ar" ? "تعذر حفظ سياسة الخصوصية" : "Could not save the privacy policy"));
+            }
+        } catch (error) {
+            console.error("Error saving privacy policy:", error);
+            toast.error(language === "ar" ? "تعذر حفظ سياسة الخصوصية. تحقق من الاتصال والصلاحيات ثم أعد المحاولة." : "Could not save the privacy policy. Check your connection and access, then try again.");
+        } finally {
+            setIsSavingPrivacyPolicy(false);
         }
     };
 
@@ -1137,6 +1156,8 @@ export default function SiteContentClient({
                         <PrivacyPolicyEditor
                             value={privacyPolicyContent}
                             onChange={setPrivacyPolicyContent}
+                            onSave={handleSavePrivacyPolicy}
+                            isSaving={isSavingPrivacyPolicy}
                         />
                     )}
 

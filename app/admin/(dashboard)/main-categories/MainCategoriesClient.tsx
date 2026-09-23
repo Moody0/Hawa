@@ -406,16 +406,18 @@ export default function MainCategoriesClient({ mainCategories: initialMainCatego
 
                                         {/* Actions Bar */}
                                         <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-3 mt-auto">
-                                            {/* Preview Link */}
-                                            <a
-                                                href={`/department/${mc.slug}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"
-                                            >
-                                                <Eye className="text-sm" />
-                                                <span>{isArabic ? 'معاينة' : 'Preview'}</span>
-                                            </a>
+                                            {/* Preview Link (Only shown when active) */}
+                                            {mc.isActive ? (
+                                                <a
+                                                    href={`/department/${mc.slug}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-gray-400 hover:text-[#8A6305] transition-colors"
+                                                >
+                                                    <Eye className="text-sm" />
+                                                    <span>{isArabic ? 'معاينة' : 'Preview'}</span>
+                                                </a>
+                                            ) : <div />}
 
                                             {/* Edit / Active / Delete Buttons */}
                                             <div className="flex items-center gap-1">

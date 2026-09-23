@@ -6,7 +6,7 @@ import {
     PrivacyPolicyContent,
     PrivacyPolicyField,
 } from "@/lib/privacy-policy-content";
-import { ShieldCheck, Database, Lock, Users, HelpCircle } from "lucide-react";
+import { ShieldCheck, Database, Lock, Users, HelpCircle, Save } from "lucide-react";
 
 type FieldDefinition = {
     key: PrivacyPolicyField;
@@ -58,10 +58,13 @@ const GROUPS: {
             { key: "section2Desc", en: "Section Subtitle", ar: "الوصف التوضيحي للقسم", multiline: true },
             { key: "usageDeliveryTitle", en: "Order Delivery Heading", ar: "عنوان تجهيز وتوصيل الطلبيات" },
             { key: "usageDeliveryDesc", en: "Order Delivery Details", ar: "تفاصيل تجهيز وتوصيل الطلبيات", multiline: true },
+            { key: "usageDeliveryNumber", en: "First Step Marker", ar: "رقم الخطوة الأولى" },
             { key: "usageVerificationTitle", en: "Account Verification Heading", ar: "عنوان اعتماد حسابات الجملة" },
             { key: "usageVerificationDesc", en: "Account Verification Details", ar: "تفاصيل اعتماد حسابات الجملة", multiline: true },
+            { key: "usageVerificationNumber", en: "Second Step Marker", ar: "رقم الخطوة الثانية" },
             { key: "usageCommunicationTitle", en: "Logistics Communication Heading", ar: "عنوان التواصل اللوجستي وتحديثات الوكالات" },
             { key: "usageCommunicationDesc", en: "Logistics Communication Details", ar: "تفاصيل التواصل اللوجستي والتحديثات", multiline: true },
+            { key: "usageCommunicationNumber", en: "Third Step Marker", ar: "رقم الخطوة الثالثة" },
         ],
     },
     {
@@ -92,6 +95,12 @@ const GROUPS: {
             { key: "supportDesc", en: "Inquiry Card Description", ar: "نص بطاقة استفسارات الخصوصية", multiline: true },
             { key: "contactButtonText", en: "Action Button Text", ar: "نص زر التواصل" },
             { key: "contactButtonLink", en: "Action Button Link", ar: "رابط زر التواصل" },
+            { key: "directPhoneLabel", en: "Phone Label", ar: "عنوان الهاتف" },
+            { key: "contactPhone", en: "Phone Number", ar: "رقم الهاتف" },
+            { key: "emailLabel", en: "Email Label", ar: "عنوان البريد الإلكتروني" },
+            { key: "contactEmail", en: "Email Address", ar: "البريد الإلكتروني" },
+            { key: "addressLabel", en: "Address Label", ar: "عنوان الموقع" },
+            { key: "contactAddress", en: "Address", ar: "العنوان", multiline: true },
         ],
     },
 ];
@@ -99,9 +108,13 @@ const GROUPS: {
 export default function PrivacyPolicyEditor({
     value,
     onChange,
+    onSave,
+    isSaving,
 }: {
     value: PrivacyPolicyContent;
     onChange: (nextValue: PrivacyPolicyContent) => void;
+    onSave: () => void;
+    isSaving: boolean;
 }) {
     const { language } = useLanguage();
     const isAr = language === "ar";
@@ -132,10 +145,31 @@ export default function PrivacyPolicyEditor({
                     </h4>
                     <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
                         {isAr
-                            ? "تحكم كامل في كافة نصوص وفقرات سياسة الخصوصية وسرية بيانات التجار باللغتين العربية والإنجليزية. تظهر التعديلات مباشرة فور الحفظ."
-                            : "Full control over all Privacy Policy sections, merchant confidentiality terms, and support details in both Arabic and English."}
+                            ? "حرر جميع نصوص الصفحة وبيانات التواصل باللغتين العربية والإنجليزية، ثم احفظ التعديلات من هذا القسم."
+                            : "Edit every visible text item and contact detail in both Arabic and English, then save directly from this section."}
                     </p>
                 </div>
+            </div>
+
+            <div className="flex justify-end">
+                <button
+                    type="button"
+                    onClick={onSave}
+                    disabled={isSaving}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0B192C] px-5 py-2.5 text-sm font-bold text-white shadow-xs transition-colors hover:bg-[#1e293b] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    {isSaving ? (
+                        <>
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                            <span>{isAr ? "جارٍ الحفظ" : "Saving"}</span>
+                        </>
+                    ) : (
+                        <>
+                            <Save className="h-4 w-4" />
+                            <span>{isAr ? "حفظ سياسة الخصوصية" : "Save Privacy Policy"}</span>
+                        </>
+                    )}
+                </button>
             </div>
 
             {/* Accordion / Section Cards */}
@@ -172,6 +206,7 @@ export default function PrivacyPolicyEditor({
                                                     value={value.ar?.[field.key] ?? ""}
                                                     onChange={(e) => updateField("ar", field.key, e.target.value)}
                                                     className={inputClassName}
+                                                    maxLength={5000}
                                                 />
                                             ) : (
                                                 <input
@@ -179,6 +214,7 @@ export default function PrivacyPolicyEditor({
                                                     value={value.ar?.[field.key] ?? ""}
                                                     onChange={(e) => updateField("ar", field.key, e.target.value)}
                                                     className={inputClassName}
+                                                    maxLength={5000}
                                                 />
                                             )}
                                         </div>
@@ -194,6 +230,7 @@ export default function PrivacyPolicyEditor({
                                                     value={value.en?.[field.key] ?? ""}
                                                     onChange={(e) => updateField("en", field.key, e.target.value)}
                                                     className={inputClassName}
+                                                    maxLength={5000}
                                                 />
                                             ) : (
                                                 <input
@@ -201,6 +238,7 @@ export default function PrivacyPolicyEditor({
                                                     value={value.en?.[field.key] ?? ""}
                                                     onChange={(e) => updateField("en", field.key, e.target.value)}
                                                     className={inputClassName}
+                                                    maxLength={5000}
                                                 />
                                             )}
                                         </div>

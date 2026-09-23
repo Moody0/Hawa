@@ -12,7 +12,7 @@ import { clearProductsApiCache } from "./products-cache";
 import { writeAdminAuditLog } from "./admin-audit";
 import { normalizeShippingPolicyContent, ShippingPolicyContent } from "./shipping-policy-content";
 import { normalizeContactPageContent, ContactPageContent } from "./contact-page-content";
-import { normalizePrivacyPolicyContent, PrivacyPolicyContent } from "./privacy-policy-content";
+import { normalizePrivacyPolicyContent, PRIVACY_POLICY_FIELDS } from "./privacy-policy-content";
 import { getMainCategoryProductCounts } from "./main-category-product-counts";
 
 export type CacheEntity =
@@ -53,7 +53,7 @@ const ENTITY_CACHE_MAP: Record<CacheEntity, { tags: string[]; paths: string[] }>
     },
     settings: {
         tags: ['settings'],
-        paths: ['/', '/categories', '/shipping-returns', '/about-us', '/products', '/admin/site-content'],
+        paths: ['/', '/categories', '/shipping-returns', '/privacy', '/about-us', '/products', '/admin/site-content'],
     },
     navigation: {
         tags: ['navigation'],
@@ -2515,10 +2515,54 @@ export async function updateAdminCredentials(data: {
 
 
 
+export async function updatePrivacyPolicyContent(input: unknown) {
+    try {
+        await requireAdminSession("SITE_CONTENT_MANAGE");
+
+        const content = normalizePrivacyPolicyContent(input);
+        if (!content) {
+            return { success: false, error: "Invalid privacy policy content" };
+        }
+
+        const saved = await prisma.settings.upsert({
+            where: { id: "site-settings" },
+            update: { privacyPolicyContent: content },
+            create: {
+                id: "site-settings",
+                privacyPolicyContent: content,
+            },
+            select: { privacyPolicyContent: true },
+        });
+
+        const verifiedContent = normalizePrivacyPolicyContent(saved.privacyPolicyContent);
+        const isPersisted = Boolean(verifiedContent) && PRIVACY_POLICY_FIELDS.every(
+            (field) => verifiedContent?.en[field] === content.en[field] && verifiedContent?.ar[field] === content.ar[field]
+        );
+
+        if (!isPersisted) {
+            console.error("Privacy policy save verification failed: persisted content did not match the submitted content.");
+            return { success: false, error: "The privacy policy could not be verified after saving. Please retry." };
+        }
+
+        invalidateCacheEntities(["settings"]);
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to update privacy policy content:", error);
+        const message = error instanceof Error ? error.message : "";
+        const migrationMissing = /unknown argument [`"']?privacyPolicyContent|privacyPolicyContent.*(does not exist|unknown argument)|column .*privacyPolicyContent.*does not exist/i.test(message);
+
+        return {
+            success: false,
+            error: migrationMissing
+                ? "Privacy policy storage is not ready. Apply the database migration, then retry."
+                : "Failed to save the privacy policy. Check your connection and access, then retry.",
+        };
+    }
+}
+
 export async function updateSiteSettings(data: {
     shippingPolicyContent?: ShippingPolicyContent;
     contactPageContent?: ContactPageContent;
-    privacyPolicyContent?: PrivacyPolicyContent;
     categoriesCtaTitle?: string;
     categoriesCtaDesc?: string;
     categoriesCtaTitleAr?: string;
@@ -2696,19 +2740,10 @@ export async function updateSiteSettings(data: {
             return { success: false, error: "Invalid contact page content" };
         }
 
-        const privacyPolicyContent = data.privacyPolicyContent === undefined
-            ? undefined
-            : normalizePrivacyPolicyContent(data.privacyPolicyContent);
-
-        if (data.privacyPolicyContent !== undefined && !privacyPolicyContent) {
-            return { success: false, error: "Invalid privacy policy content" };
-        }
-
         const settingsData: any = {
             ...data,
             ...(shippingPolicyContent !== undefined ? { shippingPolicyContent } : {}),
             ...(contactPageContent !== undefined ? { contactPageContent } : {}),
-            ...(privacyPolicyContent !== undefined ? { privacyPolicyContent } : {}),
         };
 
         const validFields = Prisma?.dmmf?.datamodel?.models?.find((m: any) => m.name === 'Settings')?.fields?.map((f: any) => f.name);
@@ -2761,7 +2796,7 @@ export async function updateSiteSettings(data: {
                     fieldRemoved = true;
                 }
 
-                // Defensively check for contactPageContent / shippingPolicyContent / privacyPolicyContent if mentioned in error
+                // Defensively check for contactPageContent / shippingPolicyContent if mentioned in error
                 if (errorMsg.includes("contactPageContent") && "contactPageContent" in currentPayload) {
                     delete currentPayload.contactPageContent;
                     fieldRemoved = true;
@@ -2770,11 +2805,6 @@ export async function updateSiteSettings(data: {
                     delete currentPayload.shippingPolicyContent;
                     fieldRemoved = true;
                 }
-                if (errorMsg.includes("privacyPolicyContent") && "privacyPolicyContent" in currentPayload) {
-                    delete currentPayload.privacyPolicyContent;
-                    fieldRemoved = true;
-                }
-
                 if (!fieldRemoved) {
                     break;
                 }
@@ -2806,18 +2836,6 @@ export async function updateSiteSettings(data: {
                 );
             } catch (e) {
                 console.warn("[updateSiteSettings] Raw SQL update for contactPageContent skipped:", e);
-            }
-        }
-
-        // If privacyPolicyContent was stripped from upsert but passed in, persist via raw SQL if column exists
-        if (privacyPolicyContent !== undefined && !("privacyPolicyContent" in currentPayload)) {
-            try {
-                await prisma.$executeRawUnsafe(
-                    `UPDATE "Settings" SET "privacyPolicyContent" = $1::jsonb WHERE id = 'site-settings'`,
-                    JSON.stringify(privacyPolicyContent)
-                );
-            } catch (e) {
-                console.warn("[updateSiteSettings] Raw SQL update for privacyPolicyContent skipped:", e);
             }
         }
 

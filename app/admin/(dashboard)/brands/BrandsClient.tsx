@@ -411,8 +411,8 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
 
                                         {/* Actions Bar */}
                                         <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-3 mt-auto">
-                                            {/* Preview Link */}
-                                            {brand.isActive && (
+                                            {/* Preview Link (Only shown when active) */}
+                                            {brand.isActive ? (
                                                 <a
                                                     href={`/products?brand=${brand.slug}`}
                                                     target="_blank"
@@ -422,7 +422,7 @@ export default function BrandsClient({ brands: initialBrands }: { brands: Brand[
                                                     <Eye className="text-sm" />
                                                     <span>{isArabic ? 'معاينة المتجر' : 'Preview Store'}</span>
                                                 </a>
-                                            )}
+                                            ) : <div />}
 
                                             {/* Edit / Active / Delete Buttons */}
                                             <div className="flex items-center gap-1">

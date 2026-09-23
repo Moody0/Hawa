@@ -49,6 +49,6 @@ export default async function PrivacyPage() {
     const content = getPrivacyPolicyContent(siteSettings?.privacyPolicyContent, siteSettings);
 
     return (
-        <PrivacyPageContent siteSettings={siteSettings} content={content} />
+        <PrivacyPageContent content={content} />
     );
 }

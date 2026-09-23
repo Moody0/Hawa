@@ -17,10 +17,13 @@ export const PRIVACY_POLICY_FIELDS = [
     "section2Desc",
     "usageDeliveryTitle",
     "usageDeliveryDesc",
+    "usageDeliveryNumber",
     "usageVerificationTitle",
     "usageVerificationDesc",
+    "usageVerificationNumber",
     "usageCommunicationTitle",
     "usageCommunicationDesc",
+    "usageCommunicationNumber",
     "section3Badge",
     "section3Title",
     "section3Desc",
@@ -37,6 +40,12 @@ export const PRIVACY_POLICY_FIELDS = [
     "supportDesc",
     "contactButtonText",
     "contactButtonLink",
+    "directPhoneLabel",
+    "contactPhone",
+    "emailLabel",
+    "contactEmail",
+    "addressLabel",
+    "contactAddress",
 ] as const;
 
 export type PrivacyPolicyField = (typeof PRIVACY_POLICY_FIELDS)[number];
@@ -66,10 +75,13 @@ export const DEFAULT_PRIVACY_POLICY_CONTENT: PrivacyPolicyContent = {
         section2Desc: "Information is used solely for operational and logistics execution directly tied to servicing your retail store and business.",
         usageDeliveryTitle: "Wholesale Order Delivery & Dispatch",
         usageDeliveryDesc: "Preparing cases at central warehouses in Homs and dispatching distribution trucks to your store door according to scheduled weekly runs.",
+        usageDeliveryNumber: "1",
         usageVerificationTitle: "Trade Account Verification & Pricing",
         usageVerificationDesc: "Authenticating merchant credentials to grant access to authorized wholesale pricing tiers, agency catalogs, and bulk volume discounts.",
+        usageVerificationNumber: "2",
         usageCommunicationTitle: "Operational & Logistics Updates",
         usageCommunicationDesc: "Directly notifying you when your order is dispatched, confirming arrival times, and alerting you to new stock from authorized commercial agencies.",
+        usageCommunicationNumber: "3",
         section3Badge: "Confidentiality & Security",
         section3Title: "3. Commercial Confidentiality & Security",
         section3Desc: "Protecting your trade secrets, order volumes, and market transactions is a cornerstone of our partnership.",
@@ -86,6 +98,12 @@ export const DEFAULT_PRIVACY_POLICY_CONTENT: PrivacyPolicyContent = {
         supportDesc: "Hawa Distribution management is available to assist you with any questions regarding data confidentiality or account security.",
         contactButtonText: "Contact Management",
         contactButtonLink: "/contact",
+        directPhoneLabel: "Direct Phone",
+        contactPhone: "+963 993 443 901",
+        emailLabel: "Email",
+        contactEmail: "info@hawa-dist.com",
+        addressLabel: "Headquarters",
+        contactAddress: "Homs Industrial Zone, Syria",
     },
     ar: {
         heroBadge: "حماية البيانات والسرية التجارية",
@@ -106,10 +124,13 @@ export const DEFAULT_PRIVACY_POLICY_CONTENT: PrivacyPolicyContent = {
         section2Desc: "تُستخدم البيانات للأغراض التشغيلية والتجارية المرتبطة بخدمة متجركم وتأمين احتياجاته من السلع الاستهلاكية والمواد الغذائية دون أي استخدامات غير مرغوبة.",
         usageDeliveryTitle: "تجهيز وتوصيل طلبيات الجملة",
         usageDeliveryDesc: "إعداد الطرود في المستودعات المركزية في حمص وتسيير شاحنات التوزيع لباب متجركم وفق جداول التوريد الأسبوعية المعتمدة.",
+        usageDeliveryNumber: "1",
         usageVerificationTitle: "اعتماد حسابات الجملة والأسعار الخاصة",
         usageVerificationDesc: "التحقق من صفة المتجر لاعتماد حسابه التجاري وتمكينه من الاطلاع على أسعار الجملة المباشرة وتخفيضات الكميات للوكالات.",
+        usageVerificationNumber: "2",
         usageCommunicationTitle: "التواصل اللوجستي وتحديثات الوكالات",
         usageCommunicationDesc: "إشعاركم بتحرك سيارة الشحن لمحافظتكم، وتأكيد وصول الطلبيات، وإعلامكم بتوافر أصناف جديدة أو عروض توريد من الوكالات الحصرية.",
+        usageCommunicationNumber: "3",
         section3Badge: "السرية والأمان",
         section3Title: "3. السرية التجارية وأمن المعلومات",
         section3Desc: "نضع سرية تعاملات متجركم وحجم مبيعاتكم في قمة أولوياتنا كشريك تجاري موثوق.",
@@ -126,6 +147,12 @@ export const DEFAULT_PRIVACY_POLICY_CONTENT: PrivacyPolicyContent = {
         supportDesc: "فريق الإدارة العامة لشركة حوا للتوزيع في خدمتكم للإجابة على أي استفسار يخص التعامل مع بياناتكم وسرية معاملاتكم التجارية.",
         contactButtonText: "تواصل مع الإدارة",
         contactButtonLink: "/contact",
+        directPhoneLabel: "الهاتف المباشر",
+        contactPhone: "+963 993 443 901",
+        emailLabel: "البريد الإلكتروني",
+        contactEmail: "info@hawa-dist.com",
+        addressLabel: "المقر الرئيسي",
+        contactAddress: "حمص، المنطقة الصناعية — سورية",
     },
 };
 
@@ -133,9 +160,30 @@ function sanitizeString(value: unknown, fallback: string): string {
     return typeof value === "string" ? value.trim() : fallback;
 }
 
+function normalizePrivacyPolicyLink(value: unknown, fallback: string): string {
+    if (typeof value !== "string") return fallback;
+    const link = value.trim();
+    if (!link || /[\\\u0000-\u001F\u007F]/.test(link)) return fallback;
+    if (link.startsWith("/") && !link.startsWith("//")) return link;
+
+    try {
+        const parsed = new URL(link);
+        return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.toString() : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+type PrivacyPolicyContactSettings = {
+    footerPhone?: string | null;
+    footerEmail?: string | null;
+    footerAddress?: string | null;
+    footerAddressAr?: string | null;
+};
+
 export function getPrivacyPolicyContent(
     rawContent: unknown,
-    fallbackSettings?: any
+    fallbackSettings?: PrivacyPolicyContactSettings | null
 ): PrivacyPolicyContent {
     const raw = (typeof rawContent === "object" && rawContent !== null ? rawContent : {}) as Partial<PrivacyPolicyContent>;
     const rawEn = (raw.en && typeof raw.en === "object" ? raw.en : {}) as Partial<PrivacyPolicyLocaleContent>;
@@ -144,9 +192,26 @@ export function getPrivacyPolicyContent(
     const en: PrivacyPolicyLocaleContent = {} as PrivacyPolicyLocaleContent;
     const ar: PrivacyPolicyLocaleContent = {} as PrivacyPolicyLocaleContent;
 
+    const fallbackEn = {
+        ...DEFAULT_PRIVACY_POLICY_CONTENT.en,
+        contactPhone: fallbackSettings?.footerPhone || DEFAULT_PRIVACY_POLICY_CONTENT.en.contactPhone,
+        contactEmail: fallbackSettings?.footerEmail || DEFAULT_PRIVACY_POLICY_CONTENT.en.contactEmail,
+        contactAddress: fallbackSettings?.footerAddress || DEFAULT_PRIVACY_POLICY_CONTENT.en.contactAddress,
+    };
+    const fallbackAr = {
+        ...DEFAULT_PRIVACY_POLICY_CONTENT.ar,
+        contactPhone: fallbackSettings?.footerPhone || DEFAULT_PRIVACY_POLICY_CONTENT.ar.contactPhone,
+        contactEmail: fallbackSettings?.footerEmail || DEFAULT_PRIVACY_POLICY_CONTENT.ar.contactEmail,
+        contactAddress: fallbackSettings?.footerAddressAr || DEFAULT_PRIVACY_POLICY_CONTENT.ar.contactAddress,
+    };
+
     for (const field of PRIVACY_POLICY_FIELDS) {
-        en[field] = sanitizeString(rawEn[field], DEFAULT_PRIVACY_POLICY_CONTENT.en[field]);
-        ar[field] = sanitizeString(rawAr[field], DEFAULT_PRIVACY_POLICY_CONTENT.ar[field]);
+        en[field] = field === "contactButtonLink"
+            ? normalizePrivacyPolicyLink(rawEn[field], fallbackEn[field])
+            : sanitizeString(rawEn[field], fallbackEn[field]);
+        ar[field] = field === "contactButtonLink"
+            ? normalizePrivacyPolicyLink(rawAr[field], fallbackAr[field])
+            : sanitizeString(rawAr[field], fallbackAr[field]);
     }
 
     return { en, ar };
@@ -164,13 +229,19 @@ export function normalizePrivacyPolicyContent(input: unknown): PrivacyPolicyCont
     const ar: Partial<PrivacyPolicyLocaleContent> = {};
 
     for (const field of PRIVACY_POLICY_FIELDS) {
-        en[field] = typeof candidate.en[field] === "string"
-            ? candidate.en[field].slice(0, 5000)
+        const enValue = typeof candidate.en[field] === "string"
+            ? candidate.en[field].slice(0, 5000).trim()
             : DEFAULT_PRIVACY_POLICY_CONTENT.en[field];
+        en[field] = field === "contactButtonLink"
+            ? normalizePrivacyPolicyLink(enValue, DEFAULT_PRIVACY_POLICY_CONTENT.en.contactButtonLink)
+            : enValue;
 
-        ar[field] = typeof candidate.ar[field] === "string"
-            ? candidate.ar[field].slice(0, 5000)
+        const arValue = typeof candidate.ar[field] === "string"
+            ? candidate.ar[field].slice(0, 5000).trim()
             : DEFAULT_PRIVACY_POLICY_CONTENT.ar[field];
+        ar[field] = field === "contactButtonLink"
+            ? normalizePrivacyPolicyLink(arValue, DEFAULT_PRIVACY_POLICY_CONTENT.ar.contactButtonLink)
+            : arValue;
     }
 
     return {

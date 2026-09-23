@@ -532,8 +532,8 @@ export default function CategoriesClient({ categories: initialCategories, brands
 
                                         {/* Actions Bar */}
                                         <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-3 mt-auto">
-                                            {/* Preview Link */}
-                                            {category.slug ? (
+                                            {/* Preview Link (Only shown when active) */}
+                                            {category.slug && category.isActive ? (
                                                 <a
                                                     href={`/categories/${category.slug}`}
                                                     target="_blank"
