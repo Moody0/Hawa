@@ -2,7 +2,7 @@
 
 import React from "react";
 import { FaFacebook, FaInstagram, FaWhatsapp, FaLinkedin } from "react-icons/fa";
-import { Phone, MapPin, Mail, Globe, ShieldCheck, Building2, Bell } from "lucide-react";
+import { Phone, MapPin, Mail, Globe, ShieldCheck, Building2 } from "lucide-react";
 
 interface FooterCategoryOption {
     id: string;
@@ -167,7 +167,7 @@ export default function FooterContentSection({
                 <SectionTitle
                     icon={<Building2 className="w-5 h-5" />}
                     title={t('admin.footerBranding') || '1. Brand & Identity (Column 1)'}
-                    description={t('admin.footerBrandingDescription') || 'Configure brand logo text, subtitle/tagline, description paragraph, and the bottom copyright declaration.'}
+                    description={t('admin.footerBrandingDescription') || 'Configure brand logo text, subtitle/tagline, description paragraph, bottom copyright declaration, and official social channels.'}
                 />
 
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -235,6 +235,76 @@ export default function FooterContentSection({
                             placeholder="© 2026 حوا للتوزيع والتجارة. جميع الحقوق محفوظة."
                             dir="rtl"
                         />
+                    </div>
+                </div>
+
+                {/* Social Media Links (Column 1) */}
+                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
+                    <div className="mb-4">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                            منصات التواصل الاجتماعي (العمود الأول) / Social Media Links
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            روابط منصات التواصل المعروضة تحت نبذة الشركة في العمود الأول.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
+                            <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
+                                <FaWhatsapp className="text-lg text-emerald-600" />
+                                <span className="text-xs font-bold uppercase">WhatsApp Link</span>
+                            </div>
+                            <TextField
+                                label="URL"
+                                value={footerContent.footerWhatsappUrl}
+                                onChange={(value) => onFieldChange('footerWhatsappUrl', value)}
+                                placeholder="https://wa.me/9639..."
+                                dir="ltr"
+                            />
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
+                            <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
+                                <FaFacebook className="text-lg text-blue-600" />
+                                <span className="text-xs font-bold uppercase">Facebook</span>
+                            </div>
+                            <TextField
+                                label="URL"
+                                value={footerContent.footerFacebookUrl}
+                                onChange={(value) => onFieldChange('footerFacebookUrl', value)}
+                                placeholder="https://facebook.com/..."
+                                dir="ltr"
+                            />
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
+                            <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
+                                <FaInstagram className="text-lg text-pink-600" />
+                                <span className="text-xs font-bold uppercase">Instagram</span>
+                            </div>
+                            <TextField
+                                label="URL"
+                                value={footerContent.footerInstagramUrl}
+                                onChange={(value) => onFieldChange('footerInstagramUrl', value)}
+                                placeholder="https://instagram.com/..."
+                                dir="ltr"
+                            />
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
+                            <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
+                                <FaLinkedin className="text-lg text-sky-600" />
+                                <span className="text-xs font-bold uppercase">LinkedIn</span>
+                            </div>
+                            <TextField
+                                label="URL"
+                                value={footerContent.footerLinkedinUrl}
+                                onChange={(value) => onFieldChange('footerLinkedinUrl', value)}
+                                placeholder="https://linkedin.com/company/..."
+                                dir="ltr"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -482,120 +552,11 @@ export default function FooterContentSection({
                 </div>
             </div>
 
-            {/* 5. Column 5: Newsletter & Social Channels */}
-            <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#0f172a] p-6 md:p-8 shadow-xs">
-                <SectionTitle
-                    icon={<Bell className="w-5 h-5" />}
-                    title="5. Newsletter & Social Channels (Column 5)"
-                    description="Customize newsletter titles, promotional description, and all official social media profile URLs."
-                />
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-6">
-                    <div className="space-y-4">
-                        <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">
-                            🇬🇧 English Newsletter
-                        </span>
-                        <TextField
-                            label="Newsletter Title"
-                            value={footerContent.footerNewsletterTitle}
-                            onChange={(value) => onFieldChange('footerNewsletterTitle', value)}
-                            placeholder="Newsletter"
-                        />
-                        <TextAreaField
-                            label="Newsletter Description"
-                            value={footerContent.footerNewsletterDesc}
-                            onChange={(value) => onFieldChange('footerNewsletterDesc', value)}
-                            rows={2}
-                            placeholder="Subscribe to get the latest trade discounts, new arrivals & price lists."
-                        />
-                    </div>
-
-                    <div className="space-y-4">
-                        <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">
-                            🇸🇦 النشرة البريدية بالعربي
-                        </span>
-                        <TextField
-                            label="عنوان النشرة"
-                            value={footerContent.footerNewsletterTitleAr}
-                            onChange={(value) => onFieldChange('footerNewsletterTitleAr', value)}
-                            placeholder="النشرة البريدية"
-                            dir="rtl"
-                        />
-                        <TextAreaField
-                            label="نص ووصف النشرة"
-                            value={footerContent.footerNewsletterDescAr}
-                            onChange={(value) => onFieldChange('footerNewsletterDescAr', value)}
-                            rows={2}
-                            placeholder="اشترك ليصلك كل جديد عن المنتجات والعروض والأسعار."
-                            dir="rtl"
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-4 pt-4 border-t border-slate-100 dark:border-white/10">
-                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
-                        <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
-                            <FaWhatsapp className="text-lg text-emerald-600" />
-                            <span className="text-xs font-bold uppercase">WhatsApp Link</span>
-                        </div>
-                        <TextField
-                            label="URL"
-                            value={footerContent.footerWhatsappUrl}
-                            onChange={(value) => onFieldChange('footerWhatsappUrl', value)}
-                            placeholder="https://wa.me/9639..."
-                            dir="ltr"
-                        />
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
-                        <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
-                            <FaFacebook className="text-lg text-blue-600" />
-                            <span className="text-xs font-bold uppercase">Facebook</span>
-                        </div>
-                        <TextField
-                            label="URL"
-                            value={footerContent.footerFacebookUrl}
-                            onChange={(value) => onFieldChange('footerFacebookUrl', value)}
-                            placeholder="https://facebook.com/..."
-                            dir="ltr"
-                        />
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
-                        <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
-                            <FaInstagram className="text-lg text-pink-600" />
-                            <span className="text-xs font-bold uppercase">Instagram</span>
-                        </div>
-                        <TextField
-                            label="URL"
-                            value={footerContent.footerInstagramUrl}
-                            onChange={(value) => onFieldChange('footerInstagramUrl', value)}
-                            placeholder="https://instagram.com/..."
-                            dir="ltr"
-                        />
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
-                        <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
-                            <FaLinkedin className="text-lg text-sky-600" />
-                            <span className="text-xs font-bold uppercase">LinkedIn</span>
-                        </div>
-                        <TextField
-                            label="URL"
-                            value={footerContent.footerLinkedinUrl}
-                            onChange={(value) => onFieldChange('footerLinkedinUrl', value)}
-                            placeholder="https://linkedin.com/company/..."
-                            dir="ltr"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* 6. Bottom Legal & Jurisdiction Bar */}
+            {/* 5. Bottom Legal & Jurisdiction Bar */}
             <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#0f172a] p-6 md:p-8 shadow-xs">
                 <SectionTitle
                     icon={<ShieldCheck className="w-5 h-5" />}
-                    title="6. Legal Policies & Regional Jurisdiction (Bottom Bar)"
+                    title="5. Legal Policies & Regional Jurisdiction (Bottom Bar)"
                     description="Configure links for Terms & Conditions and Privacy Policy, plus the official legal location statement."
                 />
 

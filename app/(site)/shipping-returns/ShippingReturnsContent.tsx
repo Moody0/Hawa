@@ -16,30 +16,54 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
     const { dir, language } = useLanguage();
     const pageContent = language === 'ar' || dir === 'rtl' ? content.ar : content.en;
 
-    // Phone / WhatsApp setup
+    // Phone / WhatsApp setup with dedicated dispatch overrides
     const defaultWa = '+963993443901';
-    const rawWa = siteSettings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || defaultWa;
+    const rawWa = pageContent.dispatchWhatsapp?.trim() || siteSettings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || defaultWa;
     const cleanWaNumber = rawWa.replace(/[^0-9]/g, '');
-    const phoneNumber = siteSettings?.footerPhone || defaultWa;
-    const cleanPhoneNumber = phoneNumber.replace(/[^0-9+]/g, '');
+    const rawPhone = pageContent.dispatchPhone?.trim() || siteSettings?.footerPhone || defaultWa;
+    const cleanPhoneNumber = rawPhone.replace(/[^0-9+]/g, '');
+    const phoneLabel = pageContent.phoneButtonLabel || (language === 'ar' || dir === 'rtl' ? 'اتصال مباشر' : 'Direct Call');
+    const heroImage = siteSettings?.shippingReturnsImage?.trim();
 
     return (
         <div className="w-full bg-[#FCFBF8] dark:bg-[#070D18] text-[#0B192C] dark:text-slate-100 transition-colors py-10 md:py-16" dir={dir}>
             <div className="container-custom max-w-4xl mx-auto">
                 
-                {/* Header: Clean & Informative */}
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-bold uppercase tracking-wider mb-3">
-                        <Truck className="text-sm" />
-                        <span>{pageContent.heroBadge}</span>
+                {/* Header: Clean & Informative or Hero Banner if Image is set */}
+                {heroImage ? (
+                    <div className="relative rounded-3xl overflow-hidden mb-12 bg-[#0B192C] text-white p-8 sm:p-12 text-center border border-[#8A6305]/30 shadow-md">
+                        <div 
+                            className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity scale-105 transition-transform duration-1000"
+                            style={{ backgroundImage: `url('${heroImage}')` }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0B192C] via-[#0B192C]/85 to-[#0B192C]/65" />
+                        <div className="relative z-10 max-w-2xl mx-auto">
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#8A6305]/20 border border-[#8A6305]/40 text-[#E5B54A] text-xs font-bold uppercase tracking-wider mb-4 shadow-xs">
+                                <Truck className="text-sm" />
+                                <span>{pageContent.heroBadge}</span>
+                            </div>
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+                                {pageContent.heroTitle}
+                            </h1>
+                            <p className="text-xs sm:text-sm md:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
+                                {pageContent.heroDescription}
+                            </p>
+                        </div>
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight mb-3">
-                        {pageContent.heroTitle}
-                    </h1>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
-                        {pageContent.heroDescription}
-                    </p>
-                </div>
+                ) : (
+                    <div className="text-center mb-12">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-bold uppercase tracking-wider mb-3">
+                            <Truck className="text-sm" />
+                            <span>{pageContent.heroBadge}</span>
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight mb-3">
+                            {pageContent.heroTitle}
+                        </h1>
+                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
+                            {pageContent.heroDescription}
+                        </p>
+                    </div>
+                )}
 
                 <div className="space-y-8">
                     
@@ -242,7 +266,7 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-2.5 shrink-0">
+                        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2.5 shrink-0">
                             <a
                                 href={`https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(pageContent.whatsappMessage)}`}
                                 target="_blank"
@@ -254,10 +278,11 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
                             </a>
                             <a
                                 href={`tel:${cleanPhoneNumber}`}
-                                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white dark:bg-[#132035] border border-slate-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-slate-50 text-xs font-bold transition-all shadow-xs"
+                                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white dark:bg-[#132035] border border-slate-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-slate-50 dark:hover:bg-white/10 text-xs font-bold transition-all shadow-xs"
                             >
-                                <Phone className="text-sm" />
-                                <span dir="ltr">{phoneNumber}</span>
+                                <Phone className="text-sm text-[#8A6305] dark:text-[#E5B54A]" />
+                                <span>{phoneLabel}</span>
+                                <span dir="ltr" className="text-slate-500 dark:text-slate-400 font-normal">({rawPhone})</span>
                             </a>
                         </div>
                     </div>

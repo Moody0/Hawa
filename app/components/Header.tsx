@@ -63,7 +63,7 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
 
     useEffect(() => {
         if (navData.length === 0) {
-            fetch('/api/navigation')
+            fetch('/api/navigation', { cache: 'no-store' })
                 .then((res) => (res.ok ? res.json() : []))
                 .then((data) => {
                     if (Array.isArray(data) && data.length > 0) {

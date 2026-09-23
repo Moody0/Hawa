@@ -4,7 +4,6 @@ import React from 'react';
 import { FaInstagram, FaFacebook, FaWhatsapp, FaLinkedin } from 'react-icons/fa';
 import { Phone, MapPin, Mail } from 'lucide-react';
 import { getSiteSettings } from '@/lib/public-queries';
-import FooterNewsletter from './FooterNewsletter';
 
 interface FooterProps {
     t: (key: string) => string;
@@ -74,22 +73,12 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
         getLocalizedValue(language, settings?.footerCompanyTitle, settings?.footerCompanyTitleAr) ||
         (isArabic ? 'روابط سريعة' : 'Quick Links');
 
-    const newsletterTitle =
-        getLocalizedValue(language, settings?.footerNewsletterTitle, settings?.footerNewsletterTitleAr) ||
-        (isArabic ? 'النشرة البريدية' : 'Newsletter');
-
-    const newsletterDesc =
-        getLocalizedValue(language, settings?.footerNewsletterDesc, settings?.footerNewsletterDescAr) ||
-        (isArabic
-            ? 'اشترك ليصلك كل جديد عن المنتجات والعروض والأسعار.'
-            : 'Subscribe to get the latest trade discounts, new arrivals & price lists.');
-
     const jurisdictionText =
         getLocalizedValue(language, settings?.footerJurisdiction, settings?.footerJurisdictionAr) ||
         (isArabic ? 'الجمهورية العربية السورية — حمص' : 'Syrian Arab Republic — Homs');
 
     const termsUrl = settings?.footerTermsUrl || '/shipping-returns';
-    const privacyUrl = settings?.footerPrivacyUrl || '/shipping-returns';
+    const privacyUrl = settings?.footerPrivacyUrl || '/privacy';
 
     // 1. Column 3: Wholesale Services Links (dynamic settings with fallbacks)
     const rawServicesLinks = [
@@ -207,11 +196,11 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#8A6305]/40 to-transparent pointer-events-none" />
 
             <div className="container-custom">
-                {/* 5-Column Grid with Desktop Vertical Border Separators */}
+                {/* 4-Column Grid with Desktop Vertical Border Separators */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-0 mb-12">
                     
-                    {/* Column 1: Brand & Identity (lg:col-span-3 lg:pe-6) */}
-                    <div className="lg:col-span-3 flex flex-col gap-4 lg:pe-6 lg:border-e lg:border-white/10">
+                    {/* Column 1: Brand & Identity + Socials (lg:col-span-4 lg:pe-8) */}
+                    <div className="lg:col-span-4 flex flex-col gap-4 lg:pe-8 lg:border-e lg:border-white/10">
                         <Link
                             href="/"
                             className="inline-flex items-center gap-3 group focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A6305] rounded-xl w-fit"
@@ -238,6 +227,30 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                         <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed max-w-sm">
                             {brandDescription}
                         </p>
+
+                        {/* Social Channels */}
+                        <div className="flex flex-col gap-2 pt-2">
+                            <span className="text-[11px] font-semibold text-slate-400">
+                                {isArabic ? 'تابعنا على منصاتنا:' : 'Follow our channels:'}
+                            </span>
+                            <div className="flex items-center gap-2">
+                                {socialLinks.map((social) => {
+                                    const Icon = social.icon;
+                                    return (
+                                        <a
+                                            key={social.label}
+                                            className="w-8 h-8 rounded-lg bg-white/[0.06] text-slate-300 hover:bg-[#8A6305] hover:text-white transition-all duration-200 flex items-center justify-center text-sm border border-white/10 hover:border-[#8A6305] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A6305]"
+                                            href={social.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={social.label}
+                                        >
+                                            <Icon aria-hidden="true" />
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Column 2: Contact & Working Hours (lg:col-span-3 lg:px-6) */}
@@ -285,8 +298,8 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                         </div>
                     </div>
 
-                    {/* Column 3: Wholesale Services (lg:col-span-2 lg:px-6) */}
-                    <div className="lg:col-span-2 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
+                    {/* Column 3: Wholesale Services (lg:col-span-3 lg:px-6) */}
+                    <div className="lg:col-span-3 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
                         <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
                             {supportTitle}
                         </h5>
@@ -299,8 +312,8 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                         </ul>
                     </div>
 
-                    {/* Column 4: Quick Links (lg:col-span-2 lg:px-6) */}
-                    <div className="lg:col-span-2 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
+                    {/* Column 4: Quick Links (lg:col-span-2 lg:ps-6) */}
+                    <div className="lg:col-span-2 flex flex-col gap-3.5 lg:ps-6">
                         <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
                             {companyTitle}
                         </h5>
@@ -311,44 +324,6 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                                 </li>
                             ))}
                         </ul>
-                    </div>
-
-                    {/* Column 5: Newsletter & Community (lg:col-span-2 lg:ps-6) */}
-                    <div className="lg:col-span-2 flex flex-col gap-3.5 lg:ps-6">
-                        <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
-                            {newsletterTitle}
-                        </h5>
-
-                        <p className="text-xs text-slate-300 leading-relaxed">
-                            {newsletterDesc}
-                        </p>
-
-                        {/* Interactive Newsletter Subscription */}
-                        <FooterNewsletter language={language} />
-
-                        {/* Social Channels */}
-                        <div className="flex flex-col gap-2 pt-2">
-                            <span className="text-[11px] font-semibold text-slate-400">
-                                {isArabic ? 'تابعنا على منصاتنا:' : 'Follow our channels:'}
-                            </span>
-                            <div className="flex items-center gap-2">
-                                {socialLinks.map((social) => {
-                                    const Icon = social.icon;
-                                    return (
-                                        <a
-                                            key={social.label}
-                                            className="w-8 h-8 rounded-lg bg-white/[0.06] text-slate-300 hover:bg-[#8A6305] hover:text-white transition-all duration-200 flex items-center justify-center text-sm border border-white/10 hover:border-[#8A6305] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A6305]"
-                                            href={social.href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            aria-label={social.label}
-                                        >
-                                            <Icon aria-hidden="true" />
-                                        </a>
-                                    );
-                                })}
-                            </div>
-                        </div>
                     </div>
 
                 </div>

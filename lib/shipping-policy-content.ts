@@ -32,6 +32,9 @@ export const SHIPPING_POLICY_FIELDS = [
     "supportDescription",
     "whatsappButtonLabel",
     "whatsappMessage",
+    "phoneButtonLabel",
+    "dispatchPhone",
+    "dispatchWhatsapp",
 ] as const;
 
 export type ShippingPolicyField = (typeof SHIPPING_POLICY_FIELDS)[number];
@@ -76,6 +79,9 @@ export const DEFAULT_SHIPPING_POLICY_CONTENT: ShippingPolicyContent = {
         supportDescription: "Our logistics dispatch desk is available to confirm route timings and order status.",
         whatsappButtonLabel: "WhatsApp",
         whatsappMessage: "Hello, I have an inquiry regarding wholesale delivery schedules to my area.",
+        phoneButtonLabel: "Direct Call",
+        dispatchPhone: "",
+        dispatchWhatsapp: "",
     },
     ar: {
         heroBadge: "تعليمات التوزيع وسياسة التوريد",
@@ -111,6 +117,9 @@ export const DEFAULT_SHIPPING_POLICY_CONTENT: ShippingPolicyContent = {
         supportDescription: "فريق حركة وتنسيق التوزيع جاهز للإجابة وتحديد موعد الرحلة القادمة لمنطقتك.",
         whatsappButtonLabel: "واتساب الحركة",
         whatsappMessage: "مرحباً، أود الاستفسار عن موعد رحلة التوزيع القادمة لمنطقتي.",
+        phoneButtonLabel: "اتصال مباشر",
+        dispatchPhone: "",
+        dispatchWhatsapp: "",
     },
 };
 
@@ -174,8 +183,12 @@ export function normalizeShippingPolicyContent(value: unknown): ShippingPolicyCo
 
         for (const field of SHIPPING_POLICY_FIELDS) {
             const fieldValue = values[field];
-            if (typeof fieldValue !== "string" || fieldValue.length > 5000) return null;
-            normalizedLocale[field] = fieldValue;
+            if (typeof fieldValue === "string") {
+                if (fieldValue.length > 5000) return null;
+                normalizedLocale[field] = fieldValue;
+            } else {
+                normalizedLocale[field] = DEFAULT_SHIPPING_POLICY_CONTENT[locale][field] || "";
+            }
         }
 
         output[locale] = normalizedLocale;

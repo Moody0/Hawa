@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Image, Clock, Truck, AlertTriangle, ShieldCheck, Info, Save, Store, TrendingUp, RefreshCw, GalleryHorizontal, FolderTree, Sparkles, Phone, Flame, MessageSquareQuote } from 'lucide-react';
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
@@ -15,14 +15,17 @@ import HomeServicesContentSection from "./HomeServicesContentSection";
 import HomeTestimonialsContentSection from "./HomeTestimonialsContentSection";
 import ShippingPolicyEditor from "./ShippingPolicyEditor";
 import ContactContentSection from "./ContactContentSection";
+import PrivacyPolicyEditor from "./PrivacyPolicyEditor";
 import { getShippingPolicyContent, ShippingPolicyContent } from "@/lib/shipping-policy-content";
 import { getContactPageContent, ContactPageContent } from "@/lib/contact-page-content";
+import { getPrivacyPolicyContent, PrivacyPolicyContent } from "@/lib/privacy-policy-content";
 import { CompanyServiceItem, DEFAULT_COMPANY_SERVICES, PublicTestimonialItem, DEFAULT_TESTIMONIALS } from "@/lib/public-queries";
 
 interface SiteSettings {
     id: string;
     shippingPolicyContent?: unknown;
     contactPageContent?: unknown;
+    privacyPolicyContent?: unknown;
     categoriesCtaTitle: string | null;
     categoriesCtaDesc: string | null;
     categoriesCtaTitleAr: string | null;
@@ -199,7 +202,7 @@ interface SiteSettings {
     homeTestimonialsItems?: string | null;
 }
 
-type TabType = "currency" | "homeCategories" | "homeFeatured" | "homeTrending" | "homeServices" | "homeTestimonials" | "stats" | "footer" | "banners" | "shipping" | "about" | "contact";
+type TabType = "currency" | "homeCategories" | "homeFeatured" | "homeTrending" | "homeServices" | "homeTestimonials" | "stats" | "footer" | "banners" | "shipping" | "about" | "contact" | "privacy";
 
 export default function SiteContentClient({ 
     initialSettings,
@@ -214,6 +217,30 @@ export default function SiteContentClient({
     const { openSidebar } = useAdminSidebar();
     const [activeTab, setActiveTab] = useState<TabType>("currency");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get("tab") as TabType | null;
+            const validTabs: TabType[] = [
+                "currency", "homeCategories", "homeFeatured", "homeTrending", 
+                "homeServices", "homeTestimonials", "stats", "footer", 
+                "banners", "shipping", "contact", "privacy", "about"
+            ];
+            if (tab && validTabs.includes(tab)) {
+                setActiveTab(tab);
+            }
+        }
+    }, []);
+
+    const handleTabChange = (newTab: TabType) => {
+        setActiveTab(newTab);
+        if (typeof window !== "undefined") {
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", newTab);
+            window.history.replaceState({}, "", url.toString());
+        }
+    };
 
     // Site Settings State - Home Categories & Wholesale Stats
     const [homeCategoriesBadge, setHomeCategoriesBadge] = useState(initialSettings?.homeCategoriesBadge || "DIRECT WHOLESALE DISTRIBUTION");
@@ -461,6 +488,9 @@ export default function SiteContentClient({
     const [contactPageContent, setContactPageContent] = useState<ContactPageContent>(
         getContactPageContent(initialSettings?.contactPageContent, initialSettings),
     );
+    const [privacyPolicyContent, setPrivacyPolicyContent] = useState<PrivacyPolicyContent>(
+        getPrivacyPolicyContent(initialSettings?.privacyPolicyContent, initialSettings),
+    );
 
     const [exchangeRate, setExchangeRate] = useState(initialSettings?.exchangeRate || 135);
 
@@ -527,6 +557,7 @@ export default function SiteContentClient({
                 shippingReturnsImage,
                 shippingPolicyContent,
                 contactPageContent,
+                privacyPolicyContent,
                 aboutHeroTitle,
                 aboutHeroTitleAr,
                 aboutHeroSubtitle,
@@ -618,6 +649,7 @@ export default function SiteContentClient({
         { id: "footer", label: t('admin.tabFooter') || "Footer & Social", icon: <Store className="text-lg" /> },
         { id: "banners", label: t('admin.tabBanners') || "Promo Banners", icon: <GalleryHorizontal className="text-lg" /> },
         { id: "shipping", label: t('admin.tabShipping') || "Shipping & Policy", icon: <Truck className="text-lg" /> },
+        { id: "privacy", label: language === 'ar' ? "سياسة الخصوصية" : "Privacy Policy", icon: <ShieldCheck className="text-lg" /> },
         { id: "contact", label: language === 'ar' ? "صفحة تواصل معنا" : "Contact Us Page", icon: <Phone className="text-lg" /> },
         { id: "about", label: t('admin.tabAbout') || "About Us Story", icon: <Info className="text-lg" /> },
     ];
@@ -664,7 +696,7 @@ export default function SiteContentClient({
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
+                                onClick={() => handleTabChange(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap ${
                                     isActive
                                         ? 'bg-[#0B192C] text-white shadow-xs'
@@ -1090,7 +1122,22 @@ export default function SiteContentClient({
 
                     {/* TAB 4: SHIPPING & POLICIES */}
                     {activeTab === "shipping" && (
-                        <ShippingPolicyEditor value={shippingPolicyContent} onChange={setShippingPolicyContent} />
+                        <ShippingPolicyEditor
+                            value={shippingPolicyContent}
+                            onChange={setShippingPolicyContent}
+                            shippingReturnsImage={shippingReturnsImage}
+                            onImageChange={setShippingReturnsImage}
+                            onSave={handleSaveAll}
+                            isSaving={isSubmitting}
+                        />
+                    )}
+
+                    {/* TAB: PRIVACY POLICY */}
+                    {activeTab === "privacy" && (
+                        <PrivacyPolicyEditor
+                            value={privacyPolicyContent}
+                            onChange={setPrivacyPolicyContent}
+                        />
                     )}
 
                     {/* TAB: CONTACT US PAGE */}

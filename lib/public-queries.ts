@@ -223,6 +223,7 @@ export const DEFAULT_SITE_SETTINGS = {
     id: "site-settings",
     shippingPolicyContent: null,
     contactPageContent: null,
+    privacyPolicyContent: null,
     categoriesCtaTitle: "Looking for specific wholesale brands?",
     categoriesCtaDesc: "Our wholesale team is ready to provide custom pricing and scheduled deliveries for your business.",
     categoriesCtaTitleAr: "تبحث عن شركات أو منتجات محددة؟",
@@ -1374,6 +1375,18 @@ export const getSiteSettings = unstable_cache(
             if (!settings) {
                 return DEFAULT_SITE_SETTINGS;
             }
+
+            let privacyPolicyContent = (settings as any)?.privacyPolicyContent || null;
+            if (!privacyPolicyContent) {
+                try {
+                    const rawRows: any = await prisma.$queryRawUnsafe(`SELECT "privacyPolicyContent" FROM "Settings" WHERE id = 'site-settings' LIMIT 1`);
+                    if (rawRows?.[0]?.privacyPolicyContent) {
+                        privacyPolicyContent = rawRows[0].privacyPolicyContent;
+                    }
+                } catch {
+                    // Safe fallback if column is not yet queried
+                }
+            }
             
             return {
                 ...DEFAULT_SITE_SETTINGS,
@@ -1424,6 +1437,7 @@ export const getSiteSettings = unstable_cache(
                 homeTestimonialsItems: settings.homeTestimonialsItems || DEFAULT_SITE_SETTINGS.homeTestimonialsItems,
                 shippingPolicyContent: (settings as any)?.shippingPolicyContent || null,
                 contactPageContent: (settings as any)?.contactPageContent || null,
+                privacyPolicyContent: privacyPolicyContent,
 
                 // Footer settings with defaults
                 footerBrandTitle: settings.footerBrandTitle || DEFAULT_SITE_SETTINGS.footerBrandTitle,

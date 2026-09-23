@@ -304,6 +304,7 @@ model Settings {
   id                        String   @id @default("site-settings")
   shippingPolicyContent     Json?
   contactPageContent        Json?
+  privacyPolicyContent      Json?
   categoriesCtaTitle        String?  @default("Looking for specific wholesale brands?")
   categoriesCtaDesc         String?  @default("Our wholesale team is ready to provide custom pricing and scheduled deliveries for your business.")
   categoriesCtaTitleAr      String?  @default("تبحث عن شركات أو منتجات محددة؟")

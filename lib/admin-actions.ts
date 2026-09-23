@@ -12,6 +12,7 @@ import { clearProductsApiCache } from "./products-cache";
 import { writeAdminAuditLog } from "./admin-audit";
 import { normalizeShippingPolicyContent, ShippingPolicyContent } from "./shipping-policy-content";
 import { normalizeContactPageContent, ContactPageContent } from "./contact-page-content";
+import { normalizePrivacyPolicyContent, PrivacyPolicyContent } from "./privacy-policy-content";
 import { getMainCategoryProductCounts } from "./main-category-product-counts";
 
 export type CacheEntity =
@@ -2517,6 +2518,7 @@ export async function updateAdminCredentials(data: {
 export async function updateSiteSettings(data: {
     shippingPolicyContent?: ShippingPolicyContent;
     contactPageContent?: ContactPageContent;
+    privacyPolicyContent?: PrivacyPolicyContent;
     categoriesCtaTitle?: string;
     categoriesCtaDesc?: string;
     categoriesCtaTitleAr?: string;
@@ -2694,10 +2696,19 @@ export async function updateSiteSettings(data: {
             return { success: false, error: "Invalid contact page content" };
         }
 
+        const privacyPolicyContent = data.privacyPolicyContent === undefined
+            ? undefined
+            : normalizePrivacyPolicyContent(data.privacyPolicyContent);
+
+        if (data.privacyPolicyContent !== undefined && !privacyPolicyContent) {
+            return { success: false, error: "Invalid privacy policy content" };
+        }
+
         const settingsData: any = {
             ...data,
             ...(shippingPolicyContent !== undefined ? { shippingPolicyContent } : {}),
             ...(contactPageContent !== undefined ? { contactPageContent } : {}),
+            ...(privacyPolicyContent !== undefined ? { privacyPolicyContent } : {}),
         };
 
         const validFields = Prisma?.dmmf?.datamodel?.models?.find((m: any) => m.name === 'Settings')?.fields?.map((f: any) => f.name);
@@ -2750,13 +2761,17 @@ export async function updateSiteSettings(data: {
                     fieldRemoved = true;
                 }
 
-                // Defensively check for contactPageContent / shippingPolicyContent if mentioned in error
+                // Defensively check for contactPageContent / shippingPolicyContent / privacyPolicyContent if mentioned in error
                 if (errorMsg.includes("contactPageContent") && "contactPageContent" in currentPayload) {
                     delete currentPayload.contactPageContent;
                     fieldRemoved = true;
                 }
                 if (errorMsg.includes("shippingPolicyContent") && "shippingPolicyContent" in currentPayload) {
                     delete currentPayload.shippingPolicyContent;
+                    fieldRemoved = true;
+                }
+                if (errorMsg.includes("privacyPolicyContent") && "privacyPolicyContent" in currentPayload) {
+                    delete currentPayload.privacyPolicyContent;
                     fieldRemoved = true;
                 }
 
@@ -2794,11 +2809,24 @@ export async function updateSiteSettings(data: {
             }
         }
 
+        // If privacyPolicyContent was stripped from upsert but passed in, persist via raw SQL if column exists
+        if (privacyPolicyContent !== undefined && !("privacyPolicyContent" in currentPayload)) {
+            try {
+                await prisma.$executeRawUnsafe(
+                    `UPDATE "Settings" SET "privacyPolicyContent" = $1::jsonb WHERE id = 'site-settings'`,
+                    JSON.stringify(privacyPolicyContent)
+                );
+            } catch (e) {
+                console.warn("[updateSiteSettings] Raw SQL update for privacyPolicyContent skipped:", e);
+            }
+        }
+
         invalidateCacheEntities(['settings', 'categories', 'products', 'catalog']);
         revalidatePath('/');
         revalidatePath('/categories');
         revalidatePath('/contact');
         revalidatePath('/shipping-returns');
+        revalidatePath('/privacy');
         revalidatePath('/admin/site-content');
         return { success: true };
     } catch (error) {

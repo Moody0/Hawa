@@ -204,12 +204,12 @@ async function fetchNavigationData(): Promise<NavMainCategory[]> {
         });
     } catch (error) {
         console.error("Error in getNavigationData:", error);
-        return [];
+        throw error;
     }
 }
 
 export const getNavigationData = unstable_cache(
     fetchNavigationData,
     ["navigation-data"],
-    { tags: ["navigation"], revalidate: 3600 }
+    { tags: ["navigation"], revalidate: 60 }
 );

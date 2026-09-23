@@ -14,7 +14,12 @@ export default async function SiteLayout({
     children: React.ReactNode;
 }) {
     const { t, dir, language } = await getI18n();
-    const navData = await getNavigationData();
+    let navData: any[] = [];
+    try {
+        navData = await getNavigationData();
+    } catch (e) {
+        console.error("Failed to load navigation data in SiteLayout:", e);
+    }
 
     return (
         <div className="min-h-screen flex flex-col" dir={dir}>
