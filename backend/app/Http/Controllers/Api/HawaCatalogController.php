@@ -54,7 +54,7 @@ class HawaCatalogController extends CatalogController
     public function navigation()
     {
         $rows = MainCategory::where('is_active', true)->where('show_in_nav', true)->orderBy('nav_order')->get()->map(function ($c) {
-            $products = self::department(self::available(), $c->id)->where('stock', '>', 0)->with('brand')->orderByDesc('is_trending')->latest()->take(3)->get();
+            $products = self::department(self::available(), $c->id)->with('brand')->orderByDesc('is_trending')->latest()->take(3)->get();
             $categories = Category::where('is_active', true)->where('main_category_id', $c->id)->orderBy('name')->get()->unique(fn ($r) => mb_strtolower(trim($r->name)))->take(8)->values();
             $brands = Brand::where('is_active', true)->where(fn ($q) => $q->where('main_category_id', $c->id)->orWhereHas('products', fn ($p) => $p->where('main_category_id', $c->id)))->take(8)->get();
 

@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 import {
     LayoutGrid,
     FolderTree,
+    Sparkles,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
@@ -15,6 +16,8 @@ import {
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import type { NavMainCategory } from '@/lib/navigation';
+import { getBrandDisplayName } from '@/lib/brand-display';
+import ResilientImage from '@/app/components/ResilientImage';
 
 interface DesktopCategoriesBarProps {
     navData: NavMainCategory[];
@@ -142,6 +145,29 @@ export default function DesktopCategoriesBar({
         }
         return result;
     }, [activeDepartment]);
+
+    const uniqueBrands = useMemo(() => {
+        if (!activeDepartment?.brands) return [];
+        const seen = new Set<string>();
+        return activeDepartment.brands.filter((brand) => {
+            const key = brand.slug?.trim().toLowerCase();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [activeDepartment]);
+
+    const featuredProducts = activeDepartment?.trendingProducts?.slice(0, 3) || [];
+
+    const getProductImage = (images: string) => {
+        try {
+            const parsed = JSON.parse(images);
+            if (Array.isArray(parsed)) return parsed[0] || '/placeholder.svg';
+        } catch {
+            // Product image values may also be comma-separated paths.
+        }
+        return images.split(',')[0]?.trim() || '/placeholder.svg';
+    };
 
     return (
         <div
@@ -292,38 +318,79 @@ export default function DesktopCategoriesBar({
                                 </Link>
                             </div>
 
-                            {/* Clean Categories Grid (No nested cards/boxes) */}
-                            {uniqueCategories.length > 0 ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-2">
-                                    {uniqueCategories.map((cat) => (
-                                        <Link
-                                            key={cat.id}
-                                            href={`/categories/${encodeURIComponent(cat.slug)}`}
-                                            onClick={closeMenu}
-                                            className="group/item flex items-center gap-2 py-2 px-3 rounded-lg text-[13.5px] font-medium text-slate-200 hover:text-white hover:bg-white/5 transition-all"
-                                        >
-                                            <span className="w-1.5 h-1.5 rounded-full bg-[#8A6305]/60 group-hover/item:bg-[#E5B54A] group-hover/item:scale-125 transition-all shrink-0" />
-                                            <span className="truncate group-hover/item:text-[#E5B54A] transition-colors">
-                                                {cat.name}
-                                            </span>
-                                        </Link>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="py-8 flex flex-col items-center justify-center text-center">
-                                    <p className="text-sm text-slate-400">
-                                        {isArabic ? `تصفح منتجات قسم ${activeDepartment.name} مباشرة:` : `Browse products in ${activeDepartment.name} directly:`}
-                                    </p>
-                                    <Link
-                                        href={`/department/${activeDepartment.slug}`}
-                                        onClick={closeMenu}
-                                        className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#8A6305] hover:bg-[#735204] text-white text-xs font-bold transition-all shadow-sm"
-                                    >
-                                        <span>{isArabic ? `عرض منتجات ${activeDepartment.name}` : `View ${activeDepartment.name} Products`}</span>
-                                        {isArabic ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                    </Link>
-                                </div>
-                            )}
+                            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                                {/* Categories */}
+                                <section aria-label={isArabic ? 'التصنيفات' : 'Categories'}>
+                                    <h4 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-white">
+                                        <FolderTree className="h-4 w-4 text-[#E5B54A]" />
+                                        {isArabic ? 'التصنيفات' : 'Categories'}
+                                    </h4>
+                                    {uniqueCategories.length > 0 ? (
+                                        <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                                            {uniqueCategories.slice(0, 8).map((cat) => (
+                                                <Link
+                                                    key={cat.id}
+                                                    href={`/categories/${encodeURIComponent(cat.slug)}`}
+                                                    onClick={closeMenu}
+                                                    className="group/item flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-[#E5B54A]"
+                                                >
+                                                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8A6305]/70 group-hover/item:bg-[#E5B54A]" />
+                                                    <span className="truncate">{cat.name}</span>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : <p className="text-xs text-slate-400">{isArabic ? 'لا توجد تصنيفات' : 'No categories available'}</p>}
+                                </section>
+
+                                {/* Brands */}
+                                <section aria-label={isArabic ? 'العلامات التجارية' : 'Brands'}>
+                                    <h4 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-white">
+                                        <span className="h-4 w-4 text-center text-[#E5B54A]" aria-hidden="true">✦</span>
+                                        {isArabic ? 'العلامات التجارية' : 'Brands'}
+                                    </h4>
+                                    {uniqueBrands.length > 0 ? (
+                                        <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                                            {uniqueBrands.slice(0, 8).map((brand) => (
+                                                <Link
+                                                    key={brand.id}
+                                                    href={`/brands/${encodeURIComponent(brand.slug)}`}
+                                                    onClick={closeMenu}
+                                                    className="truncate rounded-lg px-2 py-2 text-[13px] font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-[#E5B54A]"
+                                                >
+                                                    {getBrandDisplayName(brand, isArabic ? 'ar' : 'en')}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : <p className="text-xs text-slate-400">{isArabic ? 'لا توجد علامات تجارية' : 'No brands available'}</p>}
+                                </section>
+
+                                {/* Three featured products */}
+                                <section aria-label={isArabic ? 'منتجات مميزة' : 'Featured products'}>
+                                    <h4 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-white">
+                                        <Sparkles className="h-4 w-4 text-[#E5B54A]" />
+                                        {isArabic ? 'منتجات مميزة' : 'Featured products'}
+                                    </h4>
+                                    {featuredProducts.length > 0 ? (
+                                        <div className="flex flex-col gap-2">
+                                            {featuredProducts.map((product) => (
+                                                <Link
+                                                    key={product.id}
+                                                    href={`/products/${encodeURIComponent(product.slug)}`}
+                                                    onClick={closeMenu}
+                                                    className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2 transition-colors hover:border-[#E5B54A]/40 hover:bg-white/10"
+                                                >
+                                                    <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white">
+                                                        <ResilientImage src={getProductImage(product.images)} alt="" className="object-contain p-1" showSkeleton={false} />
+                                                    </span>
+                                                    <span className="line-clamp-2 text-[12px] font-semibold leading-5 text-slate-100">
+                                                        {(isArabic ? product.nameAr : product.nameEn) || product.name}
+                                                    </span>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : <p className="text-xs text-slate-400">{isArabic ? 'لا توجد منتجات مميزة حالياً' : 'No featured products yet'}</p>}
+                                </section>
+                            </div>
                         </div>
                     )}
 
