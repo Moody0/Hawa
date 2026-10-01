@@ -86,7 +86,9 @@ class HawaCatalogController extends CatalogController
             'getOnSaleProducts' => ApiJson::camel($base->whereNotNull('discount_price')->latest()->take(12)->get()),
             'getBestSellerProducts' => $this->selectedProducts($base, $settings->home_featured_best_seller_ids, 'bestselling'),
             'getNewArrivalProducts' => $this->selectedProducts($base, $settings->home_featured_new_arrival_ids, 'newest'),
-            'getTrendingWeeklyProducts' => $settings->home_trending_weekly_enabled === false ? [] : $this->selectedProducts($base, $settings->home_trending_weekly_product_ids, 'trending'),
+            // Stock is not maintained in Hawa's catalog import, so zero is not
+            // a reliable reason to hide an explicitly trending product here.
+            'getTrendingWeeklyProducts' => $settings->home_trending_weekly_enabled === false ? [] : $this->selectedProducts(self::available()->with(['brand', 'category']), $settings->home_trending_weekly_product_ids, 'trending'),
             'getTrendingProducts' => ApiJson::camel($base->where('is_trending', true)->latest()->take(32)->get()),
             'getApprovedReviews' => $this->testimonials($settings),
             'getHomeCollectionSections' => $categories->where('is_featured', true)->orderBy('name')->get()->map(function ($c) {
@@ -146,7 +148,7 @@ class HawaCatalogController extends CatalogController
             $query->leftJoinSub($sales, 'sales', fn ($j) => $j->on('sales.product_id', '=', 'products.id'))->select('products.*')->orderByRaw('COALESCE(sales.sold,0) DESC');
         }
         if ($sort === 'trending') {
-            $query->where('images', '!=', '/placeholder.svg')->where('images', '!=', '')->orderByDesc('is_trending');
+            $query->where('is_trending', true)->where('images', '!=', '/placeholder.svg')->where('images', '!=', '');
         }
 
         return ApiJson::camel($query->orderByDesc('products.created_at')->limit(12)->get());
