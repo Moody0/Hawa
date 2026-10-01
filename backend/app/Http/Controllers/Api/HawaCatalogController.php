@@ -67,7 +67,9 @@ class HawaCatalogController extends CatalogController
     public function storefront(Request $request, string $key)
     {
         $settings = Settings::findOrFail('site-settings');
-        $base = self::available()->where('stock', '>', 0)->with(['brand', 'category']);
+        // Hawa's catalog has no reliable stock counts; products with stock 0
+        // must remain eligible for customer-facing home sections.
+        $base = self::available()->with(['brand', 'category']);
         $categories = Category::where('is_active', true)->whereHas('brand', fn ($q) => $q->where('is_active', true))->with('brand')->withCount('products');
         $brands = Brand::where('is_active', true)->withCount(['products', 'categories']);
         $mains = MainCategory::where('is_active', true)->orderByDesc('is_featured')->orderBy('nav_order');
