@@ -274,29 +274,32 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                         </Link>
                     </h3>
 
-                    {/* Price & MOQ Row */}
-                    <div className="flex items-baseline justify-between gap-2 mt-1.5 pt-1 border-t border-slate-100 dark:border-white/5">
-                        {/* The Main Price / B2B Locked State */}
-                        {isLockedForGuest ? (
+                    {/* Price & minimum-order details */}
+                    {isLockedForGuest ? (
+                        <div className="mt-1.5 space-y-1 border-t border-slate-100 pt-1.5 dark:border-white/5">
                             <Link
                                 href="/account/login"
-                                className="group/lock inline-flex items-center gap-1.5 py-0.5"
+                                className="group/lock flex min-w-0 items-center gap-2 rounded-lg px-1 py-1 transition-colors hover:bg-[#FAF6EC]/70 dark:hover:bg-[#8A6305]/10"
                                 title={isArabic ? "سجّل دخول التاجر لعرض سعر الجملة" : "Login to view wholesale price"}
                             >
-                                <span className="w-4 h-4 rounded bg-[#FAF6EC] dark:bg-[#8A6305]/20 border border-[#8A6305]/30 flex items-center justify-center shrink-0 group-hover/lock:border-[#8A6305] group-hover/lock:bg-[#8A6305] transition-colors">
-                                    <Lock className="w-2.5 h-2.5 text-[#8A6305] group-hover/lock:text-white transition-colors" />
+                                <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-[#8A6305]/25 bg-[#FAF6EC] transition-colors group-hover/lock:border-[#8A6305] group-hover/lock:bg-[#8A6305] dark:bg-[#8A6305]/20">
+                                    <Lock className="size-3 text-[#8A6305] transition-colors group-hover/lock:text-white" />
                                 </span>
-                                <div className="flex items-baseline gap-1 select-none">
-                                    <span aria-hidden="true" className="text-sm font-black blur-[3px] opacity-60 tracking-widest">•••••</span>
-                                    <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200  transition-all opacity-60 tracking-wider">
-                                        {isArabic ? "سجّل الدخول لعرض السعر" : "Sign in to view price"}
-                                    </span>
-                                    <span className="text-[10px] font-bold text-slate-400 group-hover/lock:text-[#8A6305] transition-colors">
-                                        {isArabic ? "سعر الجملة" : "Wholesale"}
-                                    </span>
-                                </div>
+                                <span className="min-w-0 flex-1 truncate text-[11px] font-bold leading-5 text-slate-700 transition-colors group-hover/lock:text-[#8A6305] dark:text-slate-200 sm:text-xs">
+                                    {isArabic ? "سجّل الدخول لعرض سعر الجملة" : "Sign in to view wholesale price"}
+                                </span>
+                                <span aria-hidden="true" className="shrink-0 select-none rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-black tracking-widest text-slate-400 blur-[1.5px] dark:bg-white/5 dark:text-slate-500">••••</span>
                             </Link>
-                        ) : !isPriceOnInquiry ? (
+                            <div className="flex items-center justify-between gap-2 px-1 text-[10px] leading-4 text-slate-400 dark:text-slate-500">
+                                <span>{isArabic ? "الحد الأدنى للطلب" : "Minimum order"}</span>
+                                <span className="shrink-0 font-semibold text-slate-500 dark:text-slate-400">
+                                    {isArabic ? `${product.minOrder || 1} طرد` : `${product.minOrder || 1} pkg`}
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                    <div className="flex items-baseline justify-between gap-2 mt-1.5 pt-1 border-t border-slate-100 dark:border-white/5">
+                        {!isPriceOnInquiry ? (
                             <div className="flex items-baseline gap-1.5">
                                 <span className="text-sm sm:text-base font-extrabold text-[#0B192C] dark:text-white">
                                     {formatPrice(Number(product.discountPrice || product.price))}
@@ -312,12 +315,11 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                                 {isArabic ? "سعر وكالة" : "Inquire"}
                             </span>
                         )}
-
-                        {/* Minimum Order Specification */}
                         <span className="text-[10px] font-medium text-slate-400 dark:text-slate-400 shrink-0">
                             {isArabic ? `أدنى طلب: ${product.minOrder || 1} طرد` : `Min: ${product.minOrder || 1} pkg`}
                         </span>
                     </div>
+                    )}
                 </div>
             </div>
 
