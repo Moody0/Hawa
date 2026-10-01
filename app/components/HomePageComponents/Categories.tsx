@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, PackageOpen } from 'lucide-react';
 import Image from 'next/image';
 
 interface Category {
@@ -18,8 +18,6 @@ interface CategoriesProps {
 }
 
 const Categories = ({ categories, t, dir }: CategoriesProps) => {
-    const defaultImage = 'https://images.unsplash.com/photo-1621996346565-e3d5d6281290?w=800';
-
     if (!categories || categories.length === 0) {
         return null;
     }
@@ -41,13 +39,17 @@ const Categories = ({ categories, t, dir }: CategoriesProps) => {
                             className="group flex flex-col gap-3 p-2 rounded-2xl transition-all duration-300 hover:bg-white dark:hover:bg-white/5 premium-shadow-hover"
                         >
                             <div className="relative aspect-4/4 w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
-                                <Image
-                                    src={category.image || defaultImage}
-                                    alt={category.name}
-                                    fill
-                                    sizes="(max-width: 768px) 50vw, 25vw"
-                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
+                                {category.image ? (
+                                    <Image
+                                        src={category.image}
+                                        alt={category.name}
+                                        fill
+                                        sizes="(max-width: 768px) 50vw, 25vw"
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                ) : (
+                                    <PackageOpen aria-hidden="true" className="absolute left-1/2 top-1/2 size-12 -translate-x-1/2 -translate-y-1/2 text-slate-300 dark:text-zinc-600" />
+                                )}
                             </div>
                             <div className="flex flex-col items-center text-center px-1">
                                 <h4 className="text-sm font-bold text-text-main-light dark:text-text-main-dark transition-colors">

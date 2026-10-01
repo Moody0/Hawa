@@ -125,10 +125,9 @@ class HawaCatalogController extends CatalogController
             $main = $c instanceof MainCategory;
             $query = self::available();
             $query = $main ? self::department($query, $c->id) : $query->where('category_id', $c->id);
-            $p = (clone $query)->where('images', '!=', '')->latest()->first();
             $count = $query->count();
 
-            return [...ApiJson::camel($c), 'nameEn' => $c->description ?: $c->name, 'image' => $c->image ?: explode(',', $p?->images ?? '')[0] ?: '/logo.png', 'href' => $main ? '/department/'.rawurlencode($c->slug) : '/products?category='.rawurlencode($c->slug), 'type' => $main ? 'main-category' : 'category', 'isMainCategory' => $main, '_count' => ['products' => $count], 'productCount' => $count];
+            return [...ApiJson::camel($c), 'nameEn' => $c->description ?: $c->name, 'image' => $c->image, 'href' => $main ? '/department/'.rawurlencode($c->slug) : '/products?category='.rawurlencode($c->slug), 'type' => $main ? 'main-category' : 'category', 'isMainCategory' => $main, '_count' => ['products' => $count], 'productCount' => $count];
         })->values()->all();
     }
 

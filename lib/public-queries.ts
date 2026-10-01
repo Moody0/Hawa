@@ -2,14 +2,12 @@ import 'server-only';
 import { DEFAULT_SITE_SETTINGS, type RailBrand, type PublicTestimonialItem, type PublicFeaturedCategory, type HomeBrand } from './public-defaults';
 export * from './public-defaults';
 import { laravelJson } from './laravel-server';
-import { getCategoryBundleImage } from './category-images';
 export async function getHomeRailBrands(): Promise<RailBrand[]> { return laravelJson<RailBrand[]>('/api/storefront/getHomeRailBrands', []); }
 export async function getHomeRailCategories(): Promise<any[]> { return laravelJson<any[]>('/api/storefront/getHomeRailCategories', []); }
 export async function getCategoryHighlightCardsData(): Promise<any[]> { return laravelJson<any[]>('/api/storefront/getCategoryHighlightCardsData', []); }
 export async function getApprovedReviews(): Promise<PublicTestimonialItem[]> { return laravelJson<PublicTestimonialItem[]>('/api/storefront/getApprovedReviews', []); }
 export async function getFeaturedCategories(): Promise<PublicFeaturedCategory[]> {
-    const rows = await laravelJson<PublicFeaturedCategory[]>('/api/storefront/getFeaturedCategories', []);
-    return rows.map(row => ({ ...row, image: !row.image || ['/logo.png', '/placeholder.svg'].includes(row.image) ? getCategoryBundleImage(row.name, row.slug, row.image) : row.image }));
+    return laravelJson<PublicFeaturedCategory[]>('/api/storefront/getFeaturedCategories', []);
 }
 export async function getOnSaleProducts(): Promise<any[]> { return laravelJson<any[]>('/api/storefront/getOnSaleProducts', []); }
 export async function getMainCategoryBrands(): Promise<HomeBrand[]> { return laravelJson<HomeBrand[]>('/api/storefront/getMainCategoryBrands', []); }

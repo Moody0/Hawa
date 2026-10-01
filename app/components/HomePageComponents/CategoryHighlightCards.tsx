@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import ResilientImage from '@/app/components/ResilientImage';
+import { PackageOpen } from 'lucide-react';
 
 export interface HighlightCard {
     id: string;
@@ -12,8 +13,8 @@ export interface HighlightCard {
     productNameAr: string;
     productNameEn: string;
     priceText: string;
-    heroImage: string;
-    productThumb: string;
+    heroImage: string | null;
+    productThumb: string | null;
     productSlug?: string;
 }
 
@@ -22,73 +23,8 @@ interface CategoryHighlightCardsProps {
     language?: 'en' | 'ar';
 }
 
-const FALLBACK_HIGHLIGHT_CARDS: HighlightCard[] = [
-    {
-        id: 'food',
-        slug: 'food-commodities',
-        subheadingAr: 'المواد الغذائية والمعلبات',
-        subheadingEn: 'Food & Canned Goods',
-        headingAr: 'زوان والريف',
-        headingEn: 'Zwan & Alreef',
-        productNameAr: 'لحوم ولانشون معلب',
-        productNameEn: 'Canned Meats & Goods',
-        priceText: '',
-        heroImage: '/images/categories/canned-foods.webp',
-        productThumb: '/images/categories/canned-foods.webp',
-    },
-    {
-        id: 'detergents',
-        slug: 'detergents-cleaning',
-        subheadingAr: 'المنظفات ومواد العناية',
-        subheadingEn: 'Detergents & Care',
-        headingAr: 'روكافيرا وبوفالو',
-        headingEn: 'Rocavira & Buffalo',
-        productNameAr: 'سوائل جلي ومعقمات',
-        productNameEn: 'Detergents & Sanitisers',
-        priceText: '',
-        heroImage: '/images/categories/dishwashing-liquid.webp',
-        productThumb: '/images/categories/dishwashing-liquid.webp',
-    },
-    {
-        id: 'dairy-oils',
-        slug: 'oils-ghee',
-        subheadingAr: 'الزيوت والسمن والألبان',
-        subheadingEn: 'Oils, Ghee & Dairy',
-        headingAr: 'الريف وحليبنا',
-        headingEn: 'Alreef & Haleebna',
-        productNameAr: 'سمن بقري وزيوت طعام',
-        productNameEn: 'Ghee & Vegetable Oils',
-        priceText: '',
-        heroImage: '/images/categories/cooking-oil-ghee.webp',
-        productThumb: '/images/categories/cooking-oil-ghee.webp',
-    },
-    {
-        id: 'seafood',
-        slug: 'seafood-fish',
-        subheadingAr: 'الأسماك والبحريات المعلبة',
-        subheadingEn: 'Canned Seafood & Tuna',
-        headingAr: 'صن بل وسيلفر فيش',
-        headingEn: 'Sunbell & Silver Fish',
-        productNameAr: 'تونة وسردين فاخر',
-        productNameEn: 'Premium Tuna & Sardines',
-        priceText: '',
-        heroImage: '/images/categories/canned-foods.webp',
-        productThumb: '/images/categories/canned-foods.webp',
-    },
-];
-
 const CategoryHighlightCards = ({ cards = [], language = 'ar' }: CategoryHighlightCardsProps) => {
-    const combinedCards = [...cards];
-    if (combinedCards.length < 4) {
-        for (const fb of FALLBACK_HIGHLIGHT_CARDS) {
-            if (!combinedCards.some(c => c.slug === fb.slug || c.id === fb.id)) {
-                combinedCards.push(fb);
-            }
-            if (combinedCards.length >= 4) break;
-        }
-    }
-
-    const displayCards = combinedCards.length > 0 ? combinedCards : FALLBACK_HIGHLIGHT_CARDS;
+    const displayCards = cards.slice(0, 4);
 
     return (
         <section className="container-custom py-4 sm:py-6">
@@ -120,14 +56,18 @@ const CategoryHighlightCards = ({ cards = [], language = 'ar' }: CategoryHighlig
                         >
                             {/* Image Container with clean display */}
                             <div className="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-white dark:bg-zinc-900/50 mb-3 flex items-center justify-center p-2">
-                                <ResilientImage
-                                    src={card.heroImage}
-                                    alt={categoryName}
-                                    fill
-                                    sizes="(max-width: 768px) 50vw, 25vw"
-                                    className="w-full h-full object-contain"
-                                    loading="lazy"
-                                />
+                                {card.heroImage ? (
+                                    <ResilientImage
+                                        src={card.heroImage}
+                                        alt={categoryName}
+                                        fill
+                                        sizes="(max-width: 768px) 50vw, 25vw"
+                                        className="w-full h-full object-contain"
+                                        loading="lazy"
+                                    />
+                                ) : (
+                                    <PackageOpen aria-hidden="true" className="size-12 text-slate-300 dark:text-zinc-600" />
+                                )}
                             </div>
 
                             {/* Text Info */}

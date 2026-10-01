@@ -3,8 +3,7 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import ResilientImage from '@/app/components/ResilientImage';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { getCategoryBundleImage } from '@/lib/category-images';
+import { ChevronRight, ChevronLeft, PackageOpen } from 'lucide-react';
 
 interface Category {
     id: string;
@@ -305,7 +304,7 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl',
                     className="flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pt-1 pb-2 -mx-4 px-4 md:mx-0 md:px-0"
                 >
                     {cleanCategories.map((category) => {
-                        const catImage = getCategoryBundleImage(category.name, category.slug, category.image);
+                        const catImage = category.image?.trim() || null;
                         const catHref = category.href || `/products?category=${encodeURIComponent(category.slug)}`;
 
                         return (
@@ -328,7 +327,7 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl',
                                             loading="lazy"
                                         />
                                     ) : (
-                                        <span className="text-4xl">📦</span>
+                                        <PackageOpen aria-hidden="true" className="size-10 text-slate-300 dark:text-zinc-600" />
                                     )}
                                 </div>
 
