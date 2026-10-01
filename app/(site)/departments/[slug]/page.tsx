@@ -1,6 +1,6 @@
+import {getCatalogMainCategoryBySlug} from '@/lib/catalog';
 import React, { Suspense, cache } from "react";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import ProductsClient from "../../products/ProductsClient";
 import { getCatalogInitialData, getCatalogBrands } from "@/lib/catalog";
 
@@ -15,17 +15,7 @@ const getDepartment = cache(async (slug: string) => {
     }
     const cleanSlug = decodedSlug.trim();
 
-    return prisma.mainCategory.findFirst({
-        where: {
-            OR: [
-                { slug: cleanSlug },
-                { slug },
-                { slug: { equals: cleanSlug, mode: "insensitive" } },
-                { id: cleanSlug },
-                { name: { equals: cleanSlug, mode: "insensitive" } },
-            ],
-        },
-    });
+    return getCatalogMainCategoryBySlug(cleanSlug);
 });
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }) {

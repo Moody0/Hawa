@@ -18,6 +18,7 @@ interface Product {
     nameEn?: string | null;
     description: string | null;
     price: number | null;
+    hidePrice?: boolean;
     discountPrice?: number | null;
     images: string;
     categoryId: string;
@@ -37,134 +38,6 @@ interface TrendingWeeklyProps {
     settings?: any;
 }
 
-const FALLBACK_TRENDING_PRODUCTS: Product[] = [
-    {
-        id: 'tw-1',
-        slug: 'alreef-sunflower-oil-1l',
-        name: 'الريف زيت دوار الشمس حجم 1 لتر',
-        nameAr: 'الريف زيت دوار الشمس حجم 1 لتر',
-        nameEn: 'Al Reef Sunflower Oil, 1 Liter',
-        description: 'زيت نباتي نقي مكرر عالي الجودة للطبخ والقلي',
-        price: 0,
-        images: 'https://i.postimg.cc/gjtXJT65/nskht-mn-nskht-mn-dwn-ʿnwan-2026-08-11T183631-628.png',
-        categoryId: 'oils',
-        stock: 500,
-        isTrending: true,
-        brand: { id: 'b-alreef', name: 'الريف - Alreef', slug: 'alreef' }
-    },
-    {
-        id: 'tw-2',
-        slug: 'moroccan-canned-sardines-vegetable-oil',
-        name: 'المغربي معلبات سمك السردين بالزيت والفلفل 125 جرام',
-        nameAr: 'المغربي معلبات سمك السردين بالزيت والفلفل 125 جرام',
-        nameEn: 'Moroccan Canned Sardines in Vegetable Oil with Chili 125g',
-        description: 'سردين مغربي فاخر بالزيت النباتي والفلفل الحار',
-        price: 0,
-        images: 'https://i.postimg.cc/yNQDHBVN/data-bodour-(45).png',
-        categoryId: 'seafood',
-        stock: 450,
-        isTrending: true,
-        brand: { id: 'b-moroccan', name: 'المغربي - Moroccan', slug: 'al-maghrabi' }
-    },
-    {
-        id: 'tw-3',
-        slug: 'silver-fish-light-tuna-160g',
-        name: 'سيلفر فيش تونا خفيف 160 جرام',
-        nameAr: 'سيلفر فيش تونا خفيف 160 جرام',
-        nameEn: 'Silver Fish Light Tuna 160g',
-        description: 'قطع تونة خفيفة معبأة بأجود أنواع الزيت النباتي',
-        price: 0,
-        images: 'https://i.postimg.cc/X7zdwfMd/data-bodour-(44).png',
-        categoryId: 'seafood',
-        stock: 600,
-        isTrending: true,
-        brand: { id: 'b-silver-fish', name: 'سيلفر فيش - Silver Fish', slug: 'silver-fish' }
-    },
-    {
-        id: 'tw-4',
-        slug: 'sun-bull-corned-beef-240g',
-        name: 'صن بل كورند بيف 240 جرام',
-        nameAr: 'صن بل كورند بيف 240 جرام',
-        nameEn: 'Sunbell Corned Beef 240g',
-        description: 'لحم بقري معلب عالي الجودة',
-        price: 0,
-        images: 'https://i.postimg.cc/N0ftBHFq/data-bodour-(43).png',
-        categoryId: 'canned-meat',
-        stock: 350,
-        isTrending: true,
-        brand: { id: 'b-sun-bull', name: 'صن بل - Sunbell', slug: 'sunbell' }
-    },
-    {
-        id: 'tw-5',
-        slug: 'halibuna-pure-ghee-1kg',
-        name: 'حليبنا سمن بقري 1 كيلو',
-        nameAr: 'حليبنا سمن بقري 1 كيلو',
-        nameEn: 'Halibuna Pure Clarified Cow Butter Ghee 1kg',
-        description: 'سمنة بقرية طبيعية 100% بنكهة أصيلة',
-        price: 0,
-        images: 'https://i.postimg.cc/dQfzpfGv/data-bodour-(42).png',
-        categoryId: 'dairy',
-        stock: 280,
-        isTrending: true,
-        brand: { id: 'b-haleebna', name: 'حليبنا - Haleebna', slug: 'haleebna' }
-    },
-    {
-        id: 'tw-6',
-        slug: 'zwan-chicken-luncheon-meat-340g',
-        name: 'زوان لانشون دجاج 340 غرام',
-        nameAr: 'زوان لانشون دجاج 340 غرام',
-        nameEn: 'Zwan Chicken Luncheon Meat 340g',
-        description: 'لانشون دجاج هولندي أصلي معلب',
-        price: 0,
-        images: 'https://i.postimg.cc/QtDrHXLZ/data-bodour-2026-09-01T134804-711.png',
-        categoryId: 'canned-meat',
-        stock: 400,
-        isTrending: true,
-        brand: { id: 'b-zwan', name: 'زوان - Zwan', slug: 'zwan' }
-    },
-    {
-        id: 'tw-7',
-        slug: 'buffalo-dishwashing-liquid-lemon-650ml',
-        name: 'بوفالو سائل جلي برائحة الليمون 650 مل',
-        nameAr: 'بوفالو سائل جلي برائحة الليمون 650 مل',
-        nameEn: 'Buffalo Dishwashing Liquid Lemon 650ml',
-        description: 'سائل جلي مركز بقوة إذابة الدهون ورائحة الليمون المنعشة',
-        price: 0,
-        images: 'https://i.postimg.cc/J0v0wD3P/data-bodour-2026-09-01T142512-585.png',
-        categoryId: 'detergents',
-        stock: 300,
-        isTrending: true,
-        brand: { id: 'b-buffalo', name: 'بوفالو - Buffalo', slug: 'buffalo' }
-    },
-    {
-        id: 'tw-8',
-        slug: 'rocavira-active-fresh-deodorant-50ml',
-        name: 'روكافيرا مزيل عرق رول أون 50 مل',
-        nameAr: 'روكافيرا مزيل عرق رول أون 50 مل',
-        nameEn: 'Rocavira Active Fresh Roll-on Deodorant 50ml',
-        description: 'حماية وانتعاش يدوم 48 ساعة',
-        price: 0,
-        images: 'https://i.postimg.cc/tTkd177k/data-bodour-(65).png',
-        categoryId: 'personal-care',
-        stock: 320,
-        isTrending: true,
-        brand: { id: 'b-rocavira', name: 'روكافيرا - Rocavira', slug: 'rocavera' }
-    },
-    {
-        id: 'tw-9',
-        slug: 'alreef-olive-oil-1l',
-        name: 'الريف زيت زيتون حجم 1 لتر',
-        nameAr: 'الريف زيت زيتون حجم 1 لتر',
-        nameEn: 'Al Reef Olive Oil 1L',
-        description: 'زيت زيتون بكر ممتاز عالي الجودة',
-        price: 0,
-        images: 'https://i.postimg.cc/VN4YmbtT/alryf-zyt-zytwn-1ltr.jpg',
-        categoryId: 'oils',
-        stock: 480,
-        isTrending: true,
-        brand: { id: 'b-alreef', name: 'الريف - Alreef', slug: 'alreef' }
-    }
-];
 
 const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
     const { dir } = useLanguage();
@@ -174,7 +47,7 @@ const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
     const { customer } = useCustomer();
     const isLockedForGuest = !customer;
 
-    if (settings?.homeTrendingWeeklyEnabled === false) {
+    if (settings?.homeTrendingWeeklyEnabled === false || !products.length) {
         return null;
     }
 
@@ -190,7 +63,7 @@ const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
         ? (settings?.homeTrendingWeeklyDescAr || settings?.homeTrendingWeeklyDesc || 'الأصناف الأكثر حركة وسحباً من قبل المحلات والسوبرماركت بأسعار تفضيلية')
         : (settings?.homeTrendingWeeklyDesc || settings?.homeTrendingWeeklyDescAr || 'Highest volume FMCG demands ordered by merchants this week');
 
-    const displayProducts = (products && products.length > 0) ? products : FALLBACK_TRENDING_PRODUCTS;
+    const displayProducts = products;
     const initialCount = 8;
     const visibleProducts = showAll ? displayProducts : displayProducts.slice(0, initialCount);
 
@@ -284,15 +157,10 @@ const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
                                     
                                     {/* Pricing / Wholesale Lock (Matching ProductCard blurry price style) */}
                                     <div className="mt-2 flex items-center gap-2">
-                                        {isLockedForGuest ? (
+                                        {isLockedForGuest || product.hidePrice ? (
                                             <div className="flex items-baseline gap-1.5 group/lock">
                                                 <Lock className="w-3.5 h-3.5 text-[#8A6305] dark:text-[#E5B54A] shrink-0 opacity-80" />
-                                                <span className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300 blur-[4px] select-none opacity-60">
-                                                    880,000
-                                                </span>
-                                                <span className="text-[10px] font-bold text-slate-400">
-                                                    {isArabic ? 'ل.س' : 'SYP'}
-                                                </span>
+                                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">{isArabic ? "السعر متاح للحسابات المعتمدة" : "Price available to approved accounts"}</span>
                                             </div>
                                         ) : product.discountPrice ? (
                                             <div className="flex items-baseline gap-1.5">

@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import { useEffect, useState } from "react";
 import { X, RefreshCw, Star } from 'lucide-react';
@@ -50,7 +52,7 @@ export default function BrandModal({ isOpen, onClose, onSaved, brand }: BrandMod
     });
 
     useEffect(() => {
-        fetch("/api/main-categories")
+        laravelClientFetch("/api/main-categories")
             .then((res) => res.json())
             .then((data) => setMainCategories(data))
             .catch(() => setMainCategories([]));

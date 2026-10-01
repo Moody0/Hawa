@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { Star, ChevronDown } from 'lucide-react';
@@ -33,7 +35,7 @@ export default function ProductReviews({ productId, productName, productImage }:
     useEffect(() => {
         const fetchReviews = async () => {
             try {
-                const res = await fetch(`/api/reviews?productId=${productId}`);
+                const res = await laravelClientFetch(`/api/reviews?productId=${productId}`);
                 if (res.ok) {
                     const data = await res.json();
                     setReviews(data);

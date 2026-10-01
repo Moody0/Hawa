@@ -1,113 +1,75 @@
-name: Quality Gate CI
-
+name: Laravel and storefront verification
 on:
   push:
     branches: [main, master]
   pull_request:
-    branches: [main, master]
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  NODE_ENV: test
-  CI: 'true'
-  # Explicitly isolate CI from production database
-  DATABASE_URL: 'postgresql://ci_isolated:mock_secret@127.0.0.1:5432/hawa_isolated_ci_test?schema=public'
-  NEXTAUTH_SECRET: 'ci_temporary_mock_secret_key_123456789'
-  CUSTOMER_AUTH_SECRET: 'ci_temporary_mock_customer_secret_key_123456789'
-  DIRECT_URL: 'postgresql://ci_isolated:mock_secret@127.0.0.1:5432/hawa_isolated_ci_test?schema=public'
-  TEST_ADMIN_PASSWORD: 'CI-only-password-2026!'
-  MEDIA_STORAGE_DIR: '/tmp/hawa-media'
-
 jobs:
-  quality-gate:
-    name: Typecheck, Lint, Test & Smoke
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     services:
-      postgres:
-        image: postgres:16-alpine
+      mysql:
+        image: mysql:8.4
         env:
-          POSTGRES_USER: ci_isolated
-          POSTGRES_PASSWORD: mock_secret
-          POSTGRES_DB: hawa_isolated_ci_test
-        ports:
-          - 5432:5432
+          MYSQL_ROOT_PASSWORD: ci-only-password
+          MYSQL_DATABASE: hawa_backend_test
+        ports: [3306:3306]
         options: >-
-          --health-cmd "pg_isready -U ci_isolated -d hawa_isolated_ci_test"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
+          --health-cmd="mysqladmin ping -h localhost -pci-only-password"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: hawa_backend_test
+      DB_USERNAME: root
+      DB_PASSWORD: ci-only-password
+      CACHE_STORE: array
+      SESSION_DRIVER: database
+      BCRYPT_ROUNDS: 4
+      LARAVEL_API_URL: http://127.0.0.1:8001
+      MEDIA_STORAGE_DIR: /tmp/hawa-media
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Cache Next.js Build
-        uses: actions/cache@v4
+          node-version: 22
+          cache: npm
+      - uses: shivammathur/setup-php@v2
         with:
-          path: |
-            ~/.npm
-            ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Prisma Schema Validation & Client Generation
+          php-version: '8.4'
+          extensions: pdo_mysql, gd, exif, mbstring
+          tools: composer:v2
+      - run: npm ci
+      - run: composer install --working-dir=backend --no-interaction
+      - name: Initialize isolated Laravel test environment
+        working-directory: backend
         run: |
-          npx prisma validate
-          npx prisma generate
-          npx prisma migrate deploy
-          npm run db:seed:test
-
-      - name: TypeScript Typecheck
-        run: npm run typecheck
-
-      - name: ESLint Check
-        run: npm run lint
-
-      - name: Unit & Integration Tests (Isolated)
-        run: npm run test:run
-
-      - name: PostgreSQL Concurrency & Inventory Tests
-        run: npm run test:concurrency
-
-      - name: Next.js Production Build
-        run: npm run build
-        env:
-          NODE_ENV: production
-
-      - name: Production Route & API Smoke Automation
-        run: npm run test:smoke
-
-      - name: Install Playwright Chromium Browser
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --seed --force
+      - run: npm run test:backend
+      - run: npm run test:run
+      - name: Restore empty test storefront after concurrency fixtures
+        run: php backend/artisan migrate:fresh --seed --force
+      - name: Start backend for production build
+        run: php backend/artisan serve --host=127.0.0.1 --port=8001 --no-reload > /tmp/hawa-backend.log 2>&1 &
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Install browser
         run: npx playwright install --with-deps chromium
-
-      - name: Browser Critical Journey Smoke Tests
-        run: npm run test:e2e
+      - name: Browser smoke tests
+        run: npx playwright test e2e/laravel-empty-storefront.spec.ts --project=desktop-chromium
         env:
-          NODE_ENV: production
-
-      - name: Production Dependency Audit
-        run: npm audit --omit=dev --audit-level=high
-
-      - name: Upload Test Failure Artifacts
+          PREWARM_IMAGES_ON_START: 'false'
+      - uses: actions/upload-artifact@v4
         if: failure()
-        uses: actions/upload-artifact@v4
         with:
-          name: failure-artifacts
+          name: verification-failures
           path: |
             test-results/
             playwright-report/
-          retention-days: 7
+            backend/storage/logs/

@@ -1,5 +1,7 @@
 'use client';
 
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -30,6 +32,7 @@ export default function MerchantRegisterPage() {
     const router = useRouter();
     const { register, customer } = useCustomer();
     const { language, dir } = useLanguage();
+    const siteContacts = useSiteContacts();
     const isArabic = language === 'ar' || dir === 'rtl';
 
     const [formData, setFormData] = useState({
@@ -49,8 +52,7 @@ export default function MerchantRegisterPage() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [submittedData, setSubmittedData] = useState<{ shopName: string; ownerName: string; phone: string; city: string } | null>(null);
 
-    const SALES_MANAGER_PHONE = '+963 993 443 901';
-    const SALES_MANAGER_CLEAN = '963993443901';
+    const SALES_MANAGER_PHONE = siteContacts.phone;
 
     React.useEffect(() => {
         if (customer) {
@@ -96,7 +98,7 @@ export default function MerchantRegisterPage() {
             return;
         }
 
-        if (cleanAddress.length < 4) {
+        if (cleanAddress.length < 5) {
             setError(isArabic ? 'يرجى كتابة العنوان بشكل مفصل' : 'Please provide a detailed address');
             return;
         }
@@ -195,7 +197,7 @@ export default function MerchantRegisterPage() {
                         {/* WhatsApp Fast Track Action */}
                         <div className="space-y-3">
                             <a
-                                href={`https://wa.me/${SALES_MANAGER_CLEAN}?text=${waMsg}`}
+                                href={whatsappHref(siteContacts, decodeURIComponent(waMsg))}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#16833d] px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-[#126f34] sm:text-sm"
@@ -314,7 +316,7 @@ export default function MerchantRegisterPage() {
                                     <span>{isArabic ? 'مساعدة في التسجيل:' : 'Support:'}</span>
                                 </div>
                                 <a 
-                                    href={`https://wa.me/${SALES_MANAGER_CLEAN}?text=${encodeURIComponent(isArabic ? 'مرحباً، أرغب بالاستفسار عن تسجيل حساب تاجر جديد لدى شركة حوا' : 'Hello, I have a question about registering as a new merchant with Hawa')}`}
+                                    href={whatsappHref(siteContacts, isArabic ? 'مرحباً، أرغب بالاستفسار عن تسجيل حساب تاجر جديد لدى شركة حوا' : 'Hello, I have a question about registering as a new merchant with Hawa')}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="font-bold text-[#8A6305] hover:text-[#735204] dark:text-[#E5B54A] flex items-center gap-1.5 font-mono"
@@ -382,7 +384,7 @@ export default function MerchantRegisterPage() {
                                                 <User className="text-base" />
                                             </div>
                                             <input
-                                                id="reg-ownerName"
+                                                id="reg-ownerName" autoComplete="name"
                                                 type="text"
                                                 name="ownerName"
                                                 required
@@ -406,7 +408,7 @@ export default function MerchantRegisterPage() {
                                                 <Phone className="text-base" />
                                             </div>
                                             <input
-                                                id="reg-phone"
+                                                id="reg-phone" autoComplete="tel"
                                                 type="tel"
                                                 name="phone"
                                                 inputMode="tel"
@@ -458,7 +460,7 @@ export default function MerchantRegisterPage() {
                                         type="text"
                                         name="address"
                                         required
-                                        maxLength={300}
+                                        maxLength={250}
                                         value={formData.address}
                                         onChange={handleChange}
                                         placeholder={isArabic ? 'اسم الحي / الشارع / نقطة علامة قريبة' : 'Area, street, nearby landmark'}
@@ -476,7 +478,7 @@ export default function MerchantRegisterPage() {
                                             <Lock className="text-base" />
                                         </div>
                                         <input
-                                            id="reg-password"
+                                            id="reg-password" autoComplete="new-password"
                                             type={showPassword ? 'text' : 'password'}
                                             name="password"
                                             required
@@ -506,7 +508,7 @@ export default function MerchantRegisterPage() {
                                                 <Lock className="text-base" />
                                             </div>
                                             <input
-                                                id="reg-confirm-password"
+                                                id="reg-confirm-password" autoComplete="new-password"
                                                 type={showPassword ? 'text' : 'password'}
                                                 name="confirmPassword"
                                                 required

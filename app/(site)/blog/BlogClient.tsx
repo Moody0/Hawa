@@ -4,8 +4,10 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import ResilientImage from '@/app/components/ResilientImage';
-import { Search, Calendar, Clock, ArrowRight, TrendingUp, Truck, Store, ShieldCheck, FileText, Filter } from 'lucide-react';
+import { Search, Calendar, Clock, ArrowRight, Store, ShieldCheck, FileText, Filter } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import { whatsappHref } from '@/lib/website-content';
 
 export interface BlogPostItem {
     id: string;
@@ -17,14 +19,15 @@ export interface BlogPostItem {
     createdAt: Date | string;
     readTime?: string;
     isFeatured?: boolean;
+    content?: string;
 }
 
 interface BlogClientProps {
     initialPosts: BlogPostItem[];
-    whatsappNumber?: string;
 }
 
-export default function BlogClient({ initialPosts, whatsappNumber = '+963993443901' }: BlogClientProps) {
+export default function BlogClient({ initialPosts }: BlogClientProps) {
+    const contacts = useSiteContacts();
     const { language, dir } = useLanguage();
     const isAr = language === 'ar' || dir === 'rtl';
 
@@ -33,11 +36,9 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
 
     const categories = useMemo(() => [
         { key: 'all', labelAr: 'جميع المقالات', labelEn: 'All Articles' },
-        { key: 'agencies', labelAr: 'عروض الوكالات والمنتجات', labelEn: 'Agencies & Products', matchKeywords: ['وكالة', 'منتج', 'عروض', 'وكالات', 'agency', 'product', 'ريف', 'سيكو'] },
-        { key: 'retail', labelAr: 'نصائح وإدارة المحلات', labelEn: 'Store Management', matchKeywords: ['نصائح', 'متاجر', 'سوبرماركت', 'تجزئة', 'retail', 'store', 'shop', 'مخزون'] },
-        { key: 'market', labelAr: 'حركة ونبض السوق', labelEn: 'Market Trends', matchKeywords: ['سوق', 'أسعار', 'طلب', 'مؤشرات', 'market', 'price', 'trends', 'سلع'] },
-        { key: 'company', labelAr: 'أخبار التوزيع والشركة', labelEn: 'Distribution & Logistics', matchKeywords: ['شركة', 'توزيع', 'سيارات', 'شحن', 'مستودع', 'company', 'distribution', 'logistics'] },
-    ], []);
+        ...Array.from(new Set(initialPosts.map(post => post.category?.trim()).filter((category): category is string => Boolean(category))))
+            .map(category => ({ key: category, labelAr: category, labelEn: category })),
+    ], [initialPosts]);
 
     // Filter posts
     const filteredPosts = useMemo(() => {
@@ -51,24 +52,18 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
 
             if (selectedCategory === 'all') return true;
 
-            const targetCategory = categories.find(c => c.key === selectedCategory);
-            if (!targetCategory || !targetCategory.matchKeywords) return true;
-
-            const postCat = (post.category || '').toLowerCase();
-            const postTitle = post.title.toLowerCase();
-            return targetCategory.matchKeywords.some(kw => postCat.includes(kw) || postTitle.includes(kw));
+            return post.category?.trim() === selectedCategory;
         });
     }, [initialPosts, searchQuery, selectedCategory, categories]);
 
     const leadPost = filteredPosts.length > 0 ? filteredPosts[0] : null;
     const secondaryPosts = filteredPosts.length > 1 ? filteredPosts.slice(1) : [];
 
-    const cleanWaNumber = whatsappNumber.replace(/[^0-9]/g, '');
 
     const calculateReadTime = (post: BlogPostItem) => {
         if (post.readTime) return post.readTime;
-        const wordCount = (post.title + ' ' + (post.excerpt || '')).split(/\s+/).length;
-        const minutes = Math.max(3, Math.ceil(wordCount / 40) + 2);
+        const wordCount = (post.content || post.excerpt || post.title).trim().split(/\s+/).length;
+        const minutes = Math.max(1, Math.ceil(wordCount / 200));
         return isAr ? `${minutes} دقائق قراءة` : `${minutes} min read`;
     };
 
@@ -83,25 +78,6 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
 
     return (
         <div className="w-full pb-20">
-            {/* Top Trade Dateline / Masthead */}
-            <div className="border-b border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-white/[0.02]">
-                <div className="container-custom py-2.5 flex flex-wrap items-center justify-between gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                    <div className="flex items-center gap-2">
-                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="font-bold text-[#0B192C] dark:text-slate-200">
-                            {isAr ? 'النشرة التجارية المعتمدة' : 'Official Trade Journal'}
-                        </span>
-                        <span>•</span>
-                        <span>{isAr ? 'مركز معلومات سوق الجملة والسلع الغذائية' : 'Wholesale FMCG & Food Supply Insights'}</span>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs">
-                        <span className="font-mono">
-                            {new Date().toLocaleDateString(isAr ? 'ar-SY' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
             {/* Header / Hero Banner */}
             <section className="container-custom pt-10 pb-8 md:pt-14 md:pb-10">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-200/80 dark:border-white/10">
@@ -111,12 +87,10 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                             <span>{isAr ? 'المدونة والتقارير الميدانية' : 'Editorial & Trade Bulletins'}</span>
                         </div>
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight">
-                            {isAr ? 'أخبار الوكالات ونبض سوق الجملة' : 'Trade Intelligence & Agency News'}
+                            {isAr ? contacts.content.blogTitleAr : contacts.content.blogTitle}
                         </h1>
                         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2.5 leading-relaxed font-normal">
-                            {isAr 
-                                ? 'تحليلات حركة السلع الغذائية، إطلاقات الوكالات المعتمدة، ودليل عملي لأصحاب المحلات لرفع دوران المخزون وضبط المشتريات.'
-                                : 'FMCG commodity dynamics, official brand launches, and actionable guides for grocery and supermarket managers.'}
+                            {isAr ? contacts.content.blogDescriptionAr : contacts.content.blogDescription}
                         </p>
                     </div>
 
@@ -124,6 +98,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                     <div className="w-full md:w-80 relative">
                         <input
                             type="text"
+                            aria-label={isAr ? 'البحث في المقالات' : 'Search articles'}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={isAr ? 'ابحث في المقالات والتقارير...' : 'Search articles and reports...'}
@@ -142,7 +117,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                 </div>
 
                 {/* Category Filter Tabs */}
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-4 border-b border-slate-200/80 dark:border-white/10">
+                {categories.length > 1 && <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-4 border-b border-slate-200/80 dark:border-white/10">
                     <div className="flex items-center gap-1.5 text-xs text-slate-400 shrink-0 me-2">
                         <Filter className="text-base text-[#8A6305]" />
                         <span className="font-bold text-[#0B192C] dark:text-slate-300">{isAr ? 'التصنيف:' : 'Filter:'}</span>
@@ -163,7 +138,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
                             </button>
                         );
                     })}
-                </div>
+                </div>}
             </section>
 
             {/* Main Content Area */}
@@ -364,7 +339,7 @@ export default function BlogClient({ initialPosts, whatsappNumber = '+9639934439
 
                         <div className="flex flex-wrap items-center gap-3 shrink-0">
                             <a
-                                href={`https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(isAr ? 'مرحباً شركة حوا، أود الاستفسار بخصوص لوائح أسعار الجملة وعروض الوكالات' : 'Hello Hawa Distribution, I would like to inquire about wholesale price lists')}`}
+                                href={whatsappHref(contacts, isAr ? 'مرحباً شركة حوا، أود الاستفسار بخصوص لوائح أسعار الجملة وعروض الوكالات' : 'Hello Hawa Distribution, I would like to inquire about wholesale price lists')}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="px-5 py-3 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold text-xs flex items-center gap-2 shadow-sm active:scale-95 transition-all"

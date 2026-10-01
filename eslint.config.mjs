@@ -24,7 +24,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "scripts/**",
-    "prisma/**",
+    "backend/**",
     "screenshots/**",
     "temp-query*.js",
     "test-*.js",

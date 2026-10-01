@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -100,7 +102,7 @@ export default function BrandShowcaseClient({
             else if (sort === "price_desc") params.set("sort", "price_desc");
             else if (sort === "newest") params.set("sort", "newest");
 
-            const res = await fetch(`/api/products?${params.toString()}`, { signal: controller.signal });
+            const res = await laravelClientFetch(`/api/products?${params.toString()}`, { signal: controller.signal });
             if (res.ok && currentReqId === requestIdRef.current) {
                 const data = await res.json();
                 if (currentReqId !== requestIdRef.current) return;

@@ -1,3 +1,5 @@
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React from 'react';
 import ResilientImage from '@/app/components/ResilientImage';
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -18,6 +20,7 @@ interface BrandHeroHeaderProps {
 
 export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeaderProps) {
     const { language, dir } = useLanguage();
+    const siteContacts = useSiteContacts();
     const isArabic = language === 'ar';
 
     const fallbackImage = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800";
@@ -89,7 +92,7 @@ export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeade
                     </div>
 
                     <a
-                        href={`https://wa.me/963993443901?text=${whatsappMessage}`}
+                        href={whatsappHref(siteContacts, decodeURIComponent(whatsappMessage))}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#0B192C] hover:bg-[#162740] dark:bg-white dark:text-slate-900 text-white text-xs font-bold transition-colors cursor-pointer"

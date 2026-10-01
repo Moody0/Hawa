@@ -72,7 +72,7 @@ const replacements = [
         file: 'app/admin/(dashboard)/main-categories/MainCategoriesClient.tsx',
         rules: [
             // Add import
-            { regex: /import \{ useSession \} from "next-auth\/react";/g, replace: 'import { useSession } from "next-auth/react";\nimport { useLanguage } from "@/app/context/LanguageContext";' },
+            { regex: /import \{ useSession \} from "@\/lib\/admin-session";/g, replace: 'import { useSession } from "@/lib/admin-session";\nimport { useLanguage } from "@/app/context/LanguageContext";' },
             // Add hook
             { regex: /const \{ data: session \} = useSession\(\);/g, replace: 'const { data: session } = useSession();\n    const { t, dir } = useLanguage();' },
             // Replacements

@@ -29,6 +29,7 @@ interface MobileStickyOrderBarProps {
         itemsPerPackage?: string | number | null;
         minOrder?: number | null;
         hidePrice?: boolean;
+    requiresQuote?: boolean;
     };
     stock?: number;
 }
@@ -45,7 +46,7 @@ export default function MobileStickyOrderBar({ product, stock }: MobileStickyOrd
     const isArabic = language === 'ar';
     const isLockedForGuest = !customer;
     const minimumQuantity = product.minOrder || 1;
-    const isOutOfStock = typeof stock === 'number' && stock <= 0;
+    const isOutOfStock = !product.requiresQuote && typeof stock === 'number' && stock <= 0;
 
     const parsedOptions = purchaseContext?.parsedOptions ?? (product.options 
         ? product.options.split(',').map(o => o.trim()).filter(Boolean)
@@ -158,7 +159,7 @@ export default function MobileStickyOrderBar({ product, stock }: MobileStickyOrd
                                 <Lock className="w-2 h-2 text-[#8A6305]" />
                             </span>
                             <span className="text-xs font-black text-slate-800 dark:text-slate-200 blur-[2.5px] opacity-60">
-                                88,500
+                                •••••
                             </span>
                             <span className="text-[10px] font-bold text-[#8A6305]">
                                 {language === 'ar' ? 'سعر الجملة' : 'Wholesale'}

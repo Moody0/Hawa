@@ -1,10 +1,9 @@
+import {getCatalogMainCategoryBySlug} from '@/lib/catalog';
 import { Metadata } from "next";
 import React, { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import ProductsClient from "../../products/ProductsClient";
 import { getCatalogInitialData, getCategoryBySlug, getCatalogBrands } from "@/lib/catalog";
-import { prisma } from "@/lib/prisma";
-
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
 async function getMainCategory(slug: string) {
@@ -17,18 +16,7 @@ async function getMainCategory(slug: string) {
     const cleanSlug = decodedSlug.trim();
 
     try {
-        return await prisma.mainCategory.findFirst({
-            where: {
-                isActive: true,
-                OR: [
-                    { slug: cleanSlug },
-                    { slug },
-                    { slug: { equals: cleanSlug, mode: "insensitive" } },
-                    { id: cleanSlug },
-                    { name: { equals: cleanSlug, mode: "insensitive" } },
-                ],
-            },
-        });
+        return await getCatalogMainCategoryBySlug(cleanSlug);
     } catch (e) {
         console.error("Error fetching main category in CategoryPage:", e);
         return null;

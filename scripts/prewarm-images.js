@@ -1,9 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
+
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const prisma = new PrismaClient();
+
 const configuredMediaRoot = process.env.MEDIA_STORAGE_DIR;
 const CACHE_DIR = configuredMediaRoot && path.isAbsolute(configuredMediaRoot)
     ? path.join(path.resolve(configuredMediaRoot), '.image-proxy-cache')
@@ -15,9 +15,10 @@ async function prewarmImages() {
     }
 
     try {
-        const products = await prisma.product.findMany({
-            select: { images: true }
-        });
+        const backend=(process.env.LARAVEL_API_URL||'http://127.0.0.1:8001').replace(/\/$/,'');
+        const response=await fetch(backend+'/api/sitemap/products');
+        if(!response.ok)throw new Error('Catalog is unavailable');
+        const products=await response.json();
 
         const urls = new Set();
         for (const p of products) {
@@ -109,7 +110,7 @@ async function prewarmImages() {
 
         console.log(`\nPre-warm complete: ${downloaded} downloaded, ${errors} failed.`);
     } finally {
-        await prisma.$disconnect();
+
     }
 }
 

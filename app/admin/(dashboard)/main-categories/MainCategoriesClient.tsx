@@ -7,7 +7,7 @@ import { useConfirm } from "../../context/ConfirmDialogContext";
 import MainCategoryModal from "./MainCategoryModal";
 import { deleteMainCategory, toggleMainCategoryActive, toggleMainCategoryFeatured } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { Plus, Trash2, Pencil, Image, Search, RefreshCw, ToggleLeft, ToggleRight, Star, Eye, FolderTree, ShoppingBag, Tag } from 'lucide-react';
 import RelatedItemsModal from "../components/RelatedItemsModal";

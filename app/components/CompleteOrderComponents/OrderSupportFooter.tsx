@@ -1,5 +1,7 @@
 "use client";
 
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -7,6 +9,7 @@ import { ShoppingBag } from 'lucide-react';
 
 const OrderSupportFooter = () => {
     const { t } = useLanguage();
+    const siteContacts = useSiteContacts();
 
     return (
         <>
@@ -24,7 +27,7 @@ const OrderSupportFooter = () => {
                     {t('checkout.needAssistance')}{' '}
                     <a
                         className="text-[#0B192C] dark:text-[#8A6305] font-bold hover:underline"
-                        href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000').replace(/[^0-9]/g, '')}`}
+                        href={whatsappHref(siteContacts)}
                         target="_blank"
                         rel="noopener noreferrer"
                     >

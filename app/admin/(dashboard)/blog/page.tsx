@@ -1,4 +1,6 @@
 'use client';
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Pencil, Trash2, CheckCircle2, X, Image, RotateCw, Eye } from 'lucide-react';
@@ -54,7 +56,7 @@ export default function AdminBlogPage() {
     const fetchPosts = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/admin/blog');
+            const res = await laravelClientFetch('/api/admin/blog');
             if (res.ok) {
                 const data = await res.json();
                 setPosts(data.posts || []);
@@ -106,7 +108,7 @@ export default function AdminBlogPage() {
         setSubmitting(true);
         try {
             if (editingPost) {
-                const res = await fetch('/api/admin/blog', {
+                const res = await laravelClientFetch('/api/admin/blog', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: editingPost.id, ...form }),
@@ -119,7 +121,7 @@ export default function AdminBlogPage() {
                     toast.error('فشل التحديث');
                 }
             } else {
-                const res = await fetch('/api/admin/blog', {
+                const res = await laravelClientFetch('/api/admin/blog', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(form),
@@ -149,7 +151,7 @@ export default function AdminBlogPage() {
         });
         if (!ok) return;
         try {
-            const res = await fetch(`/api/admin/blog?id=${id}`, { method: 'DELETE' });
+            const res = await laravelClientFetch(`/api/admin/blog?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
                 setPosts((prev) => prev.filter((p) => p.id !== id));
                 toast.success('تم حذف المقال');

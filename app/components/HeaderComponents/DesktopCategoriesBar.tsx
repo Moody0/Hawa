@@ -1,14 +1,16 @@
 "use client";
 
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-    LayoutGrid, 
-    FolderTree, 
-    ChevronDown, 
-    ChevronLeft, 
-    ChevronRight, 
+import {
+    LayoutGrid,
+    FolderTree,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     Truck
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -28,6 +30,7 @@ export default function DesktopCategoriesBar({
     isVisible = true,
 }: DesktopCategoriesBarProps) {
     const pathname = usePathname();
+    const siteContacts = useSiteContacts();
     const [activeSlug, setActiveSlug] = useState<string | null>(null);
     const [renderedSlug, setRenderedSlug] = useState<string | null>(null);
     const [isPinned, setIsPinned] = useState(false);
@@ -66,7 +69,7 @@ export default function DesktopCategoriesBar({
         }
     }, [isVisible, closeMenu]);
 
-    const whatsappNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901').replace(/[^0-9]/g, '');
+    const whatsappNumber = (siteContacts.whatsappDigits).replace(/[^0-9]/g, '');
 
     const clearTimeouts = () => {
         if (closeTimeoutRef.current) {
@@ -141,15 +144,15 @@ export default function DesktopCategoriesBar({
     }, [activeDepartment]);
 
     return (
-        <div 
+        <div
             className="relative w-full bg-[#071322] border-t border-white/10 text-white select-none transition-colors duration-200"
             onMouseLeave={handleMouseLeave}
             onMouseEnter={clearTimeouts}
         >
             <div className="container-custom h-[42px] flex items-center justify-between">
                 {/* Start Side: Category Tabs */}
-                <nav 
-                    className="flex items-center gap-1.5 sm:gap-2 h-full" 
+                <nav
+                    className="flex items-center gap-1.5 sm:gap-2 h-full"
                     aria-label={isArabic ? 'أقسام المنتجات' : 'Product Categories'}
                 >
                     {/* All Categories Button */}
@@ -166,10 +169,10 @@ export default function DesktopCategoriesBar({
                     >
                         <LayoutGrid className="w-4 h-4 text-[#E5B54A]" />
                         <span>{isArabic ? 'جميع الأقسام' : 'All Departments'}</span>
-                        <ChevronDown 
+                        <ChevronDown
                             className={`w-3.5 h-3.5 text-white/70 transition-transform duration-250 ${
                                 activeSlug === 'all' ? 'rotate-180 text-white' : ''
-                            }`} 
+                            }`}
                         />
                     </button>
 
@@ -198,10 +201,10 @@ export default function DesktopCategoriesBar({
                             >
                                 <span className={`w-1.5 h-1.5 rounded-full transition-colors ${isOpen || isCurrentRoute ? 'bg-[#E5B54A]' : 'bg-white/40'}`} />
                                 <span>{dept.name}</span>
-                                <ChevronDown 
+                                <ChevronDown
                                     className={`w-3.5 h-3.5 text-white/60 transition-transform duration-250 ${
                                         isOpen ? 'rotate-180 text-[#E5B54A]' : ''
-                                    }`} 
+                                    }`}
                                 />
                             </button>
                         );
@@ -221,9 +224,9 @@ export default function DesktopCategoriesBar({
                     <span className="text-white/20">|</span>
 
                     <a
-                        href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+                        href={whatsappHref(siteContacts,
                             isArabic ? 'مرحباً شركة حوا، أرغب بالاستفسار عن طلبيات وتوزيع الجملة.' : 'Hello, I want to inquire about wholesale distribution.'
-                        )}`}
+                        )}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors py-1 font-bold"
@@ -235,10 +238,10 @@ export default function DesktopCategoriesBar({
             </div>
 
             {/* Backdrop Overlay with smooth fade */}
-            <div 
+            <div
                 className={`fixed inset-0 top-[114px] bg-black/45 backdrop-blur-xs z-30 transition-opacity duration-250 ease-out ${
-                    activeSlug 
-                        ? 'opacity-100 visible pointer-events-auto' 
+                    activeSlug
+                        ? 'opacity-100 visible pointer-events-auto'
                         : 'opacity-0 invisible pointer-events-none'
                 }`}
                 onClick={closeMenu}
@@ -246,7 +249,7 @@ export default function DesktopCategoriesBar({
             />
 
             {/* Minimalist Mega Menu Flyout Panel */}
-            <div 
+            <div
                 className={`absolute top-full inset-x-0 bg-[#071322]/98 backdrop-blur-2xl border-b border-[#8A6305]/35 shadow-2xl z-40 transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     activeSlug
                         ? 'opacity-100 translate-y-0 visible pointer-events-auto'

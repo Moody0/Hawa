@@ -175,7 +175,7 @@ const WholesaleProductRow: React.FC<WholesaleProductRowProps> = ({ product }) =>
                                     <Lock className="w-2.5 h-2.5 text-[#8A6305] group-hover/lock:text-white transition-colors" />
                                 </span>
                                 <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 blur-[3px] group-hover/lock:blur-[2px] transition-all opacity-60 tracking-wider">
-                                    88,500
+                                    •••••
                                 </span>
                             </div>
                             <span className="text-[10px] font-bold text-slate-400 group-hover/lock:text-[#8A6305] transition-colors mt-0.5">

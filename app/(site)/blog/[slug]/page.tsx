@@ -3,41 +3,27 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { FaWhatsapp } from 'react-icons/fa';
-import { prisma } from '@/lib/prisma';
-import { BLOG_SEED_ARTICLES } from '@/lib/blog-seed-posts';
+import {laravelJson} from '@/lib/laravel-server';
+
 import ResilientImage from '@/app/components/ResilientImage';
 import { Calendar, Clock, ArrowLeft, Store, CheckCircle2, FileText, Truck, Receipt, Share2 } from 'lucide-react';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { getSiteSettings } from '@/lib/public-queries';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { getSiteContacts, whatsappHref } from '@/lib/website-content';
+import { SITE_ORIGIN } from '@/lib/site-config';
 
 export const revalidate = 60;
 
 // Detailed seed articles library for offline resilience & rich demo content with local images
-const SEED_ARTICLES = BLOG_SEED_ARTICLES;
+
 
 export async function generateMetadata(
     props: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
     const params = await props.params;
-    let post: any = null;
-    
-    try {
-        const savedPost = await prisma.post.findUnique({ where: { slug: params.slug } });
-        if (savedPost) {
-            post = savedPost.isPublished && !savedPost.archivedAt ? savedPost : null;
-        } else {
-            post = SEED_ARTICLES[params.slug];
-        }
-    } catch (e) {
-        // Keep demo articles available only when the database cannot be reached.
-        post = SEED_ARTICLES[params.slug];
-    }
-
-    if (post && SEED_ARTICLES[params.slug]) {
-        post = { ...SEED_ARTICLES[params.slug], ...post };
-    }
+    const post=await laravelJson<any|null>('/api/blog/'+encodeURIComponent(params.slug),null);
 
     if (!post) {
         return { title: 'مقال غير موجود | Hawa Distribution' };
@@ -58,23 +44,7 @@ export default async function BlogPostPage(
     props: { params: Promise<{ slug: string }> }
 ) {
     const params = await props.params;
-    let post: any = null;
-    
-    try {
-        const savedPost = await prisma.post.findUnique({ where: { slug: params.slug } });
-        if (savedPost) {
-            post = savedPost.isPublished && !savedPost.archivedAt ? savedPost : null;
-        } else {
-            post = SEED_ARTICLES[params.slug];
-        }
-    } catch (err) {
-        console.warn('Database offline, reading from seed library for slug:', params.slug);
-        post = SEED_ARTICLES[params.slug];
-    }
-
-    if (post && SEED_ARTICLES[params.slug]) {
-        post = { ...SEED_ARTICLES[params.slug], ...post };
-    }
+    const post=await laravelJson<any|null>('/api/blog/'+encodeURIComponent(params.slug),null);
 
     if (!post) {
         notFound();
@@ -87,11 +57,10 @@ export default async function BlogPostPage(
     });
 
     const settings = await getSiteSettings();
-    const whatsappNumber = (settings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901').replace(/[^0-9]/g, '');
+    const contacts = getSiteContacts(settings || {});
 
     // Get 2 other related articles
-    const otherSlugs = Object.keys(SEED_ARTICLES).filter(s => s !== params.slug).slice(0, 2);
-    const relatedArticles = otherSlugs.map(s => SEED_ARTICLES[s]);
+    const relatedArticles=(await laravelJson<any[]>('/api/blog',[])).filter(p=>p.slug!==params.slug).slice(0,2);
 
     const readTime = post.readTime || '4 دقائق قراءة';
 
@@ -152,7 +121,7 @@ export default async function BlogPostPage(
 
                         {/* Quick WhatsApp Share Action */}
                         <a
-                            href={`https://wa.me/?text=${encodeURIComponent(`${post.title} - شركة حوا للتوزيع: https://hawa.sy/blog/${post.slug}`)}`}
+                            href={`https://wa.me/?text=${encodeURIComponent(`${post.title} - ${SITE_ORIGIN}/blog/${post.slug}`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-bold transition-all text-xs"
@@ -216,7 +185,7 @@ export default async function BlogPostPage(
 
                         <div className="flex flex-wrap items-center gap-3 shrink-0">
                             <a
-                                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`مرحباً شركة حوا للتوزيع، أود الاستفسار بخصوص المقال: ${post.title}`)}`}
+                                href={whatsappHref(contacts, `مرحباً شركة حوا للتوزيع، أود الاستفسار بخصوص المقال: ${post.title}`)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="px-5 py-3 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold text-xs flex items-center gap-2 shadow-xs active:scale-95 transition-all"

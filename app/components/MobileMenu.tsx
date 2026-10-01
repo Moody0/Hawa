@@ -1,6 +1,11 @@
 "use client";
+import { whatsappHref } from '@/lib/website-content';
+import { navigationLinkEnabled } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import { laravelClientFetch } from '@/lib/laravel-client';
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -62,7 +67,9 @@ const MobileMenu = ({
     setIsOpen: externalSetIsOpen,
 }: MobileMenuProps) => {
     const { t, dir, language } = useLanguage();
+    const siteContacts = useSiteContacts();
     const pathname = usePathname();
+    const dialogRef = useRef<HTMLDivElement>(null);
     const isRtl = dir === 'rtl' || language === 'ar';
 
     const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -81,7 +88,7 @@ const MobileMenu = ({
     useEffect(() => {
         if (isMobileMenuOpen && navData.length === 0 && !isLoadingNav) {
             setIsLoadingNav(true);
-            fetch('/api/navigation')
+            laravelClientFetch('/api/navigation')
                 .then((res) => (res.ok ? res.json() : []))
                 .then((data) => {
                     if (Array.isArray(data) && data.length > 0) {
@@ -102,7 +109,7 @@ const MobileMenu = ({
     const [shouldRender, setShouldRender] = useState(isMobileMenuOpen);
     const [isAnimating, setIsAnimating] = useState(false);
 
-    const whatsappNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901').replace(/[^0-9]/g, '');
+    const whatsappNumber = (siteContacts.whatsappDigits).replace(/[^0-9]/g, '');
 
     useEffect(() => {
         if (isMobileMenuOpen) {
@@ -121,15 +128,22 @@ const MobileMenu = ({
     }, [isMobileMenuOpen]);
 
     useEffect(() => {
-        if (isMobileMenuOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
+        if (!isMobileMenuOpen || !shouldRender) return;
+        const previousOverflow = document.body.style.overflow;
+        const previousFocus = document.activeElement as HTMLElement | null;
+        document.body.style.overflow = 'hidden';
+        const focusable = () => Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled])') || []).filter(element => element.offsetParent !== null);
+        focusable()[0]?.focus();
+        const trapFocus = (event: KeyboardEvent) => {
+            if (event.key !== 'Tab') return;
+            const elements = focusable();
+            const first = elements[0], last = elements[elements.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
         };
-    }, [isMobileMenuOpen]);
+        window.addEventListener('keydown', trapFocus);
+        return () => { document.body.style.overflow = previousOverflow; window.removeEventListener('keydown', trapFocus); previousFocus?.focus(); };
+    }, [isMobileMenuOpen, shouldRender]);
 
     // Close on escape key
     useEffect(() => {
@@ -186,10 +200,10 @@ const MobileMenu = ({
             label: isRtl ? 'تواصل معنا' : 'Contact Us',
             icon: Headphones,
         },
-    ];
+    ].filter(link => navigationLinkEnabled(link.href, siteContacts.content));
 
     return (
-        <div className="fixed inset-0 z-[60] lg:hidden overflow-hidden" suppressHydrationWarning>
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={isRtl ? 'القائمة الرئيسية' : 'Main menu'} className="fixed inset-0 z-[60] lg:hidden overflow-hidden" suppressHydrationWarning>
             {/* Backdrop with Blur */}
             <div
                 className={`fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 ease-out ${
@@ -261,7 +275,7 @@ const MobileMenu = ({
                                 className="group relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-[#0B192C] via-[#122238] to-[#0B192C] text-white shadow-md border border-[#8A6305]/30 transition-all active:scale-[0.99]"
                             >
                                 <div className="absolute top-0 end-0 w-32 h-32 bg-[#8A6305]/10 rounded-full blur-2xl pointer-events-none" />
-                                
+
                                 <div className="flex items-center justify-between gap-3 relative z-10">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-xl bg-[#8A6305]/25 border border-[#8A6305]/40 flex items-center justify-center text-[#FAF6EC] shrink-0 group-hover:scale-105 transition-transform shadow-xs">
@@ -281,7 +295,7 @@ const MobileMenu = ({
                                             </span>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 group-hover:bg-[#8A6305] group-hover:text-white transition-colors shrink-0">
                                         {isRtl ? <ChevronLeft className="text-lg" /> : <ChevronRight className="text-lg" />}
                                     </div>
@@ -370,9 +384,9 @@ const MobileMenu = ({
 
                             {/* Direct WhatsApp Sales Banner */}
                             <a
-                                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+                                href={whatsappHref(siteContacts,
                                     isRtl ? 'مرحباً، أود الاستفسار عن توريد وتوزيع بضائع لمحلنا.' : 'Hello, I would like to inquire about wholesale orders.'
-                                )}`}
+                                )}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100/70 transition-colors"
@@ -401,7 +415,7 @@ const MobileMenu = ({
                             </span>
                             <div className="flex items-center gap-3">
                                 <a
-                                    href={`https://wa.me/${whatsappNumber}`}
+                                    href={whatsappHref(siteContacts)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="WhatsApp"

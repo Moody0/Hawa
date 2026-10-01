@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { laravelLogin, adminLoginDestination, authErrorMessage } from "@/lib/laravel-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -22,12 +22,14 @@ export default function AdminLoginPage() {
         setLoading(true);
 
         try {
-            const result = await signIn("credentials", {
-                username,
-                password,
-                rememberMe: rememberMe ? "true" : "false",
-                redirect: false,
-            });
+            const response = await laravelLogin('admin', {username,password,rememberMe});
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                setError(authErrorMessage(response.status, data, dir === 'rtl'));
+                setLoading(false);
+                return;
+            }
+            const result = { ok: true, error: null as string | null };
 
             if (result?.error) {
                 if (result.error.toLowerCase().includes("too many") || result.error.toLowerCase().includes("throttled")) {
@@ -38,10 +40,8 @@ export default function AdminLoginPage() {
                 setLoading(false);
             } else if (result?.ok) {
                 const rawCallback = new URLSearchParams(window.location.search).get("callbackUrl");
-                const destination = rawCallback?.startsWith("/admin/") && !rawCallback.startsWith("/admin/login") && !rawCallback.startsWith("//")
-                    ? rawCallback
-                    : "/admin/dashboard";
-                window.location.href = destination;
+                const destination = adminLoginDestination(rawCallback);
+                window.location.replace(destination);
             } else {
                 setError(t("admin.login.errorGeneric"));
                 setLoading(false);

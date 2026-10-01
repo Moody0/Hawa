@@ -19,7 +19,6 @@ const noto_sans_arabic = Noto_Sans_Arabic({
 
 const metadataBase =
   process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXTAUTH_URL ||
   "https://hawatrading.com";
 
 export const viewport: Viewport = {

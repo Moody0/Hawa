@@ -1,1 +1,0 @@
-ALTER TABLE "Brand" ADD COLUMN "nameEn" TEXT;

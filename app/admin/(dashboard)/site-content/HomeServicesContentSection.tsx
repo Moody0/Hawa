@@ -37,8 +37,8 @@ import {
     Layers,
     ExternalLink
 } from "lucide-react";
-import type { CompanyServiceItem } from "@/lib/public-queries";
-import { DEFAULT_COMPANY_SERVICES } from "@/lib/public-queries";
+import type { CompanyServiceItem } from "@/lib/public-defaults";
+import { DEFAULT_COMPANY_SERVICES } from "@/lib/public-defaults";
 
 export const AVAILABLE_SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
     Truck,

@@ -5,9 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { LayoutDashboard, ShoppingBag, Store, FolderTree, Package, Users, Settings, X, LogOut, FileText, Network, GalleryHorizontal, FileEdit, MessageSquare, Loader2 } from 'lucide-react';
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
 import type { AdminPermission } from "@/lib/admin-permissions";
+import toast from 'react-hot-toast';
 
 interface AdminSidebarProps {
     isOpen: boolean;
@@ -76,8 +77,9 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         }
     ];
 
-    const handleSignOut = () => {
-        signOut({ callbackUrl: "/admin/login" });
+    const handleSignOut = async () => {
+        try { await signOut({ callbackUrl: "/admin/login" }); }
+        catch { toast.error(language === 'ar' ? 'تعذر تسجيل الخروج. تحقق من الاتصال وحاول مجدداً.' : 'Could not sign out. Check your connection and try again.'); }
     };
 
     return (

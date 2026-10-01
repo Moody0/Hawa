@@ -25,8 +25,8 @@ import {
     MapPin,
     Building2,
 } from 'lucide-react';
-import type { CompanyServiceItem } from '@/lib/public-queries';
-import { DEFAULT_COMPANY_SERVICES } from '@/lib/public-queries';
+import type { CompanyServiceItem } from '@/lib/public-defaults';
+import { DEFAULT_COMPANY_SERVICES } from '@/lib/public-defaults';
 
 const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
     Truck,
@@ -102,7 +102,7 @@ export default function CompanyServices({ settings }: CompanyServicesProps) {
         if (!settings?.homeServicesItems) return DEFAULT_COMPANY_SERVICES;
         try {
             const parsed = JSON.parse(settings.homeServicesItems);
-            return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_COMPANY_SERVICES;
+            return Array.isArray(parsed) ? parsed : [];
         } catch {
             return DEFAULT_COMPANY_SERVICES;
         }

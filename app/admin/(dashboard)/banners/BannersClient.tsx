@@ -8,7 +8,7 @@ import { Plus, RefreshCw, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import BannerModal from "./BannerModal";
 import { deleteBanner, toggleBannerStatus } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
 
 interface Banner {

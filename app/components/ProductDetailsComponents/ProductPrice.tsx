@@ -37,10 +37,10 @@ const ProductPrice = ({ price, discountPrice, hidePrice }: ProductPriceProps) =>
 
                     <div className="flex items-baseline gap-1 select-none">
                         <span className="text-base font-black text-slate-800 dark:text-slate-200 blur-[3px] opacity-60 tracking-wider">
-                            88,500
+                            •••••
                         </span>
                         <span className="text-[11px] font-bold text-slate-400">
-                            {isArabic ? "ل.س" : "SYP"}
+                            USD
                         </span>
                     </div>
                 </div>

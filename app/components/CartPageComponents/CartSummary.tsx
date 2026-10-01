@@ -1,5 +1,7 @@
 "use client";
 
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -14,6 +16,7 @@ interface CartSummaryProps {
 
 const CartSummary = ({ subtotal, hasUnpricedItems = false }: CartSummaryProps) => {
     const { t, dir, language } = useLanguage();
+    const siteContacts = useSiteContacts();
     const { formatPrice } = useCurrency();
     const { customer } = useCustomer();
     const isAr = language === 'ar';
@@ -114,7 +117,7 @@ const CartSummary = ({ subtotal, hasUnpricedItems = false }: CartSummaryProps) =
                     <p className="text-xs font-medium text-slate-600 dark:text-slate-300">{t('footer.contactUs')}</p>
                     <a
                         className="mt-0.5 inline-block text-xs font-bold text-[#0B192C] hover:text-[#8A6305] hover:underline dark:text-white"
-                        href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901').replace(/[^0-9]/g, '')}`}
+                        href={whatsappHref(siteContacts)}
                         target="_blank"
                         rel="noopener noreferrer"
                     >

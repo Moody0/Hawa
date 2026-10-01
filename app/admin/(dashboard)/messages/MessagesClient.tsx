@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useState, useEffect } from "react";
 import {
@@ -71,7 +73,7 @@ export default function MessagesClient() {
             if (searchQuery.trim()) params.set("search", searchQuery.trim());
             params.set("_t", Date.now().toString());
 
-            const res = await fetch(`/api/admin/messages?${params.toString()}`, {
+            const res = await laravelClientFetch(`/api/admin/messages?${params.toString()}`, {
                 cache: "no-store",
             });
             if (res.ok) {
@@ -153,7 +155,7 @@ export default function MessagesClient() {
         const nextState = !msg.isRead;
 
         try {
-            const res = await fetch(`/api/admin/messages/${msg.id}`, {
+            const res = await laravelClientFetch(`/api/admin/messages/${msg.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ isRead: nextState }),
@@ -203,7 +205,7 @@ export default function MessagesClient() {
         if (!ok) return;
 
         try {
-            const res = await fetch(`/api/admin/messages/${id}`, {
+            const res = await laravelClientFetch(`/api/admin/messages/${id}`, {
                 method: "DELETE",
             });
 
@@ -259,7 +261,7 @@ export default function MessagesClient() {
         setIsSavingNotes(true);
 
         try {
-            const res = await fetch(`/api/admin/messages/${selectedMessage.id}`, {
+            const res = await laravelClientFetch(`/api/admin/messages/${selectedMessage.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ notes: adminNotes }),

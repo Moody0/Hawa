@@ -1,26 +1,27 @@
 "use client";
 
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { Truck, CheckCircle2, Phone, RotateCcw } from 'lucide-react';
 import { FaWhatsapp } from "react-icons/fa";
-import { Settings } from "@prisma/client";
 import { ShippingPolicyContent } from "@/lib/shipping-policy-content";
 
 interface ShippingReturnsContentProps {
-    siteSettings: Settings | any | null;
+    siteSettings: any | null;
     content: ShippingPolicyContent;
 }
 
 export default function ShippingReturnsContent({ siteSettings, content }: ShippingReturnsContentProps) {
     const { dir, language } = useLanguage();
+    const siteContacts = useSiteContacts();
     const pageContent = language === 'ar' || dir === 'rtl' ? content.ar : content.en;
 
     // Phone / WhatsApp setup with dedicated dispatch overrides
-    const defaultWa = '+963993443901';
-    const rawWa = pageContent.dispatchWhatsapp?.trim() || siteSettings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || defaultWa;
+    const rawWa = siteContacts.whatsappDigits;
     const cleanWaNumber = rawWa.replace(/[^0-9]/g, '');
-    const rawPhone = pageContent.dispatchPhone?.trim() || siteSettings?.footerPhone || defaultWa;
+    const rawPhone = siteContacts.phone;
     const cleanPhoneNumber = rawPhone.replace(/[^0-9+]/g, '');
     const phoneLabel = pageContent.phoneButtonLabel || (language === 'ar' || dir === 'rtl' ? 'اتصال مباشر' : 'Direct Call');
     const heroImage = siteSettings?.shippingReturnsImage?.trim();
@@ -268,7 +269,7 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
 
                         <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2.5 shrink-0">
                             <a
-                                href={`https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(pageContent.whatsappMessage)}`}
+                                href={whatsappHref(siteContacts, pageContent.whatsappMessage)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition-all shadow-xs"

@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
@@ -161,7 +163,7 @@ const HeaderSearch = ({ onSearchSelect, onClose, placeholder, autoFocus = false,
 
         const timeoutId = setTimeout(async () => {
             try {
-                const res = await fetch(
+                const res = await laravelClientFetch(
                     `/api/products?search=${encodeURIComponent(trimmed)}&limit=3&lang=${currentLocale}`,
                     { signal: controller.signal }
                 );

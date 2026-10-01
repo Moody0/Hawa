@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { usePathname } from "next/navigation";
@@ -309,7 +311,7 @@ const ProductsClient = ({
                     return;
                 }
 
-                const res = await fetch(url, { signal: controller.signal });
+                const res = await laravelClientFetch(url, { signal: controller.signal });
                 if (res.ok && currentReqId === categoryRequestIdRef.current) {
                     const data = await res.json();
                     if (Array.isArray(data) && currentReqId === categoryRequestIdRef.current) {
@@ -424,7 +426,7 @@ const ProductsClient = ({
 
                 const url = `/api/products?page=${currentPage}&limit=36${categoryQuery}${brandQuery}${mainCategoryQuery}${inStockQuery}${onSaleQuery}${isTrendingQuery}${liveSearchQuery}${sortQuery}${countParams}`;
 
-                const response = await fetch(url, { signal: controller.signal });
+                const response = await laravelClientFetch(url, { signal: controller.signal });
 
                 if (response.ok && currentReqId === productRequestIdRef.current) {
                     const data = await response.json();

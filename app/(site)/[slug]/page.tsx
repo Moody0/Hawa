@@ -1,5 +1,5 @@
+import {fetchProductBySlug,fetchCatalogProducts} from '@/lib/catalog';
 import React from 'react';
-import { prisma } from "@/lib/prisma";
 import { notFound } from 'next/navigation';
 import ProductGallery from '@/app/components/ProductDetailsComponents/ProductGallery';
 import ProductHeader from '@/app/components/ProductDetailsComponents/ProductHeader';
@@ -12,34 +12,14 @@ import { canViewWholesalePrices, projectProductPrices, projectProductsPrices } f
 
 const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
     const params = await props.params;
-    const product = await prisma.product.findFirst({
-        where: {
-            slug: params.slug,
-            archivedAt: null,
-            brand: { isActive: true, archivedAt: null },
-            category: { isActive: true, archivedAt: null },
-        },
-        include: {
-            brand: true,
-        },
-    });
+    const product = await fetchProductBySlug(params.slug);
 
     if (!product) {
         notFound();
     }
 
     // Fetch related products (same category, exclude current)
-    const relatedProducts = await prisma.product.findMany({
-        where: {
-            categoryId: product.categoryId,
-            brandId: product.brandId,
-            id: { not: product.id },
-            archivedAt: null,
-            brand: { isActive: true, archivedAt: null },
-            category: { isActive: true, archivedAt: null },
-        },
-        take: 4,
-    });
+    const relatedProducts = await fetchCatalogProducts({categoryIds:product.categoryId,brandIds:product.brandId,excludeIds:product.id,limit:12});
     const canViewPrices = await canViewWholesalePrices();
     const safeProduct = projectProductPrices(product, canViewPrices);
     const safeRelatedProducts = projectProductsPrices(relatedProducts, canViewPrices);
@@ -79,6 +59,7 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                         image: product.images.split(',')[0],
                         slug: product.slug,
                         options: product.options,
+                        requiresQuote: product.requiresQuote,
                         description: product.description,
                         descriptionAr: product.descriptionAr,
                         descriptionEn: product.descriptionEn,

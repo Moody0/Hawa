@@ -124,8 +124,8 @@ export default function ContactContentSection({
             <div className="rounded-2xl border border-[#8A6305]/20 bg-[#8A6305]/5 px-5 py-4 text-sm text-slate-700 dark:text-slate-200 flex items-center justify-between gap-4">
                 <p>
                     {isAr
-                        ? "تحكم كامل بمحتوى صفحة (تواصل معنا) بكافة عناصرها باللغتين العربية والإنجليزية: العناوين، أرقام الهواتف والواتساب، البطاقات التعريفية، وأسماء حقول النموذج المباشر. اضغط على حفظ التغييرات بالأعلى لتطبيق التعديلات فوراً."
-                        : "Full control over all content on the (/contact) page in both Arabic and English: titles, phone and WhatsApp numbers, contact cards, and direct form fields. Click Save Changes at the top to publish your updates."}
+                        ? "عدّل عناوين صفحة التواصل والبطاقات ونصوص النموذج هنا. أرقام الهواتف والواتساب والعنوان وأوقات العمل تأتي من تبويب الموقع وبيانات التواصل العامة. اضغط حفظ التغييرات لتطبيق التعديلات."
+                        : "Edit contact page labels and form text here. Phone numbers, WhatsApp, address, and hours come from Website & Shared Contacts. Save Changes publishes your updates."}
                 </p>
             </div>
 
@@ -149,7 +149,7 @@ export default function ContactContentSection({
                     </div>
 
                     <div className="space-y-5">
-                        {group.fields.map((field) => (
+                        {group.fields.filter(field => !['salesPhone','salesWhatsapp','gmPhone','gmWhatsapp','formTargetWhatsapp','warehouseDesc','hoursDesc'].includes(field.key)).map((field) => (
                             <div key={field.key} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* English Field */}
                                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-300">

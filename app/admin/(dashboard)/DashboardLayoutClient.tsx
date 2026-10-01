@@ -1,6 +1,6 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider } from "@/lib/admin-session";
 import AdminSidebar from "../components/AdminSidebar";
 import { AdminSidebarProvider, useAdminSidebar } from "../context/AdminSidebarContext";
 import { ConfirmDialogProvider } from "../context/ConfirmDialogContext";

@@ -287,8 +287,9 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                                     <Lock className="w-2.5 h-2.5 text-[#8A6305] group-hover/lock:text-white transition-colors" />
                                 </span>
                                 <div className="flex items-baseline gap-1 select-none">
-                                    <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 blur-[3px] group-hover/lock:blur-[2px] transition-all opacity-60 tracking-wider">
-                                        88,500
+                                    <span aria-hidden="true" className="text-sm font-black blur-[3px] opacity-60 tracking-widest">•••••</span>
+                                    <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200  transition-all opacity-60 tracking-wider">
+                                        {isArabic ? "سجّل الدخول لعرض السعر" : "Sign in to view price"}
                                     </span>
                                     <span className="text-[10px] font-bold text-slate-400 group-hover/lock:text-[#8A6305] transition-colors">
                                         {isArabic ? "سعر الجملة" : "Wholesale"}

@@ -1,4 +1,6 @@
 'use client';
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { Store, Phone, MapPin, ShoppingBag, Search, CheckCircle2, Ban, Trash2, RotateCw, ShieldCheck, Check, X, Hourglass, Pencil, Save } from 'lucide-react';
@@ -64,7 +66,7 @@ function CustomerEditModal({
         setIsSaving(true);
 
         try {
-            const response = await fetch('/api/admin/customers', {
+            const response = await laravelClientFetch('/api/admin/customers', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -190,7 +192,7 @@ export default function AdminCustomersPage() {
     const fetchCustomers = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/admin/customers');
+            const res = await laravelClientFetch('/api/admin/customers');
             if (res.ok) {
                 const data = await res.json();
                 setCustomers(data.customers || []);
@@ -216,7 +218,7 @@ export default function AdminCustomersPage() {
     const handleApprove = async (id: string, shopName: string) => {
         setActionLoadingId(id);
         try {
-            const res = await fetch('/api/admin/customers', {
+            const res = await laravelClientFetch('/api/admin/customers', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id, isActive: true }),
@@ -239,7 +241,7 @@ export default function AdminCustomersPage() {
     const toggleStatus = async (id: string, currentStatus: boolean) => {
         setActionLoadingId(id);
         try {
-            const res = await fetch('/api/admin/customers', {
+            const res = await laravelClientFetch('/api/admin/customers', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id, isActive: !currentStatus }),
@@ -272,7 +274,7 @@ export default function AdminCustomersPage() {
         if (!ok) return;
         setActionLoadingId(id);
         try {
-            const res = await fetch(`/api/admin/customers?id=${id}`, { method: 'DELETE' });
+            const res = await laravelClientFetch(`/api/admin/customers?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
                 setCustomers((prev) => prev.filter((c) => c.id !== id));
                 toast.success(isPending ? 'تم رفض وحذف الطلب' : 'تم حذف الحساب');

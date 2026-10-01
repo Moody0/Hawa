@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { X, ChevronDown, RefreshCw, CheckCircle2, UploadCloud } from 'lucide-react';
@@ -110,7 +112,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                 const fd = new FormData();
                 fd.append("file", file);
                 fd.append("folder", "products");
-                const res = await fetch("/api/upload", { method: "POST", body: fd });
+                const res = await laravelClientFetch("/api/upload", { method: "POST", body: fd });
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.url) {
                     uploadedUrls.push(data.url);
@@ -484,6 +486,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                 placeholder={language === 'ar' ? '-- اختر الفئة --' : '-- Select Sub Category --'}
                                 required
                                 isArabic={language === 'ar'}
+                                pageSize={categoryOptions.length || 50}
                                 disabled={categoryOptions.length === 0}
                             />
                         </div>

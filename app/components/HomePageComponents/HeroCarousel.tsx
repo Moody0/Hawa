@@ -45,59 +45,6 @@ interface HeroCarouselProps {
 }
 
 // Rich, curated default wholesale slides highlighting Hawa's core capabilities
-const DEFAULT_SLIDES: SlideItem[] = [
-    {
-        id: 'default-slide-partner',
-        badge: 'Certified Wholesale Distributor',
-        badgeAr: 'توزيع جملة معتمد',
-        title: 'Your Trusted Partner in Wholesale & Distribution',
-        titleAr: 'شريكك الموثوق في التوزيع والتجارة',
-        subtitle: 'We supply leading global brands and provide integrated distribution solutions covering markets and retail stores.',
-        subtitleAr: 'نوفر أفضل العلامات التجارية العالمية ونقدم حلول توزيع متكاملة تغطي الأسواق والمتاجر',
-        buttonText: 'Browse Products',
-        buttonTextAr: 'تصفح المنتجات',
-        link: '/products',
-        secondaryButtonText: 'Discover Agencies',
-        secondaryButtonTextAr: 'اكتشف وكالاتنا',
-        secondaryLink: '/brands',
-        secondaryIcon: 'agencies',
-        image: '/images/hero-showcase-perfect.webp',
-    },
-    {
-        id: 'default-slide-agencies',
-        badge: 'Exclusive Food Agencies',
-        badgeAr: 'وكالات تجارية حصرية',
-        title: 'All Your Global Food Brands in a Single Order',
-        titleAr: 'كل منتجات وكالاتك الغذائية… بطلب واحد',
-        subtitle: 'Direct supply from top international agencies: Zwan, Alreef, Haleebna, Buffalo, Silver Fish, and more at bulk pricing.',
-        subtitleAr: 'المنصة الرائدة لتوريد كبرى الوكالات والعلامات التجارية للمحلات والسوبرماركت بالجملة وبأفضل الأسعار.',
-        buttonText: 'Explore Agencies',
-        buttonTextAr: 'استكشف الوكالات',
-        link: '/brands',
-        secondaryButtonText: 'Order via WhatsApp',
-        secondaryButtonTextAr: 'طلب مباشر عبر واتساب',
-        secondaryLink: 'https://wa.me/963982276537',
-        secondaryIcon: 'whatsapp',
-        image: '/images/hawa-hero-showcase.webp',
-    },
-    {
-        id: 'default-slide-logistics',
-        badge: 'Direct Refrigerated Logistics',
-        badgeAr: 'توريد لوجستي مبرد وسريع',
-        title: 'Fast Scheduled Delivery Directly to Your Storefront',
-        titleAr: 'توصيل مبرد ومباشر لباب محلك التجاري',
-        subtitle: 'Modern temperature-controlled fleet ensuring maximum freshness, product safety, and reliable scheduled supply.',
-        subtitleAr: 'أسطول شاحنات مجهزة تضمن سلامة البضائع الغذائية والمفرزات مع التزام تام بمواعيد التسليم المباشر لباب متجرك.',
-        buttonText: 'Order Wholesale',
-        buttonTextAr: 'تسوق بالجملة',
-        link: '/products',
-        secondaryButtonText: 'Contact Sales',
-        secondaryButtonTextAr: 'تواصل مع المبيعات',
-        secondaryLink: 'https://wa.me/963982276537',
-        secondaryIcon: 'whatsapp',
-        image: '/images/hawa_wholesale_hub.jpg',
-    },
-];
 
 const SLIDE_DURATION = 6000; // 6 seconds per slide
 
@@ -168,7 +115,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
         const activeBanners = (banners || []).filter((b) => b.isActive !== false);
 
         if (activeBanners.length === 0) {
-            return DEFAULT_SLIDES;
+            return [];
         }
 
         const mapped: SlideItem[] = activeBanners.map((b, idx) => ({
@@ -305,6 +252,8 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     const onTouchEnd = () => {
         handleSwipeEnd();
     };
+
+    if (!slides.length) return null;
 
     return (
         <section

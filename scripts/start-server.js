@@ -40,7 +40,7 @@ let lastStartTime = 0;
 function startChild() {
     if (isShuttingDown) return;
     lastStartTime = Date.now();
-    const child = spawn(process.execPath, [nextBin, 'start', '-p', port], {
+    const child = spawn(process.execPath, [nextBin, 'start', '-p', port, '--hostname', process.env.HOSTNAME || '127.0.0.1'], {
         stdio: 'inherit',
         cwd: path.join(__dirname, '..'),
         env: process.env,

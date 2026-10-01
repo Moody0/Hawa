@@ -1,4 +1,6 @@
 'use client';
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -199,7 +201,7 @@ const MobileSearchModal = ({ isOpen, onClose }: MobileSearchModalProps) => {
         setLoading(true);
         const timeoutId = setTimeout(async () => {
             try {
-                const res = await fetch(
+                const res = await laravelClientFetch(
                     `/api/products?search=${encodeURIComponent(trimmed)}&limit=6&lang=${language}`,
                     { signal: controller.signal }
                 );

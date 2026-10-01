@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { scrubSentryEvent } from "@/lib/sentry-privacy";
+import * as Sentry from '@sentry/nextjs';
+
+vi.mock('@sentry/nextjs', () => ({ init: vi.fn() }));
 
 interface SentryLikeEvent {
   message?: string;
@@ -28,6 +31,10 @@ describe("Adversarial Sentry Privacy & Telemetry Challenge", () => {
   describe("1. Sentry Client Configuration", () => {
     it("can load sentry.client.config without crashing", async () => {
       await expect(import("../sentry.client.config")).resolves.toBeDefined();
+      expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({
+        sendDefaultPii: false, replaysSessionSampleRate: 0, replaysOnErrorSampleRate: 0,
+        beforeSend: expect.any(Function), beforeSendTransaction: expect.any(Function),
+      }));
     });
   });
 

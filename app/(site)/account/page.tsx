@@ -1,4 +1,8 @@
 'use client';
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -62,6 +66,7 @@ export default function MerchantPortalPage() {
     const { customer, isLoading, logout, updateProfile } = useCustomer();
     const { addItem, openDrawer } = useCart();
     const { language } = useLanguage();
+    const siteContacts = useSiteContacts();
     const isArabic = language === 'ar';
 
     const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
@@ -89,7 +94,7 @@ export default function MerchantPortalPage() {
 
     const tabButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000';
+    const whatsappNumber = siteContacts.whatsappDigits;
     const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
 
     // Redirect guest to login
@@ -111,7 +116,7 @@ export default function MerchantPortalPage() {
     const fetchOrders = useCallback(async () => {
         setOrdersState((prev) => ({ ...prev, status: 'loading', errorMessage: undefined }));
         try {
-            const res = await fetch('/api/customer/orders', { cache: 'no-store' });
+            const res = await laravelClientFetch('/api/customer/orders', { cache: 'no-store' });
             if (res.status === 401 || res.status === 403) {
                 setOrdersState({
                     status: 'unauthorized',
@@ -170,8 +175,8 @@ export default function MerchantPortalPage() {
         });
 
         toast.success(
-            isArabic 
-                ? `تمت إضافة ${addedCount} أصناف من الطلبية السابقة إلى السلة بنجاح!` 
+            isArabic
+                ? `تمت إضافة ${addedCount} أصناف من الطلبية السابقة إلى السلة بنجاح!`
                 : `Added ${addedCount} items from previous order to cart!`
         );
         openDrawer();
@@ -347,11 +352,11 @@ export default function MerchantPortalPage() {
 
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <a
-                            href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(
+                            href={whatsappHref(siteContacts,
                                 isArabic
                                     ? `مرحباً شركة حوا، معكم ${customer.ownerName} من ${customer.shopName} (${customer.city}). أود الاستفسار عن طلبيتي.`
                                     : `Hello Hawa Distribution, this is ${customer.ownerName} from ${customer.shopName}.`
-                            )}`}
+                            )}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all"

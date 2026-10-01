@@ -8,7 +8,7 @@ import AdminHeader from "../../components/AdminHeader";
 import AddProductModal from "./AddProductModal";
 import { deleteProduct, toggleProductTrending, bulkToggleTrending, bulkCreateProducts, bulkRemoveSale, bulkDeleteProducts } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { getSafeImageUrl } from '@/lib/image-utils';
 import { ChevronRight, ChevronLeft, Upload, Download, Plus, Search, ChevronDown, Flame, Tag, Trash2, Pencil, RefreshCw, ArrowUp, ArrowDown, Share2, Copy, TrendingDown, CircleSlash, X } from 'lucide-react';

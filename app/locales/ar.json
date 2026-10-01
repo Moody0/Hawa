@@ -392,7 +392,7 @@
         "inCatalog": "في الكتالوج",
         "categories": "الأقسام",
         "activeSections": "أقسام نشطة",
-        "averageOrderValue": "متوسط قيمة الطلب (AOV)",
+        "averageOrderValue": "متوسط قيمة الطلب المكتمل",
         "perDeliveredOrder": "لكل طلب مكتمل",
         "pendingFulfillment": "بانتظار التجهيز",
         "ordersNeedingAction": "تحتاج معالجة فورية",

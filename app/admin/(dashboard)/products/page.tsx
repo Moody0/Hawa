@@ -1,20 +1,19 @@
-import { getAdminProducts, getAdminCategories, getAdminBrands, getAdminMainCategories } from "../../../../lib/admin-actions";
+import { getAdminProducts, getCatalogFormOptions } from "../../../../lib/admin-actions";
 import ProductsClient from "./ProductsClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-    const [products, categoriesData, brands, mainCategories] = await Promise.all([
+    const [products, options] = await Promise.all([
         getAdminProducts(),
-        getAdminCategories(1, 100),
-        getAdminBrands(),
-        getAdminMainCategories()
+        getCatalogFormOptions(),
     ]);
+    const {categories, brands, mainCategories} = options;
 
     return (
         <ProductsClient 
             products={products} 
-            categories={categoriesData.categories} 
+            categories={categories}
             brands={brands}
             mainCategories={mainCategories}
         />

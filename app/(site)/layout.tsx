@@ -1,3 +1,6 @@
+import { SiteContactsProvider } from '@/app/context/SiteContactsContext';
+import { getSiteContacts } from '@/lib/website-content';
+import { getSiteSettings } from '@/lib/public-queries';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
@@ -21,8 +24,10 @@ export default async function SiteLayout({
         console.error("Failed to load navigation data in SiteLayout:", e);
     }
 
+    const contacts = getSiteContacts(await getSiteSettings());
+
     return (
-        <div className="min-h-screen flex flex-col" dir={dir}>
+        <SiteContactsProvider contacts={contacts}><div className="min-h-screen flex flex-col" dir={dir}>
             {/* Navigation Progress Bar & Scroll Management */}
             <Suspense fallback={null}>
                 <NavigationProgressBar />
@@ -46,6 +51,6 @@ export default async function SiteLayout({
 
             {/* Footer */}
             <Footer t={t} language={language} />
-        </div>
+        </div></SiteContactsProvider>
     );
 }

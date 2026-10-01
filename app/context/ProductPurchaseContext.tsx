@@ -15,6 +15,7 @@ export interface PurchaseProduct {
     price: number;
     discountPrice?: number | null;
     hidePrice?: boolean;
+    requiresQuote?: boolean;
     image: string;
     slug: string;
     options?: string | null;
@@ -77,7 +78,7 @@ export function ProductPurchaseProvider({
     );
 
     const isValidSelection = !hasOptions || Boolean(selectedOption && parsedOptions.includes(selectedOption));
-    const isOutOfStock = typeof stock === 'number' && stock <= 0;
+    const isOutOfStock = !product.requiresQuote && typeof stock === 'number' && stock <= 0;
     const effectivePrice = Number(product.discountPrice || product.price);
 
     const displayName = (isArabic ? product.nameAr : product.nameEn) || product.name || product.nameAr || '';

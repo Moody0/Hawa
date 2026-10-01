@@ -1,3 +1,4 @@
+import { getSiteContacts } from '@/lib/website-content';
 import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
@@ -51,6 +52,8 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
             ? 'جميع الحقوق محفوظة © 2026 شركة حوا للتوزيع والتجارة'
             : '© 2026 Hawa Distribution & Trading. All rights reserved.');
 
+    const contacts = getSiteContacts(settings || {});
+
     // Direct Contacts
     const contactTitle =
         getLocalizedValue(language, settings?.footerContactTitle, settings?.footerContactTitleAr) ||
@@ -58,11 +61,10 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
 
     const contactAddress =
         getLocalizedValue(language, settings?.footerAddress, settings?.footerAddressAr) ||
-        (isArabic ? 'حمص، المنطقة الصناعية — سورية' : 'Homs Industrial Zone, Syria');
+        '';
 
-    const wholesalePhone = settings?.footerPhone || settings?.whatsappNumber || '+963 993 443 901';
-    const emailAddress = settings?.footerEmail || 'info@hawa-dist.com';
-    const whatsappClean = wholesalePhone.replace(/\D/g, '') || '963993443901';
+    const wholesalePhone = contacts.phone;
+    const emailAddress = contacts.email;
 
     // Column Titles
     const supportTitle =
@@ -78,7 +80,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
         (isArabic ? 'الجمهورية العربية السورية — حمص' : 'Syrian Arab Republic — Homs');
 
     const termsUrl = settings?.footerTermsUrl || '/shipping-returns';
-    const privacyUrl = settings?.footerPrivacyUrl || '/privacy';
+    const privacyUrl = settings?.footerPrivacyUrl === '/shipping-returns' ? '/privacy' : settings?.footerPrivacyUrl || '/privacy';
 
     // 1. Column 3: Wholesale Services Links (dynamic settings with fallbacks)
     const rawServicesLinks = [
@@ -143,12 +145,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
         .filter((link) => Boolean(link.href && link.href.trim()));
 
     // 3. Social Media Links
-    const whatsappUrl =
-        settings?.footerWhatsappUrl && settings.footerWhatsappUrl !== '#'
-            ? settings.footerWhatsappUrl
-            : `https://wa.me/${whatsappClean}?text=${encodeURIComponent(
-                  isArabic ? 'مرحباً شركة حوا للتوزيع، أود الاستفسار عن بضائع الجملة.' : 'Hello Hawa Distribution, I would like to inquire about wholesale goods.'
-              )}`;
+    const whatsappUrl = contacts.whatsappUrl;
 
     const socialLinks = [
         {
@@ -157,21 +154,21 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
             label: 'WhatsApp',
         },
         {
-            href: settings?.footerFacebookUrl && settings.footerFacebookUrl !== '#' ? settings.footerFacebookUrl : 'https://facebook.com',
+            href: contacts.facebook,
             icon: FaFacebook,
             label: 'Facebook',
         },
         {
-            href: settings?.footerInstagramUrl && settings.footerInstagramUrl !== '#' ? settings.footerInstagramUrl : 'https://instagram.com',
+            href: contacts.instagram,
             icon: FaInstagram,
             label: 'Instagram',
         },
         {
-            href: settings?.footerLinkedinUrl && settings.footerLinkedinUrl !== '#' ? settings.footerLinkedinUrl : 'https://linkedin.com',
+            href: contacts.linkedin,
             icon: FaLinkedin,
             label: 'LinkedIn',
         },
-    ];
+    ].filter(link => Boolean(link.href));
 
     const renderLink = (label: string, href: string) => {
         const isExt = isExternalUrl(href);
@@ -229,7 +226,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                         </p>
 
                         {/* Social Channels */}
-                        <div className="flex flex-col gap-2 pt-2">
+                        {socialLinks.length > 0 && <div className="flex flex-col gap-2 pt-2">
                             <span className="text-[11px] font-semibold text-slate-400">
                                 {isArabic ? 'تابعنا على منصاتنا:' : 'Follow our channels:'}
                             </span>
@@ -239,7 +236,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                                     return (
                                         <a
                                             key={social.label}
-                                            className="w-8 h-8 rounded-lg bg-white/[0.06] text-slate-300 hover:bg-[#8A6305] hover:text-white transition-all duration-200 flex items-center justify-center text-sm border border-white/10 hover:border-[#8A6305] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A6305]"
+                                            className="w-11 h-11 rounded-lg bg-white/[0.06] text-slate-300 hover:bg-[#8A6305] hover:text-white transition-all duration-200 flex items-center justify-center text-sm border border-white/10 hover:border-[#8A6305] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A6305]"
                                             href={social.href}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -250,26 +247,26 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                                     );
                                 })}
                             </div>
-                        </div>
+                        </div>}
                     </div>
 
                     {/* Column 2: Contact & Working Hours (lg:col-span-3 lg:px-6) */}
                     <div className="lg:col-span-3 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
-                        <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider flex items-center gap-2">
+                        <h2 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider flex items-center gap-2">
                             <span>{contactTitle}</span>
-                        </h5>
+                        </h2>
 
                         <div className="flex flex-col gap-3 text-xs sm:text-[13px] text-slate-300">
                             {/* Location */}
-                            <div className="flex items-start gap-2.5">
+                            {contactAddress && <div className="flex items-start gap-2.5">
                                 <MapPin className="w-4 h-4 text-[#E5B54A] shrink-0 mt-0.5" aria-hidden="true" />
                                 <span className="leading-snug">
                                     {contactAddress}
                                 </span>
-                            </div>
+                            </div>}
 
                             {/* Phone */}
-                            <div className="flex items-center gap-2.5">
+                            {wholesalePhone && <div className="flex items-center gap-2.5">
                                 <Phone className="w-4 h-4 text-[#E5B54A] shrink-0" aria-hidden="true" />
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-slate-400 font-medium text-xs">
@@ -283,10 +280,10 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                                         {wholesalePhone}
                                     </a>
                                 </div>
-                            </div>
+                            </div>}
 
                             {/* Email */}
-                            <div className="flex items-center gap-2.5">
+                            {emailAddress && <div className="flex items-center gap-2.5">
                                 <Mail className="w-4 h-4 text-[#E5B54A] shrink-0" aria-hidden="true" />
                                 <a
                                     href={`mailto:${emailAddress}`}
@@ -294,15 +291,15 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                                 >
                                     {emailAddress}
                                 </a>
-                            </div>
+                            </div>}
                         </div>
                     </div>
 
                     {/* Column 3: Wholesale Services (lg:col-span-3 lg:px-6) */}
                     <div className="lg:col-span-3 flex flex-col gap-3.5 lg:px-6 lg:border-e lg:border-white/10">
-                        <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
+                        <h2 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
                             {supportTitle}
-                        </h5>
+                        </h2>
                         <ul className="flex flex-col gap-2.5">
                             {servicesLinks.map((link, idx) => (
                                 <li key={idx}>
@@ -314,9 +311,9 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
 
                     {/* Column 4: Quick Links (lg:col-span-2 lg:ps-6) */}
                     <div className="lg:col-span-2 flex flex-col gap-3.5 lg:ps-6">
-                        <h5 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
+                        <h2 className="font-black text-xs sm:text-sm text-[#E5B54A] uppercase tracking-wider">
                             {companyTitle}
-                        </h5>
+                        </h2>
                         <ul className="flex flex-col gap-2.5">
                             {quickLinks.map((link, idx) => (
                                 <li key={idx}>
@@ -336,7 +333,7 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                             href={termsUrl}
                             className="hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                         >
-                            {isArabic ? 'الشروط والأحكام' : 'Terms & Conditions'}
+                            {isArabic ? 'الشحن والاسترجاع' : 'Shipping & Returns'}
                         </Link>
                         <span className="text-white/20">•</span>
                         <Link

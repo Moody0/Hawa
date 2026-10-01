@@ -1,14 +1,19 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Image, Clock, Truck, AlertTriangle, ShieldCheck, Info, Save, Store, TrendingUp, RefreshCw, GalleryHorizontal, FolderTree, Sparkles, Phone, Flame, MessageSquareQuote } from 'lucide-react';
+import { getWebsiteContent } from '@/lib/website-content';
+import WebsiteControlsSection from './WebsiteControlsSection';
+import AboutValuesSection, { ABOUT_VALUE_FIELDS } from './AboutValuesSection';
+import ImageUploadField from '../../components/ImageUploadField';
+import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { Truck, ShieldCheck, Info, Save, Store, TrendingUp, RefreshCw, GalleryHorizontal, FolderTree, Sparkles, Phone, Flame, MessageSquareQuote } from 'lucide-react';
 import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { updatePrivacyPolicyContent, updateSiteSettings } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import FooterContentSection from "./FooterContentSection";
-import HomeCategoriesContentSection, { CategoryOption, StatMetricItem, DEFAULT_STATS } from "./HomeCategoriesContentSection";
+import HomeCategoriesContentSection, { CategoryOption, StatMetricItem } from "./HomeCategoriesContentSection";
 import HomeFeaturedContentSection, { ProductOption } from "./HomeFeaturedContentSection";
 import HomeTrendingContentSection from "./HomeTrendingContentSection";
 import HomeServicesContentSection from "./HomeServicesContentSection";
@@ -19,9 +24,10 @@ import PrivacyPolicyEditor from "./PrivacyPolicyEditor";
 import { getShippingPolicyContent, ShippingPolicyContent } from "@/lib/shipping-policy-content";
 import { getContactPageContent, ContactPageContent } from "@/lib/contact-page-content";
 import { getPrivacyPolicyContent, PrivacyPolicyContent } from "@/lib/privacy-policy-content";
-import { CompanyServiceItem, DEFAULT_COMPANY_SERVICES, PublicTestimonialItem, DEFAULT_TESTIMONIALS } from "@/lib/public-queries";
+import { CompanyServiceItem, DEFAULT_COMPANY_SERVICES, PublicTestimonialItem } from "@/lib/public-defaults";
 
 interface SiteSettings {
+    websiteContent?: unknown;
     id: string;
     shippingPolicyContent?: unknown;
     contactPageContent?: unknown;
@@ -202,20 +208,22 @@ interface SiteSettings {
     homeTestimonialsItems?: string | null;
 }
 
-type TabType = "currency" | "homeCategories" | "homeFeatured" | "homeTrending" | "homeServices" | "homeTestimonials" | "stats" | "footer" | "banners" | "shipping" | "about" | "contact" | "privacy";
+type TabType = "website" | "currency" | "homeCategories" | "homeFeatured" | "homeTrending" | "homeServices" | "homeTestimonials" | "footer" | "banners" | "shipping" | "about" | "contact" | "privacy";
 
-export default function SiteContentClient({ 
+export default function SiteContentClient({
     initialSettings,
     categories,
     products = [],
-}: { 
+}: {
     initialSettings: SiteSettings | null;
     categories: CategoryOption[];
     products?: ProductOption[];
 }) {
     const { t, dir, language } = useLanguage();
     const { openSidebar } = useAdminSidebar();
-    const [activeTab, setActiveTab] = useState<TabType>("currency");
+    const [activeTab, setActiveTab] = useState<TabType>("website");
+    const [websiteContent, setWebsiteContent] = useState(() => getWebsiteContent(initialSettings?.websiteContent));
+    const [aboutValues, setAboutValues] = useState<Record<string,string>>(() => Object.fromEntries(ABOUT_VALUE_FIELDS.flatMap(key => [key, `${key}Ar`]).map(key => [key, String((initialSettings as any)?.[key] ?? '')])));
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -223,8 +231,8 @@ export default function SiteContentClient({
             const params = new URLSearchParams(window.location.search);
             const tab = params.get("tab") as TabType | null;
             const validTabs: TabType[] = [
-                "currency", "homeCategories", "homeFeatured", "homeTrending", 
-                "homeServices", "homeTestimonials", "stats", "footer", 
+                "currency", "homeCategories", "homeFeatured", "homeTrending",
+                "homeServices", "homeTestimonials", "footer",
                 "banners", "shipping", "contact", "privacy", "about"
             ];
             if (tab && validTabs.includes(tab)) {
@@ -251,12 +259,12 @@ export default function SiteContentClient({
     const [homeCategoriesDescAr, setHomeCategoriesDescAr] = useState(initialSettings?.homeCategoriesDescAr || "نوفر لمتاجرك ومستودعاتك أفضل السلع الأساسية والمواد الاستهلاكية بأسعار جملة منافسة وجاهزية فورية للتسليم.");
 
     const [homeStats, setHomeStats] = useState<StatMetricItem[]>(() => {
-        if (!initialSettings?.homeCategoriesStats) return DEFAULT_STATS;
+        if (!initialSettings?.homeCategoriesStats) return [];
         try {
             const parsed = JSON.parse(initialSettings.homeCategoriesStats);
-            return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_STATS;
+            return Array.isArray(parsed) ? parsed : [];
         } catch {
-            return DEFAULT_STATS;
+            return [];
         }
     });
 
@@ -344,24 +352,16 @@ export default function SiteContentClient({
     const [homeTestimonialsDescAr, setHomeTestimonialsDescAr] = useState(initialSettings?.homeTestimonialsDescAr || "آراء وتجارب شركائنا من تجار التجزئة وأصحاب البقاليات في مختلف المحافظات");
 
     const [homeTestimonials, setHomeTestimonials] = useState<PublicTestimonialItem[]>(() => {
-        if (!initialSettings?.homeTestimonialsItems) return DEFAULT_TESTIMONIALS;
+        if (!initialSettings?.homeTestimonialsItems) return [];
         try {
             const parsed = JSON.parse(initialSettings.homeTestimonialsItems);
-            return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_TESTIMONIALS;
+            return Array.isArray(parsed) ? parsed : [];
         } catch {
-            return DEFAULT_TESTIMONIALS;
+            return [];
         }
     });
 
     // Site Settings State - B2B Wholesale Statistics
-    const [statsContent, setStatsContent] = useState({
-        statDeliveries: initialSettings?.statDeliveries || "+9000",
-        statBrands: initialSettings?.statBrands || "+100",
-        statProducts: initialSettings?.statProducts || "+500",
-        statClients: initialSettings?.statClients || "+300",
-    });
-
-    // Site Settings State - Categories CTA
     const [ctaTitle, setCtaTitle] = useState(initialSettings?.categoriesCtaTitle || "");
     const [ctaDesc, setCtaDesc] = useState(initialSettings?.categoriesCtaDesc || "");
     const [ctaTitleAr, setCtaTitleAr] = useState(initialSettings?.categoriesCtaTitleAr || "");
@@ -380,15 +380,15 @@ export default function SiteContentClient({
         footerCopyrightAr: initialSettings?.footerCopyrightAr || "© 2026 حوا للتوزيع والتجارة. جميع الحقوق محفوظة.",
         footerContactTitle: initialSettings?.footerContactTitle || "Contact Us",
         footerContactTitleAr: initialSettings?.footerContactTitleAr || "تواصل معنا",
-        footerAddress: initialSettings?.footerAddress || "Homs Industrial Zone, Syria",
-        footerAddressAr: initialSettings?.footerAddressAr || "حمص، المنطقة الصناعية — سورية",
-        footerPhone: initialSettings?.footerPhone || "+963 993 443 901",
-        footerEmail: initialSettings?.footerEmail || "info@hawa-dist.com",
+        footerAddress: initialSettings?.footerAddress ?? "",
+        footerAddressAr: initialSettings?.footerAddressAr ?? "",
+        footerPhone: initialSettings?.footerPhone ?? "",
+        footerEmail: initialSettings?.footerEmail ?? "",
         footerInstagramUrl: initialSettings?.footerInstagramUrl || "",
         footerFacebookUrl: initialSettings?.footerFacebookUrl || "",
         footerWhatsappUrl: initialSettings?.footerWhatsappUrl || "",
         footerLinkedinUrl: initialSettings?.footerLinkedinUrl || "",
-        whatsappNumber: initialSettings?.whatsappNumber || "+963 993 443 901",
+        whatsappNumber: initialSettings?.whatsappNumber ?? "",
         footerShopTitle: initialSettings?.footerShopTitle || "Shop",
         footerShopTitleAr: initialSettings?.footerShopTitleAr || "المتجر",
         footerSupportTitle: initialSettings?.footerSupportTitle || "Our Services",
@@ -402,7 +402,7 @@ export default function SiteContentClient({
         footerJurisdiction: initialSettings?.footerJurisdiction || "Syrian Arab Republic — Homs",
         footerJurisdictionAr: initialSettings?.footerJurisdictionAr || "الجمهورية العربية السورية — حمص",
         footerTermsUrl: initialSettings?.footerTermsUrl || "/shipping-returns",
-        footerPrivacyUrl: initialSettings?.footerPrivacyUrl || "/shipping-returns",
+        footerPrivacyUrl: initialSettings?.footerPrivacyUrl || "/privacy",
         footerSupportLink1Label: initialSettings?.footerSupportLink1Label || "Nationwide Freight & Delivery",
         footerSupportLink1LabelAr: initialSettings?.footerSupportLink1LabelAr || "الشحن والتوصيل للمحافظات",
         footerSupportLink1Url: initialSettings?.footerSupportLink1Url || "/shipping-returns",
@@ -439,7 +439,7 @@ export default function SiteContentClient({
     const [aboutHeroSubtitle, setAboutHeroSubtitle] = useState(initialSettings?.aboutHeroSubtitle || "");
     const [aboutHeroSubtitleAr, setAboutHeroSubtitleAr] = useState(initialSettings?.aboutHeroSubtitleAr || "");
     const [aboutHeroImage, setAboutHeroImage] = useState(initialSettings?.aboutHeroImage || "");
-    
+
     const [aboutNarrativeTitle, setAboutNarrativeTitle] = useState(initialSettings?.aboutNarrativeTitle || "");
     const [aboutNarrativeTitleAr, setAboutNarrativeTitleAr] = useState(initialSettings?.aboutNarrativeTitleAr || "");
     const [aboutNarrativeFounded, setAboutNarrativeFounded] = useState(initialSettings?.aboutNarrativeFounded || "Founded in 2024");
@@ -495,20 +495,6 @@ export default function SiteContentClient({
 
     const [exchangeRate, setExchangeRate] = useState(initialSettings?.exchangeRate || 135);
 
-    // Middle Banner 1
-    const [middleBanner1Image, setMiddleBanner1Image] = useState(initialSettings?.middleBanner1Image || "");
-    const [middleBanner1Link, setMiddleBanner1Link] = useState(initialSettings?.middleBanner1Link || "");
-
-    // Middle Banner 2
-    const [middleBanner2Image, setMiddleBanner2Image] = useState(initialSettings?.middleBanner2Image || "");
-    const [middleBanner2Link, setMiddleBanner2Link] = useState(initialSettings?.middleBanner2Link || "");
-    const [middleBanner2Title, setMiddleBanner2Title] = useState(initialSettings?.middleBanner2Title || "");
-    const [middleBanner2TitleAr, setMiddleBanner2TitleAr] = useState(initialSettings?.middleBanner2TitleAr || "");
-    const [middleBanner2Subtitle, setMiddleBanner2Subtitle] = useState(initialSettings?.middleBanner2Subtitle || "");
-    const [middleBanner2SubtitleAr, setMiddleBanner2SubtitleAr] = useState(initialSettings?.middleBanner2SubtitleAr || "");
-    const [middleBanner2ButtonText, setMiddleBanner2ButtonText] = useState(initialSettings?.middleBanner2ButtonText || "");
-    const [middleBanner2ButtonTextAr, setMiddleBanner2ButtonTextAr] = useState(initialSettings?.middleBanner2ButtonTextAr || "");
-
     const handleFooterFieldChange = (field: string, value: string) => {
         setFooterContent((current) => ({
             ...current,
@@ -522,6 +508,8 @@ export default function SiteContentClient({
 
         try {
             const result = await updateSiteSettings({
+                websiteContent,
+                ...aboutValues,
                 exchangeRate: Number(exchangeRate) || 135,
                 categoriesCtaTitle: ctaTitle,
                 categoriesCtaDesc: ctaDesc,
@@ -574,17 +562,6 @@ export default function SiteContentClient({
                 aboutNarrativeQuote,
                 aboutNarrativeQuoteAr,
                 aboutNarrativeImage,
-                middleBanner1Image,
-                middleBanner1Link,
-                middleBanner2Image,
-                middleBanner2Link,
-                middleBanner2Title,
-                middleBanner2TitleAr,
-                middleBanner2Subtitle,
-                middleBanner2SubtitleAr,
-                middleBanner2ButtonText,
-                middleBanner2ButtonTextAr,
-                ...statsContent,
                 homeCategoriesBadge,
                 homeCategoriesBadgeAr,
                 homeCategoriesTitle,
@@ -658,15 +635,15 @@ export default function SiteContentClient({
     };
 
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
+        { id: "website", label: language === "ar" ? "التحكم العام والتواصل" : "Website & Shared Contacts", icon: <Store className="text-lg" /> },
         { id: "currency", label: t('admin.tabCurrency') || "Currency & Rates", icon: <RefreshCw className="text-lg" /> },
         { id: "homeCategories", label: language === 'ar' ? "أقسام وإحصائيات الرئيسية" : "Home Categories & Stats", icon: <FolderTree className="text-lg" /> },
         { id: "homeFeatured", label: language === 'ar' ? "مختارات الجملة (المميزة)" : "Featured Products", icon: <Sparkles className="text-lg" /> },
         { id: "homeTrending", label: language === 'ar' ? "الأكثر طلباً هذا الأسبوع" : "Weekly Trending", icon: <Flame className="text-lg" /> },
         { id: "homeServices", label: language === 'ar' ? "خدمات ومزايا الشركة" : "Company Services", icon: <Truck className="text-lg" /> },
         { id: "homeTestimonials", label: language === 'ar' ? "آراء التجار (ثقة المحلات)" : "Merchant Reviews", icon: <MessageSquareQuote className="text-lg" /> },
-        { id: "stats", label: t('admin.companyStats') || (language === 'ar' ? "إحصائيات صفحة من نحن" : "About Us Stats"), icon: <TrendingUp className="text-lg" /> },
         { id: "footer", label: t('admin.tabFooter') || "Footer & Social", icon: <Store className="text-lg" /> },
-        { id: "banners", label: t('admin.tabBanners') || "Promo Banners", icon: <GalleryHorizontal className="text-lg" /> },
+        { id: "banners", label: language === "ar" ? "دعوة صفحة الأقسام" : "Categories invitation", icon: <GalleryHorizontal className="text-lg" /> },
         { id: "shipping", label: t('admin.tabShipping') || "Shipping & Policy", icon: <Truck className="text-lg" /> },
         { id: "privacy", label: language === 'ar' ? "سياسة الخصوصية" : "Privacy Policy", icon: <ShieldCheck className="text-lg" /> },
         { id: "contact", label: language === 'ar' ? "صفحة تواصل معنا" : "Contact Us Page", icon: <Phone className="text-lg" /> },
@@ -734,6 +711,8 @@ export default function SiteContentClient({
             <div className="flex-1 overflow-y-auto p-6 md:p-10">
                 <div className="max-w-6xl mx-auto pb-12">
                     {/* TAB 1: CURRENCY & EXCHANGE RATES */}
+                    {activeTab === "website" && <WebsiteControlsSection value={websiteContent} onChange={setWebsiteContent} contacts={footerContent} onContactChange={(key, value) => setFooterContent(prev => ({ ...prev, [key]: value }))} isArabic={language === "ar"} />}
+                    {activeTab === "about" && <AboutValuesSection value={aboutValues} onChange={setAboutValues} isArabic={language === "ar"} />}
                     {activeTab === "currency" && (
                         <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
                             <div className="mb-6 flex items-start gap-4">
@@ -895,108 +874,6 @@ export default function SiteContentClient({
                         />
                     )}
 
-                    {/* TAB: B2B COMPANY STATISTICS */}
-                    {activeTab === "stats" && (
-                        <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
-                            <div className="mb-6 flex items-start gap-4">
-                                <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-[#8A6305] dark:text-[#8A6305] rounded-xl">
-                                    <TrendingUp className="text-2xl" />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                        {t('admin.companyStats') || (language === 'ar' ? "إحصائيات صفحة من نحن" : "About Us Stats")}
-                                    </h3>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                        {t('admin.companyStatsDesc') || (language === 'ar' ? "الأرقام والإحصائيات المعروضة في صفحة من نحن (About Us) لتعزيز ثقة المحلات والعملاء." : "Key wholesale figures and milestones displayed on the About Us page.")}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
-                                        🚚 {t('admin.statDeliveries') || "عمليات التوصيل الناجحة"}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={statsContent.statDeliveries}
-                                        onChange={(e) => setStatsContent({ ...statsContent, statDeliveries: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
-                                        placeholder="+9000"
-                                    />
-                                    <p className="text-xs text-slate-400">مثال: +9000 توصيل لكافة المحافظات</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
-                                        🏢 {t('admin.statBrands') || "الوكالات والعلامات التجارية"}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={statsContent.statBrands}
-                                        onChange={(e) => setStatsContent({ ...statsContent, statBrands: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
-                                        placeholder="+100"
-                                    />
-                                    <p className="text-xs text-slate-400">مثال: +100 وكالة تجارية حصرية</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
-                                        📦 {t('admin.statProducts') || "المنتجات المتاحة بالجملة"}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={statsContent.statProducts}
-                                        onChange={(e) => setStatsContent({ ...statsContent, statProducts: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
-                                        placeholder="+500"
-                                    />
-                                    <p className="text-xs text-slate-400">مثال: +500 صنف غذائي واستهلاكي</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
-                                        🏪 {t('admin.statClients') || "العملاء والمحلات النشطة"}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={statsContent.statClients}
-                                        onChange={(e) => setStatsContent({ ...statsContent, statClients: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none transition-all"
-                                        placeholder="+300"
-                                    />
-                                    <p className="text-xs text-slate-400">مثال: +300 متجر وسوبرماركت شريك</p>
-                                </div>
-                            </div>
-
-                            {/* Live Preview Card */}
-                            <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-white/10">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
-                                    {language === 'ar' ? 'معاينة مباشرة في المتجر' : 'Live Homepage Preview'}
-                                </h4>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5">
-                                    <div className="text-center p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-white/5">
-                                        <p className="text-xl md:text-2xl font-black text-[#0B192C] dark:text-[#8A6305]">{statsContent.statDeliveries}</p>
-                                        <p className="text-xs font-semibold text-slate-500 mt-1">{language === 'ar' ? 'عملية توصيل' : 'Deliveries'}</p>
-                                    </div>
-                                    <div className="text-center p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-white/5">
-                                        <p className="text-xl md:text-2xl font-black text-[#0B192C] dark:text-[#8A6305]">{statsContent.statBrands}</p>
-                                        <p className="text-xs font-semibold text-slate-500 mt-1">{language === 'ar' ? 'وكالة معتمدة' : 'Brands'}</p>
-                                    </div>
-                                    <div className="text-center p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-white/5">
-                                        <p className="text-xl md:text-2xl font-black text-[#0B192C] dark:text-[#8A6305]">{statsContent.statProducts}</p>
-                                        <p className="text-xs font-semibold text-slate-500 mt-1">{language === 'ar' ? 'منتج متاح' : 'Products'}</p>
-                                    </div>
-                                    <div className="text-center p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-white/5">
-                                        <p className="text-xl md:text-2xl font-black text-[#0B192C] dark:text-[#8A6305]">{statsContent.statClients}</p>
-                                        <p className="text-xs font-semibold text-slate-500 mt-1">{language === 'ar' ? 'عميل ومحل' : 'Active Clients'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* TAB 2: FOOTER & SOCIAL LINKS */}
                     {activeTab === "footer" && (
                         <div className="animate-in fade-in-50 duration-200">
@@ -1009,7 +886,7 @@ export default function SiteContentClient({
                         </div>
                     )}
 
-                    {/* TAB 3: PROMO & MIDDLE BANNERS */}
+                    {/* Categories landing page invitation */}
                     {activeTab === "banners" && (
                         <div className="space-y-8 animate-in fade-in-50 duration-200">
                             {/* Categories CTA Banner */}
@@ -1024,27 +901,7 @@ export default function SiteContentClient({
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                                            {t('admin.imageUrl')}
-                                        </label>
-                                        <div className="flex gap-4 items-start">
-                                            <input
-                                                type="text"
-                                                value={ctaImage}
-                                                onChange={(e) => setCtaImage(e.target.value)}
-                                                className="flex-1 px-4 py-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0B192C] outline-none text-sm"
-                                                placeholder="https://images.unsplash.com/..."
-                                            />
-                                            <div className="w-28 h-16 rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                                                {ctaImage ? (
-                                                    <img src={ctaImage} alt="CTA Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                                                ) : (
-                                                    <Image className="text-2xl text-slate-400" />
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <ImageUploadField value={ctaImage} onChange={setCtaImage} folder="banners" label={t('admin.imageUrl')} />
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-4">
@@ -1074,68 +931,9 @@ export default function SiteContentClient({
                                 </div>
                             </div>
 
-                            {/* Middle Banner 1 */}
-                            <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs">
-                                <div className="mb-6">
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                        {t('admin.middleBanner1') || "Middle Banner 1 (After Trending)"}
-                                    </h3>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                        {t('admin.middleBanner1Desc') || "Control the full-width banner that appears after the Trending Products section."}
-                                    </p>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200">{t('admin.imageUrl')}</label>
-                                        <input type="text" value={middleBanner1Image} onChange={(e) => setMiddleBanner1Image(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" placeholder="https://..." />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200">{t('admin.linkUrl')}</label>
-                                        <input type="text" value={middleBanner1Link} onChange={(e) => setMiddleBanner1Link(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" placeholder="/categories or /products" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Middle Banner 2 */}
-                            <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs">
-                                <div className="mb-6">
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                        {t('admin.middleBanner2') || "Middle Banner 2 (After Featured Collection)"}
-                                    </h3>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                        {t('admin.middleBanner2Desc') || "Configure the secondary promotional banner with call to action button."}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">{t('admin.imageUrl')}</label>
-                                            <input type="text" value={middleBanner2Image} onChange={(e) => setMiddleBanner2Image(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" placeholder="https://..." />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">{t('admin.linkUrl')}</label>
-                                            <input type="text" value={middleBanner2Link} onChange={(e) => setMiddleBanner2Link(e.target.value)} className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" placeholder="/categories" />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-3">
-                                            <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">🇬🇧 English</span>
-                                            <input type="text" value={middleBanner2Title} onChange={(e) => setMiddleBanner2Title(e.target.value)} placeholder="Title" className="w-full px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                            <input type="text" value={middleBanner2Subtitle} onChange={(e) => setMiddleBanner2Subtitle(e.target.value)} placeholder="Subtitle" className="w-full px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                            <input type="text" value={middleBanner2ButtonText} onChange={(e) => setMiddleBanner2ButtonText(e.target.value)} placeholder="Button Text" className="w-full px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                        </div>
-                                        <div className="space-y-3" dir="rtl">
-                                            <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">🇸🇦 العربية</span>
-                                            <input type="text" value={middleBanner2TitleAr} onChange={(e) => setMiddleBanner2TitleAr(e.target.value)} placeholder="العنوان" className="w-full px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                            <input type="text" value={middleBanner2SubtitleAr} onChange={(e) => setMiddleBanner2SubtitleAr(e.target.value)} placeholder="العنوان الفرعي" className="w-full px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                            <input type="text" value={middleBanner2ButtonTextAr} onChange={(e) => setMiddleBanner2ButtonTextAr(e.target.value)} placeholder="نص الزر" className="w-full px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <Link href="/admin/banners" className="inline-flex rounded-lg border border-slate-200 p-3 text-sm font-semibold dark:border-slate-700">
+                                {language === 'ar' ? 'إدارة بنرات الصفحة الرئيسية' : 'Manage homepage banners'}
+                            </Link>
                         </div>
                     )}
 
@@ -1183,7 +981,7 @@ export default function SiteContentClient({
                                 <div className="space-y-6">
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-slate-700 dark:text-slate-200">{t('admin.imageUrl')}</label>
-                                        <input type="text" value={aboutHeroImage} onChange={(e) => setAboutHeroImage(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white outline-none text-sm" placeholder="https://..." />
+                                        <ImageUploadField value={aboutHeroImage} onChange={setAboutHeroImage} folder="site-content" />
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1213,6 +1011,8 @@ export default function SiteContentClient({
                                 </div>
 
                                 <div className="space-y-6">
+                                    <ImageUploadField value={aboutNarrativeImage} onChange={setAboutNarrativeImage} folder="site-content" label={language === 'ar' ? 'صورة قصة الشركة' : 'Company story image'} />
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-4">
                                             <span className="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-md text-slate-700 dark:text-slate-300">🇬🇧 English</span>

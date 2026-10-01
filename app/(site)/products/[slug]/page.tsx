@@ -1,7 +1,8 @@
+import {fetchProductBySlug,fetchCatalogProducts} from '@/lib/catalog';
 import React, { cache } from 'react';
-import { prisma } from "@/lib/prisma";
+
 import { notFound } from 'next/navigation';
-import { unstable_cache } from 'next/cache';
+
 import { Metadata } from 'next';
 import ProductGallery from '@/app/components/ProductDetailsComponents/ProductGallery';
 import ProductHeader from '@/app/components/ProductDetailsComponents/ProductHeader';
@@ -17,68 +18,9 @@ import { canViewWholesalePrices, projectProductPrices, projectProductsPrices } f
 
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
-const getProduct = cache((slug: string) =>
-    prisma.product.findFirst({
-        where: {
-            slug,
-            archivedAt: null,
-            brand: { isActive: true },
-            category: { isActive: true, archivedAt: null },
-        },
-        include: {
-            brand: true,
-            category: true,
-        },
-    })
-);
+const getProduct=cache(fetchProductBySlug);
 
-const getRelatedProducts = cache((productId: string, categoryId: string, brandId: string) =>
-    unstable_cache(
-        async () => {
-            const categoryProducts = await prisma.product.findMany({
-                where: {
-                    categoryId,
-                    archivedAt: null,
-                    id: { not: productId },
-                    brand: { isActive: true },
-                    category: { isActive: true, archivedAt: null },
-                },
-                include: {
-                    brand: true,
-                    category: true,
-                },
-                take: 12,
-            });
-
-            if (categoryProducts.length >= 12) {
-                return categoryProducts;
-            }
-
-            const existingIds = [productId, ...categoryProducts.map((product) => product.id)];
-            const additionalProducts = await prisma.product.findMany({
-                where: {
-                    id: { notIn: existingIds },
-                    archivedAt: null,
-                    brand: { isActive: true },
-                    category: { isActive: true, archivedAt: null },
-                    OR: [
-                        { brandId },
-                        { isTrending: true },
-                    ],
-                },
-                include: {
-                    brand: true,
-                    category: true,
-                },
-                take: 12 - categoryProducts.length,
-            });
-
-            return [...categoryProducts, ...additionalProducts];
-        },
-        [`related-products-v2-${productId}-${categoryId}-${brandId}`],
-        { tags: ['products'], revalidate: 60 }
-    )()
-);
+const getRelatedProducts=cache(async(productId:string,categoryId:string,brandId:string)=>{const primary=await fetchCatalogProducts({categoryIds:categoryId,excludeIds:productId,limit:12});if(primary.length>=12)return primary;const extras=await fetchCatalogProducts({brandIds:brandId,excludeIds:[productId,...primary.map(p=>p.id)].join(','),limit:12-primary.length});return [...primary,...extras];});
 
 export async function generateMetadata(
     props: { params: Promise<{ slug: string }> }
@@ -232,6 +174,7 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
         price: safeProduct.price !== null ? Number(safeProduct.price) : 0,
         discountPrice: safeProduct.discountPrice !== null ? Number(safeProduct.discountPrice) : null,
         hidePrice: safeProduct.hidePrice,
+        requiresQuote: safeProduct.requiresQuote,
         image: mainImage,
         slug: safeProduct.slug,
         options: safeProduct.options,

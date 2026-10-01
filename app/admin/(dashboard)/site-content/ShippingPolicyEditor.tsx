@@ -147,8 +147,8 @@ export default function ShippingPolicyEditor({
                         </h4>
                         <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
                             {isAr
-                                ? "تحكم كامل بجميع نصوص الشحن وسياسات التوريد بالعربية والإنجليزية، صورة البانر العلوي، وأرقام التواصل المباشر مع إدارة الحركة."
-                                : "Full control over all delivery guidelines, lead times, claims resolution rules in English & Arabic, hero banner image, and dispatch contact desk."}
+                                ? "عدّل نصوص الشحن وسياسات التوريد باللغتين وصورة البانر هنا. أرقام التواصل تأتي من تبويب التحكم العام والتواصل."
+                                : "Edit delivery guidelines, policies, and the banner here. Contact numbers come from Website & Shared Contacts."}
                         </p>
                     </div>
                 </div>
@@ -233,7 +233,7 @@ export default function ShippingPolicyEditor({
 
                     {/* Group Fields */}
                     <div className="space-y-6">
-                        {group.fields.map((field) => (
+                        {group.fields.filter(field => !['dispatchPhone', 'dispatchWhatsapp'].includes(field.key)).map((field) => (
                             <div key={field.key} className="grid grid-cols-1 md:grid-cols-2 gap-5 p-4 rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/40 dark:bg-white/[0.01]">
                                 {/* English Field */}
                                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">

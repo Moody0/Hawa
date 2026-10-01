@@ -1,3 +1,5 @@
+import { getSiteContacts } from './website-content';
+
 export const CONTACT_PAGE_FIELDS = [
     "heroTitle",
     "heroDescription",
@@ -153,6 +155,20 @@ export function getContactPageContent(
         ar[field] = sanitizeString(rawAr[field], defaultArVal);
     }
 
+    if (fallbackSettings) {
+        const contacts = getSiteContacts(fallbackSettings);
+        for (const locale of [en, ar]) {
+            locale.salesPhone = contacts.phone;
+            locale.salesWhatsapp = contacts.whatsappDigits;
+            locale.formTargetWhatsapp = contacts.whatsappDigits;
+            locale.gmPhone = contacts.managementPhone;
+            locale.gmWhatsapp = contacts.managementPhone;
+        }
+        en.warehouseDesc = contacts.address;
+        ar.warehouseDesc = contacts.addressAr || contacts.address;
+        en.hoursDesc = contacts.hours;
+        ar.hoursDesc = contacts.hoursAr || contacts.hours;
+    }
     return { en, ar };
 }
 

@@ -1,21 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+
 
 export async function proxy(req: NextRequest) {
   const { pathname, search, searchParams } = req.nextUrl;
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    if (!token) {
-      const loginUrl = new URL("/admin/login", req.url);
-      loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-  if (pathname.startsWith("/api/admin")) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    if (!token) return NextResponse.json({ ok: false, code: "UNAUTHENTICATED" }, { status: 401 });
-  }
+  const forwarded = new Headers(req.headers);
+  forwarded.set('x-admin-return-to', pathname + search);
   if (pathname === "/ar" || pathname.startsWith("/ar/")) {
     const url = new URL(pathname.replace(/^\/ar/, "") || "/", req.url);
     url.search = search;
@@ -33,7 +23,7 @@ export async function proxy(req: NextRequest) {
     // by redirecting them to the canonical Arabic URL.
     return NextResponse.redirect(url, 308);
   }
-  return NextResponse.next();
+  return NextResponse.next({request:{headers:forwarded}});
 }
 
 export const config = {

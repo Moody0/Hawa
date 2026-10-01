@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { getWebsiteContent } from '@/lib/website-content';
 import dynamic from 'next/dynamic';
 import type { RailBrand } from '@/lib/public-queries';
 import FeaturedCollection from './FeaturedCollection';
@@ -95,40 +97,47 @@ const Main = async ({
 }: MainProps) => {
     const { dir, language } = await getI18n();
 
+    const content = getWebsiteContent(siteSettings?.websiteContent);
+    const ar = language === "ar";
+
     return (
         <div className="w-full flex flex-col overflow-x-clip">
             {/* 1. Editorial hero */}
-            <HeroCarousel banners={banners} />
+            {content.homeHeroEnabled && banners.length ? <HeroCarousel banners={banners} /> : <header className="container-custom py-14 sm:py-20">
+                <h1 className="text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white max-w-3xl">{ar ? content.homeIntroTitleAr : content.homeIntroTitle}</h1>
+                <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 max-w-2xl">{ar ? content.homeIntroDescriptionAr : content.homeIntroDescription}</p>
+                <Link href="/contact" className="inline-flex mt-6 rounded-lg bg-heading hover:bg-[#16304d] px-6 py-3 text-white font-semibold">{ar ? 'تواصل معنا' : 'Contact us'}</Link>
+            </header>}
 
             {/* 2. Compact agency trust rail */}
             <ScrollReveal
                 className="bg-[#FAF7F0] dark:bg-[#101E32]"
                 variant="subtle"
             >
-                <AgenciesSlider brands={railBrands} />
+                {content.homeBrandsEnabled && <AgenciesSlider brands={railBrands} title={ar ? content.homeBrandsTitleAr : content.homeBrandsTitle} subtitle={ar ? content.homeBrandsDescriptionAr : content.homeBrandsDescription} />}
             </ScrollReveal>
 
             {/* 3–4. Category discovery followed by commercial proof */}
             <ScrollReveal
                 className="bg-white dark:bg-[#0B192C]"
             >
-                <FeaturedCategoriesGrid
+                {content.homeCategoriesEnabled && <FeaturedCategoriesGrid
                     categories={featuredCategories}
                     language={language}
                     dir={dir}
                     settings={siteSettings}
-                />
+                />}
             </ScrollReveal>
 
             {/* 5. Best sellers and new arrivals; product cards remain unchanged */}
             <ScrollReveal
                 className="bg-slate-50/70 dark:bg-[#0E1B2E]"
             >
-                <FeaturedCollection
+                {content.homeFeaturedEnabled && <FeaturedCollection
                     newArrivals={featuredNewArrivals}
                     bestSellers={featuredBestSellers}
                     settings={siteSettings}
-                />
+                />}
             </ScrollReveal>
 
             {/* 6. Weekly demand; product card design remains unchanged */}

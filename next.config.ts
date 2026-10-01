@@ -32,11 +32,11 @@ const securityHeaders = [
   },
   {
     key: 'Content-Security-Policy',
-    value: `default-src 'self'; script-src ${process.env.NODE_ENV === 'production' ? productionScriptSources : developmentScriptSources}; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data: https:; connect-src 'self' https://aws-0-eu-central-1.pooler.supabase.com https://*.supabase.co https://*.ingest.sentry.io https://wa.me; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self';`,
+    value: `default-src 'self'; script-src ${process.env.NODE_ENV === 'production' ? productionScriptSources : developmentScriptSources}; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data: https:; connect-src 'self' https://*.ingest.sentry.io https://wa.me; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self';`,
   },
   {
     key: 'Content-Security-Policy-Report-Only',
-    value: "default-src 'self'; script-src 'self' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data:; connect-src 'self' https://aws-0-eu-central-1.pooler.supabase.com https://*.supabase.co https://*.ingest.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self'; report-uri /api/csp-report;",
+    value: "default-src 'self'; script-src 'self' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://fatoradrive.blob.core.windows.net https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com https://images.unsplash.com https://cdn.shopify.com https://i.postimg.cc; font-src 'self' data:; connect-src 'self'  https://*.ingest.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self' https://wa.me; frame-ancestors 'self'; report-uri /api/csp-report;",
   },
 ];
 
@@ -128,12 +128,15 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    return [
-      {
-        source: '/media/:path*',
-        destination: '/uploads/:path*',
-      },
-    ];
+    const backend = (process.env.LARAVEL_API_URL || 'http://127.0.0.1:8001').replace(/\/$/, '');
+    return {
+      beforeFiles: [
+        { source: '/sanctum/:path*', destination: `${backend}/sanctum/:path*` },
+        { source: '/media/:path*', destination: '/uploads/:path*' },
+      ],
+      afterFiles: [{ source: '/api/:path*', destination: `${backend}/api/:path*` }],
+      fallback: [{ source: '/uploads/:path*', destination: `${backend}/uploads/:path*` }],
+    };
   },
   async redirects() {
     return [

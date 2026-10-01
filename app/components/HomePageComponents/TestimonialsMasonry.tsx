@@ -34,88 +34,6 @@ const StarIcons = ({ count = 5 }: { count?: number }) => (
 );
 
 // Real products from Hawa's catalog with genuine slugs and direct image URLs
-const DEFAULT_REVIEWS: ReviewItem[] = [
-    {
-        id: 'rev-1',
-        name: 'سوبرماركت الشام الحديث (دمشق - كفرسوسة)',
-        feedback: 'أفضل موزع معتمد لوكالات زوان والريف. سرعة استثنائية في تلبية طلبيات الطرود وتأكيد مباشر وسلس عبر واتساب وبضاعة مضمونة.',
-        rating: 5,
-        image: 'https://i.postimg.cc/mgc4nXNC/data-bodour-2026-09-01T134612-915.png',
-        productNameAr: 'زوان لانشون دجاج 200 غرام',
-        productNameEn: 'Zwan Chicken Luncheon Meat 200g',
-        productSlug: 'zwan-chicken-luncheon-meat-200g',
-    },
-    {
-        id: 'rev-2',
-        name: 'ميني ماركت الهدى (المزة)',
-        feedback: 'التوريد منتظم جداً ومواصفات التعبئة واضحة بالطرود، مما يسهل جرد وتوزيع البضائع في المحل بدقة وبدون أي نقص.',
-        rating: 5,
-        image: 'https://i.postimg.cc/dQfzpfGv/data-bodour-(42).png',
-        productNameAr: 'حليبنا سمن بقري 1 كيلو',
-        productNameEn: 'Halibuna Ghee Clarified Butter 1kg',
-        productSlug: 'halibuna-made-with-ghee-clarified-butter-1-kg',
-    },
-    {
-        id: 'rev-3',
-        name: 'بقالة البركة التجارية (مشروع دمر)',
-        feedback: 'توفير كبرى الوكالات بطلب واحد وفر علينا وقتاً كبيراً في التواصل واللوجستيات مع الموزعين المتفرقين.',
-        rating: 5,
-        image: 'https://i.postimg.cc/N0ftBHFq/data-bodour-(43).png',
-        productNameAr: 'صن بل كورند بيف 240 جرام',
-        productNameEn: 'Sunbell Corned Beef 240g',
-        productSlug: 'sun-bull-corned-beef-240g',
-    },
-    {
-        id: 'rev-4',
-        name: 'سوبرماركت الواحة (القصاع)',
-        feedback: 'تواريخ الصلاحية حديثة جداً والتخزين المبرد يضمن وصول المنتجات بأفضل جودة لباب المحل دون أي تلف.',
-        rating: 5,
-        image: 'https://i.postimg.cc/X7zdwfMd/data-bodour-(44).png',
-        productNameAr: 'سيلفر فيش تونا خفيف 160 جرام',
-        productNameEn: 'Silver Fish Light Tuna 160g',
-        productSlug: 'silver-fish-light-tuna-160g',
-    },
-    {
-        id: 'rev-5',
-        name: 'مطعم ومقهى ديلايت (المالكي)',
-        feedback: 'اعتمادنا على شركة حوا في توريد الزيوت والمعلبات وفر لنا استقراراً كبيراً في الجودة وثبات الأسعار التنافسية.',
-        rating: 5,
-        image: 'https://i.postimg.cc/gjtXJT65/nskht-mn-nskht-mn-dwn-ʿnwan-2026-08-11T183631-628.png',
-        productNameAr: 'الريف زيت دوار الشمس حجم 1 لتر',
-        productNameEn: 'Al-Reef Sunflower Oil 1L',
-        productSlug: 'al-reef-sunflower-oil-liter-size',
-    },
-    {
-        id: 'rev-6',
-        name: 'ماركت المدينة المنورة (التجارة)',
-        feedback: 'خدمة التوصيل المباشر لباب السوبرماركت ممتازة، والشاحنات مجهزة ومبردة لنقل البضائع بأمان تام.',
-        rating: 5,
-        image: 'https://i.postimg.cc/yNQDHBVN/data-bodour-(45).png',
-        productNameAr: 'المغربي معلبات سمك السردين بالزيت 125 جرام',
-        productNameEn: 'Al-Maghrabi Canned Sardines 125g',
-        productSlug: 'moroccan-canned-sardines-in-vegetable-oil-and-chili-peppers-125g',
-    },
-    {
-        id: 'rev-7',
-        name: 'بقالة النجوم (الميدان)',
-        feedback: 'المعاملة راقية جداً والأسعار منافسة، وتسهيلات طلبات الجملة عبر المنصة ممتازة وسريعة.',
-        rating: 5,
-        image: 'https://i.postimg.cc/sDzdmf1M/data-bodour-2026-09-01T140727-827.png',
-        productNameAr: 'حليبنا قهوة سريعة التحضير بحجم 80 غراماً',
-        productNameEn: 'Halibuna Instant Coffee 80g',
-        productSlug: 'halibuna-instant-coffee-80-grams',
-    },
-    {
-        id: 'rev-8',
-        name: 'سوبرماركت الفصول الأربعة (أبو رمانة)',
-        feedback: 'بضاعة وكالات أصلية 100% مع فواتير نظامية وتوصيل في الموعد المحدد دائماً. نوصي بالتعامل معهم بشدة.',
-        rating: 5,
-        image: 'https://i.postimg.cc/7hqfkLF5/data-bodour-2026-09-01T140919-561.png',
-        productNameAr: 'حليبنا جبنة كريمية 240 جرام',
-        productNameEn: 'Halibuna Cream Cheese 240g',
-        productSlug: 'halibuna-cream-cheese-240g',
-    }
-];
 
 interface Product {
     id: string;
@@ -159,12 +77,6 @@ const TestimonialsMasonry = ({ reviews = [], settings }: TestimonialsMasonryProp
                     return parsed as ReviewItem[];
                 }
             } catch {}
-        }
-        if (!reviews || reviews.length === 0) {
-            return DEFAULT_REVIEWS;
-        }
-        if (reviews.length <= 3) {
-            return [...reviews, ...DEFAULT_REVIEWS.slice(reviews.length)];
         }
         return reviews;
     }, [reviews, settings?.homeTestimonialsItems]);

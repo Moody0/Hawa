@@ -18,7 +18,7 @@ import {
     CheckCircle2
 } from "lucide-react";
 import { ProductOption } from "./HomeFeaturedContentSection";
-import { PublicTestimonialItem, DEFAULT_TESTIMONIALS } from "@/lib/public-queries";
+import { PublicTestimonialItem, DEFAULT_TESTIMONIALS } from "@/lib/public-defaults";
 
 interface HomeTestimonialsContentSectionProps {
     enabled: boolean;

@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import { useState, useRef } from "react";
 import { UploadCloud, Link, X, RefreshCw, Image } from 'lucide-react';
@@ -48,7 +50,7 @@ export default function ImageUploadField({
         formData.append("folder", folder);
 
         try {
-            const res = await fetch("/api/upload", {
+            const res = await laravelClientFetch("/api/upload", {
                 method: "POST",
                 body: formData,
             });

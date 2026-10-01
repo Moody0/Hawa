@@ -1,4 +1,8 @@
 'use client';
+import { laravelClientFetch } from '@/lib/laravel-client';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import { navigationLinkEnabled } from '@/lib/website-content';
+
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -43,6 +47,7 @@ interface HeaderProps {
 
 const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) => {
     const pathname = usePathname();
+    const contacts = useSiteContacts();
     const isHomePage = pathname === '/';
     const { dir, language: _language } = useLanguage();
     const isArabic = dir === 'rtl';
@@ -63,7 +68,7 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
 
     useEffect(() => {
         if (navData.length === 0) {
-            fetch('/api/navigation', { cache: 'no-store' })
+            laravelClientFetch('/api/navigation', { cache: 'no-store' })
                 .then((res) => (res.ok ? res.json() : []))
                 .then((data) => {
                     if (Array.isArray(data) && data.length > 0) {
@@ -133,7 +138,7 @@ const Header = ({ initialCategories = [], initialNavData = [] }: HeaderProps) =>
         { href: '/shipping-returns', labelAr: 'خدمات التوزيع', labelEn: 'Distribution' },
         { href: '/blog', labelAr: 'المدونة', labelEn: 'Blog' },
         { href: '/contact', labelAr: 'تواصل معنا', labelEn: 'Contact Us' },
-    ];
+    ].filter(link => navigationLinkEnabled(link.href, contacts.content));
 
     return (
         <>

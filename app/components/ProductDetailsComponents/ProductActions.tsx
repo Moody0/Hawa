@@ -1,5 +1,7 @@
 "use client";
 
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from "@/app/context/CartContext";
@@ -23,6 +25,7 @@ interface ProductActionsProps {
         price: number;
         discountPrice?: number | null;
         hidePrice?: boolean;
+    requiresQuote?: boolean;
         image: string;
         slug: string;
         options?: string | null;
@@ -41,16 +44,17 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
     const { addItem } = useCart();
     const { customer } = useCustomer();
     const { language } = useLanguage();
+    const siteContacts = useSiteContacts();
     const { formatPrice } = useCurrency();
     const router = useRouter();
 
     const isArabic = language === 'ar';
     const isLockedForGuest = !customer;
     const minimumQuantity = product.minOrder || 1;
-    const isOutOfStock = typeof stock === 'number' && stock <= 0;
+    const isOutOfStock = !product.requiresQuote && typeof stock === 'number' && stock <= 0;
 
     // Options parsing
-    const parsedOptions = purchaseContext?.parsedOptions ?? (product.options 
+    const parsedOptions = purchaseContext?.parsedOptions ?? (product.options
         ? product.options.split(',').map(o => o.trim()).filter(Boolean)
         : []);
     const hasOptions = parsedOptions.length > 0;
@@ -176,16 +180,16 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
                             </span>
                             <span className={`hidden sm:inline-flex items-center gap-1 text-[10px] font-bold ${isOutOfStock ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                 <span className={`h-1.5 w-1.5 rounded-full ${isOutOfStock ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-                                {isOutOfStock ? (isArabic ? 'غير متوفر' : 'Out of stock') : (isArabic ? 'متوفر' : 'Available')}
+                                {product.requiresQuote ? (isArabic ? 'متاح للاستعلام' : 'Available for inquiry') : isOutOfStock ? (isArabic ? 'غير متوفر' : 'Out of stock') : (isArabic ? 'متوفر' : 'Available')}
                             </span>
                         </div>
 
                         <div className="flex items-baseline gap-1 select-none">
                             <span className="text-lg sm:text-xl font-black text-slate-800 dark:text-slate-200 blur-[3px] opacity-60 tracking-wider">
-                                88,500
+                                •••••
                             </span>
                             <span className="text-xs font-bold text-slate-400">
-                                {isArabic ? "ل.س" : "SYP"}
+                                USD
                             </span>
                         </div>
                     </div>
@@ -214,7 +218,7 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
                     </span>
                     <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${isOutOfStock ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                         <span className={`w-2 h-2 rounded-full ${isOutOfStock ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
-                        <span>{isOutOfStock ? (isArabic ? 'غير متوفر حالياً' : 'Out of stock') : (isArabic ? 'متوفر للتوريد' : 'In Stock')}</span>
+                        <span>{product.requiresQuote ? (isArabic ? 'التوفر يؤكد عبر واتساب' : 'Availability confirmed on WhatsApp') : isOutOfStock ? (isArabic ? 'غير متوفر حالياً' : 'Out of stock') : (isArabic ? 'متوفر للتوريد' : 'In Stock')}</span>
                     </span>
                 </div>
             ) : (
@@ -239,7 +243,7 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
                     </div>
                     <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-[6px] border ${isOutOfStock ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border-rose-500/20' : 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500/20'}`}>
                         <span className={`w-2 h-2 rounded-full ${isOutOfStock ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
-                        <span>{isOutOfStock ? (isArabic ? 'غير متوفر حالياً' : 'Out of stock') : (isArabic ? 'متوفر للتوريد' : 'In Stock')}</span>
+                        <span>{product.requiresQuote ? (isArabic ? 'التوفر يؤكد عبر واتساب' : 'Availability confirmed on WhatsApp') : isOutOfStock ? (isArabic ? 'غير متوفر حالياً' : 'Out of stock') : (isArabic ? 'متوفر للتوريد' : 'In Stock')}</span>
                     </span>
                 </div>
             )}
@@ -328,11 +332,11 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
             {/* 5. Direct Fast Action: Fast Checkout (Logged In) OR Direct Sales WhatsApp (Guest) */}
             {isLockedForGuest ? (
                 <a
-                    href={`https://wa.me/963993443901?text=${encodeURIComponent(
+                    href={whatsappHref(siteContacts,
                         isArabic
                             ? `مرحباً مدير المبيعات بشركة حوا، أود الاستفسار عن توفر وتسعير جملة لمنتج: ${displayName} (${quantity} ${formatPackaging(product.packaging, 'ar')})`
                             : `Hello Hawa Sales, I would like to inquire about wholesale pricing for: ${displayName}`
-                    )}`}
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full h-11 bg-emerald-50/50 hover:bg-emerald-100/60 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-500/25 rounded-[10px] font-bold text-xs flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
@@ -347,7 +351,9 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
                     disabled={isOutOfStock}
                     className="w-full h-11 bg-[#8A6305] hover:bg-[#735204] text-white rounded-[10px] font-bold text-xs transition-colors active:scale-[0.99] cursor-pointer disabled:bg-slate-300 disabled:text-slate-600 disabled:cursor-not-allowed dark:bg-[#E5B54A] dark:text-[#0B192C] dark:hover:bg-[#d9a432] dark:disabled:bg-zinc-700 dark:disabled:text-slate-400"
                 >
-                    {isArabic ? 'متابعة الطلب والدفع السريع ←' : 'Proceed to Checkout →'}
+                    {product.requiresQuote
+                        ? (isArabic ? 'متابعة طلب الأسعار ←' : 'Continue quote request →')
+                        : (isArabic ? 'متابعة الطلب والدفع السريع ←' : 'Proceed to Checkout →')}
                 </button>
             )}
         </section>

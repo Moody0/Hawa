@@ -1,5 +1,7 @@
 'use client';
 
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -13,6 +15,7 @@ export default function MerchantLoginPage() {
     const router = useRouter();
     const { login, customer } = useCustomer();
     const { language, dir } = useLanguage();
+    const siteContacts = useSiteContacts();
     const isArabic = language === 'ar' || dir === 'rtl';
 
     const [phone, setPhone] = useState('');
@@ -23,13 +26,12 @@ export default function MerchantLoginPage() {
     const [pendingAccount, setPendingAccount] = useState<{ shopName?: string; phone: string } | null>(null);
     const [showForgotModal, setShowForgotModal] = useState(false);
 
-    const SALES_MANAGER_PHONE = '+963 993 443 901';
-    const SALES_MANAGER_CLEAN = '963993443901';
+    const SALES_MANAGER_PHONE = siteContacts.phone;
 
     // If already logged in, redirect to portal
     React.useEffect(() => {
         if (customer) {
-            router.push('/account');
+            window.location.replace('/account');
         }
     }, [customer, router]);
 
@@ -37,16 +39,27 @@ export default function MerchantLoginPage() {
         if (!showForgotModal) return;
 
         const previousOverflow = document.body.style.overflow;
+        const previousFocus = document.activeElement as HTMLElement | null;
+        const dialog = document.getElementById('password-recovery-dialog');
+        const focusable = () => Array.from(dialog?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])') || []);
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') setShowForgotModal(false);
+            if (event.key === 'Tab') {
+                const elements = focusable();
+                const first = elements[0], last = elements[elements.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+            }
         };
 
         document.body.style.overflow = 'hidden';
         window.addEventListener('keydown', handleKeyDown);
+        focusable()[0]?.focus();
 
         return () => {
             document.body.style.overflow = previousOverflow;
             window.removeEventListener('keydown', handleKeyDown);
+            previousFocus?.focus();
         };
     }, [showForgotModal]);
 
@@ -70,7 +83,7 @@ export default function MerchantLoginPage() {
         setLoading(false);
 
         if (res.success) {
-            router.push('/account');
+            window.location.replace('/account');
         } else if (res.isPending) {
             setPendingAccount({
                 shopName: res.shopName,
@@ -87,7 +100,7 @@ export default function MerchantLoginPage() {
             <div className="mx-auto min-w-0 w-full max-w-4xl">
                 {/* Main Card: Split Panel Layout */}
                 <div className="grid min-w-0 w-full grid-cols-1 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#132035] lg:grid-cols-12">
-                    
+
                     {/* Panel 1: Merchant Benefits & Trust (Hidden on mobile, 5 cols on desktop) */}
                     <div className="hidden lg:flex lg:col-span-5 bg-[#FAF6EC] dark:bg-[#0E1A29] p-6 sm:p-8 flex-col justify-between border-b lg:border-b-0 lg:border-e border-slate-200/80 dark:border-white/10">
                         <div>
@@ -103,7 +116,7 @@ export default function MerchantLoginPage() {
                             </h2>
 
                             <p className="text-xs sm:text-sm text-[#475569] dark:text-slate-400 mb-6 leading-relaxed">
-                                {isArabic 
+                                {isArabic
                                     ? 'سجّل دخولك للوصول إلى لوحة المشتريات الخاصة بمحلك التجاري والاطلاع على أسعار الجملة الرسمية.'
                                     : 'Sign in to access your wholesale store dashboard, price lists, and order history.'}
                             </p>
@@ -155,8 +168,8 @@ export default function MerchantLoginPage() {
                                     <Headset className="text-base text-[#8A6305]" />
                                     <span>{isArabic ? 'مدير المبيعات المباشر:' : 'Sales Manager:'}</span>
                                 </div>
-                                <a 
-                                    href={`https://wa.me/${SALES_MANAGER_CLEAN}?text=${encodeURIComponent(isArabic ? 'مرحباً، أحتاج مساعدة في حساب التاجر لدى شركة حوا' : 'Hello, I need assistance with my Hawa merchant account')}`}
+                                <a
+                                    href={whatsappHref(siteContacts, isArabic ? 'مرحباً، أحتاج مساعدة في حساب التاجر لدى شركة حوا' : 'Hello, I need assistance with my Hawa merchant account')}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="font-bold text-[#8A6305] hover:text-[#735204] dark:text-[#E5B54A] flex items-center gap-1.5 font-mono"
@@ -177,8 +190,8 @@ export default function MerchantLoginPage() {
                                     {isArabic ? 'تسجيل دخول التاجر' : 'Merchant Sign In'}
                                 </h1>
                                 <p className="text-xs sm:text-sm text-[#475569] dark:text-slate-400 mt-1">
-                                    {isArabic 
-                                        ? 'أدخل رقم الهاتف المسجل وكلمة المرور للمتابعة' 
+                                    {isArabic
+                                        ? 'أدخل رقم الهاتف المسجل وكلمة المرور للمتابعة'
                                         : 'Enter your registered phone number and password'}
                                 </p>
                             </div>
@@ -191,14 +204,14 @@ export default function MerchantLoginPage() {
                                         <span>{isArabic ? 'حسابك التجاري قيد المراجعة والتدقيق' : 'Account Under Review'}</span>
                                     </div>
                                     <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                                        {isArabic 
+                                        {isArabic
                                             ? `طلبك قيد التحقق من قبل إدارة مبيعات شركة حوا. يمكنك التواصل مع مدير المبيعات للاستفسار عن حالة الطلب.`
                                             : 'Your application is being verified by sales management. You can contact sales to ask about its status.'}
                                     </p>
                                     <a
-                                        href={`https://wa.me/${SALES_MANAGER_CLEAN}?text=${encodeURIComponent(
+                                        href={whatsappHref(siteContacts,
                                             `مرحباً، أتابع حالة حسابي التجاري (${pendingAccount.shopName || ''}) المسجل برقم (${pendingAccount.phone})، وأرغب في مراجعة وتفعيل الحساب.`
-                                        )}`}
+                                        )}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="mt-1 inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#16833d] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#126f34]"
@@ -228,13 +241,13 @@ export default function MerchantLoginPage() {
                                             <Phone className="text-base" />
                                         </div>
                                         <input
-                                            id="login-phone"
+                                            id="login-phone" autoComplete="username"
                                             type="tel"
                                             inputMode="tel"
                                             required
                                             maxLength={15}
                                             value={phone}
-                                            onChange={(e) => setPhone(normalizeSyrianPhone(e.target.value).slice(0, 10))}
+                                            onChange={(e) => setPhone(e.target.value.replace(/[^0-9+٠-٩۰-۹]/g, '').slice(0, 15))}
                                             placeholder="09xxxxxxxx"
                                             dir="ltr"
                                             className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2.5 ps-10 pe-4 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:py-3 sm:text-sm"
@@ -261,7 +274,7 @@ export default function MerchantLoginPage() {
                                             <Lock className="text-base" />
                                         </div>
                                         <input
-                                            id="login-password"
+                                            id="login-password" autoComplete="current-password"
                                             type={showPassword ? 'text' : 'password'}
                                             required
                                             maxLength={64}
@@ -311,12 +324,13 @@ export default function MerchantLoginPage() {
 
             {/* Forgot Password Modal */}
             {showForgotModal && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
                     onClick={() => setShowForgotModal(false)}
                 >
-                    <div 
+                    <div
                         role="dialog"
+                        id="password-recovery-dialog"
                         aria-modal="true"
                         aria-labelledby="password-recovery-title"
                         className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#132035] sm:p-8"
@@ -329,14 +343,14 @@ export default function MerchantLoginPage() {
                             {isArabic ? 'استعادة كلمة المرور للحساب التجاري' : 'Merchant Password Recovery'}
                         </h3>
                         <p className="text-xs sm:text-sm text-[#475569] dark:text-slate-300 text-center leading-relaxed mb-6">
-                            {isArabic 
+                            {isArabic
                                 ? 'لأمان حسابات المحلات التجارية، يتم إعادة تعيين كلمة المرور مباشرة عبر التواصل مع إدارة المبيعات على واتساب.'
                                 : 'For security, password resets are processed directly via WhatsApp support with sales management.'}
                         </p>
 
                         <div className="space-y-2.5">
                             <a
-                                href={`https://wa.me/${SALES_MANAGER_CLEAN}?text=${encodeURIComponent(isArabic ? 'مرحباً، نسيت كلمة المرور الخاصة بحسابي التجاري لدى شركة حوا وأرغب في استعادتها.' : 'Hello, I forgot my merchant account password and need to reset it.')}`}
+                                href={whatsappHref(siteContacts, isArabic ? 'مرحباً، نسيت كلمة المرور الخاصة بحسابي التجاري لدى شركة حوا وأرغب في استعادتها.' : 'Hello, I forgot my merchant account password and need to reset it.')}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#16833d] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#126f34] sm:text-sm"

@@ -1,3 +1,5 @@
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React from 'react';
 import LanguageToggle from '../LanguageToggle';
 import CurrencyToggle from '../CurrencyToggle';
@@ -10,8 +12,9 @@ interface TopBarProps {
 
 const TopBar = ({ isVisible }: TopBarProps) => {
     const { dir, language } = useLanguage();
+    const siteContacts = useSiteContacts();
     const isArabic = dir === 'rtl' || language === 'ar';
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901';
+    const whatsappNumber = siteContacts.whatsappDigits;
     const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
 
     return (
@@ -34,13 +37,13 @@ const TopBar = ({ isVisible }: TopBarProps) => {
                 {/* Center Column: Sales Manager Hotline */}
                 <div className="hidden xl:flex items-center justify-center gap-3 text-xs font-bold text-[#0B192C] dark:text-gray-200">
                     <a 
-                        href="tel:+963993443901"
+                        href={`tel:${siteContacts.phone}`}
                         className="hover:text-[#8A6305] transition-colors flex items-center gap-1.5"
                         title={isArabic ? 'اتصال مباشر بمدير المبيعات' : 'Call Sales Manager'}
                     >
                         <span>📞</span>
                         <span>{isArabic ? 'مبيعات الجملة:' : 'Wholesale Sales:'}</span>
-                        <span dir="ltr" className="font-extrabold text-[#8A6305]">+963 993 443 901</span>
+                        <span dir="ltr" className="font-extrabold text-[#8A6305]">{siteContacts.phone}</span>
                     </a>
                 </div>
                 
@@ -55,7 +58,7 @@ const TopBar = ({ isVisible }: TopBarProps) => {
                     {/* Socials & WhatsApp Order Link */}
                     <div className="flex items-center gap-3">
                         <a 
-                            href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(isArabic ? 'مرحباً شركة حوا، أرغب بالاستفسار عن طلبيات الجملة للمحل.' : 'Hello Hawa Distribution, I would like to inquire about wholesale orders.')}`}
+                            href={whatsappHref(siteContacts, isArabic ? 'مرحباً شركة حوا، أرغب بالاستفسار عن طلبيات الجملة للمحل.' : 'Hello Hawa Distribution, I would like to inquire about wholesale orders.')}
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="text-[#25D366] hover:text-[#1ebe5d] transition-colors flex items-center gap-1.5 font-bold text-xs" 

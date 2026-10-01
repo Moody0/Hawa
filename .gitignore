@@ -44,6 +44,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/app/generated/prisma
-
 screenshots/
+
+!.env.example
+!backend/.env.example
+!deploy/env.production.example

@@ -8,7 +8,7 @@ import { useConfirm } from "../../context/ConfirmDialogContext";
 import BrandModal from "./BrandModal";
 import { deleteBrand, toggleBrandActive, toggleBrandFeatured } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { Plus, Trash2, Pencil, Image, Search, Star, RefreshCw, ToggleLeft, ToggleRight, Eye, Store, ShoppingBag, FolderTree, Network } from 'lucide-react';
 import RelatedItemsModal from "../components/RelatedItemsModal";

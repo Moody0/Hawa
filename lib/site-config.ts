@@ -7,8 +7,7 @@
 const rawSiteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.SITE_URL ||
-    process.env.NEXTAUTH_URL ||
-    "https://hawatrading.com";
+    "https://hawasy.com";
 
 export const SITE_ORIGIN = rawSiteUrl.replace(/\/+$/, "");
 

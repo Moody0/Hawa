@@ -39,36 +39,6 @@ interface FeaturedCategoriesGridProps {
     } | null;
 }
 
-const DEFAULT_STATS_DATA: StatItem[] = [
-    {
-        amount: 500,
-        suffixAr: '+',
-        suffixEn: '+',
-        labelAr: 'صنف متوفر بالمستودعات',
-        labelEn: 'Wholesale SKUs',
-    },
-    {
-        amount: 8,
-        suffixAr: '+',
-        suffixEn: '+',
-        labelAr: 'وكالات تجارية حصرية',
-        labelEn: 'Exclusive Agencies',
-    },
-    {
-        amount: 48,
-        suffixAr: ' ساعة',
-        suffixEn: 'h',
-        labelAr: 'أقصى مدة للتفريغ والتسليم',
-        labelEn: 'Max Delivery SLA',
-    },
-    {
-        amount: 1500,
-        suffixAr: '+',
-        suffixEn: '+',
-        labelAr: 'متجر وبقالية معتمدة',
-        labelEn: 'Active Retail Stores',
-    },
-];
 
 const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl', settings }: FeaturedCategoriesGridProps) => {
     const isArabic = language === 'ar' || dir === 'rtl';
@@ -94,7 +64,7 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl',
                 // fallback to DEFAULT_STATS_DATA
             }
         }
-        return DEFAULT_STATS_DATA;
+        return [];
     }, [settings?.homeCategoriesStats]);
 
     const badgeText = isArabic
@@ -250,6 +220,8 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl',
         });
         setTimeout(updateScrollState, 350);
     };
+
+    if (!categories.length && !statsList.length) return null;
 
     return (
         <section ref={sectionRef} className="container-custom py-12 md:py-16">

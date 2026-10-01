@@ -9,7 +9,7 @@ import CategoryModal from "./CategoryModal";
 import { deleteCategory, toggleCategoryActive, toggleCategoryFeatured, bulkDeleteCategories } from "../../../../lib/admin-actions";
 import RelatedItemsModal from "../components/RelatedItemsModal";
 import { toast } from "react-hot-toast";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

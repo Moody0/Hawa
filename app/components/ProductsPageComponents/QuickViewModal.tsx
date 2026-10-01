@@ -239,7 +239,7 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                                     </span>
                                     <div className="flex items-baseline gap-1.5 select-none">
                                         <span className="text-base font-black text-slate-800 dark:text-slate-200 blur-[3.5px] opacity-60 tracking-wider">
-                                            88,500
+                                            •••••
                                         </span>
                                         <span className="text-xs font-bold text-[#8A6305] dark:text-[#E5B54A]">
                                             {language === 'ar' ? 'سعر الجملة للتجار (سجّل الآن)' : 'Wholesale Rate (Login to view)'}

@@ -1,4 +1,8 @@
 "use client";
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +17,7 @@ import { RotateCw } from 'lucide-react';
 
 import { useLanguage } from '@/app/context/LanguageContext';
 import { FaWhatsapp } from 'react-icons/fa';
-import { generateWhatsAppOrderMessage, buildWhatsAppUrl } from '@/lib/whatsapp-utils';
+import { generateWhatsAppOrderMessage } from '@/lib/whatsapp-utils';
 
 interface OrderItem {
     id: string;
@@ -39,6 +43,7 @@ interface Order {
     city: string;
     notes?: string | null;
     totalAmount: number;
+    isQuoteRequest?: boolean;
     items: OrderItem[];
     createdAt: string;
     whatsappNumber?: string;
@@ -48,9 +53,10 @@ const CompleteOrderContent = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { t, language } = useLanguage();
+    const siteContacts = useSiteContacts();
     const orderId = searchParams.get('id');
-    const isQuoteRequest = searchParams.get('quote') === '1';
     const [order, setOrder] = useState<Order | null>(null);
+    const isQuoteRequest = Boolean(order?.isQuoteRequest || searchParams.get('quote') === '1');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -65,7 +71,7 @@ const CompleteOrderContent = () => {
                 const fetchUrl = token
                     ? `/api/orders/${orderId}?token=${encodeURIComponent(token)}`
                     : `/api/orders/${orderId}`;
-                const response = await fetch(fetchUrl);
+                const response = await laravelClientFetch(fetchUrl);
                 if (response.ok) {
                     const data = await response.json();
                     setOrder(data);
@@ -119,8 +125,7 @@ const CompleteOrderContent = () => {
         }))
     });
 
-    const targetNumber = order.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963900000000';
-    const whatsappUrl = buildWhatsAppUrl(targetNumber, waMessage);
+    const whatsappUrl = whatsappHref(siteContacts, waMessage);
 
     return (
         <div className="flex-grow w-full max-w-4xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center">
@@ -138,8 +143,8 @@ const CompleteOrderContent = () => {
                         </h3>
                         <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-0.5">
                             {language === 'ar'
-                                ? 'أرسل تفاصيل الطلب مباشرة إلى مسؤول المبيعات والتوزيع عبر واتساب لتسريع التجهيز'
-                                : 'Send order details directly to our sales & distribution team via WhatsApp for fast processing'}
+                                ? (isQuoteRequest ? 'أرسل المنتجات والكميات المطلوبة عبر واتساب للحصول على الأسعار وتأكيد التوفر.' : 'أرسل تفاصيل الطلب مباشرة إلى مسؤول المبيعات والتوزيع عبر واتساب لتسريع التجهيز')
+                                : (isQuoteRequest ? 'Send your products and quantities on WhatsApp to get prices and confirm availability.' : 'Send order details directly to our sales & distribution team via WhatsApp for fast processing')}
                         </p>
                     </div>
                 </div>
@@ -150,7 +155,7 @@ const CompleteOrderContent = () => {
                     className="w-full md:w-auto px-6 py-3.5 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-extrabold rounded-xl flex items-center justify-center gap-2.5 text-sm md:text-base shadow-md hover:shadow-lg transition-all active:scale-[0.98] shrink-0"
                 >
                     <FaWhatsapp className="text-xl" />
-                    <span>{t('checkout.resendViaWhatsapp')}</span>
+                    <span>{isQuoteRequest ? (language === 'ar' ? 'طلب الأسعار عبر واتساب' : 'Ask for prices on WhatsApp') : t('checkout.resendViaWhatsapp')}</span>
                 </a>
             </div>
 

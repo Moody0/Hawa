@@ -1,4 +1,6 @@
 "use client";
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 import React, { useState, useRef } from "react";
 import { Phone, MapPin, Clock, Store, Send, CheckCircle2 } from "lucide-react";
@@ -6,6 +8,8 @@ import { FaWhatsapp } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { ContactPageContent as ContactPageContentType } from "@/lib/contact-page-content";
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import { whatsappHref } from '@/lib/website-content';
 
 interface ContactPageContentProps {
     siteSettings: any;
@@ -14,14 +18,14 @@ interface ContactPageContentProps {
 
 export default function ContactPageContent({ siteSettings, content }: ContactPageContentProps) {
     const { dir, language } = useLanguage();
+    const contacts = useSiteContacts();
     const isAr = language === "ar" || dir === "rtl";
     const pageContent = isAr ? content.ar : content.en;
 
     // Numbers cleanup
     const cleanNumber = (val?: string) => (val || "").replace(/[^0-9]/g, "");
 
-    const salesWaClean = cleanNumber(pageContent.salesWhatsapp || siteSettings?.whatsappNumber || "+963993443901");
-    const gmWaClean = cleanNumber(pageContent.gmWhatsapp || "+963994166000");
+    const gmWaClean = cleanNumber(pageContent.gmWhatsapp);
 
     const [formData, setFormData] = useState({
         shopName: "",
@@ -75,7 +79,7 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
 
         setIsSubmitting(true);
         try {
-            const res = await fetch("/api/contact", {
+            const res = await laravelClientFetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -165,7 +169,7 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
                                 )}
                                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-emerald-500/20 flex-wrap">
                                     <a
-                                        href={`https://wa.me/${salesWaClean}?text=${encodeURIComponent(pageContent.salesWhatsappMsg || "")}`}
+                                        href={whatsappHref(contacts, pageContent.salesWhatsappMsg || "")}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold transition-all shadow-xs"
@@ -188,7 +192,7 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
                     </div>
 
                     {/* Company General Manager Dedicated Card */}
-                    <div className="bg-gradient-to-br from-[#FAF6EC] via-amber-50/40 to-transparent dark:from-[#132035] dark:via-[#0B192C] border border-[#8A6305]/30 hover:border-[#8A6305] rounded-3xl p-6 transition-all shadow-xs hover:shadow-md">
+                    <div hidden={!pageContent.gmPhone && !gmWaClean} className="bg-gradient-to-br from-[#FAF6EC] via-amber-50/40 to-transparent dark:from-[#132035] dark:via-[#0B192C] border border-[#8A6305]/30 hover:border-[#8A6305] rounded-3xl p-6 transition-all shadow-xs hover:shadow-md">
                         <div className="flex items-start gap-4">
                             <div className="w-14 h-14 rounded-2xl bg-[#0B192C] dark:bg-[#8A6305] text-[#8A6305] dark:text-white border border-[#8A6305]/40 flex items-center justify-center text-2xl shrink-0 shadow-sm">
                                 <Store className="text-3xl" />

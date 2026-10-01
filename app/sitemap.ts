@@ -1,5 +1,5 @@
+import {laravelJson} from '@/lib/laravel-server';
 import { MetadataRoute } from 'next';
-import { prisma } from '@/lib/prisma';
 import { SITE_ORIGIN } from '@/lib/site-config';
 
 export const revalidate = 3600; // Revalidate sitemap hourly
@@ -55,17 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ];
 
         // 2. Fetch all active products
-        const products = await prisma.product.findMany({
-            where: {
-                archivedAt: null,
-                brand: { isActive: true, archivedAt: null },
-                category: { isActive: true, archivedAt: null },
-            },
-            select: {
-                slug: true,
-                updatedAt: true,
-            },
-        });
+        const products = await laravelJson<any[]>('/api/sitemap/products',[],{forwardSession:false});
 
         const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
             url: `${baseUrl}/products/${product.slug}`,
@@ -75,13 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }));
 
         // 3. Fetch all active Main Categories (Departments)
-        const departments = await prisma.mainCategory.findMany({
-            where: { isActive: true },
-            select: {
-                slug: true,
-                updatedAt: true,
-            },
-        });
+        const departments = await laravelJson<any[]>('/api/main-categories',[],{forwardSession:false});
 
         const departmentRoutes: MetadataRoute.Sitemap = departments.map((dept) => ({
             url: `${baseUrl}/departments/${dept.slug}`,
@@ -91,13 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }));
 
         // 4. Fetch all active Brands
-        const brands = await prisma.brand.findMany({
-            where: { isActive: true },
-            select: {
-                slug: true,
-                updatedAt: true,
-            },
-        });
+        const brands = await laravelJson<any[]>('/api/brands',[],{forwardSession:false});
 
         const brandRoutes: MetadataRoute.Sitemap = brands.map((brand) => ({
             url: `${baseUrl}/brands/${brand.slug}`,
@@ -107,13 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }));
 
         // 5. Fetch all active Categories
-        const categories = await prisma.category.findMany({
-            where: { isActive: true, archivedAt: null, brand: { isActive: true, archivedAt: null } },
-            select: {
-                slug: true,
-                updatedAt: true,
-            },
-        });
+        const categories = await laravelJson<any[]>('/api/categories',[],{forwardSession:false});
 
         const categoryRoutes: MetadataRoute.Sitemap = categories.map((cat) => ({
             url: `${baseUrl}/categories/${cat.slug}`,
@@ -123,13 +95,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }));
 
         // 6. Fetch all published Blog Posts
-        const posts = await prisma.post.findMany({
-            where: { isPublished: true, archivedAt: null },
-            select: {
-                slug: true,
-                updatedAt: true,
-            },
-        });
+        const posts = await laravelJson<any[]>('/api/blog',[],{forwardSession:false});
 
         const postRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
             url: `${baseUrl}/blog/${post.slug}`,

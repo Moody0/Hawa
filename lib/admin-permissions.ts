@@ -61,3 +61,16 @@ export function hasAdminPermission(
 ): boolean {
   return isSuperAdmin || permissionImplies(new Set(granted ?? []), required);
 }
+
+export const ADMIN_PAGE_PERMISSIONS: Record<string, AdminPermission> = {
+  dashboard: 'ORDERS_VIEW', products: 'PRODUCTS_VIEW', brands: 'BRANDS_VIEW',
+  categories: 'CATEGORIES_VIEW', 'main-categories': 'MAIN_CATEGORIES_VIEW',
+  banners: 'BANNERS_VIEW', orders: 'ORDERS_VIEW', customers: 'CUSTOMERS_VIEW',
+  reviews: 'REVIEWS_VIEW', blog: 'BLOG_VIEW', messages: 'CUSTOMERS_VIEW',
+  'site-content': 'SITE_CONTENT_VIEW',
+};
+
+export function adminLandingPath(user: {role: string; permissions: readonly AdminPermission[]}) {
+  const page = Object.entries(ADMIN_PAGE_PERMISSIONS).find(([, permission]) => hasAdminPermission(user.permissions, permission, user.role === 'SUPER_ADMIN'));
+  return page ? `/admin/${page[0]}` : '/admin/settings';
+}

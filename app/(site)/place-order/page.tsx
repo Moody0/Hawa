@@ -1,4 +1,8 @@
 "use client";
+import { whatsappHref } from '@/lib/website-content';
+import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import { laravelClientFetch } from '@/lib/laravel-client';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +17,6 @@ import OrderSummary from '@/app/components/PlaceOrderComponents/OrderSummary';
 
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCustomer } from '@/app/context/CustomerContext';
-import { generateWhatsAppOrderMessage, buildWhatsAppUrl } from '@/lib/whatsapp-utils';
 import { validateOrderForm, findGovernorate, normalizeSyrianPhone } from '@/lib/order-validation';
 
 function PlaceOrderSkeleton() {
@@ -51,6 +54,7 @@ const PlaceOrderPage = () => {
     const { items, subtotal, clearCart, isHydrated } = useCart();
     const { customer, isLoading: isCustomerLoading } = useCustomer();
     const { language } = useLanguage();
+    const siteContacts = useSiteContacts();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -182,7 +186,7 @@ const PlaceOrderPage = () => {
         try {
             const cleanData = validation.cleanData;
             const currentIdempotencyKey = idempotencyKeyRef.current;
-            const response = await fetch('/api/orders', {
+            const response = await laravelClientFetch('/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -220,43 +224,8 @@ const PlaceOrderPage = () => {
                 );
                 setIsSuccess(true);
 
-                // Prepare WhatsApp message
-                const waMessage = generateWhatsAppOrderMessage({
-                    orderNumber: data.orderNumber,
-                    shopName: cleanData.shopName,
-                    Name: cleanData.ownerName,
-                    phone: cleanData.phone,
-                    city: cleanData.city,
-                    streetAddress: cleanData.streetAddress,
-                    notes: cleanData.notes,
-                    totalAmount: isQuoteRequest ? 0 : total,
-                    isQuoteRequest,
-                    showPrices: !isQuoteRequest,
-                    items: items.map(item => ({
-                        quantity: item.quantity,
-                        price: item.price,
-                        options: item.selectedOption || null,
-                        product: {
-                            name: item.name,
-                            nameAr: item.name,
-                            packaging: item.packaging || 'طرد',
-                            itemsPerPackage: item.itemsPerPackage || null,
-                        }
-                    }))
-                });
-
-                const targetNumber = data.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+963993443901';
-                const whatsappUrl = buildWhatsAppUrl(targetNumber, waMessage);
-
-                // Open WhatsApp
-                try {
-                    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-                } catch (err) {
-                    console.error("Popup blocker prevented opening WhatsApp:", err);
-                }
-
                 clearCart();
-                const quoteParam = isQuoteRequest ? '&quote=1' : '';
+                const quoteParam = data.isQuoteRequest || isQuoteRequest ? '&quote=1' : '';
                 const redirectUrl = data.orderToken
                     ? `/complete-order?id=${data.id}&token=${encodeURIComponent(data.orderToken)}${quoteParam}`
                     : `/complete-order?id=${data.id}${quoteParam}`;

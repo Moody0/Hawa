@@ -47,72 +47,6 @@ const BRAND_SPECIALTIES: Record<string, { ar: string; en: string }> = {
     'almaghrabi': { ar: 'سردين وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
 };
 
-const FALLBACK_BRANDS: AgencyBrand[] = [
-    {
-        id: 'fb-rokavera',
-        name: 'روكافيرا',
-        nameEn: 'Rokavera',
-        slug: 'rocavera',
-        image: '/images/brands/rokavera.webp',
-        description: 'منتجات عناية شخصية ومنظفات',
-    },
-    {
-        id: 'fb-buffalo',
-        name: 'بوفالو',
-        nameEn: 'Buffalo',
-        slug: 'buffalo',
-        image: '/images/brands/bufalo.webp',
-        description: 'منتجات استهلاكية ومواد نظافة',
-    },
-    {
-        id: 'fb-alreef',
-        name: 'الريف',
-        nameEn: 'Alreef',
-        slug: 'alreef',
-        image: '/images/brands/alreef.webp',
-        description: 'منتجات غذائية وزيوت نقية',
-    },
-    {
-        id: 'fb-zwan',
-        name: 'زوان',
-        nameEn: 'Zwan',
-        slug: 'zwan',
-        image: '/images/brands/zwan.webp',
-        description: 'معلبات ولحوم فاخرة',
-    },
-    {
-        id: 'fb-haleebna',
-        name: 'حليبنا',
-        nameEn: 'Haleebna',
-        slug: 'haleebna',
-        image: '/images/brands/halibna.webp',
-        description: 'سمن بقري وألبان مجففة',
-    },
-    {
-        id: 'fb-sunbell',
-        name: 'صن بل',
-        nameEn: 'Sunbell',
-        slug: 'sunbell',
-        image: 'https://i.postimg.cc/N0ftBHFq/data-bodour-(43).png',
-        description: 'معلبات لحم بقري فاخر',
-    },
-    {
-        id: 'fb-silver-fish',
-        name: 'سيلفر فيش',
-        nameEn: 'Silver Fish',
-        slug: 'silver-fish',
-        image: 'https://i.postimg.cc/X7zdwfMd/data-bodour-(44).png',
-        description: 'معلبات تونة وسردين',
-    },
-    {
-        id: 'fb-almaghrabi',
-        name: 'المغربي',
-        nameEn: 'Al Maghrabi',
-        slug: 'al-maghrabi',
-        image: 'https://i.postimg.cc/yNQDHBVN/data-bodour-(45).png',
-        description: 'سردين معلب بالزيت النباتي',
-    },
-];
 
 export default function AgenciesSlider({ brands = [], title, subtitle }: AgenciesSliderProps) {
     const { language, dir } = useLanguage();
@@ -138,7 +72,8 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
         };
     }, []);
 
-    const activeBrands = (brands && brands.length > 0) ? brands : FALLBACK_BRANDS;
+    const activeBrands = brands;
+    if (!activeBrands.length) return null;
 
     const getBrandLatinName = (brand: AgencyBrand) => {
         return getBrandDisplayName(brand, 'en');

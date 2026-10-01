@@ -7,7 +7,7 @@ import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { updateAdminCredentials } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
-import { signOut } from "next-auth/react";
+import { signOut } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
 
 interface AdminUser {

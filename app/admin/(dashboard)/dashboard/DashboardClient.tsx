@@ -250,7 +250,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats }) {
                         <div className="flex flex-col justify-between rounded-xl sm:rounded-2xl p-3.5 sm:p-5 lg:p-6 bg-white dark:bg-[#0f172a] border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-md transition-all">
                             <div>
                                 <div className="flex justify-between items-center gap-1">
-                                    <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider truncate">
+                                    <p className="max-w-[96px] whitespace-normal text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider leading-tight">
                                         {t('admin.averageOrderValue')}
                                     </p>
                                     <div className="p-1.5 sm:p-2.5 bg-amber-50 dark:bg-amber-950/50 rounded-lg sm:rounded-xl text-amber-600 dark:text-amber-400 shrink-0">

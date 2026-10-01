@@ -1,60 +1,15 @@
+import {getAdminMainCategories,getAdminCategories,getAdminProducts} from '@/lib/admin-actions';
 import { getSiteSettings } from "@/lib/public-queries";
 import SiteContentClient from "./SiteContentClient";
 import { requireAdminSession } from "@/lib/admin-auth";
-import { prisma } from "@/lib/prisma";
-
 export default async function SiteContentPage() {
     await requireAdminSession("SITE_CONTENT_VIEW");
 
     const [siteSettings, mainCategoriesData, categoriesData, productsData] = await Promise.all([
         getSiteSettings(),
-        prisma.mainCategory.findMany({
-            where: { archivedAt: null },
-            select: {
-                id: true,
-                name: true,
-                slug: true,
-                image: true,
-                isFeatured: true,
-                isActive: true,
-            },
-            orderBy: [{ navOrder: "asc" }, { name: "asc" }],
-        }),
-        prisma.category.findMany({
-            where: { isActive: true, archivedAt: null, brand: { isActive: true } },
-            select: {
-                id: true,
-                name: true,
-                slug: true,
-                image: true,
-                isFeatured: true,
-                brand: {
-                    select: {
-                        name: true,
-                    },
-                },
-            },
-            orderBy: [{ name: "asc" }, { id: "asc" }],
-        }),
-        prisma.product.findMany({
-            where: { archivedAt: null, brand: { isActive: true } },
-            select: {
-                id: true,
-                name: true,
-                nameAr: true,
-                slug: true,
-                images: true,
-                price: true,
-                isTrending: true,
-                brand: {
-                    select: {
-                        name: true,
-                    },
-                },
-            },
-            orderBy: [{ name: "asc" }, { id: "asc" }],
-            take: 300,
-        }),
+        getAdminMainCategories(),
+        getAdminCategories(1,1000).then(r=>r.categories),
+        getAdminProducts({limit:1000}),
     ]);
     
     return (
