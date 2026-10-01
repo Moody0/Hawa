@@ -315,6 +315,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     fill
                                     priority={index === 0}
                                     loading={index === 0 ? "eager" : "lazy"}
+                                    unoptimized={slide.image.startsWith('/uploads/')}
                                     sizes="(max-width: 640px) 100vw, (max-width: 1023px) 100vw, (max-width: 1536px) 58vw, 850px"
                                     className="object-cover object-center w-full h-full pointer-events-none"
                                 />
