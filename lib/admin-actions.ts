@@ -31,7 +31,7 @@ interface CategoryInput {
     description?: string;
     image?: string;
     isFeatured?: boolean;
-    brandId?: string;
+    mainCategoryId?: string | null;
 }
 interface BrandInput {
     name: string;

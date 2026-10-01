@@ -27,14 +27,26 @@ class HawaCatalogController extends CatalogController
 
     public function categories(Request $request)
     {
-        $query = Category::where('is_active', true)->whereHas('brand', fn ($q) => $q->where('is_active', true))->with('brand')->withCount('products');
-        foreach (['brandId' => 'brand_id', 'mainCategoryId' => 'main_category_id', 'slug' => 'slug'] as $key => $column) {
-            if ($request->filled($key)) {
-                $query->where($column, $request->query($key));
-            }
+        $query = Category::where('is_active', true)->withCount('products');
+        $brandIds = collect(explode(',', (string) $request->query('brandIds', $request->query('brandId', ''))))
+            ->map(fn ($id) => trim($id))->filter()->unique()->values();
+        if ($brandIds->isNotEmpty()) {
+            $query->whereHas('products', fn ($q) => $q->whereIn('brand_id', $brandIds));
+        }
+        if ($request->filled('mainCategoryId')) {
+            $query->where('main_category_id', $request->query('mainCategoryId'));
+        }
+        if ($request->filled('slug')) {
+            $slug = $request->query('slug');
+            $redirect = DB::table('category_slug_redirects')->where('slug', $slug)->first();
+            $query->where(fn ($q) => $q->where('slug', $slug)->when($redirect, fn ($q) => $q->orWhere('id', $redirect->category_id)));
         }
 
-        return response()->json($query->orderByDesc('is_featured')->orderBy('name')->limit(1000)->get()->map(fn ($c) => [...ApiJson::camel($c), '_count' => ['products' => $c->products_count]]));
+        $categories = $query->orderByDesc('is_featured')->orderBy('name')->limit(1000)->get();
+        $redirects = DB::table('category_slug_redirects')->whereIn('category_id', $categories->pluck('id'))
+            ->get()->groupBy('category_id');
+
+        return response()->json($categories->map(fn ($c) => [...ApiJson::camel($c), 'redirectSlugs' => ($redirects[$c->id] ?? collect())->pluck('slug')->values(), '_count' => ['products' => $c->products_count]]));
     }
 
     public function mainCategories()
@@ -48,7 +60,9 @@ class HawaCatalogController extends CatalogController
 
     public function brands(Request $request)
     {
-        return response()->json(Brand::where('is_active', true)->when($request->filled('mainCategoryId'), fn ($q) => $q->where(fn ($b) => $b->where('main_category_id', $request->query('mainCategoryId'))->orWhereHas('products', fn ($p) => self::department($p, $request->query('mainCategoryId')))))->with('mainCategory')->withCount(['products', 'categories'])->orderBy('name')->get()->map(fn ($b) => [...ApiJson::camel($b), '_count' => ['products' => $b->products_count, 'categories' => $b->categories_count]]));
+        $brands = Brand::where('is_active', true)->when($request->filled('mainCategoryId'), fn ($q) => $q->where(fn ($b) => $b->where('main_category_id', $request->query('mainCategoryId'))->orWhereHas('products', fn ($p) => self::department($p, $request->query('mainCategoryId')))))->with('mainCategory')->withCount('products')->orderBy('name')->get();
+
+        return response()->json($this->serializeBrandsWithCounts($brands));
     }
 
     public function navigation()
@@ -70,14 +84,14 @@ class HawaCatalogController extends CatalogController
         // Hawa's catalog has no reliable stock counts; products with stock 0
         // must remain eligible for customer-facing home sections.
         $base = self::available()->with(['brand', 'category']);
-        $categories = Category::where('is_active', true)->whereHas('brand', fn ($q) => $q->where('is_active', true))->with('brand')->withCount('products');
-        $brands = Brand::where('is_active', true)->withCount(['products', 'categories']);
+        $categories = Category::where('is_active', true)->withCount('products');
+        $brands = Brand::where('is_active', true)->withCount('products');
         $mains = MainCategory::where('is_active', true)->orderByDesc('is_featured')->orderBy('nav_order');
         $value = match ($key) {
             'getSiteSettings' => ApiJson::camel($settings),
             'getActiveBanners' => ApiJson::camel(Banner::where('is_active', true)->latest()->get()),
-            'getHomeRailBrands' => $brands->orderByDesc('is_featured')->orderBy('name')->get()->map(fn ($b) => [...ApiJson::camel($b), 'nameAr' => $b->name, 'fullName' => $b->name, 'productCount' => $b->products_count, '_count' => ['products' => $b->products_count, 'categories' => $b->categories_count]]),
-            'getMainCategoryBrands','getFeaturedMainBrands' => $brands->where('group', 'MAIN')->orderByDesc('is_featured')->get()->map(fn ($b) => [...ApiJson::camel($b), '_count' => ['products' => $b->products_count, 'categories' => $b->categories_count]]),
+            'getHomeRailBrands' => $this->serializeBrandsWithCounts($brands->orderByDesc('is_featured')->orderBy('name')->get(), true),
+            'getMainCategoryBrands','getFeaturedMainBrands' => $this->serializeBrandsWithCounts($brands->where('group', 'MAIN')->orderByDesc('is_featured')->get()),
             'getHomeRailCategories' => $mains->get()->map(fn ($c) => [...ApiJson::camel($c), 'nameAr' => $c->name, 'nameEn' => $c->description ?: $c->name]),
             'getFeaturedCategories' => $this->featuredCategories($settings),
             'getCategoryHighlightCardsData' => $mains->whereNotNull('image')->where('image', '!=', '')->take(4)->get()->map(function ($c) {
@@ -94,7 +108,7 @@ class HawaCatalogController extends CatalogController
             'getTrendingProducts' => ApiJson::camel($base->where('is_trending', true)->latest()->take(32)->get()),
             'getApprovedReviews' => $this->testimonials($settings),
             'getHomeCollectionSections' => $categories->where('is_featured', true)->orderBy('name')->get()->map(function ($c) {
-                $p = self::available()->where('category_id', $c->id)->where('stock', '>', 0)->with('brand')->latest()->take(18)->get();
+                $p = self::available()->where('category_id', $c->id)->with('brand')->latest()->take(18)->get();
 
                 return ['category' => [...ApiJson::camel($c), 'productCount' => $p->count()], 'products' => ApiJson::camel($p)];
             })->filter(fn ($s) => count($s['products']) > 0)->values(),
@@ -111,7 +125,7 @@ class HawaCatalogController extends CatalogController
         if (! is_array($ids)) {
             $ids = array_filter(explode(',', (string) $selection));
         }
-        $sub = Category::where('is_active', true)->whereHas('brand', fn ($q) => $q->where('is_active', true))->with('brand')->withCount('products');
+        $sub = Category::where('is_active', true)->withCount('products');
         $mains = MainCategory::where('is_active', true);
         if ($ids) {
             $rows = $sub->whereIn('id', $ids)->get()->concat($mains->whereIn('id', $ids)->get())->keyBy('id');
@@ -129,6 +143,29 @@ class HawaCatalogController extends CatalogController
 
             return [...ApiJson::camel($c), 'nameEn' => $c->description ?: $c->name, 'image' => $c->image, 'href' => $main ? '/department/'.rawurlencode($c->slug) : '/products?category='.rawurlencode($c->slug), 'type' => $main ? 'main-category' : 'category', 'isMainCategory' => $main, '_count' => ['products' => $count], 'productCount' => $count];
         })->values()->all();
+    }
+
+    private function serializeBrandsWithCounts($brands, bool $includeRailNames = false)
+    {
+        $categoryCounts = DB::table('products')->whereIn('brand_id', $brands->pluck('id'))
+            ->whereNull('products.archived_at')->select('brand_id')
+            ->selectRaw('COUNT(DISTINCT category_id) as categories_count')->groupBy('brand_id')
+            ->pluck('categories_count', 'brand_id');
+
+        return $brands->map(function ($brand) use ($categoryCounts, $includeRailNames) {
+            $data = ApiJson::camel($brand);
+            $data['_count'] = [
+                'products' => (int) $brand->products_count,
+                'categories' => (int) ($categoryCounts[$brand->id] ?? 0),
+            ];
+            if ($includeRailNames) {
+                $data['nameAr'] = $brand->name;
+                $data['fullName'] = $brand->name;
+                $data['productCount'] = (int) $brand->products_count;
+            }
+
+            return $data;
+        })->values();
     }
 
     private function selectedProducts($query, ?string $selection, string $sort)

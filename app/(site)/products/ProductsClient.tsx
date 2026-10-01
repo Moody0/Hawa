@@ -23,6 +23,7 @@ interface Category {
     image: string | null;
     nameEn?: string | null;
     mainCategoryId?: string | null;
+    redirectSlugs?: string[];
     _count?: {
         products: number;
     };
@@ -134,7 +135,7 @@ const ProductsClient = ({
         if (activeCategory) return [activeCategory.id];
         if (!initialCategorySlugs || initialCategorySlugs.length === 0) return [];
         return initialCategories
-            .filter((c) => initialCategorySlugs.includes(c.slug) || initialCategorySlugs.includes(c.id))
+            .filter((c) => initialCategorySlugs.includes(c.slug) || initialCategorySlugs.includes(c.id) || c.redirectSlugs?.some((slug) => initialCategorySlugs.includes(slug)))
             .map((c) => c.id);
     }, [activeCategory, initialCategorySlugs, initialCategories]);
 

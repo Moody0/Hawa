@@ -29,11 +29,6 @@ class Category extends Model
         static::addGlobalScope('active_records', fn ($q) => $q->whereNull($q->getModel()->getTable().'.archived_at'));
     }
 
-    public function brand()
-    {
-        return $this->belongsTo(Brand::class);
-    }
-
     public function mainCategory()
     {
         return $this->belongsTo(MainCategory::class);

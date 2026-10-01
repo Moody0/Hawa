@@ -4,7 +4,7 @@ import AdminHeader from "../../components/AdminHeader";
 import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { useConfirm } from "../../context/ConfirmDialogContext";
 import { useState, useMemo } from "react";
-import { Trash2, Search, Plus, Check, Image, Star, Pencil, SearchX, RefreshCw, Eye, ShoppingBag, Store, FolderTree, CheckSquare, Square, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Trash2, Search, Plus, Check, Image, Star, Pencil, SearchX, RefreshCw, Eye, ShoppingBag, FolderTree, CheckSquare, Square, ToggleLeft, ToggleRight } from 'lucide-react';
 import CategoryModal from "./CategoryModal";
 import { deleteCategory, toggleCategoryActive, toggleCategoryFeatured, bulkDeleteCategories } from "../../../../lib/admin-actions";
 import RelatedItemsModal from "../components/RelatedItemsModal";
@@ -21,12 +21,10 @@ interface Category {
     slug?: string;
     description: string | null;
     image: string | null;
-    brandId: string;
-    brand: {
+    mainCategoryId?: string | null;
+    mainCategory: {
         id: string;
         name: string;
-        slug: string;
-        group: string;
     } | null;
     isFeatured: boolean;
     isActive: boolean;
@@ -35,15 +33,12 @@ interface Category {
     };
 }
 
-interface Brand {
+interface MainCategory {
     id: string;
     name: string;
-    slug: string;
-    group: string;
-    isActive: boolean;
 }
 
-export default function CategoriesClient({ categories: initialCategories, brands, focusedCategoryId }: { categories: Category[], brands: Brand[], focusedCategoryId?: string }) {
+export default function CategoriesClient({ categories: initialCategories, mainCategories, focusedCategoryId }: { categories: Category[], mainCategories: MainCategory[], focusedCategoryId?: string }) {
     const router = useRouter();
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
@@ -58,7 +53,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedBrand, setSelectedBrand] = useState("ALL");
+    const [selectedMainCategory, setSelectedMainCategory] = useState("ALL");
     const [filterTab, setFilterTab] = useState<"ALL" | "FEATURED">("ALL");
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
 
@@ -90,17 +85,17 @@ export default function CategoriesClient({ categories: initialCategories, brands
             const matchesSearch = 
                 category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (category.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
-                (category.brand?.name.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+                (category.mainCategory?.name.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
                 (category.slug?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
             
-            const matchesBrand = selectedBrand === "ALL" || category.brandId === selectedBrand;
-            if (!matchesSearch || !matchesBrand) return false;
+            const matchesMainCategory = selectedMainCategory === "ALL" || category.mainCategoryId === selectedMainCategory;
+            if (!matchesSearch || !matchesMainCategory) return false;
 
             if (filterTab === "FEATURED") return category.isFeatured;
 
             return true;
         });
-    }, [categories, searchQuery, selectedBrand, filterTab]);
+    }, [categories, searchQuery, selectedMainCategory, filterTab]);
 
     const toggleSelect = (id: string) => {
         const newSelected = new Set(selectedIds);
@@ -265,7 +260,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="h-2.5 w-2.5 rounded-full bg-[#8A6305]" />
                                 <span className="text-xs font-bold uppercase tracking-wider text-[#8A6305] dark:text-[#8A6305]">
-                                    {isArabic ? 'إدارة فئات الماركات والمنتجات' : 'Brand Subcategories & Lines'}
+                                    {isArabic ? 'إدارة فئات المنتجات المشتركة' : 'Shared Product Categories'}
                                 </span>
                             </div>
                             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B192C] dark:text-white tracking-tight">
@@ -273,8 +268,8 @@ export default function CategoriesClient({ categories: initialCategories, brands
                             </h1>
                             <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-gray-400">
                                 {isArabic 
-                                    ? 'إدارة الفئات الفرعية التابعة لكل علامة تجارية (مثل تونة، برغر بقري، ستربس، باستا).' 
-                                    : 'Manage brand product subcategories, imagery, and homepage featured showcase cards.'}
+                                    ? 'إدارة الفئات المشتركة بين العلامات التجارية وربطها بالأقسام الرئيسية.'
+                                    : 'Manage categories shared across brands and organize them by department.'}
                             </p>
                         </div>
 
@@ -284,22 +279,22 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                 <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
                                 <input
                                     type="text"
-                                    placeholder={isArabic ? 'بحث بالفئة أو الماركة...' : 'Search categories...'}
+                                    placeholder={isArabic ? 'بحث بالفئة أو القسم...' : 'Search categories or departments...'}
                                     className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900 ps-9 pe-4 text-sm text-[#0B192C] dark:text-white outline-none focus:border-[#8A6305] focus:ring-2 focus:ring-[#8A6305]/20 shadow-2xs"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
 
-                            {/* Brand Filter Dropdown */}
+                            {/* Main Category Filter Dropdown */}
                             <select
-                                value={selectedBrand}
-                                onChange={(e) => setSelectedBrand(e.target.value)}
+                                value={selectedMainCategory}
+                                onChange={(e) => setSelectedMainCategory(e.target.value)}
                                 className="h-11 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900 px-3.5 text-xs sm:text-sm font-semibold text-[#0B192C] dark:text-white outline-none focus:border-[#8A6305] shadow-2xs cursor-pointer"
                             >
-                                <option value="ALL">{isArabic ? 'كافة الماركات' : 'All Brands'}</option>
-                                {brands.map((brand) => (
-                                    <option key={brand.id} value={brand.id}>{brand.name}</option>
+                                <option value="ALL">{isArabic ? 'كل الأقسام الرئيسية' : 'All departments'}</option>
+                                {mainCategories.map((mainCategory) => (
+                                    <option key={mainCategory.id} value={mainCategory.id}>{mainCategory.name}</option>
                                 ))}
                             </select>
 
@@ -386,7 +381,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
                         category={selectedCategory}
-                        brands={brands}
+                        mainCategories={mainCategories}
                     />
 
                     <RelatedItemsModal
@@ -467,7 +462,7 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                     {/* Content Body */}
                                     <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                                         <div>
-                                            {/* Name & Brand */}
+                                            {/* Name & Department */}
                                             <div className="flex items-start justify-between gap-2 mb-1.5">
                                                 <div className="min-w-0">
                                                     <h3 className="text-base sm:text-lg font-extrabold text-[#0B192C] dark:text-white truncate">
@@ -480,9 +475,9 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                     )}
                                                 </div>
 
-                                                {category.brand?.name && (
+                                                {category.mainCategory?.name && (
                                                     <span className="shrink-0 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-gray-300 px-2.5 py-0.5 text-[10px] font-bold border border-slate-200 dark:border-white/5 truncate max-w-[130px]">
-                                                        {category.brand.name.split('-')[0].trim()}
+                                                        {category.mainCategory.name}
                                                     </span>
                                                 )}
                                             </div>
@@ -521,10 +516,10 @@ export default function CategoriesClient({ categories: initialCategories, brands
                                                     <span>{category._count.products} {isArabic ? 'منتج' : 'Products'}</span>
                                                 </button>
 
-                                                {category.brand?.name && (
+                                                {category.mainCategory?.name && (
                                                     <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 dark:bg-zinc-800/50 text-slate-600 dark:text-gray-400 px-2.5 py-1 text-[11px]">
-                                                        <Store className="text-xs" />
-                                                        <span>{category.brand.name}</span>
+                                                        <FolderTree className="text-xs" />
+                                                        <span>{category.mainCategory.name}</span>
                                                     </span>
                                                 )}
                                             </div>

@@ -19,7 +19,7 @@ class OrderConcurrencyTest extends TestCase
     private function product(int $stock): Product
     {
         $brand = Brand::create(['name' => 'Concurrency test', 'slug' => 'concurrency-test']);
-        $category = Category::create(['name' => 'Concurrency test', 'slug' => 'concurrency-test', 'brand_id' => $brand->id]);
+        $category = Category::create(['name' => 'Concurrency test', 'slug' => 'concurrency-test']);
 
         return Product::create(['name' => 'Concurrent item', 'slug' => 'concurrent-item', 'price' => '0.10', 'stock' => $stock, 'images' => '/logo.png', 'brand_id' => $brand->id, 'category_id' => $category->id]);
     }

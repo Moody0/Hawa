@@ -4,8 +4,13 @@ export interface CatalogCategory {
     slug: string;
     description: string | null;
     image: string | null;
-    brandId: string;
-    brand?: CatalogBrand | null;
+    mainCategoryId?: string | null;
+    mainCategory?: {
+        id: string;
+        name: string;
+        slug: string;
+    } | null;
+    redirectSlugs?: string[];
 }
 export interface CatalogProduct {
     id: string;
@@ -43,7 +48,7 @@ export const getCatalogBrands = cache(async (mainCategoryId?: string): Promise<C
 export const getBrandBySlug = cache(async (slug: string) => { const rows = await getCatalogBrands(); return rows.find(r => r.slug === decodeURIComponent(slug) || r.id === slug || r.name === decodeURIComponent(slug)) || null; });
 export const getCatalogCategories = cache(async (brandId?: string): Promise<CatalogCategory[]> => laravelJson('/api/categories' + (brandId ? '?brandId=' + encodeURIComponent(brandId) : ''), []));
 export const getFooterCategories = cache(async (preferredIds: string[] = []) => { const rows = await getCatalogCategories(); return preferredIds.length ? preferredIds.flatMap(id => rows.filter(r => r.id === id)).slice(0, 4) : rows.slice(0, 4); });
-export const getCategoryBySlug = cache(async (slug: string) => { const rows = await getCatalogCategories(); return rows.find(r => r.slug === decodeURIComponent(slug) || r.id === slug || r.name === decodeURIComponent(slug)) || null; });
+export const getCategoryBySlug = cache(async (slug: string) => { const decoded = decodeURIComponent(slug); const rows = await getCatalogCategories(); return rows.find(r => r.slug === decoded || r.redirectSlugs?.includes(decoded) || r.id === slug || r.name === decoded) || null; });
 export const getCatalogCategoriesByMainCategory = cache(async (id: string): Promise<CatalogCategory[]> => laravelJson('/api/categories?mainCategoryId=' + encodeURIComponent(id), []));
 export const getCatalogMainCategories = cache(async (): Promise<any[]> => laravelJson('/api/main-categories', []));
 export const getCatalogMainCategoryBySlug = cache(async (slug: string) => { const rows = await getCatalogMainCategories(); return rows.find(r => r.slug === decodeURIComponent(slug) || r.id === slug || r.name === decodeURIComponent(slug)) || null; });

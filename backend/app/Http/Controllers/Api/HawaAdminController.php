@@ -35,9 +35,9 @@ class HawaAdminController extends Controller
         // Authenticated editors need relation options for their catalog forms;
         // mutations and resource management remain separately permission checked.
         return response()->json([
-            'brands' => Brand::with('mainCategory')->withCount(['products', 'categories'])->orderBy('name')->get()->map(fn ($row) => $this->serialize($row, 'brands')),
+            'brands' => $this->serializeBrands(Brand::with('mainCategory')->withCount('products')->orderBy('name')->get()),
             'mainCategories' => MainCategory::withCount(['products', 'categories', 'brands'])->orderBy('nav_order')->get()->map(fn ($row) => $this->serialize($row, 'main-categories')),
-            'categories' => Category::with(['brand', 'mainCategory'])->withCount('products')->orderBy('name')->get()->map(fn ($row) => $this->serialize($row, 'categories')),
+            'categories' => Category::with('mainCategory')->withCount('products')->orderBy('name')->get()->map(fn ($row) => $this->serialize($row, 'categories')),
         ]);
     }
 
@@ -50,7 +50,7 @@ class HawaAdminController extends Controller
 
     private const FIELDS = [
         'brands' => ['name', 'nameEn', 'slug', 'description', 'image', 'group', 'isActive', 'isFeatured', 'mainCategoryId'],
-        'categories' => ['name', 'slug', 'description', 'image', 'brandId', 'mainCategoryId', 'isFeatured', 'isActive'],
+        'categories' => ['name', 'slug', 'description', 'image', 'mainCategoryId', 'isFeatured', 'isActive'],
         'main-categories' => ['name', 'slug', 'description', 'image', 'isActive', 'isFeatured', 'showInNav', 'navOrder'],
         'products' => ['name', 'nameAr', 'nameEn', 'slug', 'description', 'descriptionAr', 'descriptionEn', 'price', 'discountPrice', 'discountType', 'discountValue', 'stock', 'minOrder', 'packaging', 'itemsPerPackage', 'options', 'sku', 'images', 'brandId', 'categoryId', 'mainCategoryId', 'isTrending', 'hidePrice'],
         'banners' => ['title', 'subtitle', 'titleAr', 'subtitleAr', 'image', 'buttonText', 'buttonTextAr', 'link', 'badge', 'badgeAr', 'isActive'],
@@ -72,10 +72,10 @@ class HawaAdminController extends Controller
             $query->with(['brand', 'category', 'mainCategory']);
         }
         if ($resource === 'categories') {
-            $query->with(['brand', 'mainCategory'])->withCount('products');
+            $query->with('mainCategory')->withCount('products');
         }
         if ($resource === 'brands') {
-            $query->with('mainCategory')->withCount(['products', 'categories']);
+            $query->with('mainCategory')->withCount('products');
         }
         if ($resource === 'main-categories') {
             $query->withCount(['products', 'categories', 'brands']);
@@ -101,6 +101,10 @@ class HawaAdminController extends Controller
             });
         }
         foreach (['brandId' => 'brand_id', 'categoryId' => 'category_id', 'mainCategoryId' => 'main_category_id'] as $key => $col) {
+            if ($resource === 'categories' && $key === 'brandId' && $request->filled($key)) {
+                $query->whereHas('products', fn ($products) => $products->where('brand_id', $request->query($key)));
+                continue;
+            }
             if ($request->filled($key) && Schema::hasColumn((new $class)->getTable(), $col)) {
                 $query->where($col, $request->query($key));
             }
@@ -132,7 +136,8 @@ class HawaAdminController extends Controller
                 $query->where(fn ($q) => $q->where('created_at', '<', $record->created_at)->orWhere(fn ($q) => $q->where('created_at', $record->created_at)->where('id', '<', $record->id)));
             }
         }
-        $rows = $query->orderByDesc('created_at')->orderByDesc('id')->skip(($page - 1) * $limit)->take($limit)->get()->map(fn ($row) => $this->serialize($row, $resource))->values();
+        $records = $query->orderByDesc('created_at')->orderByDesc('id')->skip(($page - 1) * $limit)->take($limit)->get();
+        $rows = $resource === 'brands' ? $this->serializeBrands($records) : $records->map(fn ($row) => $this->serialize($row, $resource))->values();
         $pagination = ['total' => $total, 'pages' => (int) ceil($total / $limit), 'page' => $page, 'limit' => $limit];
         if (in_array($resource, ['blog', 'reviews', 'customers', 'messages', 'audit-logs'])) {
             return response()->json(['success' => true, 'items' => $rows, 'posts' => $resource === 'blog' ? $rows : [], 'customers' => $resource === 'customers' ? $rows : [], 'messages' => $resource === 'messages' ? $rows : [], 'total' => $total, 'unreadCount' => $resource === 'messages' ? ContactMessage::where('is_read', false)->count() : 0, 'todayCount' => $resource === 'messages' ? ContactMessage::whereDate('created_at', today())->count() : 0, 'nextCursor' => $rows->count() === $limit ? ($rows->last()['id'] ?? null) : null, 'previousCursor' => $cursor ?? null, 'pagination' => [...$pagination, 'hasMore' => $page * $limit < $total, 'nextCursor' => $rows->count() === $limit ? ($rows->last()['id'] ?? null) : null]]);
@@ -155,6 +160,9 @@ class HawaAdminController extends Controller
         $id = $id ?: $request->input('id');
         $record = $id ? $class::whereKey($id)->firstOrFail() : new $class;
         $fields = self::FIELDS[$resource];
+        if ($resource === 'categories' && is_string($request->input('name'))) {
+            $request->merge(['name' => trim(preg_replace('/\s+/u', ' ', $request->input('name')) ?? $request->input('name'))]);
+        }
         $rules = [];
         foreach ($fields as $field) {
             $nullable = in_array($field, ['mainCategoryId', 'discountPrice', 'discountType', 'discountValue', 'description', 'descriptionAr', 'descriptionEn', 'image', 'notes', 'nameAr', 'nameEn', 'options', 'sku', 'itemsPerPackage', 'excerpt', 'excerptAr', 'contentAr', 'titleAr', 'subtitle', 'subtitleAr', 'badge', 'badgeAr', 'link', 'buttonText', 'buttonTextAr', 'delegateName', 'nameEn'], true);
@@ -174,7 +182,7 @@ class HawaAdminController extends Controller
         }
         if (! $id) {
             foreach (match ($resource) {
-                'products' => ['name', 'images', 'price', 'stock', 'categoryId', 'brandId'],'brands','main-categories' => ['name'],'categories' => ['name', 'brandId'],'banners' => ['image'],'promo-codes' => ['code', 'discountPercentage'],'customers' => ['shopName', 'ownerName', 'phone', 'city', 'address', 'password'],'blog' => ['title', 'content'],default => []
+                'products' => ['name', 'images', 'price', 'stock', 'categoryId', 'brandId'],'brands','main-categories' => ['name'],'categories' => ['name'],'banners' => ['image'],'promo-codes' => ['code', 'discountPercentage'],'customers' => ['shopName', 'ownerName', 'phone', 'city', 'address', 'password'],'blog' => ['title', 'content'],default => []
             } as $field) {
                 $rules[$field][0] = 'required';
             }
@@ -186,7 +194,10 @@ class HawaAdminController extends Controller
             $rules['name'][] = Rule::unique((new $class)->getTable(), 'name')->ignore($id);
         }
         if ($resource === 'categories') {
-            $rules['name'][] = Rule::unique('categories', 'name')->where('brand_id', $request->input('brandId', $record->brand_id))->ignore($id);
+            $mainCategoryId = $request->input('mainCategoryId', $record->main_category_id);
+            $rules['name'][] = Rule::unique('categories', 'name')
+                ->where(fn ($query) => $mainCategoryId ? $query->where('main_category_id', $mainCategoryId) : $query->whereNull('main_category_id'))
+                ->ignore($id);
         }
         if ($resource === 'promo-codes') {
             $rules['code'][] = Rule::unique('promo_codes', 'code')->ignore($id);
@@ -231,8 +242,13 @@ class HawaAdminController extends Controller
         if ($resource === 'products') {
             $category = Category::find($input['category_id'] ?? $record->category_id);
             abort_unless($category, 422);
-            abort_unless(($input['brand_id'] ?? $record->brand_id) === $category->brand_id, 422, 'The category belongs to a different brand.');
-            $input['main_category_id'] = $input['main_category_id'] ?? $category->main_category_id ?? $category->brand?->main_category_id;
+            $brand = Brand::find($input['brand_id'] ?? $record->brand_id);
+            abort_unless($brand, 422);
+            $categoryMainCategoryId = $category->main_category_id;
+            if (! empty($input['main_category_id'])) {
+                abort_unless(! $categoryMainCategoryId || $input['main_category_id'] === $categoryMainCategoryId, 422, 'The category belongs to a different department.');
+            }
+            $input['main_category_id'] = $categoryMainCategoryId ?? $input['main_category_id'] ?? $brand->main_category_id;
             $price = (float) ($input['price'] ?? $record->price);
             if (isset($input['discount_price'])) {
                 abort_if((float) $input['discount_price'] > $price, 422, 'Discount price must not exceed regular price.');
@@ -265,8 +281,8 @@ class HawaAdminController extends Controller
                 'brands' => 'brand_id','categories' => 'category_id',default => 'main_category_id'
             };
             abort_if(Product::where($column, $id)->exists(), 409, 'Archive or move related products first.');
-            if ($resource !== 'categories') {
-                abort_if(Category::where($column, $id)->exists(), 409, 'Archive or move related categories first.');
+            if ($resource === 'main-categories') {
+                abort_if(Category::where('main_category_id', $id)->exists(), 409, 'Archive or move related categories first.');
             }
         }
         DB::transaction(function () use ($record) {
@@ -480,11 +496,12 @@ class HawaAdminController extends Controller
                 abort_unless($nameAr || $nameEn, 422, 'Product name is required.');
                 $main = $mainName ? MainCategory::firstOrCreate(['name' => $mainName], ['slug' => $this->slug('main_categories', $mainName)]) : null;
                 $brand = Brand::firstOrCreate(['name' => $brandName], ['slug' => $this->slug('brands', $brandName), 'group' => 'DIFFERENT', 'main_category_id' => $main?->id]);
-                $category = Category::firstOrCreate(['brand_id' => $brand->id, 'name' => $categoryName], ['slug' => $this->slug('categories', $categoryName), 'main_category_id' => $main?->id ?? $brand->main_category_id]);
+                $resolvedMainCategory = $main?->id ?? $brand->main_category_id;
+                $category = Category::firstOrCreate(['main_category_id' => $resolvedMainCategory, 'name' => $categoryName], ['slug' => $this->slug('categories', $categoryName)]);
                 $payload = ['name' => $nameEn ?: $nameAr, 'nameAr' => $nameAr ?: null, 'nameEn' => $nameEn ?: null,
                     'descriptionAr' => $value(['description ar', 'descriptionAr', 'Description Ar', 'الوصف بالعربي', 'وصف المنتج بالعربي']) ?: null,
                     'descriptionEn' => $value(['description en', 'descriptionEn', 'Description En', 'Description', 'description', 'الوصف بالانجليزي', 'وصف المنتج بالانجليزي', 'وصف المنتج بالإنجليزي']) ?: null,
-                    'brandId' => $brand->id, 'categoryId' => $category->id, 'mainCategoryId' => $main?->id ?? $category->main_category_id,
+                    'brandId' => $brand->id, 'categoryId' => $category->id, 'mainCategoryId' => $resolvedMainCategory ?? $category->main_category_id,
                     'price' => $value(['Price', 'price', 'السعر'], '0'), 'stock' => $value(['Quantity', 'quantity', 'Stock', 'stock', 'الكمية', 'المخزون'], '0'),
                     'images' => $value(['Images', 'images', 'Image', 'image', 'الصور', 'رابط الصورة', 'رابط صورة المنتج'], '/placeholder.svg'),
                     'sku' => $value(['SKU', 'sku', 'رمز المنتج']) ?: null, 'options' => $value(['Options', 'options', 'Variants', 'variants', 'الخيارات', 'الألوان والأحجام']) ?: null,
@@ -553,6 +570,21 @@ class HawaAdminController extends Controller
         }
 
         return $data;
+    }
+
+    private function serializeBrands($brands)
+    {
+        $categoryCounts = DB::table('products')->whereIn('brand_id', $brands->pluck('id'))
+            ->whereNull('products.archived_at')->select('brand_id')
+            ->selectRaw('COUNT(DISTINCT category_id) as categories_count')->groupBy('brand_id')
+            ->pluck('categories_count', 'brand_id');
+
+        return $brands->map(function ($brand) use ($categoryCounts) {
+            $data = $this->serialize($brand, 'brands');
+            $data['_count']['categories'] = (int) ($categoryCounts[$brand->id] ?? 0);
+
+            return $data;
+        })->values();
     }
 
     private function resource(string $r): array

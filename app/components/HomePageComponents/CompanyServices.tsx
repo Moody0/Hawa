@@ -85,6 +85,16 @@ export default function CompanyServices({ settings }: CompanyServicesProps) {
     const { language } = useLanguage();
     const isArabic = language === 'ar';
 
+    const services: CompanyServiceItem[] = useMemo(() => {
+        if (!settings?.homeServicesItems) return DEFAULT_COMPANY_SERVICES;
+        try {
+            const parsed = JSON.parse(settings.homeServicesItems);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return DEFAULT_COMPANY_SERVICES;
+        }
+    }, [settings?.homeServicesItems]);
+
     // If section disabled by admin, return null
     if (settings?.homeServicesEnabled === false) {
         return null;
@@ -97,16 +107,6 @@ export default function CompanyServices({ settings }: CompanyServicesProps) {
     const desc = isArabic
         ? (settings?.homeServicesDescAr || 'نقدم للشركات المنتجة وأصحاب المحلات منظومة متكاملة تشمل التخزين والتسويق والتوصيل')
         : (settings?.homeServicesDesc || 'Delivering end-to-end supply chain, marketing, and distribution solutions for FMCG brands');
-
-    const services: CompanyServiceItem[] = useMemo(() => {
-        if (!settings?.homeServicesItems) return DEFAULT_COMPANY_SERVICES;
-        try {
-            const parsed = JSON.parse(settings.homeServicesItems);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
-            return DEFAULT_COMPANY_SERVICES;
-        }
-    }, [settings?.homeServicesItems]);
 
     const activeServices = services.filter((s) => s.isActive !== false);
     if (activeServices.length === 0) {

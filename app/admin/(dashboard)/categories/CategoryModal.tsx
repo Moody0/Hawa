@@ -15,22 +15,22 @@ interface CategoryModalProps {
         name: string;
         description: string | null;
         image: string | null;
-        brandId?: string;
+        mainCategoryId?: string | null;
         isFeatured?: boolean;
     } | null;
-    brands: {
+    mainCategories: {
         id: string;
         name: string;
     }[];
 }
 
-export default function CategoryModal({ isOpen, onClose, category, brands }: CategoryModalProps) {
+export default function CategoryModal({ isOpen, onClose, category, mainCategories }: CategoryModalProps) {
     const { t, language } = useLanguage();
     const isArabic = language === 'ar';
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [image, setImage] = useState("");
-    const [brandId, setBrandId] = useState("");
+    const [mainCategoryId, setMainCategoryId] = useState("");
     const [isFeatured, setIsFeatured] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,16 +39,16 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
             setName(category.name);
             setDescription(category.description || "");
             setImage(category.image || "");
-            setBrandId(category.brandId || brands[0]?.id || "");
+            setMainCategoryId(category.mainCategoryId || "");
             setIsFeatured(category.isFeatured ?? false);
         } else {
             setName("");
             setDescription("");
             setImage("");
-            setBrandId(brands[0]?.id || "");
+            setMainCategoryId("");
             setIsFeatured(false);
         }
-    }, [category, isOpen, brands]);
+    }, [category, isOpen]);
 
     if (!isOpen) return null;
 
@@ -57,7 +57,7 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
         setIsSubmitting(true);
 
         try {
-            const data = { name, description, image, isFeatured, brandId };
+            const data = { name, description, image, isFeatured, mainCategoryId: mainCategoryId || null };
             let result;
 
             if (category) {
@@ -102,8 +102,8 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
                         </h2>
                         <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">
                             {isArabic 
-                                ? 'الفئات الفرعية التابعة للماركة (مثل التونة، الباستا، الزيوت)' 
-                                : 'Brand product lines & subcategories'}
+                            ? 'فئة مشتركة يمكن استخدامها مع علامات تجارية متعددة'
+                            : 'Shared product category available across brands'}
                         </p>
                     </div>
                     <button
@@ -131,20 +131,19 @@ export default function CategoryModal({ isOpen, onClose, category, brands }: Cat
                         />
                     </div>
 
-                    {/* Brand Selection */}
+                    {/* Department Selection */}
                     <div className="flex flex-col gap-1.5">
                         <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-gray-300">
-                            {isArabic ? 'العلامة التجارية التابعة لها (Brand)' : 'Parent Brand'}
+                            {isArabic ? 'القسم الرئيسي (اختياري)' : 'Main department (optional)'}
                         </label>
                         <select
-                            value={brandId}
-                            onChange={(e) => setBrandId(e.target.value)}
-                            required
+                            value={mainCategoryId}
+                            onChange={(e) => setMainCategoryId(e.target.value)}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-800 text-[#0B192C] dark:text-white focus:ring-2 focus:ring-[#8A6305]/20 focus:border-[#8A6305] transition-all outline-none text-sm cursor-pointer"
                         >
-                            <option value="">{isArabic ? 'اختر العلامة التجارية...' : 'Select a Brand...'}</option>
-                            {brands.map((brand) => (
-                                <option key={brand.id} value={brand.id}>{brand.name}</option>
+                            <option value="">{isArabic ? 'كل الأقسام' : 'All departments'}</option>
+                            {mainCategories.map((mainCategory) => (
+                                <option key={mainCategory.id} value={mainCategory.id}>{mainCategory.name}</option>
                             ))}
                         </select>
                     </div>

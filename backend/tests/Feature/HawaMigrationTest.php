@@ -42,7 +42,7 @@ class HawaMigrationTest extends TestCase
     {
         $main = MainCategory::create(['name' => 'Department '.bin2hex(random_bytes(4)), 'slug' => 'department-'.bin2hex(random_bytes(4))]);
         $brand = Brand::create(['name' => 'Brand '.bin2hex(random_bytes(4)), 'slug' => 'brand-'.bin2hex(random_bytes(4)), 'main_category_id' => $main->id]);
-        $category = Category::create(['name' => 'Subcategory', 'slug' => 'subcategory-'.bin2hex(random_bytes(4)), 'brand_id' => $brand->id, 'main_category_id' => $main->id]);
+        $category = Category::create(['name' => 'Subcategory', 'slug' => 'subcategory-'.bin2hex(random_bytes(4)), 'main_category_id' => $main->id]);
 
         return Product::create([...['name' => 'Sample product', 'slug' => 'product-'.bin2hex(random_bytes(4)), 'images' => '/logo.png', 'price' => '10.08', 'stock' => 10, 'brand_id' => $brand->id, 'category_id' => $category->id, 'main_category_id' => $main->id], ...$attributes]);
     }
@@ -188,12 +188,17 @@ class HawaMigrationTest extends TestCase
         $this->actingAs($this->admin(), 'web');
         $main = $this->postJson('/api/admin/main-categories', ['name' => 'Food', 'image' => '/logo.png'])->assertCreated()->json('data');
         $brand = $this->postJson('/api/admin/brands', ['name' => 'Hawa partner', 'group' => 'MAIN', 'mainCategoryId' => $main['id']])->assertCreated()->json('data');
-        $category = $this->postJson('/api/admin/categories', ['name' => 'Rice', 'brandId' => $brand['id'], 'mainCategoryId' => $main['id']])->assertCreated()->json('data');
+        $category = $this->postJson('/api/admin/categories', ['name' => 'Rice', 'mainCategoryId' => $main['id']])->assertCreated()->json('data');
+        $otherBrand = $this->postJson('/api/admin/brands', ['name' => 'Second Rice Partner', 'group' => 'MAIN', 'mainCategoryId' => $main['id']])->assertCreated()->json('data');
+        $this->postJson('/api/admin/categories', ['name' => ' Rice ', 'mainCategoryId' => $main['id']])->assertUnprocessable();
         $p = $this->postJson('/api/admin/products', ['name' => 'Rice 1kg', 'brandId' => $brand['id'], 'categoryId' => $category['id'], 'price' => '2.35', 'stock' => 24, 'images' => '/logo.png'])->assertCreated()->json('data');
+        $secondProduct = $this->postJson('/api/admin/products', ['name' => 'Rice 2kg', 'brandId' => $otherBrand['id'], 'categoryId' => $category['id'], 'price' => '4.50', 'stock' => 12, 'images' => '/logo.png'])->assertCreated()->json('data');
+        $this->getJson('/api/admin/categories?brandId='.$otherBrand['id'])->assertOk()->assertJsonCount(1)->assertJsonPath('0.id', $category['id']);
         $this->patchJson('/api/admin/products/'.$p['id'], ['discountPrice' => 3])->assertUnprocessable();
         $this->patchJson('/api/admin/products/'.$p['id'], ['price' => 3, 'stock' => 30])->assertOk();
         $this->deleteJson('/api/admin/categories/'.$category['id'])->assertConflict();
         $this->deleteJson('/api/admin/products/'.$p['id'])->assertOk();
+        $this->deleteJson('/api/admin/products/'.$secondProduct['id'])->assertOk();
         $this->getJson('/api/products/'.$p['slug'])->assertNotFound();
         $this->deleteJson('/api/admin/categories/'.$category['id'])->assertOk();
     }

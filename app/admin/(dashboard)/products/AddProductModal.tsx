@@ -12,7 +12,6 @@ import SearchableCombobox from "../../components/SearchableCombobox";
 interface Category {
     id: string;
     name: string;
-    brandId: string;
     mainCategoryId?: string | null;
 }
 
@@ -258,7 +257,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
         setFormData({ ...formData, images: newImages });
     };
 
-    const filteredCategories = categories.filter((category) => !formData.brandId || category.brandId === formData.brandId);
+    const filteredCategories = categories.filter((category) => !category.mainCategoryId || !formData.mainCategoryId || category.mainCategoryId === formData.mainCategoryId);
 
     const brandOptions = useMemo(
         () => brands.map((b) => ({ value: b.id, label: b.name })),
@@ -454,7 +453,13 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                 <SearchableCombobox
                                     options={mainCategoryOptions}
                                     value={formData.mainCategoryId || ""}
-                                    onChange={(val) => setFormData({ ...formData, mainCategoryId: val })}
+                                    onChange={(val) => setFormData((current) => ({
+                                        ...current,
+                                        mainCategoryId: val,
+                                        categoryId: categories.some((category) => category.id === current.categoryId && (!category.mainCategoryId || !val || category.mainCategoryId === val))
+                                            ? current.categoryId
+                                            : "",
+                                    }))}
                                     placeholder={language === 'ar' ? '-- اختر القسم الرئيسي --' : '-- Select Main Category --'}
                                     isArabic={language === 'ar'}
                                 />
@@ -468,7 +473,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                             <SearchableCombobox
                                 options={brandOptions}
                                 value={formData.brandId}
-                                onChange={(val) => setFormData({ ...formData, brandId: val, categoryId: "" })}
+                                onChange={(val) => setFormData({ ...formData, brandId: val })}
                                 placeholder={language === 'ar' ? '-- اختر الماركة / الشركة --' : '-- Select Brand --'}
                                 required
                                 isArabic={language === 'ar'}
@@ -482,7 +487,10 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                             <SearchableCombobox
                                 options={categoryOptions}
                                 value={formData.categoryId}
-                                onChange={(val) => setFormData({ ...formData, categoryId: val })}
+                                onChange={(val) => {
+                                    const selectedCategory = categories.find((category) => category.id === val);
+                                    setFormData({ ...formData, categoryId: val, mainCategoryId: selectedCategory?.mainCategoryId || formData.mainCategoryId });
+                                }}
                                 placeholder={language === 'ar' ? '-- اختر الفئة --' : '-- Select Sub Category --'}
                                 required
                                 isArabic={language === 'ar'}

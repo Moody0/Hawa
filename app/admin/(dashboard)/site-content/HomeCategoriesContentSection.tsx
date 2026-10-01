@@ -24,7 +24,7 @@ export interface CategoryOption {
     slug?: string;
     image?: string | null;
     isFeatured?: boolean;
-    brandName?: string;
+    contextName?: string;
     type?: 'category' | 'main-category';
     isActive?: boolean;
 }
@@ -123,7 +123,7 @@ export default function HomeCategoriesContentSection({
         return categories.filter(
             (c) =>
                 c.name.toLowerCase().includes(q) ||
-                (c.brandName && c.brandName.toLowerCase().includes(q))
+                (c.contextName && c.contextName.toLowerCase().includes(q))
         );
     }, [categories, searchQuery]);
 
@@ -661,9 +661,9 @@ export default function HomeCategoriesContentSection({
                                                         <span className="inline-block text-[9px] font-bold text-amber-700 dark:text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded-md mt-0.5">
                                                             {isArabic ? "قسم رئيسي" : "Main Dept"}
                                                         </span>
-                                                    ) : cat.brandName ? (
+                                                    ) : cat.contextName ? (
                                                         <p className="text-[10px] text-slate-400 truncate">
-                                                            {cat.brandName}
+                                                            {cat.contextName}
                                                         </p>
                                                     ) : null}
                                                 </div>
@@ -763,9 +763,9 @@ export default function HomeCategoriesContentSection({
                                                     <span className="inline-block text-[9px] font-bold text-amber-700 dark:text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded-md mt-0.5">
                                                         {isArabic ? "قسم رئيسي" : "Main Dept"}
                                                     </span>
-                                                ) : category.brandName ? (
+                                                ) : category.contextName ? (
                                                     <p className="text-[10px] text-slate-400 truncate">
-                                                        {category.brandName}
+                                                        {category.contextName}
                                                     </p>
                                                 ) : null}
                                             </div>
