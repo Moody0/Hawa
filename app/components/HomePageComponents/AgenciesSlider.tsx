@@ -30,24 +30,6 @@ interface AgenciesSliderProps {
     subtitle?: string;
 }
 
-const BRAND_SPECIALTIES: Record<string, { ar: string; en: string }> = {
-    'rocavera': { ar: 'منتجات غذائية متنوعة', en: 'Diverse Food Products' },
-    'rokavera': { ar: 'منتجات غذائية متنوعة', en: 'Diverse Food Products' },
-    'buffalo': { ar: 'منتجات استهلاكية', en: 'Consumer Products' },
-    'alreef': { ar: 'منتجات غذائية ومكسرات', en: 'Food Products & Nuts' },
-    'monda': { ar: 'منتجات شوكولاتة وحلويات', en: 'Chocolates & Confectionery' },
-    'moria': { ar: 'منتجات شوكولاتة وحلويات', en: 'Chocolates & Confectionery' },
-    'zwan': { ar: 'منتجات متنوعة', en: 'Diverse Products' },
-    'rona': { ar: 'منتجات متنوعة', en: 'Diverse Products' },
-    'haleebna': { ar: 'سمن بقري وألبان مجففة', en: 'Pure Ghee & Dairy' },
-    'sunbell': { ar: 'معلبات تونة وسردين', en: 'Canned Tuna & Sardines' },
-    'silver-fish': { ar: 'معلبات أسماك وسردين', en: 'Canned Sardines & Seafood' },
-    'silverfish': { ar: 'معلبات أسماك وسردين', en: 'Canned Sardines & Seafood' },
-    'al-maghrabi': { ar: 'سردين وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
-    'almaghrabi': { ar: 'سردين وبقوليات مختارة', en: 'Canned Sardines & Legumes' },
-};
-
-
 export default function AgenciesSlider({ brands = [], title, subtitle }: AgenciesSliderProps) {
     const { language, dir } = useLanguage();
     const isArabic = language === 'ar' || dir === 'rtl';
@@ -77,17 +59,6 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
 
     const getBrandLatinName = (brand: AgencyBrand) => {
         return getBrandDisplayName(brand, 'en');
-    };
-
-    const getBrandSpecialty = (brand: AgencyBrand) => {
-        if (brand.description && brand.description.trim()) {
-            return brand.description.trim();
-        }
-        const key = brand.slug?.toLowerCase();
-        if (key && BRAND_SPECIALTIES[key]) {
-            return isArabic ? BRAND_SPECIALTIES[key].ar : BRAND_SPECIALTIES[key].en;
-        }
-        return isArabic ? 'منتجات غذائية متنوعة' : 'Diverse Products';
     };
 
     const sectionTitle = title || (isArabic ? 'علامات تجارية تثق بنا' : 'Brands That Trust Us');
@@ -186,7 +157,6 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                     >
                         {activeBrands.map((brand) => {
                             const latinName = getBrandLatinName(brand);
-                            const specialty = getBrandSpecialty(brand);
 
                             return (
                                 <SwiperSlide key={brand.id || brand.slug} className="h-auto">
@@ -216,9 +186,6 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                                             <h3 className="text-base sm:text-lg font-bold text-[#0B192C] dark:text-white group-hover:text-[#C28E2B] transition-colors truncate max-w-full">
                                                 {latinName}
                                             </h3>
-                                            <p className="text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 font-normal">
-                                                {specialty}
-                                            </p>
                                         </div>
 
                                         {/* Call to Action Link (Bottom: Golden Link with Arrow) */}
