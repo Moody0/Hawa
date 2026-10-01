@@ -191,25 +191,26 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                     <div className="absolute bottom-2.5 left-2.5 z-20">
                         <motion.div
                             layout
+                            initial={false}
                             transition={{
-                                layout: { type: "spring", stiffness: 500, damping: 30, mass: 0.8 },
+                                layout: { type: "spring", stiffness: 420, damping: 34, mass: 0.7 },
                             }}
-                            className={`h-8 sm:h-9 rounded-lg flex items-center border overflow-hidden select-none transition-colors duration-200 ${
+                            className={`h-8 sm:h-9 rounded-full flex items-center justify-center border overflow-hidden select-none transition-colors duration-200 ${
                                 quantityInCart === 0
-                                    ? 'bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-[#0B192C] dark:text-white hover:border-[#8A6305]'
-                                    : 'bg-[#0B192C] dark:bg-zinc-900 border-slate-700/80 dark:border-zinc-700 text-white p-0.5'
+                                    ? 'w-8 sm:w-9 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-[#0B192C] dark:text-white hover:border-[#8A6305]'
+                                    : 'w-[5.5rem] sm:w-[6.75rem] bg-[#0B192C] dark:bg-zinc-900 border-slate-700/80 dark:border-zinc-700 text-white'
                             }`}
                         >
-                            <AnimatePresence mode="popLayout" initial={false}>
+                            <AnimatePresence mode="sync" initial={false}>
                                 {quantityInCart === 0 ? (
                                     <motion.button
                                         key="quick-add-btn"
-                                        initial={{ opacity: 0, scale: 0.6 }}
+                                        initial={{ opacity: 0, scale: 0.85 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.6 }}
-                                        transition={{ duration: 0.15 }}
+                                        exit={{ opacity: 0, scale: 0.85 }}
+                                        transition={{ duration: 0.14, ease: "easeOut" }}
                                         onClick={handleInitialAdd}
-                                        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center cursor-pointer transition-colors"
+                                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full cursor-pointer transition-colors sm:h-9 sm:w-9"
                                         title={isArabic ? "إضافة للطلب" : "Add to Order"}
                                         aria-label={isArabic ? "إضافة للطلب" : "Add to Order"}
                                     >
@@ -218,17 +219,17 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                                 ) : (
                                     <motion.div
                                         key="quick-stepper-ctrls"
-                                        initial={{ opacity: 0, scale: 0.85 }}
+                                        initial={{ opacity: 0, scale: 0.92 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.85 }}
-                                        transition={{ duration: 0.18 }}
+                                        exit={{ opacity: 0, scale: 0.92 }}
+                                        transition={{ duration: 0.14, ease: "easeOut" }}
                                         dir="ltr"
-                                        className="flex items-center"
+                                        className="flex h-full w-full items-center justify-between px-0.5"
                                     >
                                         <button
                                             type="button"
                                             onClick={handleDecrease}
-                                            className="w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer touch-manipulation"
+                                            className="flex h-7 w-7 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-white/10 hover:text-white active:scale-90 sm:h-8 sm:w-8"
                                             aria-label={quantityInCart <= minQuantity ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart') : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')}
                                             title={quantityInCart <= minQuantity ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart') : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')}
                                         >
@@ -241,9 +242,9 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
                                         <button
                                             type="button"
                                             onClick={handleIncrease}
-                                            className="w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer touch-manipulation"
-                                            aria-label="Increase quantity"
-                                            title="Increase quantity"
+                                            className="flex h-7 w-7 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-white/10 hover:text-white active:scale-90 sm:h-8 sm:w-8"
+                                            aria-label={language === 'ar' ? 'زيادة الكمية' : 'Increase quantity'}
+                                            title={language === 'ar' ? 'زيادة الكمية' : 'Increase quantity'}
                                         >
                                             <Plus className="w-3.5 h-3.5" />
                                         </button>
