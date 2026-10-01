@@ -380,6 +380,13 @@ export default function CategoriesClient({ categories: initialCategories, mainCa
                     <CategoryModal
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
+                        onSaved={(savedCategory) => setCategories((prev) => {
+                            const exists = prev.some((item) => item.id === savedCategory.id);
+                            if (exists) {
+                                return prev.map((item) => item.id === savedCategory.id ? { ...item, ...savedCategory } : item);
+                            }
+                            return [...prev, savedCategory as Category];
+                        })}
                         category={selectedCategory}
                         mainCategories={mainCategories}
                     />

@@ -10,13 +10,28 @@ import ImageUploadField from "../../components/ImageUploadField";
 interface CategoryModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSaved: (category: {
+        id: string;
+        name: string;
+        slug?: string;
+        description: string | null;
+        image: string | null;
+        mainCategoryId?: string | null;
+        mainCategory: { id: string; name: string } | null;
+        isFeatured: boolean;
+        isActive: boolean;
+        _count: { products: number };
+    }) => void;
     category?: {
         id: string;
         name: string;
+        slug?: string;
         description: string | null;
         image: string | null;
         mainCategoryId?: string | null;
         isFeatured?: boolean;
+        isActive?: boolean;
+        _count?: { products: number };
     } | null;
     mainCategories: {
         id: string;
@@ -24,7 +39,7 @@ interface CategoryModalProps {
     }[];
 }
 
-export default function CategoryModal({ isOpen, onClose, category, mainCategories }: CategoryModalProps) {
+export default function CategoryModal({ isOpen, onClose, onSaved, category, mainCategories }: CategoryModalProps) {
     const { t, language } = useLanguage();
     const isArabic = language === 'ar';
     const [name, setName] = useState("");
@@ -67,6 +82,19 @@ export default function CategoryModal({ isOpen, onClose, category, mainCategorie
             }
 
             if (result.success) {
+                const savedRecord = result.data || result.record || {};
+                onSaved({
+                    id: savedRecord.id || category?.id || "",
+                    name,
+                    slug: savedRecord.slug || category?.slug,
+                    description: description || null,
+                    image: image || null,
+                    mainCategoryId: mainCategoryId || null,
+                    mainCategory: mainCategories.find((item) => item.id === mainCategoryId) || null,
+                    isFeatured,
+                    isActive: category?.isActive ?? true,
+                    _count: category?._count ?? { products: 0 },
+                });
                 toast.success(
                     category 
                         ? (isArabic ? 'تم تحديث الفئة بنجاح' : 'Category updated successfully') 
