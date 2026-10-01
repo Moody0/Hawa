@@ -4,7 +4,6 @@ import { laravelClientFetch } from '@/lib/laravel-client';
 
 import { useEffect, useState } from "react";
 import { X, RefreshCw, Star } from 'lucide-react';
-import { createBrand, updateBrand } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import ImageUploadField from "../../components/ImageUploadField";
@@ -98,9 +97,19 @@ export default function BrandModal({ isOpen, onClose, onSaved, brand }: BrandMod
                 isFeatured: formData.isFeatured,
                 mainCategoryId: formData.mainCategoryId || undefined,
             };
-            const result = brand ? await updateBrand(brand.id, payload) : await createBrand(payload);
+            const response = await laravelClientFetch(
+                brand
+                    ? `/api/admin/brands/${encodeURIComponent(brand.id)}`
+                    : "/api/admin/brands",
+                {
+                    method: brand ? "PATCH" : "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                },
+            );
+            const result = await response.json().catch(() => ({}));
 
-            if (result.success) {
+            if (response.ok && result.success) {
                 toast.success(
                     brand 
                         ? (isArabic ? 'تم تحديث الماركة بنجاح' : 'Brand updated successfully') 
@@ -109,7 +118,14 @@ export default function BrandModal({ isOpen, onClose, onSaved, brand }: BrandMod
                 onSaved?.();
                 onClose();
             } else {
-                toast.error(result.error === 'englishBrandNameRequired' ? t('admin.englishBrandNameRequired') : result.error || t("admin.brandSaveError") || "Failed to save");
+                const validationMessage = Object.values(result.errors || {})
+                    .flat()
+                    .find((message): message is string => typeof message === "string");
+                toast.error(
+                    result.error === 'englishBrandNameRequired'
+                        ? t('admin.englishBrandNameRequired')
+                        : validationMessage || result.message || result.error || t("admin.brandSaveError") || "Failed to save",
+                );
             }
         } catch (error) {
             console.error("Error saving brand:", error);
