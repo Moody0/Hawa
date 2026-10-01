@@ -276,7 +276,7 @@ export default function DesktopCategoriesBar({
 
             {/* Minimalist Mega Menu Flyout Panel */}
             <div
-                className={`absolute top-full inset-x-0 bg-[#071322]/98 backdrop-blur-2xl border-b border-[#8A6305]/35 shadow-2xl z-40 transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                className={`absolute top-full inset-x-0 bg-white dark:bg-[#101c2d] border-t-2 border-t-[#C28E2B] border-b border-slate-200 dark:border-white/10 shadow-[0_24px_60px_-24px_rgba(7,19,34,0.45)] z-40 transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     activeSlug
                         ? 'opacity-100 translate-y-0 visible pointer-events-auto'
                         : 'opacity-0 -translate-y-2 invisible pointer-events-none'
@@ -284,19 +284,19 @@ export default function DesktopCategoriesBar({
                 onMouseEnter={clearTimeouts}
                 onMouseLeave={handleMouseLeave}
             >
-                <div className="container-custom py-6">
+                <div className="container-custom py-6 lg:py-7">
                     {/* CASE A: Specific Department Categories */}
                     {activeDepartment && (
                         <div className="flex flex-col">
                             {/* Department Header Bar */}
-                            <div className="flex items-center justify-between pb-3.5 mb-5 border-b border-white/10">
+                            <div className="flex items-center justify-between gap-4 pb-4 mb-5 border-b border-slate-200 dark:border-white/10">
                                 <div className="flex items-center gap-2.5">
                                     <FolderTree className="w-4 h-4 text-[#E5B54A]" />
-                                    <h3 className="text-base font-extrabold text-white tracking-tight">
+                                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
                                         {isArabic ? `أقسام وتصنيفات ${activeDepartment.name}` : `${activeDepartment.name} Categories`}
                                     </h3>
                                     {uniqueCategories.length > 0 && (
-                                        <span className="text-xs font-semibold text-slate-400 px-2 py-0.5 rounded-md bg-white/5">
+                                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 px-2 py-1 rounded-md bg-slate-100 dark:bg-white/5">
                                             {uniqueCategories.length} {isArabic ? 'تصنيف' : 'categories'}
                                         </span>
                                     )}
@@ -305,7 +305,7 @@ export default function DesktopCategoriesBar({
                                 <Link
                                     href={`/department/${activeDepartment.slug}`}
                                     onClick={closeMenu}
-                                    className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-[#E5B54A] hover:text-[#f5d482] transition-colors group"
+                                    className="inline-flex shrink-0 items-center gap-1.5 text-xs sm:text-[13px] font-bold text-[#8A6305] dark:text-[#E5B54A] hover:text-[#654900] dark:hover:text-[#f5d482] transition-colors group"
                                 >
                                     <span>
                                         {isArabic ? `عرض جميع منتجات ${activeDepartment.name}` : `View all in ${activeDepartment.name}`}
@@ -318,56 +318,56 @@ export default function DesktopCategoriesBar({
                                 </Link>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                            <div className="grid grid-cols-1 gap-7 md:grid-cols-3 md:gap-0">
                                 {/* Categories */}
-                                <section aria-label={isArabic ? 'التصنيفات' : 'Categories'}>
-                                    <h4 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-white">
-                                        <FolderTree className="h-4 w-4 text-[#E5B54A]" />
+                                <section aria-label={isArabic ? 'التصنيفات' : 'Categories'} className="md:border-e md:border-slate-200 md:pe-6 dark:md:border-white/10">
+                                    <h4 className="mb-3 flex items-center gap-2 text-[13px] font-extrabold text-slate-900 dark:text-white">
+                                        <FolderTree className="h-4 w-4 text-[#A8760B] dark:text-[#E5B54A]" />
                                         {isArabic ? 'التصنيفات' : 'Categories'}
                                     </h4>
                                     {uniqueCategories.length > 0 ? (
-                                        <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                                        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
                                             {uniqueCategories.slice(0, 8).map((cat) => (
                                                 <Link
                                                     key={cat.id}
                                                     href={`/categories/${encodeURIComponent(cat.slug)}`}
                                                     onClick={closeMenu}
-                                                    className="group/item flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-[#E5B54A]"
+                                                    className="group/item flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium text-slate-700 transition-colors hover:bg-amber-50 hover:text-[#795500] dark:text-slate-200 dark:hover:bg-white/5 dark:hover:text-[#E5B54A]"
                                                 >
-                                                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8A6305]/70 group-hover/item:bg-[#E5B54A]" />
+                                                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#C28E2B]/70 group-hover/item:bg-[#A8760B] dark:group-hover/item:bg-[#E5B54A]" />
                                                     <span className="truncate">{cat.name}</span>
                                                 </Link>
                                             ))}
                                         </div>
-                                    ) : <p className="text-xs text-slate-400">{isArabic ? 'لا توجد تصنيفات' : 'No categories available'}</p>}
+                                    ) : <p className="text-xs text-slate-500 dark:text-slate-400">{isArabic ? 'لا توجد تصنيفات' : 'No categories available'}</p>}
                                 </section>
 
                                 {/* Brands */}
-                                <section aria-label={isArabic ? 'العلامات التجارية' : 'Brands'}>
-                                    <h4 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-white">
-                                        <span className="h-4 w-4 text-center text-[#E5B54A]" aria-hidden="true">✦</span>
+                                <section aria-label={isArabic ? 'العلامات التجارية' : 'Brands'} className="md:border-e md:border-slate-200 md:px-6 dark:md:border-white/10">
+                                    <h4 className="mb-3 flex items-center gap-2 text-[13px] font-extrabold text-slate-900 dark:text-white">
+                                        <span className="h-4 w-4 text-center text-[#A8760B] dark:text-[#E5B54A]" aria-hidden="true">✦</span>
                                         {isArabic ? 'العلامات التجارية' : 'Brands'}
                                     </h4>
                                     {uniqueBrands.length > 0 ? (
-                                        <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                                        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
                                             {uniqueBrands.slice(0, 8).map((brand) => (
                                                 <Link
                                                     key={brand.id}
                                                     href={`/brands/${encodeURIComponent(brand.slug)}`}
                                                     onClick={closeMenu}
-                                                    className="truncate rounded-lg px-2 py-2 text-[13px] font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-[#E5B54A]"
+                                                    className="truncate rounded-lg px-2 py-2 text-[13px] font-medium text-slate-700 transition-colors hover:bg-amber-50 hover:text-[#795500] dark:text-slate-200 dark:hover:bg-white/5 dark:hover:text-[#E5B54A]"
                                                 >
                                                     {getBrandDisplayName(brand, isArabic ? 'ar' : 'en')}
                                                 </Link>
                                             ))}
                                         </div>
-                                    ) : <p className="text-xs text-slate-400">{isArabic ? 'لا توجد علامات تجارية' : 'No brands available'}</p>}
+                                    ) : <p className="text-xs text-slate-500 dark:text-slate-400">{isArabic ? 'لا توجد علامات تجارية' : 'No brands available'}</p>}
                                 </section>
 
                                 {/* Three featured products */}
-                                <section aria-label={isArabic ? 'منتجات مميزة' : 'Featured products'}>
-                                    <h4 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-white">
-                                        <Sparkles className="h-4 w-4 text-[#E5B54A]" />
+                                <section aria-label={isArabic ? 'منتجات مميزة' : 'Featured products'} className="md:ps-6">
+                                    <h4 className="mb-3 flex items-center gap-2 text-[13px] font-extrabold text-slate-900 dark:text-white">
+                                        <Sparkles className="h-4 w-4 text-[#A8760B] dark:text-[#E5B54A]" />
                                         {isArabic ? 'منتجات مميزة' : 'Featured products'}
                                     </h4>
                                     {featuredProducts.length > 0 ? (
@@ -377,18 +377,18 @@ export default function DesktopCategoriesBar({
                                                     key={product.id}
                                                     href={`/products/${encodeURIComponent(product.slug)}`}
                                                     onClick={closeMenu}
-                                                    className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2 transition-colors hover:border-[#E5B54A]/40 hover:bg-white/10"
+                                                    className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2.5 transition-colors hover:border-[#C28E2B]/45 hover:bg-amber-50 dark:border-white/10 dark:bg-white/5 dark:hover:border-[#E5B54A]/40 dark:hover:bg-white/10"
                                                 >
-                                                    <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white">
+                                                    <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-slate-100 bg-white dark:border-white/10">
                                                         <ResilientImage src={getProductImage(product.images)} alt="" className="object-contain p-1" showSkeleton={false} />
                                                     </span>
-                                                    <span className="line-clamp-2 text-[12px] font-semibold leading-5 text-slate-100">
+                                                    <span className="line-clamp-2 text-[12px] font-semibold leading-5 text-slate-800 dark:text-slate-100">
                                                         {(isArabic ? product.nameAr : product.nameEn) || product.name}
                                                     </span>
                                                 </Link>
                                             ))}
                                         </div>
-                                    ) : <p className="text-xs text-slate-400">{isArabic ? 'لا توجد منتجات مميزة حالياً' : 'No featured products yet'}</p>}
+                                    ) : <p className="text-xs text-slate-500 dark:text-slate-400">{isArabic ? 'لا توجد منتجات مميزة حالياً' : 'No featured products yet'}</p>}
                                 </section>
                             </div>
                         </div>
@@ -398,10 +398,10 @@ export default function DesktopCategoriesBar({
                     {renderedSlug === 'all' && (
                         <div className="flex flex-col">
                             {/* Directory Header */}
-                            <div className="flex items-center justify-between pb-3.5 mb-5 border-b border-white/10">
+                            <div className="flex items-center justify-between pb-3.5 mb-5 border-b border-slate-200 dark:border-white/10">
                                 <div className="flex items-center gap-2.5">
                                     <LayoutGrid className="w-4 h-4 text-[#E5B54A]" />
-                                    <h3 className="text-base font-extrabold text-white tracking-tight">
+                                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
                                         {isArabic ? 'دليل الأقسام والتصنيفات' : 'Departments & Categories Directory'}
                                     </h3>
                                 </div>
@@ -409,7 +409,7 @@ export default function DesktopCategoriesBar({
                                 <Link
                                     href="/categories"
                                     onClick={closeMenu}
-                                    className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-[#E5B54A] hover:text-[#f5d482] transition-colors group"
+                                    className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-[#8A6305] dark:text-[#E5B54A] hover:text-[#654900] dark:hover:text-[#f5d482] transition-colors group"
                                 >
                                     <span>{isArabic ? 'عرض صفحة الأقسام الكاملة' : 'View Full Categories Page'}</span>
                                     {isArabic ? (
@@ -438,15 +438,15 @@ export default function DesktopCategoriesBar({
                                             <Link
                                                 href={`/department/${dept.slug}`}
                                                 onClick={closeMenu}
-                                                className="group flex items-center justify-between pb-2 mb-2 border-b border-white/10 hover:border-[#8A6305]/50 transition-colors"
+                                                className="group flex items-center justify-between pb-2 mb-2 border-b border-slate-200 hover:border-[#8A6305]/50 transition-colors dark:border-white/10"
                                             >
-                                                <span className="text-sm font-black text-white group-hover:text-[#E5B54A] transition-colors">
+                                                    <span className="text-sm font-black text-slate-900 group-hover:text-[#8A6305] transition-colors dark:text-white dark:group-hover:text-[#E5B54A]">
                                                     {dept.name}
                                                 </span>
                                                 {isArabic ? (
-                                                    <ChevronLeft className="w-3.5 h-3.5 text-white/40 group-hover:text-[#E5B54A] group-hover:-translate-x-0.5 transition-all" />
+                                                    <ChevronLeft className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#8A6305] group-hover:-translate-x-0.5 transition-all dark:text-white/40 dark:group-hover:text-[#E5B54A]" />
                                                 ) : (
-                                                    <ChevronRight className="w-3.5 h-3.5 text-white/40 group-hover:text-[#E5B54A] group-hover:translate-x-0.5 transition-all" />
+                                                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#8A6305] group-hover:translate-x-0.5 transition-all dark:text-white/40 dark:group-hover:text-[#E5B54A]" />
                                                 )}
                                             </Link>
 
@@ -458,7 +458,7 @@ export default function DesktopCategoriesBar({
                                                             <Link
                                                                 href={`/categories/${encodeURIComponent(cat.slug)}`}
                                                                 onClick={closeMenu}
-                                                                className="text-[13px] font-medium text-slate-300 hover:text-[#E5B54A] transition-colors block py-1 px-1.5 rounded hover:bg-white/5"
+                                                                className="text-[13px] font-medium text-slate-600 hover:text-[#795500] transition-colors block py-1 px-1.5 rounded hover:bg-amber-50 dark:text-slate-300 dark:hover:text-[#E5B54A] dark:hover:bg-white/5"
                                                             >
                                                                 {cat.name}
                                                             </Link>
@@ -466,7 +466,7 @@ export default function DesktopCategoriesBar({
                                                     ))}
                                                 </ul>
                                             ) : (
-                                                <p className="text-xs text-slate-400 py-1.5">
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 py-1.5">
                                                     {isArabic ? 'منتجات مباشرة ضمن هذا القسم' : 'Direct products under this department'}
                                                 </p>
                                             )}
