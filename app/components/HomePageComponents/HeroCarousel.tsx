@@ -294,7 +294,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 }
             `}</style>
 
-            <div dir="ltr" className="relative grid h-[440px] grid-cols-1 sm:h-auto sm:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
+            <div dir="ltr" className="relative grid h-[clamp(420px,60svh,520px)] grid-cols-1 sm:h-auto sm:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
                 {/* Physical left: photography only with smooth crossfade */}
                 <div className="absolute inset-0 h-full overflow-hidden bg-slate-100 sm:relative sm:inset-auto sm:h-[290px] md:h-[330px] lg:h-full dark:bg-slate-900">
                     {slides.map((slide, index) => {
@@ -324,7 +324,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                     })}
 
                     {/* A localized mobile scrim protects text contrast without muting the full photograph. */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[56%] bg-gradient-to-t from-[#071522]/95 via-[#071522]/60 to-transparent sm:hidden" aria-hidden="true" />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[70%] bg-gradient-to-t from-[#071522] via-[#071522]/80 to-transparent sm:hidden" aria-hidden="true" />
 
                     {/* Compact mobile controls stay with the image and do not add hero height. */}
                     <div dir={dir} className="absolute bottom-3 inset-x-0 z-30 flex items-center justify-center gap-2 sm:hidden" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
@@ -359,8 +359,8 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 </div>
 
                 {/* Physical right: clean HTML content panel with smooth crossfade */}
-                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-5 pb-14 pt-14 sm:relative sm:inset-auto sm:min-h-[270px] sm:items-center sm:bg-white sm:px-10 sm:pb-14 sm:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:sm:bg-[#0B192C]">
-                    <div className="relative w-full max-w-xl h-full min-h-[210px] sm:min-h-[260px] lg:min-h-[280px]">
+                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-5 pb-16 pt-8 sm:relative sm:inset-auto sm:min-h-[270px] sm:items-center sm:bg-white sm:px-10 sm:pb-14 sm:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:sm:bg-[#0B192C]">
+                    <div className="relative h-full min-h-[190px] w-full max-w-xl sm:min-h-[260px] lg:min-h-[280px]">
                         {slides.map((slide, index) => {
                             const isActive = index === currentIndex;
                             const headline = parseHeadline(isArabic ? slide.titleAr : slide.title, isArabic);
@@ -373,7 +373,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             return (
                                 <div
                                     key={slide.id}
-                                    className={`absolute inset-0 flex flex-col justify-end sm:justify-center text-center lg:text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
+                                    className={`absolute inset-0 flex flex-col justify-end text-center transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none sm:justify-center lg:text-start ${
                                         isActive
                                             ? 'opacity-100 translate-y-0 z-10 pointer-events-auto'
                                             : 'opacity-0 translate-y-2 pointer-events-none z-0'
@@ -381,33 +381,33 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     aria-hidden={!isActive}
                                 >
                                     {badgeText && (
-                                        <span className="mb-2 inline-flex items-center justify-center lg:justify-start gap-2 text-[10px] font-black uppercase tracking-[0.1em] text-[#8A6305] sm:mb-2.5 sm:text-xs sm:tracking-[0.14em] dark:text-[#E5B54A]">
+                                        <span className="mb-2 inline-flex items-center justify-center gap-2 self-center rounded-full border border-white/15 bg-[#071522]/55 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#F4C95D] sm:mb-2.5 sm:self-auto sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-xs sm:tracking-[0.14em] sm:text-[#8A6305] lg:justify-start dark:sm:text-[#E5B54A]">
                                             <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                                             {badgeText}
                                         </span>
                                     )}
 
-                                    <h1 className="mx-auto max-w-[25rem] text-[1.5rem] font-black leading-[1.18] tracking-tight text-white sm:max-w-none sm:text-4xl sm:text-[#0B192C] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
+                                    <h1 className="mx-auto max-w-[22rem] text-[1.65rem] font-black leading-[1.12] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:max-w-none sm:text-4xl sm:text-[#0B192C] sm:drop-shadow-none lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
                                         <span className="block">{headline.part1}</span>
                                         {headline.part2 && (
-                                            <span className="block text-[#A8750A] dark:text-[#E5B54A] mt-1">
+                                            <span className="mt-1 block text-white sm:text-[#A8750A] dark:sm:text-[#E5B54A]">
                                                 {headline.part2}
                                             </span>
                                         )}
                                     </h1>
 
                                     {subtitleText && (
-                                        <p className="mx-auto mt-2.5 line-clamp-2 max-w-lg text-xs font-medium leading-[1.65] text-slate-100 sm:mt-3 sm:text-sm sm:leading-relaxed sm:text-slate-600 lg:mx-0 lg:text-base dark:text-slate-300">
+                                        <p className="mx-auto mt-2 line-clamp-2 max-w-[24rem] text-[13px] font-medium leading-[1.55] text-slate-100 drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)] sm:mt-3 sm:max-w-lg sm:text-sm sm:leading-relaxed sm:text-slate-600 sm:drop-shadow-none lg:mx-0 lg:text-base dark:text-slate-300">
                                             {subtitleText}
                                         </p>
                                     )}
 
-                                    <div className="mt-4 grid grid-cols-2 items-stretch gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5 lg:justify-start">
+                                    <div className="mx-auto mt-4 grid w-full max-w-[22rem] grid-cols-1 items-stretch gap-2 sm:mx-0 sm:mt-6 sm:w-auto sm:max-w-none sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5 lg:justify-start">
                                         <Link
                                             href={slide.link}
                                             prefetch={false}
                                             tabIndex={isActive ? 0 : -1}
-                                            className="group/btn inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#B68012] bg-[#B68012] px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#946809] active:scale-[0.98] sm:gap-2 sm:px-6 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
+                                            className="group/btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#B68012] bg-[#B68012] px-4 text-xs font-bold leading-tight text-white shadow-lg shadow-black/20 transition-colors hover:bg-[#946809] active:scale-[0.98] sm:rounded-lg sm:px-6 sm:text-sm sm:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
                                         >
                                             <span>{primaryButtonText}</span>
                                             <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
@@ -420,7 +420,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                                 tabIndex={isActive ? 0 : -1}
                                                 target={secondaryLink.startsWith('http') ? '_blank' : undefined}
                                                 rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
-                                                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-white/70 bg-[#0B192C]/75 px-3 text-[11px] font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] sm:gap-2 sm:border-[#0B192C] sm:bg-[#0B192C] sm:px-6 sm:text-sm sm:hover:bg-[#152841] dark:sm:border-white dark:sm:bg-white dark:sm:text-[#0B192C] dark:sm:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] sm:focus-visible:ring-[#8A6305] sm:focus-visible:ring-offset-white"
+                                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/70 bg-[#0B192C]/75 px-4 text-xs font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] sm:rounded-lg sm:border-[#0B192C] sm:px-6 sm:text-sm sm:hover:bg-[#152841] dark:sm:border-white dark:sm:bg-white dark:sm:text-[#0B192C] dark:sm:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] sm:focus-visible:ring-[#8A6305] sm:focus-visible:ring-offset-white"
                                             >
                                                 <span>{secondaryButtonText}</span>
                                                 {slide.secondaryIcon === 'whatsapp' ? (
