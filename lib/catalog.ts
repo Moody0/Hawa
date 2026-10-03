@@ -44,6 +44,7 @@ export interface CatalogBrand {
 }
 import { cache } from 'react';
 import { laravelJson } from './laravel-server';
+import type { ParsedCatalogParams } from './catalog-url';
 export const getCatalogBrands = cache(async (mainCategoryId?: string): Promise<CatalogBrand[]> => laravelJson('/api/brands' + (mainCategoryId ? '?mainCategoryId=' + encodeURIComponent(mainCategoryId) : ''), []));
 export const getBrandBySlug = cache(async (slug: string) => { const rows = await getCatalogBrands(); return rows.find(r => r.slug === decodeURIComponent(slug) || r.id === slug || r.name === decodeURIComponent(slug)) || null; });
 export const getCatalogCategories = cache(async (brandId?: string): Promise<CatalogCategory[]> => laravelJson('/api/categories' + (brandId ? '?brandId=' + encodeURIComponent(brandId) : ''), []));
@@ -56,11 +57,18 @@ export async function fetchProductBySlug(slug: string): Promise<any | null> { re
 export async function fetchCatalogProducts(options: Record<string, unknown> = {}): Promise<any[]> { const query = new URLSearchParams(Object.entries(options).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])); const data = await laravelJson<{
     products: any[];
 }>('/api/products?' + query, { products: [] }); return data.products; }
-export const getCatalogInitialData = cache(async (categoryId?: string, brandId?: string, mainCategoryId?: string, search?: string) => { const query = new URLSearchParams({ limit: '36', inStock: 'true' }); if (categoryId)
-    query.set('categoryIds', categoryId); if (brandId)
-    query.set('brandIds', brandId); if (mainCategoryId)
-    query.set('mainCategoryId', mainCategoryId); if (search)
-    query.set('search', search); const [categories, result] = await Promise.all([brandId ? getCatalogCategories(brandId) : mainCategoryId ? getCatalogCategoriesByMainCategory(mainCategoryId) : getCatalogMainCategories(), laravelJson<{
+export const getCatalogInitialData = cache(async (categoryId?: string, brandId?: string, mainCategoryId?: string, search?: string, options: Partial<ParsedCatalogParams> = {}) => {
+    const query = new URLSearchParams({ limit: '36', sort: options.sort || 'best_sellers', page: String(options.page || 1) });
+    const categoryTokens = options.categories?.length ? options.categories : categoryId ? [categoryId] : [];
+    const brandTokens = options.brands?.length ? options.brands : brandId ? [brandId] : [];
+    if (categoryTokens.length) query.set('categoryIds', categoryTokens.join(','));
+    if (brandTokens.length) query.set('brandIds', brandTokens.join(','));
+    if (mainCategoryId || options.mainCategory) query.set('mainCategoryId', mainCategoryId || options.mainCategory!);
+    if (search) query.set('search', search);
+    if (options.inStock) query.set('inStock', 'true');
+    if (options.onSale) query.set('onSale', 'true');
+    if (options.isTrending) query.set('isTrending', 'true');
+    const [categories, result] = await Promise.all([brandId ? getCatalogCategories(brandId) : mainCategoryId ? getCatalogCategoriesByMainCategory(mainCategoryId) : getCatalogMainCategories(), laravelJson<{
         products: any[];
         pagination: {
             total: number;

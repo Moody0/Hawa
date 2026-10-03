@@ -117,6 +117,7 @@ interface ProductsSidebarFilterProps {
     filters: FilterState;
     onFiltersChange: (newFilters: FilterState) => void;
     onResetFilters: () => void;
+    resetKey?: number;
     totalResults: number;
     isMobileDrawerOpen: boolean;
     onCloseMobileDrawer: () => void;
@@ -128,6 +129,7 @@ export default function ProductsSidebarFilter({
     filters,
     onFiltersChange,
     onResetFilters,
+    resetKey = 0,
     totalResults,
     isMobileDrawerOpen,
     onCloseMobileDrawer,
@@ -136,7 +138,12 @@ export default function ProductsSidebarFilter({
     const isArabic = language === "ar";
 
     const [brandSearch, setBrandSearch] = useState("");
+    useEffect(() => { setBrandSearch(''); }, [resetKey]);
     const [mounted, setMounted] = useState(false);
+    const handleReset = () => {
+        setBrandSearch('');
+        onResetFilters();
+    };
     const closeBtnRef = useRef<HTMLButtonElement>(null);
     const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -193,7 +200,7 @@ export default function ProductsSidebarFilter({
     const filteredBrands = useMemo(() => {
         if (!brandSearch.trim()) return brands;
         const q = brandSearch.toLowerCase().trim();
-        return brands.filter((b) => b.name.toLowerCase().includes(q));
+        return brands.filter((b) => b.name.toLowerCase().includes(q) || b.nameEn?.toLowerCase().includes(q));
     }, [brands, brandSearch]);
 
     // Active filters count
@@ -442,7 +449,7 @@ export default function ProductsSidebarFilter({
                 {activeFiltersCount > 0 && (
                     <button
                         type="button"
-                        onClick={onResetFilters}
+                        onClick={handleReset}
                         className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-red-600 dark:hover:text-red-400 cursor-pointer transition-colors"
                     >
                         <RotateCw className="w-3 h-3" />
@@ -607,7 +614,7 @@ export default function ProductsSidebarFilter({
                                     {activeFiltersCount > 0 && (
                                         <button
                                             type="button"
-                                            onClick={onResetFilters}
+                                            onClick={handleReset}
                                             className="inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-xl px-2.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/30 dark:hover:text-red-400 cursor-pointer"
                                         >
                                             <RotateCw className="w-3.5 h-3.5" />

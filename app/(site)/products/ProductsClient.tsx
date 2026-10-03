@@ -3,7 +3,7 @@ import { laravelClientFetch } from '@/lib/laravel-client';
 
 
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import ProductsBreadcrumbs from "@/app/components/ProductsPageComponents/ProductsBreadcrumbs";
 import ProductsHeader from "@/app/components/ProductsPageComponents/ProductsHeader";
 import EditorialProductCard from "@/app/components/ProductsPageComponents/EditorialProductCard";
@@ -24,6 +24,7 @@ interface Category {
     nameEn?: string | null;
     mainCategoryId?: string | null;
     redirectSlugs?: string[];
+    type?: 'category' | 'main-category';
     _count?: {
         products: number;
     };
@@ -97,14 +98,17 @@ interface ProductsClientProps {
     initialCategorySlugs?: string[];
 }
 
+const EMPTY_TOKENS: string[] = [];
+const EMPTY_BRANDS: Brand[] = [];
+
 const ProductsClient = ({
     initialCategories,
-    initialBrands = [],
+    initialBrands = EMPTY_BRANDS,
     initialProducts,
     initialTotal,
-    activeCategory = null,
+    activeCategory: initialActiveCategory = null,
     activeBrand = null,
-    activeMainCategory = null,
+    activeMainCategory: initialMainCategory = null,
     initialSearch = "",
     initialSort = "best_sellers",
     initialPage = 1,
@@ -112,32 +116,29 @@ const ProductsClient = ({
     initialOnSale = false,
     initialIsTrending = false,
     initialView = "grid",
-    initialBrandSlugs = [],
-    initialCategorySlugs = [],
+    initialBrandSlugs = EMPTY_TOKENS,
+    initialCategorySlugs = EMPTY_TOKENS,
 }: ProductsClientProps) => {
     const { t, language } = useLanguage();
     const isArabic = language === "ar";
     const pathname = usePathname();
+    const router = useRouter();
 
     const initialResolvedBrandIds = useMemo(() => {
         // A category page already scopes products to its category. Keeping the
         // derived brand in the client filter creates a URL/effect feedback loop
         // and duplicates the same request, so only honor an explicit brand URL.
-        if (activeCategory && (!initialBrandSlugs || initialBrandSlugs.length === 0)) return [];
+        if (initialActiveCategory && initialBrandSlugs.length === 0) return [];
         if (activeBrand) return [activeBrand.id];
         if (!initialBrandSlugs || initialBrandSlugs.length === 0) return [];
-        return initialBrands
-            .filter((b) => initialBrandSlugs.includes(b.slug) || initialBrandSlugs.includes(b.id))
-            .map((b) => b.id);
-    }, [activeCategory, activeBrand, initialBrandSlugs, initialBrands]);
+        return [...new Set(initialBrandSlugs.map((token) => initialBrands.find((brand) => brand.slug === token || brand.id === token)?.id || token))];
+    }, [initialActiveCategory, activeBrand, initialBrandSlugs, initialBrands]);
 
     const initialResolvedCategoryIds = useMemo(() => {
-        if (activeCategory) return [activeCategory.id];
+        if (initialActiveCategory) return [initialActiveCategory.id];
         if (!initialCategorySlugs || initialCategorySlugs.length === 0) return [];
-        return initialCategories
-            .filter((c) => initialCategorySlugs.includes(c.slug) || initialCategorySlugs.includes(c.id) || c.redirectSlugs?.some((slug) => initialCategorySlugs.includes(slug)))
-            .map((c) => c.id);
-    }, [activeCategory, initialCategorySlugs, initialCategories]);
+        return [...new Set(initialCategorySlugs.map((token) => initialCategories.find((category) => category.slug === token || category.id === token || category.redirectSlugs?.includes(token))?.id || token))];
+    }, [initialActiveCategory, initialCategorySlugs, initialCategories]);
 
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [categories, setCategories] = useState<Category[]>(initialCategories);
@@ -146,6 +147,12 @@ const ProductsClient = ({
     const [loading, setLoading] = useState(false);
     const [totalProducts, setTotalProducts] = useState(initialTotal);
     const [isInitialRender, setIsInitialRender] = useState(true);
+    const [activeMainCategory, setActiveMainCategory] = useState(initialMainCategory);
+    const [fetchError, setFetchError] = useState<{ reset: boolean; page: number } | null>(null);
+    const [hasNextPage, setHasNextPage] = useState(initialPage * 36 < initialTotal);
+    const [filterResetKey, setFilterResetKey] = useState(0);
+    const requestedResetPageRef = useRef<number | null>(initialPage);
+    const categoryLookupRef = useRef(new Map(initialCategories.map((category) => [category.id, category])));
 
     // View Density: 'grid' vs 'list' (Wholesale view)
     const [viewMode, setViewMode] = useState<"grid" | "list">(initialView);
@@ -165,9 +172,18 @@ const ProductsClient = ({
         onSale: initialOnSale,
         isTrending: initialIsTrending,
     });
+    const activeCategory = filters.categoryIds.includes(initialActiveCategory?.id || '') ? initialActiveCategory : null;
 
-    // Sync initial props when navigating between different routes (e.g. brand or department pages)
+    const initialPropsSyncRef = useRef(true);
+    // Sync server navigation without replaying the initial filters on mount.
     useEffect(() => {
+        initialCategories.forEach((category) => categoryLookupRef.current.set(category.id, category));
+        if (initialActiveCategory) categoryLookupRef.current.set(initialActiveCategory.id, initialActiveCategory);
+        if (initialPropsSyncRef.current) {
+            initialPropsSyncRef.current = false;
+            return;
+        }
+        requestedResetPageRef.current = initialPage;
         setCategories(initialCategories);
         setProducts(initialProducts);
         setTotalProducts(initialTotal);
@@ -176,6 +192,9 @@ const ProductsClient = ({
         setSort(initialSort);
         setPage(initialPage);
         setViewMode(initialView);
+        setActiveMainCategory(initialMainCategory);
+        setFetchError(null);
+        setHasNextPage(initialPage * 36 < initialTotal);
         setFilters({
             brandIds: initialResolvedBrandIds,
             categoryIds: initialResolvedCategoryIds,
@@ -196,10 +215,12 @@ const ProductsClient = ({
         initialOnSale,
         initialIsTrending,
         initialView,
+        initialMainCategory,
+        initialActiveCategory,
     ]);
 
     const observerRef = useRef<HTMLDivElement>(null);
-    const hasMore = products.length < totalProducts;
+    const hasMore = products.length > 0 && hasNextPage;
 
     // Synchronize client state to canonical URL (deterministic parameter sorting, omits defaults)
     useEffect(() => {
@@ -211,7 +232,7 @@ const ProductsClient = ({
         });
 
         const catSlugs = filters.categoryIds.map((id) => {
-            const c = categories.find((cat) => cat.id === id) || initialCategories.find((cat) => cat.id === id);
+            const c = categoryLookupRef.current.get(id);
             return c ? c.slug : id;
         });
 
@@ -260,14 +281,14 @@ const ProductsClient = ({
             setDebouncedSearch(parsed.search);
             setSort(parsed.sort);
             setPage(parsed.page);
+            requestedResetPageRef.current = parsed.page;
             setViewMode(parsed.view);
+            const mainCategory = [...categoryLookupRef.current.values()].find((c) => c.type === 'main-category' && (c.slug === parsed.mainCategory || c.id === parsed.mainCategory));
+            setActiveMainCategory(parsed.mainCategory ? mainCategory || (initialMainCategory?.slug === parsed.mainCategory || initialMainCategory?.id === parsed.mainCategory ? initialMainCategory : { id: parsed.mainCategory, slug: parsed.mainCategory, name: parsed.mainCategory }) : null);
 
-            const popBrandIds = initialBrands
-                .filter((b) => parsed.brands.includes(b.slug) || parsed.brands.includes(b.id))
-                .map((b) => b.id);
-            const popCategoryIds = categories
-                .filter((c) => parsed.categories.includes(c.slug) || parsed.categories.includes(c.id))
-                .map((c) => c.id);
+            const popBrandIds = [...new Set(parsed.brands.map((token) => initialBrands.find((brand) => brand.slug === token || brand.id === token)?.id || token))];
+            const knownCategories = [...categoryLookupRef.current.values()];
+            const popCategoryIds = [...new Set(parsed.categories.map((token) => knownCategories.find((category) => category.slug === token || category.id === token || category.redirectSlugs?.includes(token))?.id || token))];
 
             setFilters({
                 brandIds: popBrandIds,
@@ -280,14 +301,14 @@ const ProductsClient = ({
 
         window.addEventListener("popstate", handlePopState);
         return () => window.removeEventListener("popstate", handlePopState);
-    }, [initialBrands, categories]);
+    }, [initialBrands, initialMainCategory]);
 
     const categoryAbortControllerRef = useRef<AbortController | null>(null);
     const categoryRequestIdRef = useRef(0);
 
     // Dynamically fetch and update categories/departments when brand filters change in sidebar
     useEffect(() => {
-        if (isInitialRender || activeCategory) return;
+        if (isInitialRender) return;
 
         categoryAbortControllerRef.current?.abort();
         const controller = new AbortController();
@@ -298,10 +319,14 @@ const ProductsClient = ({
             try {
                 let url = "";
                 if (filters.brandIds.length > 0) {
-                    url = `/api/categories?brandIds=${filters.brandIds.join(",")}${activeMainCategory ? `&mainCategoryId=${activeMainCategory.id}` : ""}`;
+                    const query = new URLSearchParams({ brandIds: filters.brandIds.join(',') });
+                    if (activeMainCategory) query.set('mainCategoryId', activeMainCategory.id);
+                    url = `/api/categories?${query}`;
                 } else if (activeMainCategory) {
-                    url = `/api/categories?mainCategoryId=${activeMainCategory.id}`;
-                } else if (!activeBrand) {
+                    url = `/api/categories?${new URLSearchParams({ mainCategoryId: activeMainCategory.id })}`;
+                } else if (activeCategory) {
+                    url = `/api/categories`;
+                } else {
                     url = `/api/main-categories`;
                 }
 
@@ -316,22 +341,8 @@ const ProductsClient = ({
                 if (res.ok && currentReqId === categoryRequestIdRef.current) {
                     const data = await res.json();
                     if (Array.isArray(data) && currentReqId === categoryRequestIdRef.current) {
+                        data.forEach((category: Category) => categoryLookupRef.current.set(category.id, category));
                         setCategories(data);
-                        setFilters((prev) => {
-                            if (prev.categoryIds.length === 0) return prev;
-                            const validCategoryIds = prev.categoryIds.filter((catId) =>
-                                data.some(
-                                    (c: Category) =>
-                                        c.id === catId ||
-                                        c.slug === catId ||
-                                        c.mainCategoryId === catId
-                                )
-                            );
-                            if (validCategoryIds.length === prev.categoryIds.length) {
-                                return prev;
-                            }
-                            return { ...prev, categoryIds: validCategoryIds };
-                        });
                         return;
                     }
                 }
@@ -369,14 +380,15 @@ const ProductsClient = ({
         (filters.inStock ? 1 : 0) +
         (filters.onSale ? 1 : 0) +
         (filters.isTrending ? 1 : 0) +
-        (debouncedSearch ? 1 : 0);
+        (debouncedSearch ? 1 : 0) +
+        (activeMainCategory ? 1 : 0);
 
     const isFetchingRef = useRef(false);
     const activeRequestRef = useRef<AbortController | null>(null);
     const productRequestIdRef = useRef(0);
 
     const fetchProducts = useCallback(
-        async (reset = false) => {
+        async (reset = false, requestedPage = reset ? 1 : page + 1) => {
             if (reset) {
                 activeRequestRef.current?.abort();
             } else if (isFetchingRef.current) {
@@ -387,52 +399,39 @@ const ProductsClient = ({
             activeRequestRef.current = controller;
             isFetchingRef.current = true;
             setLoading(true);
+            setFetchError(null);
+            if (reset) {
+                setProducts([]);
+                setTotalProducts(0);
+                setHasNextPage(false);
+            }
             const currentReqId = ++productRequestIdRef.current;
 
             try {
-                const currentPage = reset ? 1 : page;
+                const currentPage = requestedPage;
 
-                // Priority to filters.categoryIds
-                let categoryQuery = "";
-                if (filters.categoryIds.length > 0) {
-                    categoryQuery = `&categoryIds=${filters.categoryIds.join(",")}`;
+                const query = new URLSearchParams({ page: String(currentPage), limit: '36', sort });
+                if (filters.categoryIds.length) query.set('categoryIds', filters.categoryIds.join(','));
+                if (filters.brandIds.length) query.set('brandIds', filters.brandIds.join(','));
+                if (activeMainCategory) query.set('mainCategoryId', activeMainCategory.id);
+                if (filters.inStock) query.set('inStock', 'true');
+                if (filters.onSale) query.set('onSale', 'true');
+                if (filters.isTrending) query.set('isTrending', 'true');
+                if (debouncedSearch) query.set('search', debouncedSearch);
+                if (!reset && currentPage > 1) {
+                    query.set('knownTotal', String(totalProducts));
+                    query.set('skipCount', 'true');
                 }
-
-                // Brand filter query
-                let brandQuery = "";
-                if (filters.brandIds.length > 0) {
-                    brandQuery = `&brandIds=${filters.brandIds.join(",")}`;
-                }
-
-                const mainCategoryQuery = activeMainCategory
-                    ? `&mainCategoryId=${activeMainCategory.id}`
-                    : "";
-
-                const inStockQuery = filters.inStock ? "&inStock=true" : "";
-                const onSaleQuery = filters.onSale ? "&onSale=true" : "";
-                const isTrendingQuery = filters.isTrending ? "&isTrending=true" : "";
-                const liveSearchQuery = debouncedSearch
-                    ? `&search=${encodeURIComponent(debouncedSearch)}`
-                    : "";
-
-                let sortQuery = "";
-                if (sort === "price_asc") sortQuery = "&sort=price_asc";
-                else if (sort === "price_desc") sortQuery = "&sort=price_desc";
-                else if (sort === "newest") sortQuery = "&sort=newest";
-
-                const countParams =
-                    !reset && currentPage > 1
-                        ? `&knownTotal=${totalProducts}&skipCount=true`
-                        : "";
-
-                const url = `/api/products?page=${currentPage}&limit=36${categoryQuery}${brandQuery}${mainCategoryQuery}${inStockQuery}${onSaleQuery}${isTrendingQuery}${liveSearchQuery}${sortQuery}${countParams}`;
+                const url = `/api/products?${query}`;
 
                 const response = await laravelClientFetch(url, { signal: controller.signal });
 
-                if (response.ok && currentReqId === productRequestIdRef.current) {
+                if (!response.ok) throw new Error(`Product request failed (${response.status})`);
+                if (currentReqId === productRequestIdRef.current) {
                     const data = await response.json();
-                    if (currentReqId !== productRequestIdRef.current) return;
-                    const incomingProducts: Product[] = data.products || [];
+                    if (controller.signal.aborted || currentReqId !== productRequestIdRef.current) return;
+                    if (!Array.isArray(data.products) || typeof data.pagination?.total !== 'number') throw new Error('Invalid product response');
+                    const incomingProducts: Product[] = data.products;
                     if (reset) {
                         setProducts(incomingProducts);
                     } else {
@@ -445,10 +444,13 @@ const ProductsClient = ({
                     if (data.pagination?.total !== undefined) {
                         setTotalProducts(data.pagination.total);
                     }
+                    setPage(currentPage);
+                    setHasNextPage(incomingProducts.length > 0 && currentPage * 36 < data.pagination.total);
                 }
             } catch (error) {
-                if (!(error instanceof DOMException && error.name === "AbortError")) {
+                if (!(error instanceof Error && error.name === "AbortError") && currentReqId === productRequestIdRef.current) {
                     console.error("Failed to fetch products", error);
+                    setFetchError({ reset, page: requestedPage });
                 }
             } finally {
                 if (activeRequestRef.current === controller) {
@@ -472,34 +474,24 @@ const ProductsClient = ({
         return () => activeRequestRef.current?.abort();
     }, []);
 
-    // Refetch when filters, search, or sort changes
+    // Refresh every filter snapshot; only a successful request advances pagination.
     useEffect(() => {
-        if (isInitialRender) {
-            setIsInitialRender(false);
-            return;
-        }
-
-        setPage(1);
-        fetchProducts(true);
+        const requestedPage = requestedResetPageRef.current || 1;
+        requestedResetPageRef.current = null;
+        setIsInitialRender(false);
+        setPage(requestedPage);
+        fetchProducts(true, requestedPage);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters, debouncedSearch, sort]);
-
-    // Load next page
-    useEffect(() => {
-        if (page > 1) {
-            fetchProducts(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page]);
+    }, [filters, debouncedSearch, sort, activeMainCategory]);
 
     // IntersectionObserver for Automatic Infinite Scroll
     useEffect(() => {
-        if (!hasMore || loading) return;
+        if (!hasMore || loading || fetchError) return;
 
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && !loading && !isFetchingRef.current) {
-                    setPage((prevPage) => prevPage + 1);
+                    fetchProducts(false, page + 1);
                 }
             },
             { rootMargin: "300px" }
@@ -515,7 +507,7 @@ const ProductsClient = ({
                 observer.unobserve(currentRef);
             }
         };
-    }, [hasMore, loading]);
+    }, [hasMore, loading, fetchError, fetchProducts, page]);
 
     // Brand chip toggle handler
     const handleQuickToggleBrand = (brandId: string) => {
@@ -546,6 +538,8 @@ const ProductsClient = ({
     };
 
     const handleResetAllFilters = () => {
+        requestedResetPageRef.current = 1;
+        setFilterResetKey((value) => value + 1);
         setFilters({
             brandIds: [],
             categoryIds: [],
@@ -555,6 +549,10 @@ const ProductsClient = ({
         });
         setSearchQuery("");
         setDebouncedSearch("");
+        setActiveMainCategory(null);
+        setSort('best_sellers');
+        setPage(1);
+        if (pathname !== '/products') router.push('/products', { scroll: false });
     };
 
     const sortOptions = [
@@ -565,10 +563,14 @@ const ProductsClient = ({
     ];
 
     const getHeadingTitle = () => {
-        if (activeCategory) {
+        if (selectedCategoryObjects.length === 1) {
+            const category = selectedCategoryObjects[0];
             return isArabic
-                ? activeCategory.name
-                : activeCategory.description || activeCategory.nameEn || activeCategory.name;
+                ? category.name
+                : category.nameEn || category.description || category.name;
+        }
+        if (selectedCategoryObjects.length > 1) {
+            return isArabic ? `منتجات الأقسام المحددة (${selectedCategoryObjects.length})` : `Products in selected categories (${selectedCategoryObjects.length})`;
         }
         if (activeMainCategory) {
             return isArabic
@@ -600,7 +602,7 @@ const ProductsClient = ({
     // Single selected brand object (only when EXACTLY ONE brand is selected)
     const singleSelectedBrand = useMemo(() => {
         if (filters.brandIds.length === 1) {
-            return displayBrands.find((b) => b.id === filters.brandIds[0]) || activeBrand || null;
+            return displayBrands.find((b) => b.id === filters.brandIds[0]) || (activeBrand?.id === filters.brandIds[0] ? activeBrand : null);
         }
         return null;
     }, [filters.brandIds, displayBrands, activeBrand]);
@@ -617,11 +619,14 @@ const ProductsClient = ({
 
     // Find brand / category names for active filter chips
     const selectedBrandObjects = useMemo(() => {
-        return displayBrands.filter((b) => filters.brandIds.includes(b.id));
-    }, [displayBrands, filters.brandIds]);
+        return filters.brandIds.map((id) => initialBrands.find((brand) => brand.id === id) || { id, name: id });
+    }, [initialBrands, filters.brandIds]);
 
-    const selectedCategoryObjects = useMemo(() => {
-        return categories.filter((c) => filters.categoryIds.includes(c.id));
+    const selectedCategoryObjects = useMemo<Category[]>(() => {
+        return filters.categoryIds.flatMap((id) => {
+            const category = categoryLookupRef.current.get(id);
+            return category ? [category] : [{ id, name: id, slug: id, description: null, image: null }];
+        });
     }, [categories, filters.categoryIds]);
 
     return (
@@ -629,9 +634,9 @@ const ProductsClient = ({
             <div className="container-custom py-4 md:py-6">
             {/* Breadcrumbs */}
             <ProductsBreadcrumbs
-                activeCategory={activeCategory}
+                activeCategory={selectedCategoryObjects.length === 1 && selectedCategoryObjects[0].type !== 'main-category' ? selectedCategoryObjects[0] : null}
                 activeBrand={singleSelectedBrand}
-                activeMainCategory={activeMainCategory}
+                activeMainCategory={activeMainCategory || (selectedCategoryObjects.length === 1 && selectedCategoryObjects[0].type === 'main-category' ? selectedCategoryObjects[0] : null)}
             />
 
             {/* Products Page Header */}
@@ -646,6 +651,7 @@ const ProductsClient = ({
                     filters={filters}
                     onFiltersChange={setFilters}
                     onResetFilters={handleResetAllFilters}
+                    resetKey={filterResetKey}
                     totalResults={totalProducts}
                     isMobileDrawerOpen={isMobileDrawerOpen}
                     onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
@@ -808,7 +814,7 @@ const ProductsClient = ({
                                         <span>"{debouncedSearch}"</span>
                                         <button
                                             type="button"
-                                            onClick={() => setSearchQuery("")}
+                                            onClick={() => { setSearchQuery(''); setDebouncedSearch(''); }}
                                             className="hover:text-red-500"
                                         >
                                             <X className="text-xs" />
@@ -817,6 +823,17 @@ const ProductsClient = ({
                                 )}
 
                                 {/* Selected Brand Chips */}
+                                {activeMainCategory && (
+                                    <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-[#0B192C] dark:border-white/10 dark:bg-zinc-800 dark:text-white">
+                                        <span>{activeMainCategory.name}</span>
+                                        <button type="button" onClick={() => {
+                                            setActiveMainCategory(null);
+                                            if (pathname !== '/products') router.push('/products', { scroll: false });
+                                        }} aria-label={isArabic ? 'إزالة فلتر القسم' : 'Remove department filter'} className="hover:text-red-500">
+                                            <X className="text-xs" />
+                                        </button>
+                                    </span>
+                                )}
                                 {selectedBrandObjects.map((b) => (
                                     <span
                                         key={b.id}
@@ -913,7 +930,7 @@ const ProductsClient = ({
                     {/* Results Counter & Section Title */}
                     <div className="flex items-center justify-between gap-3 mb-4">
                         <div>
-                            {!(singleSelectedBrand && !activeCategory && !activeMainCategory) && (
+                            {!(singleSelectedBrand && selectedCategoryObjects.length === 0 && !activeMainCategory) && (
                                 <h1 className="text-lg md:text-xl font-bold text-[#0B192C] dark:text-white tracking-tight">
                                     {getHeadingTitle()}
                                 </h1>
@@ -933,8 +950,23 @@ const ProductsClient = ({
                         )}
                     </div>
 
+                    {fetchError && !loading && (
+                        <div role="alert" className="my-4 rounded-2xl border border-red-200 bg-white p-6 text-center dark:border-red-900 dark:bg-zinc-900">
+                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                {isArabic ? 'تعذر تحميل المنتجات. يرجى المحاولة مجدداً.' : 'Products could not be loaded. Please try again.'}
+                            </p>
+                            <button type="button" onClick={() => fetchProducts(fetchError.reset, fetchError.page)} className="mt-3 rounded-xl bg-[#0B192C] px-4 py-2 text-xs font-bold text-white dark:bg-white dark:text-slate-900">
+                                {isArabic ? 'إعادة المحاولة' : 'Retry'}
+                            </button>
+                        </div>
+                    )}
+                    {products.length === 0 && loading && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3" aria-hidden="true">
+                            {Array.from({ length: 6 }, (_, index) => <div key={index} className="aspect-[3/4] animate-pulse rounded-2xl bg-slate-200/70 dark:bg-zinc-800" />)}
+                        </div>
+                    )}
                     {/* Empty State */}
-                    {products.length === 0 && !loading && (
+                    {products.length === 0 && !loading && !fetchError && (
                         <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 my-4">
                             <SearchX className="text-5xl text-slate-300 dark:text-zinc-600 mb-3" />
                             <h3 className="text-base font-bold text-[#0B192C] dark:text-white mb-1">
@@ -980,7 +1012,7 @@ const ProductsClient = ({
                     )}
 
                     {/* Automatic Infinite Scroll Trigger & Spinner */}
-                    {hasMore && (
+                    {hasMore && !fetchError && (
                         <div ref={observerRef} className="mt-8 py-6 flex items-center justify-center">
                             <div className="flex items-center gap-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-white dark:bg-zinc-900 px-4 py-2 rounded-full border border-gray-200 dark:border-white/10">
                                 <div className="w-4 h-4 border-2 border-[#8A6305] border-t-transparent rounded-full animate-spin" />

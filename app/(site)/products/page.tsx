@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import ProductsClient from "./ProductsClient";
-import { getCatalogInitialData, getCatalogBrands, getBrandBySlug, getCategoryBySlug, getCatalogCategories, getCatalogMainCategoryBySlug } from "@/lib/catalog";
+import { getCatalogInitialData, getCatalogBrands, getBrandBySlug, getCategoryBySlug, getCatalogCategories, getCatalogMainCategories, getCatalogMainCategoryBySlug } from "@/lib/catalog";
 import { parseCatalogUrlParams, buildCatalogUrl } from "@/lib/catalog-url";
 
 import { Metadata } from "next";
@@ -138,13 +138,11 @@ export default async function ProductsPage({
         : null;
 
     const [{ categories: catalogCategories, products, totalProducts }, brands, allCategories] = await Promise.all([
-        activeCategory
-            ? getCatalogInitialData(activeCategory.id, undefined, activeCategory.mainCategoryId || undefined, parsed.search)
-            : activeMainCategory
-                ? getCatalogInitialData(undefined, undefined, activeMainCategory.id, parsed.search)
-                : getCatalogInitialData(undefined, activeBrand?.id, undefined, parsed.search),
-        getCatalogBrands(activeMainCategory?.id),
-        parsed.categories.length > 0 ? getCatalogCategories() : Promise.resolve([]),
+        getCatalogInitialData(activeCategory?.id, activeBrand?.id, activeMainCategory?.id, parsed.search, parsed),
+        getCatalogBrands(),
+        parsed.categories.length > 0
+            ? Promise.all([getCatalogCategories(), getCatalogMainCategories()]).then((groups) => groups.flat())
+            : Promise.resolve([]),
     ]);
 
     const categories = parsed.categories.length > 0 ? (allCategories.length > 0 ? allCategories : catalogCategories) : catalogCategories;
@@ -159,7 +157,7 @@ export default async function ProductsPage({
                 initialTotal={totalProducts}
                 activeCategory={activeCategory}
                 activeBrand={activeCategory ? null : activeBrand}
-                activeMainCategory={activeMainCategory}
+                activeMainCategory={activeMainCategory || (parsed.mainCategory ? { id: parsed.mainCategory, slug: parsed.mainCategory, name: parsed.mainCategory } : null)}
                 initialSearch={parsed.search}
                 initialSort={parsed.sort}
                 initialPage={parsed.page}
