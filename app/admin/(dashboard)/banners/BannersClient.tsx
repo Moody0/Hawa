@@ -10,6 +10,7 @@ import { deleteBanner, toggleBannerStatus } from "../../../../lib/admin-actions"
 import { toast } from "react-hot-toast";
 import { useSession } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
+import type { DepartmentLink } from "../../../../lib/catalog-links";
 
 interface Banner {
     id: string;
@@ -28,7 +29,7 @@ interface Banner {
     updatedAt: string;
 }
 
-export default function BannersClient({ banners }: { banners: Banner[] }) {
+export default function BannersClient({ banners, mainCategories }: { banners: Banner[]; mainCategories: DepartmentLink[] }) {
     const confirm = useConfirm();
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
@@ -120,6 +121,7 @@ export default function BannersClient({ banners }: { banners: Banner[] }) {
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
                         banner={selectedBanner}
+                        mainCategories={mainCategories}
                     />
 
                     <div className="grid grid-cols-1 gap-6">

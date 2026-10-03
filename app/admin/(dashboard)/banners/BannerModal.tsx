@@ -6,6 +6,8 @@ import { createBanner, updateBanner, BannerInput } from "../../../../lib/admin-a
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import ImageUploadField from "../../components/ImageUploadField";
+import type { DepartmentLink } from "../../../../lib/catalog-links";
+import { resolveBannerDestination } from "../../../../lib/catalog-links";
 
 interface BannerModalProps {
     isOpen: boolean;
@@ -24,9 +26,10 @@ interface BannerModalProps {
         badgeAr?: string | null;
         isActive: boolean;
     } | null;
+    mainCategories: DepartmentLink[];
 }
 
-export default function BannerModal({ isOpen, onClose, banner }: BannerModalProps) {
+export default function BannerModal({ isOpen, onClose, banner, mainCategories }: BannerModalProps) {
     const { t, language } = useLanguage();
     const isArabic = language === 'ar';
 
@@ -57,7 +60,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
             setBadgeAr(banner.badgeAr || "توزيع جملة معتمد");
             setButtonText(banner.buttonText || "Explore Products");
             setButtonTextAr(banner.buttonTextAr || "تصفح المنتجات");
-            setLink(banner.link || "/products");
+            setLink(resolveBannerDestination(banner.link, mainCategories));
             setIsActive(banner.isActive);
         } else {
             setTitle("");
@@ -73,7 +76,7 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
             setIsActive(true);
         }
         setActiveTab("content");
-    }, [banner, isOpen]);
+    }, [banner, isOpen, mainCategories]);
 
     if (!isOpen) return null;
 
@@ -328,8 +331,10 @@ export default function BannerModal({ isOpen, onClose, banner }: BannerModalProp
                                         </span>
                                         {[
                                             { label: isArabic ? "كل المنتجات" : "All Products", url: "/products" },
-                                            { label: isArabic ? "الغذائيات" : "Food", url: "/products?mainCategory=food" },
-                                            { label: isArabic ? "المنظفات" : "Detergents", url: "/products?mainCategory=detergents" },
+                                            ...mainCategories.filter((department) => department.slug).map((department) => ({
+                                                label: isArabic ? department.name : department.description || department.name,
+                                                url: `/departments/${encodeURIComponent(department.slug)}`,
+                                            })),
                                             { label: isArabic ? "الوكالات" : "Brands", url: "/brands" },
                                         ].map((preset) => (
                                             <button
