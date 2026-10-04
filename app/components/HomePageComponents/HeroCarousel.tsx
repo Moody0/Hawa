@@ -372,24 +372,24 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             return (
                                 <div
                                     key={slide.id}
-                                    className={`absolute inset-0 flex flex-col items-start justify-end text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:items-center md:text-center lg:items-start lg:text-start ${
+                                    className={`absolute inset-0 flex flex-col items-end justify-end text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:items-center md:text-center lg:items-start lg:text-start ${
                                         isActive
                                             ? 'opacity-100 translate-y-0 z-10 pointer-events-auto'
                                             : 'opacity-0 translate-y-2 pointer-events-none z-0'
                                     }`}
                                     aria-hidden={!isActive}
                                 >
-                                    <h1 className="mx-0 max-w-[22rem] text-[2rem] font-black leading-[1.08] tracking-tight text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.95),0_4px_12px_rgba(0,0,0,0.9)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:[text-shadow:none] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
+                                    <h1 className="mx-0 max-w-[min(58vw,22rem)] text-[2rem] font-black leading-[1.08] tracking-tight text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.95),0_4px_12px_rgba(0,0,0,0.9)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:[text-shadow:none] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
                                         <span className="block">{headline.part1}</span>
                                         {headline.part2 && (
-                                            <span className="mt-1 block text-[#E5B54A] [-webkit-text-stroke:0.75px_rgba(7,21,34,0.8)] [paint-order:stroke_fill] md:[-webkit-text-stroke:0] md:text-[#A8750A] dark:md:text-[#E5B54A]">
+                                            <span className="mt-1 block text-white md:text-[#A8750A] dark:md:text-[#E5B54A]">
                                                 {headline.part2}
                                             </span>
                                         )}
                                     </h1>
 
                                     {subtitleText && (
-                                        <p className="mx-0 mt-2 line-clamp-3 max-w-[25rem] text-sm font-semibold leading-[1.55] text-white [text-shadow:0_1px_3px_rgba(0,0,0,1),0_2px_10px_rgba(0,0,0,0.95)] md:mx-auto md:mt-3 md:line-clamp-2 md:max-w-lg md:text-sm md:font-medium md:leading-relaxed md:text-slate-600 md:[text-shadow:none] lg:mx-0 lg:text-base dark:text-slate-300">
+                                        <p className="mx-0 mt-2 line-clamp-3 max-w-[min(62vw,25rem)] text-sm font-semibold leading-[1.55] text-white [text-shadow:0_1px_3px_rgba(0,0,0,1),0_2px_10px_rgba(0,0,0,0.95)] md:mx-auto md:mt-3 md:line-clamp-2 md:max-w-lg md:text-sm md:font-medium md:leading-relaxed md:text-slate-600 md:[text-shadow:none] lg:mx-0 lg:text-base dark:text-slate-300">
                                             {subtitleText}
                                         </p>
                                     )}
