@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { ShoppingCart, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, ChevronRight, ChevronDown, Building2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 export interface Banner {
@@ -181,6 +181,13 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
         setAnimKey((prev) => prev + 1);
     }, []);
 
+    const scrollToNextSection = () => {
+        const nextSection = heroContainerRef.current?.nextElementSibling;
+        if (nextSection instanceof HTMLElement) {
+            nextSection.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+        }
+    };
+
     // Auto-advance carousel timer
     useEffect(() => {
         if (isPaused || slides.length <= 1) return;
@@ -294,7 +301,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 }
             `}</style>
 
-            <div dir="ltr" className="relative grid h-[clamp(420px,60svh,520px)] grid-cols-1 md:h-auto md:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
+            <div dir="ltr" className="relative grid h-[clamp(500px,72svh,620px)] grid-cols-1 md:h-auto md:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
                 {/* Physical left: photography only with smooth crossfade */}
                 <div className="absolute inset-0 h-full overflow-hidden bg-slate-100 md:relative md:inset-auto md:h-[330px] lg:h-full dark:bg-slate-900">
                     {slides.map((slide, index) => {
@@ -324,11 +331,11 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                     })}
 
                     {/* A localized mobile scrim protects text contrast without muting the full photograph. */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[70%] bg-gradient-to-t from-[#071522] via-[#071522]/80 to-transparent md:hidden" aria-hidden="true" />
+                    <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-t from-[#071522]/95 via-[#071522]/55 to-transparent md:hidden" aria-hidden="true" />
 
-                    {/* Compact mobile controls stay with the image and do not add hero height. */}
-                    <div dir={dir} className="absolute bottom-3 inset-x-0 z-30 flex items-center justify-center gap-2 md:hidden" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
-                        <div dir={dir} className="flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white/95 px-2.5 dark:border-white/10 dark:bg-slate-800/95" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
+                    {/* Small progress marks keep slide navigation out of the CTA area. */}
+                    <div dir={dir} className="absolute bottom-5 start-5 z-30 flex items-center gap-1.5 md:hidden" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
+                        <div dir={dir} className="flex items-center gap-1.5" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
                             {slides.map((_, idx) => {
                                 const isActive = idx === currentIndex;
                                 return (
@@ -339,14 +346,14 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                         aria-selected={isActive}
                                         aria-label={isArabic ? `الانتقال إلى البنر ${idx + 1}` : `Go to banner ${idx + 1}`}
                                         onClick={() => goToSlide(idx)}
-                                        className={`relative h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] ${
-                                            isActive ? 'w-7 bg-slate-300 dark:bg-white/30' : 'w-1.5 bg-slate-400 dark:bg-white/50'
+                                        className={`relative h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] ${
+                                            isActive ? 'w-7 bg-white/70' : 'w-1.5 bg-white/65 hover:bg-white'
                                         }`}
                                     >
                                         {isActive && (
                                             <span
                                                 key={`mobile-prog-${animKey}`}
-                                                className={`absolute inset-y-0 start-0 rounded-full bg-[#8A6305] dark:bg-[#E5B54A] ${
+                                                className={`absolute inset-y-0 start-0 rounded-full bg-[#E5B54A] ${
                                                     isPaused ? 'hero-progress-fill-paused' : 'hero-progress-fill'
                                                 }`}
                                             />
@@ -359,7 +366,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 </div>
 
                 {/* Physical right: clean HTML content panel with smooth crossfade */}
-                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-5 pb-16 pt-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
+                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-6 pb-20 pt-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
                     <div className="relative h-full min-h-[190px] w-full max-w-xl md:min-h-[260px] lg:min-h-[280px]">
                         {slides.map((slide, index) => {
                             const isActive = index === currentIndex;
@@ -373,7 +380,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             return (
                                 <div
                                     key={slide.id}
-                                    className={`absolute inset-0 flex flex-col justify-end text-center transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:justify-center lg:text-start ${
+                                    className={`absolute inset-0 flex flex-col items-start justify-end text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:items-center md:text-center lg:items-start lg:text-start ${
                                         isActive
                                             ? 'opacity-100 translate-y-0 z-10 pointer-events-auto'
                                             : 'opacity-0 translate-y-2 pointer-events-none z-0'
@@ -381,33 +388,33 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     aria-hidden={!isActive}
                                 >
                                     {badgeText && (
-                                        <span className="mb-2 inline-flex items-center justify-center gap-2 self-center rounded-full border border-white/15 bg-[#071522]/55 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#F4C95D] md:mb-2.5 md:self-auto md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:text-xs md:tracking-[0.14em] md:text-[#8A6305] lg:justify-start dark:md:text-[#E5B54A]">
+                                        <span className="mb-2 inline-flex items-center justify-start gap-2 self-start rounded-full border border-white/15 bg-[#071522]/55 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#F4C95D] md:mb-2.5 md:self-auto md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:text-xs md:tracking-[0.14em] md:text-[#8A6305] md:justify-center lg:justify-start dark:md:text-[#E5B54A]">
                                             <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                                             {badgeText}
                                         </span>
                                     )}
 
-                                    <h1 className="mx-auto max-w-[22rem] text-[1.65rem] font-black leading-[1.12] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] md:max-w-none md:text-4xl md:text-[#0B192C] md:drop-shadow-none lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
+                                    <h1 className="mx-0 max-w-[22rem] text-[1.85rem] font-black leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:drop-shadow-none lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
                                         <span className="block">{headline.part1}</span>
                                         {headline.part2 && (
-                                            <span className="mt-1 block text-white md:text-[#A8750A] dark:md:text-[#E5B54A]">
+                                            <span className="mt-1 block text-[#E5B54A] md:text-[#A8750A] dark:md:text-[#E5B54A]">
                                                 {headline.part2}
                                             </span>
                                         )}
                                     </h1>
 
                                     {subtitleText && (
-                                        <p className="mx-auto mt-2 line-clamp-2 max-w-[24rem] text-[13px] font-medium leading-[1.55] text-slate-100 drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)] md:mt-3 md:max-w-lg md:text-sm md:leading-relaxed md:text-slate-600 md:drop-shadow-none lg:mx-0 lg:text-base dark:text-slate-300">
+                                        <p className="mx-0 mt-2 line-clamp-3 max-w-[25rem] text-[13px] font-medium leading-[1.55] text-slate-100 drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)] md:mx-auto md:mt-3 md:line-clamp-2 md:max-w-lg md:text-sm md:leading-relaxed md:text-slate-600 md:drop-shadow-none lg:mx-0 lg:text-base dark:text-slate-300">
                                             {subtitleText}
                                         </p>
                                     )}
 
-                                    <div className="mx-auto mt-4 grid w-full max-w-[22rem] grid-cols-1 items-stretch gap-2 md:mx-0 md:mt-6 md:w-auto md:max-w-none md:flex md:flex-wrap md:items-center md:justify-center md:gap-2.5 lg:justify-start">
+                                    <div className="mx-0 mt-4 grid w-fit max-w-full grid-cols-1 justify-items-start gap-2 md:mx-0 md:mt-6 md:w-auto md:max-w-none md:flex md:flex-wrap md:items-center md:justify-center md:gap-2.5 lg:justify-start">
                                         <Link
                                             href={slide.link}
                                             prefetch={false}
                                             tabIndex={isActive ? 0 : -1}
-                                            className="group/btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#B68012] bg-[#B68012] px-4 text-xs font-bold leading-tight text-white shadow-lg shadow-black/20 transition-colors hover:bg-[#946809] active:scale-[0.98] md:rounded-lg md:px-6 md:text-sm md:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
+                                            className="group/btn inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-lg border border-[#B68012] bg-[#B68012] px-5 text-xs font-bold leading-tight text-white shadow-lg shadow-black/20 transition-colors hover:bg-[#946809] active:scale-[0.98] md:rounded-lg md:px-6 md:text-sm md:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
                                         >
                                             <span>{primaryButtonText}</span>
                                             <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
@@ -438,6 +445,15 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 </div>
             </div>
 
+            <button
+                type="button"
+                onClick={scrollToNextSection}
+                aria-label={isArabic ? 'انتقل إلى محتوى الصفحة' : 'Scroll to page content'}
+                className="absolute bottom-2 left-1/2 z-40 flex size-11 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white text-white transition-transform hover:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B192C] active:scale-95 md:hidden"
+            >
+                <ChevronDown className="size-6" aria-hidden="true" />
+            </button>
+
             {/* Circular Floating Left Arrow Button (Physically on left side with arrow pointing left) */}
             <button
                 type="button"
@@ -458,7 +474,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
             </button>
 
-            {/* Bottom Centered Pagination Dots / Pill */}
+            {/* Desktop slide progress navigation */}
             <div className="absolute bottom-5 inset-x-0 z-30 hidden items-center justify-center gap-2.5 md:flex" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
                 <div className="flex items-center justify-center gap-2" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
                     {slides.map((_, idx) => {
