@@ -312,7 +312,7 @@ class HawaAdminController extends Controller
                 } elseif ($cast === 'array') {
                     abort_unless(is_array($value) || $value === null, 422, 'Invalid structured settings field.');
                     if ($column === 'website_content' && is_array($value)) {
-                        $toggles = ['homeHeroEnabled', 'homeBrandsEnabled', 'homeCategoriesEnabled', 'homeFeaturedEnabled', 'aboutStoryEnabled', 'aboutValuesEnabled', 'aboutContactEnabled', 'navHomeEnabled', 'navAboutEnabled', 'navBrandsEnabled', 'navProductsEnabled', 'navShippingEnabled', 'navBlogEnabled', 'navContactEnabled'];
+                        $toggles = ['homeHeroEnabled', 'homePrideEnabled', 'homeBrandsEnabled', 'homeCategoriesEnabled', 'homeFeaturedEnabled', 'aboutStoryEnabled', 'aboutValuesEnabled', 'aboutContactEnabled', 'navHomeEnabled', 'navAboutEnabled', 'navBrandsEnabled', 'navProductsEnabled', 'navShippingEnabled', 'navBlogEnabled', 'navContactEnabled'];
                         foreach ($value as $field => $setting) {
                             if (!in_array($field, $toggles, true) && $setting === null) $setting = '';
                             abort_unless(in_array($field, $toggles, true) ? is_bool($setting) : is_string($setting) && mb_strlen($setting) <= 5000, 422, 'Invalid website content field: '.$field);

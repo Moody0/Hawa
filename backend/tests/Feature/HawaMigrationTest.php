@@ -152,6 +152,44 @@ class HawaMigrationTest extends TestCase
         $this->getJson('/api/customer/auth/me')->assertJsonPath('authenticated', false);
     }
 
+    public function test_phone_formats_save_as_canonical_plus_963(): void
+    {
+        $formats = [
+            '0987654321',
+            '987654321',
+            '963987654321',
+            '+963987654321',
+        ];
+
+        foreach ($formats as $index => $phoneInput) {
+            $this->assertSame('+963987654321', \App\Support\MerchantPhone::normalize($phoneInput));
+        }
+
+        // Register with local format
+        $this->postJson('/api/customer/auth/register', [
+            'shopName' => 'Store 987',
+            'ownerName' => 'Owner 987',
+            'phone' => '0987654321',
+            'password' => 'merchant-password',
+            'city' => 'حمص',
+            'address' => 'Street 987',
+        ])->assertCreated();
+
+        $saved = Customer::withoutGlobalScopes()->where('phone', '+963987654321')->first();
+        $this->assertNotNull($saved);
+        $this->assertSame('+963987654321', $saved->phone);
+
+        // Can login with 987654321 or 963987654321 or +963987654321
+        $saved->update(['is_active' => true]);
+        $this->postJson('/api/customer/auth/login', ['phone' => '987654321', 'password' => 'merchant-password'])->assertOk();
+        $this->postJson('/api/customer/auth/logout')->assertOk();
+
+        $this->postJson('/api/customer/auth/login', ['phone' => '963987654321', 'password' => 'merchant-password'])->assertOk();
+        $this->postJson('/api/customer/auth/logout')->assertOk();
+
+        $this->postJson('/api/customer/auth/login', ['phone' => '+963987654321', 'password' => 'merchant-password'])->assertOk();
+    }
+
     public function test_two_guards_and_guard_specific_logout(): void
     {
         $admin = $this->admin();

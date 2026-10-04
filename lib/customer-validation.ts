@@ -77,7 +77,7 @@ export function validateCustomerLogin(body: unknown): ValidationResult<CustomerL
         } else {
             const cleanPhone = normalizeSyrianPhone(rawPhone);
             if (!isValidSyrianPhone(cleanPhone)) {
-                errors.phone = 'يرجى إدخال رقم هاتف محمول سوري صالح مكون من 10 أرقام (09xxxxxxxx).';
+                errors.phone = 'يرجى إدخال رقم هاتف محمول صالح.';
             }
         }
     }
@@ -156,7 +156,7 @@ export function validateCustomerRegistration(body: unknown): ValidationResult<Cu
         } else {
             const cleanPhone = normalizeSyrianPhone(rawPhone);
             if (!isValidSyrianPhone(cleanPhone)) {
-                errors.phone = 'يرجى إدخال رقم هاتف محمول سوري صالح مكون من 10 أرقام (مثال: 0993443901).';
+                errors.phone = 'يرجى إدخال رقم هاتف محمول صالح.';
             }
         }
     }

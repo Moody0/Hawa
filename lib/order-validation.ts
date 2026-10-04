@@ -10,8 +10,8 @@ export function convertArabicToEnglishDigits(str: string): string {
 }
 
 /**
- * Normalizes Syrian mobile phone numbers to the canonical 10-digit format: 09xxxxxxxx
- * Handles variations: +963993..., 00963993..., 963993..., 993..., 0993... and Eastern Arabic numerals
+ * Normalizes Syrian mobile phone numbers to the canonical format: +9639xxxxxxxx
+ * Handles variations: +9639..., 009639..., 9639..., 09..., 9... and Eastern Arabic numerals
  */
 export function normalizeSyrianPhone(rawPhone: string): string {
     if (!rawPhone) return '';
@@ -21,25 +21,30 @@ export function normalizeSyrianPhone(rawPhone: string): string {
 
     // Handle international prefixes
     if (digits.startsWith('00963')) {
-        digits = '0' + digits.slice(5);
+        digits = digits.slice(5);
     } else if (digits.startsWith('963')) {
-        digits = '0' + digits.slice(3);
+        digits = digits.slice(3);
     }
 
-    // Handle 9-digit format without leading 0 (e.g. 993443901 -> 0993443901)
+    // Handle local prefix 0
+    if (digits.startsWith('0')) {
+        digits = digits.slice(1);
+    }
+
+    // Syrian mobile subscriber number is 9 digits starting with 9
     if (digits.length === 9 && digits.startsWith('9')) {
-        digits = '0' + digits;
+        return `+963${digits}`;
     }
 
-    return digits;
+    return digits ? `+${digits}` : '';
 }
 
 /**
- * Validates whether a phone number is a valid 10-digit Syrian mobile number (09xxxxxxxx)
+ * Validates whether a phone number is a valid Syrian mobile number (+9639xxxxxxxx)
  */
 export function isValidSyrianPhone(phone: string): boolean {
     const normalized = normalizeSyrianPhone(phone);
-    return /^09[0-9]{8}$/.test(normalized);
+    return /^\+9639[0-9]{8}$/.test(normalized);
 }
 
 /**
@@ -166,12 +171,12 @@ export function validateOrderForm(
     // Phone
     if (!cleanPhone) {
         errors.phone = isAr
-            ? 'يرجى إدخال رقم هاتف محمول سوري (09xxxxxxxx)'
-            : 'Please enter a Syrian mobile phone number (09xxxxxxxx)';
+            ? 'يرجى إدخال رقم الهاتف المحمول'
+            : 'Please enter mobile phone number';
     } else if (!isValidSyrianPhone(cleanPhone)) {
         errors.phone = isAr
-            ? 'رقم الهاتف غير صالح: يجب أن يبدأ بـ 09 ويتكون من 10 أرقام'
-            : 'Invalid phone: must start with 09 and contain 10 digits';
+            ? 'يرجى إدخال رقم هاتف محمول صالح'
+            : 'Please enter a valid mobile phone number';
     }
 
     // City

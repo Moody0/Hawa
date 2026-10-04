@@ -16,7 +16,7 @@ describe('API Validation Tests', () => {
             expect(result.isValid).toBe(true);
             expect(Object.keys(result.errors)).toHaveLength(0);
             expect(result.cleanData.shopName).toBe('سوبرماركت الأمل');
-            expect(result.cleanData.phone).toBe('0993443901');
+            expect(result.cleanData.phone).toBe('+963993443901');
             expect(result.cleanData.city).toBe('دمشق');
         });
 
@@ -49,7 +49,7 @@ describe('API Validation Tests', () => {
 
             const result = validateOrderForm(payload, 'ar');
             expect(result.isValid).toBe(true);
-            expect(result.cleanData.phone).toBe('0993443901');
+            expect(result.cleanData.phone).toBe('+963993443901');
             expect(result.cleanData.city).toBe('حلب');
         });
     });

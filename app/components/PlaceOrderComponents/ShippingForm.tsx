@@ -58,7 +58,7 @@ const ShippingForm = ({
 
     const isPhoneValid = isValidSyrianPhone(formData.phone);
     const showPhoneError = Boolean(touched.phone && errors.phone);
-    const showPhoneSuccess = formData.phone.length === 10 && isPhoneValid;
+    const showPhoneSuccess = Boolean(formData.phone && isPhoneValid);
 
     const onFieldBlur = (field: keyof ShippingFormData) => {
         if (handleBlur) {
@@ -177,11 +177,10 @@ const ShippingForm = ({
                                 onBlur={() => onFieldBlur('phone')}
                                 required
                                 autoComplete="tel"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                maxLength={10}
+                                inputMode="tel"
+                                maxLength={20}
                                 aria-invalid={showPhoneError}
-                                aria-describedby="phone-hint"
+                                aria-describedby={showPhoneError ? "phone-error" : undefined}
                                 className={`w-full rounded-lg border bg-white py-3 ps-10 pe-10 text-sm font-mono font-medium text-[#0B192C] outline-none transition-colors placeholder:text-slate-400 dark:bg-zinc-800 dark:text-white ${
                                     showPhoneError
                                         ? 'border-red-500 focus:border-red-500 focus:ring-0 bg-red-50/20 dark:bg-red-950/10'
@@ -189,7 +188,7 @@ const ShippingForm = ({
                                         ? 'border-emerald-500 focus:border-emerald-500 focus:ring-0'
                                         : 'border-slate-300 dark:border-white/15 focus:border-[#8A6305] focus:ring-0'
                                 }`}
-                                placeholder="09xxxxxxxx"
+                                placeholder=""
                                 type="tel"
                                 dir="ltr"
                             />
@@ -199,16 +198,10 @@ const ShippingForm = ({
                                 </div>
                             )}
                         </div>
-                        {showPhoneError ? (
-                            <p id="phone-hint" className="flex items-center gap-1 text-xs text-red-500 font-bold mt-1.5">
+                        {showPhoneError && (
+                            <p id="phone-error" className="flex items-center gap-1 text-xs text-red-500 font-bold mt-1.5">
                                 <AlertCircle className="text-sm shrink-0" />
                                 <span>{errors.phone}</span>
-                            </p>
-                        ) : (
-                            <p id="phone-hint" className="text-xs text-gray-400 dark:text-slate-400 mt-1.5 font-medium">
-                                {isAr 
-                                    ? 'يجب أن يبدأ بـ 09 ويتكون من 10 أرقام (لتلقي تفاصيل الطلب عبر واتساب)' 
-                                    : 'Must start with 09 and be 10 digits (for WhatsApp order confirmation)'}
                             </p>
                         )}
                     </div>

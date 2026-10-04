@@ -2,12 +2,14 @@
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import ResilientImage from '@/app/components/ResilientImage';
-import { getWebsiteContent } from '@/lib/website-content';
+import { getSiteContacts, getWebsiteContent } from '@/lib/website-content';
+import PartnerPrideBanner from '@/app/components/HomePageComponents/PartnerPrideBanner';
 
 export default function AboutUsClient({ settings }: { settings: Record<string, any> | null }) {
     const { language, dir } = useLanguage();
     const ar = language === 'ar' || dir === 'rtl';
     const content = getWebsiteContent(settings?.websiteContent);
+    const contacts = getSiteContacts(settings || {});
     const copy = (key: string) => String(settings?.[ar ? `${key}Ar` : key] ?? settings?.[key] ?? '');
     const localized = (key: keyof typeof content) => String(content[(ar ? `${key}Ar` : key) as keyof typeof content] ?? content[key]);
     const values = [1, 2, 3].map(n => ({ title: copy(`aboutValue${n}Title`), description: copy(`aboutValue${n}Desc`) })).filter(v => v.title || v.description);
@@ -34,6 +36,18 @@ export default function AboutUsClient({ settings }: { settings: Record<string, a
             {copy('aboutValuesDesc') && <p className="text-slate-600 dark:text-slate-300 mb-8">{copy('aboutValuesDesc')}</p>}
             <div className="grid gap-6 md:grid-cols-3">{values.map((value, i) => <article key={i} className="border-s-2 border-slate-200 dark:border-slate-700 ps-5"><h3 className="font-bold text-lg mb-3">{value.title}</h3><p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{value.description}</p></article>)}</div>
         </section>}
+        {content.homePrideEnabled && (
+            <div className="pt-6">
+                <PartnerPrideBanner
+                    language={language}
+                    dir={dir}
+                    content={content}
+                    salesPhone={contacts.phone}
+                    managementPhone={contacts.managementPhone}
+                    whatsappUrl={contacts.whatsappUrl}
+                />
+            </div>
+        )}
         {content.aboutContactEnabled && <section className="flex flex-col sm:flex-row gap-6 items-start sm:items-center sm:justify-between rounded-xl bg-slate-100 p-6 sm:p-8 dark:bg-slate-800"><div><h2 className="text-xl sm:text-2xl font-bold mb-2">{localized('aboutContactTitle')}</h2><p className="text-slate-600 dark:text-slate-300">{localized('aboutContactDescription')}</p></div><Link href="/contact" className="rounded-lg px-6 py-3 bg-[#0B192C] hover:bg-[#16304d] text-white font-semibold shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4">{localized('aboutContactButton')}</Link></section>}
     </div>;
 }

@@ -29,22 +29,35 @@ const TopBar = ({ isVisible }: TopBarProps) => {
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <p className="text-xs font-bold text-[#0B192C] dark:text-gray-200 truncate">
                         {isArabic 
-                            ? 'شركة حوا للتوزيع والتجارة | كل منتجات وكالاتك… بطلب واحد' 
-                            : 'Hawa Distribution & Trading | All your agency products... in one single order'}
+                            ? '✨ نفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان | كل منتجات وكالاتك… بطلب واحد' 
+                            : '✨ Proud distributor of Bitinjana Brothers | All your agency products in one order'}
                     </p>
                 </div>
                 
-                {/* Center Column: Sales Manager Hotline */}
-                <div className="hidden xl:flex items-center justify-center gap-3 text-xs font-bold text-[#0B192C] dark:text-gray-200">
+                {/* Center Column: Sales Manager & General Manager Hotlines */}
+                <div className="hidden xl:flex items-center justify-center gap-3.5 text-xs font-bold text-[#0B192C] dark:text-gray-200">
                     <a 
-                        href={`tel:${siteContacts.phone}`}
+                        href={`tel:${(siteContacts.phone || '+963 993 443 901').replace(/\s+/g, '')}`}
                         className="hover:text-[#8A6305] transition-colors flex items-center gap-1.5"
                         title={isArabic ? 'اتصال مباشر بمدير المبيعات' : 'Call Sales Manager'}
                     >
                         <span>📞</span>
-                        <span>{isArabic ? 'مبيعات الجملة:' : 'Wholesale Sales:'}</span>
-                        <span dir="ltr" className="font-extrabold text-[#8A6305]">{siteContacts.phone}</span>
+                        <span>{isArabic ? 'مدير المبيعات:' : 'Sales:'}</span>
+                        <span dir="ltr" className="font-extrabold text-[#8A6305]">{siteContacts.phone || '+963 993 443 901'}</span>
                     </a>
+                    {siteContacts.managementPhone && (
+                        <>
+                            <span className="text-gray-300 dark:text-gray-700">|</span>
+                            <a 
+                                href={`tel:${siteContacts.managementPhone.replace(/\s+/g, '')}`}
+                                className="hover:text-[#8A6305] transition-colors flex items-center gap-1.5"
+                                title={isArabic ? 'اتصال مباشر بمدير الشركة' : 'Call General Management'}
+                            >
+                                <span>{isArabic ? 'مدير الشركة:' : 'Management:'}</span>
+                                <span dir="ltr" className="font-extrabold text-[#0B192C] dark:text-gray-100">{siteContacts.managementPhone}</span>
+                            </a>
+                        </>
+                    )}
                 </div>
                 
                 {/* Right Column: Switchers and Live WhatsApp Link */}

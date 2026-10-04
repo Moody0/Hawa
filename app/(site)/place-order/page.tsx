@@ -17,7 +17,7 @@ import OrderSummary from '@/app/components/PlaceOrderComponents/OrderSummary';
 
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCustomer } from '@/app/context/CustomerContext';
-import { validateOrderForm, findGovernorate, normalizeSyrianPhone } from '@/lib/order-validation';
+import { validateOrderForm, findGovernorate, normalizeSyrianPhone, isValidSyrianPhone, convertArabicToEnglishDigits } from '@/lib/order-validation';
 
 function PlaceOrderSkeleton() {
     return (
@@ -122,7 +122,7 @@ const PlaceOrderPage = () => {
         
         let cleanedValue = value;
         if (name === 'phone') {
-            cleanedValue = normalizeSyrianPhone(value).slice(0, 10);
+            cleanedValue = convertArabicToEnglishDigits(value).replace(/[^0-9+]/g, '').slice(0, 20);
         }
 
         const nextFormData = { ...formData, [name]: cleanedValue };
@@ -137,7 +137,15 @@ const PlaceOrderPage = () => {
 
     const handleBlur = (field: keyof ShippingFormData) => {
         setTouched(prev => ({ ...prev, [field]: true }));
-        const fieldError = validateField(field, formData[field] || '', formData);
+        let valToValidate = formData[field] || '';
+        if (field === 'phone' && formData.phone) {
+            const normalized = normalizeSyrianPhone(formData.phone);
+            if (isValidSyrianPhone(normalized)) {
+                setFormData(prev => ({ ...prev, phone: normalized }));
+                valToValidate = normalized;
+            }
+        }
+        const fieldError = validateField(field, valToValidate, { ...formData, [field]: valToValidate });
         setErrors(prev => ({ ...prev, [field]: fieldError }));
     };
 

@@ -74,7 +74,7 @@ export default function MerchantLoginPage() {
             return;
         }
         if (!isValidSyrianPhone(cleanPhone)) {
-            setError(isArabic ? 'يرجى إدخال رقم موبايل سوري صحيح يبدأ بـ 09' : 'Enter a valid Syrian mobile number beginning with 09');
+            setError(isArabic ? 'يرجى إدخال رقم موبايل سوري صحيح' : 'Enter a valid Syrian mobile number');
             return;
         }
 
@@ -245,10 +245,10 @@ export default function MerchantLoginPage() {
                                             type="tel"
                                             inputMode="tel"
                                             required
-                                            maxLength={15}
+                                            maxLength={20}
                                             value={phone}
-                                            onChange={(e) => setPhone(e.target.value.replace(/[^0-9+٠-٩۰-۹]/g, '').slice(0, 15))}
-                                            placeholder="09xxxxxxxx"
+                                            onChange={(e) => setPhone(e.target.value.replace(/[^0-9+٠-٩۰-۹]/g, '').slice(0, 20))}
+                                            placeholder=""
                                             dir="ltr"
                                             className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2.5 ps-10 pe-4 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:py-3 sm:text-sm"
                                         />

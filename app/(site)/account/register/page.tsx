@@ -63,7 +63,7 @@ export default function MerchantRegisterPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         if (name === 'phone') {
-            const numeric = convertArabicToEnglishDigits(value).replace(/[^0-9+]/g, '').slice(0, 15);
+            const numeric = convertArabicToEnglishDigits(value).replace(/[^0-9+]/g, '').slice(0, 20);
             setFormData((prev) => ({ ...prev, [name]: numeric }));
             return;
         }
@@ -94,7 +94,7 @@ export default function MerchantRegisterPage() {
         }
 
         if (!isValidSyrianPhone(formData.phone)) {
-            setError(isArabic ? 'يرجى إدخال رقم هاتف محمول سوري صالح (مثال: 0993443901 أو 09xxxxxxxx)' : 'Please enter a valid Syrian mobile number (e.g. 0993443901)');
+            setError(isArabic ? 'يرجى إدخال رقم هاتف محمول صالح' : 'Please enter a valid mobile number');
             return;
         }
 
@@ -413,10 +413,10 @@ export default function MerchantRegisterPage() {
                                                 name="phone"
                                                 inputMode="tel"
                                                 required
-                                                maxLength={15}
+                                                maxLength={20}
                                                 value={formData.phone}
                                                 onChange={handleChange}
-                                                placeholder="09xxxxxxxx"
+                                                placeholder=""
                                                 dir="ltr"
                                                 className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2.5 ps-9 pe-3 text-xs font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-slate-800 dark:text-white sm:text-sm"
                                             />

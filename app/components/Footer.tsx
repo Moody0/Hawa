@@ -225,6 +225,11 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                             {brandDescription}
                         </p>
 
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#8A6305]/25 to-transparent border border-[#8A6305]/40 text-[#E5B54A] text-xs font-bold w-fit">
+                            <span>✨</span>
+                            <span>{isArabic ? 'نفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان' : 'Proud distributor of Bitinjana Brothers products'}</span>
+                        </div>
+
                         {/* Social Channels */}
                         {socialLinks.length > 0 && <div className="flex flex-col gap-2 pt-2">
                             <span className="text-[11px] font-semibold text-slate-400">
@@ -278,6 +283,23 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                                         className="font-bold text-white hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                                     >
                                         {wholesalePhone}
+                                    </a>
+                                </div>
+                            </div>}
+
+                            {/* Management Phone */}
+                            {contacts.managementPhone && <div className="flex items-center gap-2.5">
+                                <Phone className="w-4 h-4 text-[#E5B54A] shrink-0" aria-hidden="true" />
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-slate-400 font-medium text-xs">
+                                        {isArabic ? 'إدارة الشركة:' : 'Management:'}
+                                    </span>
+                                    <a
+                                        href={`tel:${contacts.managementPhone.replace(/\s+/g, '')}`}
+                                        dir="ltr"
+                                        className="font-bold text-white hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
+                                    >
+                                        {contacts.managementPhone}
                                     </a>
                                 </div>
                             </div>}

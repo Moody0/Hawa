@@ -36,39 +36,38 @@ interface ProductResult {
 }
 
 const POPULAR_SEARCHES_AR = [
-    'زيت دوار الشمس',
-    'زيت زيتون الريف',
-    'ارز بسمتي',
-    'حليب بودرة حليبنا',
-    'سمن بقري حليبنا',
-    'سائل جلي بوفالو',
-    'مسحوق غسيل بوفالو',
-    'صابون يدين بوفالو',
-    'مطهر فيتول',
-    'معجون اسنان روكافيرا',
-    'شامبو روكافيرا',
-    'لانشون دجاج زوان',
-    'طون صن بيل',
-    'تونا سيلفر فيش',
-    'مناديل مبللة',
+    { label: 'زيت', query: 'زيت دوار الشمس' },
+    { label: 'زيت زيتون', query: 'زيت زيتون الريف' },
+    { label: 'أرز', query: 'ارز بسمتي' },
+    { label: 'حليب', query: 'حليب بودرة حليبنا' },
+    { label: 'سمن', query: 'سمن بقري حليبنا' },
+    { label: 'جلي', query: 'سائل جلي بوفالو' },
+    { label: 'غسيل', query: 'مسحوق غسيل بوفالو' },
+    { label: 'صابون', query: 'صابون يدين بوفالو' },
+    { label: 'مطهر', query: 'مطهر فيتول' },
+    { label: 'معجون', query: 'معجون اسنان روكافيرا' },
+    { label: 'شامبو', query: 'شامبو روكافيرا' },
+    { label: 'لانشون', query: 'لانشون دجاج زوان' },
+    { label: 'طون', query: 'طون صن بيل' },
+    { label: 'تونا', query: 'تونا سيلفر فيش' },
+    { label: 'مناديل', query: 'مناديل مبللة' },
 ];
 
 const POPULAR_SEARCHES_EN = [
-    'Sunflower Oil',
-    'Alreef Olive Oil',
-    'Basmati Rice',
-    'Halibna Milk Powder',
-    'Halibna Ghee',
-    'Bufalo Dishwashing Liquid',
-    'Bufalo Laundry Detergent',
-    'Bufalo Hand Soap',
-    'Vitol Antiseptic',
-    'Rocavera Toothpaste',
-    'Rocavera Shampoo',
-    'Zwan Chicken Luncheon',
-    'Sun Bell Tuna',
-    'Silver Fish Tuna',
-    'Wet Wipes',
+    { label: 'Oil', query: 'Sunflower Oil' },
+    { label: 'Olive Oil', query: 'Alreef Olive Oil' },
+    { label: 'Rice', query: 'Basmati Rice' },
+    { label: 'Milk', query: 'Halibna Milk Powder' },
+    { label: 'Ghee', query: 'Halibna Ghee' },
+    { label: 'Dish Soap', query: 'Bufalo Dishwashing Liquid' },
+    { label: 'Laundry', query: 'Bufalo Laundry Detergent' },
+    { label: 'Soap', query: 'Bufalo Hand Soap' },
+    { label: 'Antiseptic', query: 'Vitol Antiseptic' },
+    { label: 'Toothpaste', query: 'Rocavera Toothpaste' },
+    { label: 'Shampoo', query: 'Rocavera Shampoo' },
+    { label: 'Luncheon', query: 'Zwan Chicken Luncheon' },
+    { label: 'Tuna', query: 'Tuna' },
+    { label: 'Wipes', query: 'Wet Wipes' },
 ];
 
 const FEATURED_AGENCIES = [
@@ -366,11 +365,11 @@ const MobileSearchModal = ({ isOpen, onClose }: MobileSearchModalProps) => {
                                         <button
                                             key={idx}
                                             type="button"
-                                            onClick={() => handleSelectTag(term)}
+                                            onClick={() => handleSelectTag(term.query)}
                                             className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-zinc-800/80 hover:bg-[#8A6305]/10 hover:text-[#8A6305] dark:hover:bg-[#8A6305]/20 dark:hover:text-[#E5B54A] text-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-white/5 transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                                         >
                                             <Search className="w-3 h-3 text-slate-400 shrink-0" />
-                                            <span>{term}</span>
+                                            <span>{term.label}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -551,10 +550,10 @@ const MobileSearchModal = ({ isOpen, onClose }: MobileSearchModalProps) => {
                                     <button
                                         key={idx}
                                         type="button"
-                                        onClick={() => handleSelectTag(term)}
+                                        onClick={() => handleSelectTag(term.query)}
                                         className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-300 hover:bg-[#8A6305]/10 hover:text-[#8A6305] border border-slate-200/60 dark:border-white/5 transition-all cursor-pointer"
                                     >
-                                        {term}
+                                        {term.label}
                                     </button>
                                 ))}
                             </div>

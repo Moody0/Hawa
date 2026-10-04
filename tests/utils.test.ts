@@ -15,12 +15,16 @@ describe('Utility tests: lib/order-validation', () => {
         expect(convertArabicToEnglishDigits('')).toBe('');
     });
 
-    it('normalizes various Syrian phone number inputs to canonical 10-digit format', () => {
-        expect(normalizeSyrianPhone('+963993443901')).toBe('0993443901');
-        expect(normalizeSyrianPhone('00963 993 443 901')).toBe('0993443901');
-        expect(normalizeSyrianPhone('993443901')).toBe('0993443901');
-        expect(normalizeSyrianPhone('٠٩٩٣٤٤٣٩٠١')).toBe('0993443901');
-        expect(normalizeSyrianPhone('0993443901')).toBe('0993443901');
+    it('normalizes various Syrian phone number inputs to canonical +963 format', () => {
+        expect(normalizeSyrianPhone('+963993443901')).toBe('+963993443901');
+        expect(normalizeSyrianPhone('00963 993 443 901')).toBe('+963993443901');
+        expect(normalizeSyrianPhone('993443901')).toBe('+963993443901');
+        expect(normalizeSyrianPhone('٠٩٩٣٤٤٣٩٠١')).toBe('+963993443901');
+        expect(normalizeSyrianPhone('0993443901')).toBe('+963993443901');
+        // User requested variations:
+        expect(normalizeSyrianPhone('0987654321')).toBe('+963987654321');
+        expect(normalizeSyrianPhone('987654321')).toBe('+963987654321');
+        expect(normalizeSyrianPhone('963987654321')).toBe('+963987654321');
     });
 
     it('accurately validates 10-digit Syrian mobile phone numbers', () => {

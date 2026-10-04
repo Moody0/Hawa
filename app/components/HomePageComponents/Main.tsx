@@ -9,6 +9,8 @@ import ScrollReveal from '../ScrollReveal';
 import { getI18n } from '@/lib/i18n';
 import HeroCarousel from './HeroCarousel';
 import CompanyServices from './CompanyServices';
+import PartnerPrideBanner from './PartnerPrideBanner';
+import { getSiteContacts } from '@/lib/website-content';
 
 const AgenciesSlider = dynamic(() => import('./AgenciesSlider'), {
     loading: () => <div className="min-h-[140px]" />,
@@ -116,6 +118,23 @@ const Main = async ({
             >
                 {content.homeBrandsEnabled && <AgenciesSlider brands={railBrands} title={ar ? content.homeBrandsTitleAr : content.homeBrandsTitle} subtitle={ar ? content.homeBrandsDescriptionAr : content.homeBrandsDescription} />}
             </ScrollReveal>
+
+            {/* 2.5 Featured Partner Pride Representation Banner */}
+            {content.homePrideEnabled !== false && (
+                <ScrollReveal
+                    className="bg-[#FAF7F0] dark:bg-[#101E32] pt-2 pb-6"
+                    variant="subtle"
+                >
+                    <PartnerPrideBanner
+                        language={language}
+                        dir={dir}
+                        content={content}
+                        salesPhone={getSiteContacts(siteSettings || {}).phone || '+963 993 443 901'}
+                        managementPhone={getSiteContacts(siteSettings || {}).managementPhone || '+963 994 166 000'}
+                        whatsappUrl={getSiteContacts(siteSettings || {}).whatsappUrl}
+                    />
+                </ScrollReveal>
+            )}
 
             {/* 3–4. Category discovery followed by commercial proof */}
             <ScrollReveal

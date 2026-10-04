@@ -145,12 +145,15 @@ describe('Customer Validation & Credential Normalization (Tasks 4.5 & 4.6)', () 
 
         it('normalizes various Syrian phone formats correctly', () => {
             const phoneCases = [
-                { input: '0993443901', expected: '0993443901' },
-                { input: '+963993443901', expected: '0993443901' },
-                { input: '00963993443901', expected: '0993443901' },
-                { input: '963993443901', expected: '0993443901' },
-                { input: '993443901', expected: '0993443901' },
-                { input: '٠٩٩٣٤٤٣٩٠١', expected: '0993443901' }, // Arabic-Indic numerals
+                { input: '0993443901', expected: '+963993443901' },
+                { input: '+963993443901', expected: '+963993443901' },
+                { input: '00963993443901', expected: '+963993443901' },
+                { input: '963993443901', expected: '+963993443901' },
+                { input: '993443901', expected: '+963993443901' },
+                { input: '٠٩٩٣٤٤٣٩٠١', expected: '+963993443901' }, // Arabic-Indic numerals
+                { input: '0987654321', expected: '+963987654321' },
+                { input: '987654321', expected: '+963987654321' },
+                { input: '963987654321', expected: '+963987654321' },
             ];
 
             for (const { input, expected } of phoneCases) {

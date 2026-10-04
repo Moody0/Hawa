@@ -2,7 +2,8 @@
 import type { WebsiteContent } from '@/lib/website-content';
 
 const toggles: [keyof WebsiteContent, string, string][] = [
-    ['homeHeroEnabled', 'Home banners', 'بنرات الرئيسية'], ['homeBrandsEnabled', 'Home partners', 'شركاء الرئيسية'],
+    ['homeHeroEnabled', 'Home banners', 'بنرات الرئيسية'], ['homePrideEnabled', 'Bitinjana Brothers pride banner', 'بانر تمثيل وتوزيع بيتنجانة إخوان'],
+    ['homeBrandsEnabled', 'Home partners', 'شركاء الرئيسية'],
     ['homeCategoriesEnabled', 'Home categories', 'أقسام الرئيسية'], ['homeFeaturedEnabled', 'Featured collections', 'تشكيلات المنتجات'],
     ['aboutStoryEnabled', 'About: company story', 'من نحن: قصة الشركة'], ['aboutValuesEnabled', 'About: values', 'من نحن: قيم الشركة'],
     ['aboutContactEnabled', 'About: contact invitation', 'من نحن: دعوة التواصل'],
@@ -12,6 +13,7 @@ const toggles: [keyof WebsiteContent, string, string][] = [
 ];
 const fields: [keyof WebsiteContent, string, string][] = [
     ['homeIntroTitle', 'Home welcome title', 'عنوان ترحيب الرئيسية'], ['homeIntroDescription', 'Home welcome description', 'وصف ترحيب الرئيسية'],
+    ['homePrideTitle', 'Pride banner title', 'عنوان بانر تمثيل بيتنجانة إخوان'], ['homePrideDescription', 'Pride banner description', 'وصف بانر تمثيل بيتنجانة إخوان'],
     ['homeBrandsTitle', 'Partners title', 'عنوان الشركاء'], ['homeBrandsDescription', 'Partners description', 'وصف الشركاء'],
     ['businessHours', 'Business hours', 'أوقات العمل'], ['aboutContactTitle', 'About contact title', 'عنوان التواصل في من نحن'],
     ['aboutContactDescription', 'About contact description', 'وصف التواصل في من نحن'], ['aboutContactButton', 'About contact button', 'زر التواصل في من نحن'],
@@ -41,9 +43,9 @@ export default function WebsiteControlsSection({ value, onChange, contacts, onCo
         <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
             <h3 className="text-xl font-bold mb-2">{isArabic ? 'بيانات التواصل الموحدة' : 'Shared contact information'}</h3>
             <p className="text-sm text-slate-500 mb-5">{isArabic ? 'تطبق هذه البيانات على الترويسة والفوتر وحسابات التجار والسلة وصفحة التواصل وبقية روابط الدعم. تترك روابط التواصل الاجتماعي الفارغة مخفية.' : 'These details apply to the header, footer, merchant support, cart, contact page, and other support links. Blank social links stay hidden.'}</p>
-            <label className="block mb-5">{isArabic ? 'هاتف الإدارة (اختياري)' : 'Management phone (optional)'}<input type="tel" className={inputClass} value={value.managementPhone} onChange={e => onChange({ ...value, managementPhone: e.target.value })} maxLength={32} dir="ltr" /></label>
+            <label className="block mb-5">{isArabic ? 'هاتف إدارة الشركة (مدير الشركة)' : 'Company Director / Management phone'}<input type="tel" className={inputClass} value={value.managementPhone} onChange={e => onChange({ ...value, managementPhone: e.target.value })} maxLength={32} dir="ltr" /></label>
             <div className="grid gap-5 sm:grid-cols-2">{[
-                ['footerPhone', 'Sales phone', 'هاتف المبيعات'], ['whatsappNumber', 'WhatsApp number', 'رقم واتساب'],
+                ['footerPhone', 'Wholesale Sales phone (Sales Manager)', 'هاتف مبيعات الجملة (مدير المبيعات)'], ['whatsappNumber', 'WhatsApp number', 'رقم واتساب'],
                 ['footerEmail', 'Email', 'البريد الإلكتروني'], ['footerAddress', 'Address (English)', 'العنوان بالإنجليزية'],
                 ['footerAddressAr', 'Address (Arabic)', 'العنوان بالعربية'], ['footerFacebookUrl', 'Facebook URL', 'رابط فيسبوك'],
                 ['footerInstagramUrl', 'Instagram URL', 'رابط إنستغرام'], ['footerLinkedinUrl', 'LinkedIn URL', 'رابط لينكدإن'],
