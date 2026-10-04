@@ -101,6 +101,7 @@ const Main = async ({
 
     const content = getWebsiteContent(siteSettings?.websiteContent);
     const ar = language === "ar";
+    const siteContacts = getSiteContacts(siteSettings || {});
 
     return (
         <div className="w-full flex flex-col overflow-x-clip">
@@ -118,23 +119,6 @@ const Main = async ({
             >
                 {content.homeBrandsEnabled && <AgenciesSlider brands={railBrands} title={ar ? content.homeBrandsTitleAr : content.homeBrandsTitle} subtitle={ar ? content.homeBrandsDescriptionAr : content.homeBrandsDescription} />}
             </ScrollReveal>
-
-            {/* 2.5 Featured Partner Pride Representation Banner */}
-            {content.homePrideEnabled !== false && (
-                <ScrollReveal
-                    className="bg-[#FAF7F0] dark:bg-[#101E32] pt-2 pb-6"
-                    variant="subtle"
-                >
-                    <PartnerPrideBanner
-                        language={language}
-                        dir={dir}
-                        content={content}
-                        salesPhone={getSiteContacts(siteSettings || {}).phone || '+963 993 443 901'}
-                        managementPhone={getSiteContacts(siteSettings || {}).managementPhone || '+963 994 166 000'}
-                        whatsappUrl={getSiteContacts(siteSettings || {}).whatsappUrl}
-                    />
-                </ScrollReveal>
-            )}
 
             {/* 3–4. Category discovery followed by commercial proof */}
             <ScrollReveal
@@ -181,6 +165,22 @@ const Main = async ({
                     className="bg-slate-50 dark:bg-[#0E1B2E]"
                 >
                     <TestimonialsMasonry reviews={reviews} products={featuredBestSellers} settings={siteSettings} />
+                </ScrollReveal>
+            )}
+
+            {/* 10. Partner callout at the end of the home page */}
+            {content.homePrideEnabled !== false && (
+                <ScrollReveal
+                    className="bg-[#FAF7F0] dark:bg-[#101E32]"
+                    variant="subtle"
+                >
+                    <PartnerPrideBanner
+                        language={language}
+                        dir={dir}
+                        content={content}
+                        salesPhone={siteContacts.phone || '+963 993 443 901'}
+                        whatsappUrl={siteContacts.whatsappUrl}
+                    />
                 </ScrollReveal>
             )}
         </div>
