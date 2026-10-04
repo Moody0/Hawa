@@ -372,7 +372,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             return (
                                 <div
                                     key={slide.id}
-                                    className={`absolute inset-0 flex flex-col items-end justify-end text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:items-center md:text-center lg:items-start lg:text-start ${
+                                    className={`absolute inset-0 flex flex-col items-start justify-end text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:items-center md:text-center lg:items-start lg:text-start ${
                                         isActive
                                             ? 'opacity-100 translate-y-0 z-10 pointer-events-auto'
                                             : 'opacity-0 translate-y-2 pointer-events-none z-0'
