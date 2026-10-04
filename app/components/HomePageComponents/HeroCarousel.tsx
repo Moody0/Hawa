@@ -323,8 +323,8 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                         );
                     })}
 
-                    {/* A localized mobile scrim protects text contrast without muting the full photograph. */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[72%] bg-gradient-to-t from-[#071522]/95 via-[#071522]/55 to-transparent md:hidden" aria-hidden="true" />
+                    {/* A subtle mobile scrim keeps the hero text readable while preserving the photo. */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[38%] bg-gradient-to-t from-[#071522]/45 via-[#071522]/10 to-transparent md:hidden" aria-hidden="true" />
 
                     {/* Small progress marks keep slide navigation out of the CTA area. */}
                     <div dir={dir} className="absolute bottom-5 start-5 z-30 flex items-center gap-1.5 md:hidden" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
@@ -359,12 +359,11 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 </div>
 
                 {/* Physical right: clean HTML content panel with smooth crossfade */}
-                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-6 pb-20 pt-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
-                    <div className="relative h-full min-h-[190px] w-full max-w-xl md:min-h-[260px] lg:min-h-[280px]">
+                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-6 pb-16 pt-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
+                    <div className="relative h-full min-h-[240px] w-full max-w-xl md:min-h-[260px] lg:min-h-[280px]">
                         {slides.map((slide, index) => {
                             const isActive = index === currentIndex;
                             const headline = parseHeadline(isArabic ? slide.titleAr : slide.title, isArabic);
-                            const badgeText = isArabic ? slide.badgeAr : slide.badge;
                             const subtitleText = isArabic ? slide.subtitleAr : slide.subtitle;
                             const primaryButtonText = isArabic ? slide.buttonTextAr : slide.buttonText;
                             const secondaryButtonText = isArabic ? slide.secondaryButtonTextAr : slide.secondaryButtonText;
@@ -380,13 +379,6 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     }`}
                                     aria-hidden={!isActive}
                                 >
-                                    {badgeText && (
-                                        <span className="mb-2 inline-flex items-center justify-start gap-2 self-start rounded-full border border-white/15 bg-[#071522]/55 px-3 py-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#F4C95D] md:mb-2.5 md:self-auto md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:text-xs md:tracking-[0.14em] md:text-[#8A6305] md:justify-center lg:justify-start dark:md:text-[#E5B54A]">
-                                            <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
-                                            {badgeText}
-                                        </span>
-                                    )}
-
                                     <h1 className="mx-0 max-w-[22rem] text-[2rem] font-black leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:drop-shadow-none lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
                                         <span className="block">{headline.part1}</span>
                                         {headline.part2 && (
