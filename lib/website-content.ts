@@ -1,6 +1,9 @@
-export const PARTNER_PRIDE_TITLE_AR = 'نَفْخَرُ بِتَمْثِيلِ وَتَوْزِيعِ أَصْنَافِ شَرِكَةِ بَيْتِنْجَانَة إِخْوَان';
+export const PARTNER_PRIDE_TITLE_AR = 'نَفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان';
 
-const LEGACY_PARTNER_PRIDE_TITLE_AR = 'نفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان';
+const LEGACY_PARTNER_PRIDE_TITLES_AR = [
+    'نفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان',
+    'نَفْخَرُ بِتَمْثِيلِ وَتَوْزِيعِ أَصْنَافِ شَرِكَةِ بَيْتِنْجَانَة إِخْوَان',
+];
 
 export const DEFAULT_WEBSITE_CONTENT = {
     homeHeroEnabled: true, homeBrandsEnabled: true, homeCategoriesEnabled: true, homeFeaturedEnabled: true,
@@ -38,7 +41,7 @@ export function getWebsiteContent(raw: unknown): WebsiteContent {
         const value = (raw as Record<string, unknown>)[key];
         if (typeof value === typeof result[key]) Object.assign(result, { [key]: value });
     }
-    if (result.homePrideTitleAr === LEGACY_PARTNER_PRIDE_TITLE_AR) {
+    if (LEGACY_PARTNER_PRIDE_TITLES_AR.includes(result.homePrideTitleAr)) {
         result.homePrideTitleAr = PARTNER_PRIDE_TITLE_AR;
     }
     return result;

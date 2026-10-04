@@ -59,8 +59,8 @@ export default function PartnerPrideBanner({
                         <h2 className="text-xl font-bold leading-snug tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                             {isArabic && title === PARTNER_PRIDE_TITLE_AR ? (
                                 <>
-                                    <span className="text-[#8A6305] dark:text-[#E5B54A]">نَفْخَرُ</span>
-                                    {title.slice('نَفْخَرُ'.length)}
+                                    <span className="text-[#8A6305] dark:text-[#E5B54A]">نَفخر</span>
+                                    {title.slice('نَفخر'.length)}
                                 </>
                             ) : title}
                         </h2>
