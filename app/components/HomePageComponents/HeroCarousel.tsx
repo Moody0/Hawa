@@ -379,49 +379,51 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     }`}
                                     aria-hidden={!isActive}
                                 >
-                                    <h1 className="mx-0 max-w-[22rem] text-[2rem] font-black leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:drop-shadow-none lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
-                                        <span className="block">{headline.part1}</span>
-                                        {headline.part2 && (
-                                            <span className="mt-1 block text-[#E5B54A] md:text-[#A8750A] dark:md:text-[#E5B54A]">
-                                                {headline.part2}
-                                            </span>
+                                    <div className="w-fit max-w-full rounded-2xl border border-white/15 bg-[#071522]/80 px-4 py-3 shadow-xl shadow-black/20 backdrop-blur-sm md:w-auto md:max-w-none md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:backdrop-blur-none">
+                                        <h1 className="mx-0 max-w-[22rem] text-[2rem] font-black leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:drop-shadow-none lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
+                                            <span className="block">{headline.part1}</span>
+                                            {headline.part2 && (
+                                                <span className="mt-1 block text-[#E5B54A] md:text-[#A8750A] dark:md:text-[#E5B54A]">
+                                                    {headline.part2}
+                                                </span>
+                                            )}
+                                        </h1>
+
+                                        {subtitleText && (
+                                            <p className="mx-0 mt-2 line-clamp-3 max-w-[25rem] text-sm font-medium leading-[1.55] text-slate-100 drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)] md:mx-auto md:mt-3 md:line-clamp-2 md:max-w-lg md:text-sm md:leading-relaxed md:text-slate-600 md:drop-shadow-none lg:mx-0 lg:text-base dark:text-slate-300">
+                                                {subtitleText}
+                                            </p>
                                         )}
-                                    </h1>
 
-                                    {subtitleText && (
-                                        <p className="mx-0 mt-2 line-clamp-3 max-w-[25rem] text-sm font-medium leading-[1.55] text-slate-100 drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)] md:mx-auto md:mt-3 md:line-clamp-2 md:max-w-lg md:text-sm md:leading-relaxed md:text-slate-600 md:drop-shadow-none lg:mx-0 lg:text-base dark:text-slate-300">
-                                            {subtitleText}
-                                        </p>
-                                    )}
-
-                                    <div className="mx-0 mt-4 grid w-fit max-w-full grid-cols-1 justify-items-start gap-2 md:mx-0 md:mt-6 md:w-auto md:max-w-none md:flex md:flex-wrap md:items-center md:justify-center md:gap-2.5 lg:justify-start">
-                                        <Link
-                                            href={slide.link}
-                                            prefetch={false}
-                                            tabIndex={isActive ? 0 : -1}
-                                            className="group/btn inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-lg border border-[#B68012] bg-[#B68012] px-5 text-[13px] font-bold leading-tight text-white shadow-lg shadow-black/20 transition-colors hover:bg-[#946809] active:scale-[0.98] md:rounded-lg md:px-6 md:text-sm md:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
-                                        >
-                                            <span>{primaryButtonText}</span>
-                                            <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
-                                        </Link>
-
-                                        {secondaryButtonText && (
+                                        <div className="mx-0 mt-4 grid w-fit max-w-full grid-cols-1 justify-items-start gap-2 md:mx-0 md:mt-6 md:w-auto md:max-w-none md:flex md:flex-wrap md:items-center md:justify-center md:gap-2.5 lg:justify-start">
                                             <Link
-                                                href={secondaryLink}
+                                                href={slide.link}
                                                 prefetch={false}
                                                 tabIndex={isActive ? 0 : -1}
-                                                target={secondaryLink.startsWith('http') ? '_blank' : undefined}
-                                                rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
-                                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/70 bg-[#0B192C]/75 px-4 text-xs font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] md:rounded-lg md:border-[#0B192C] md:px-6 md:text-sm md:hover:bg-[#152841] dark:md:border-white dark:md:bg-white dark:md:text-[#0B192C] dark:md:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] md:focus-visible:ring-[#8A6305] md:focus-visible:ring-offset-white"
+                                                className="group/btn inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-lg border border-[#B68012] bg-[#B68012] px-5 text-[13px] font-bold leading-tight text-white shadow-lg shadow-black/20 transition-colors hover:bg-[#946809] active:scale-[0.98] md:rounded-lg md:px-6 md:text-sm md:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
                                             >
-                                                <span>{secondaryButtonText}</span>
-                                                {slide.secondaryIcon === 'whatsapp' ? (
-                                                    <FaWhatsapp className="w-4 h-4 text-emerald-500" aria-hidden="true" />
-                                                ) : (
-                                                    <Building2 className="w-4 h-4" aria-hidden="true" />
-                                                )}
+                                                <span>{primaryButtonText}</span>
+                                                <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
                                             </Link>
-                                        )}
+
+                                            {secondaryButtonText && (
+                                                <Link
+                                                    href={secondaryLink}
+                                                    prefetch={false}
+                                                    tabIndex={isActive ? 0 : -1}
+                                                    target={secondaryLink.startsWith('http') ? '_blank' : undefined}
+                                                    rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
+                                                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/70 bg-[#0B192C]/75 px-4 text-xs font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] md:rounded-lg md:border-[#0B192C] md:px-6 md:text-sm md:hover:bg-[#152841] dark:md:border-white dark:md:bg-white dark:md:text-[#0B192C] dark:md:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] md:focus-visible:ring-[#8A6305] md:focus-visible:ring-offset-white"
+                                                >
+                                                    <span>{secondaryButtonText}</span>
+                                                    {slide.secondaryIcon === 'whatsapp' ? (
+                                                        <FaWhatsapp className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+                                                    ) : (
+                                                        <Building2 className="w-4 h-4" aria-hidden="true" />
+                                                    )}
+                                                </Link>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             );
