@@ -359,7 +359,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 </div>
 
                 {/* Physical right: clean HTML content panel with smooth crossfade */}
-                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-6 pb-16 pt-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
+                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-6 pb-10 pt-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
                     <div className="relative h-full min-h-[240px] w-full max-w-xl md:min-h-[260px] lg:min-h-[280px]">
                         {slides.map((slide, index) => {
                             const isActive = index === currentIndex;
@@ -379,23 +379,22 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     }`}
                                     aria-hidden={!isActive}
                                 >
-                                    <div className="w-fit max-w-full rounded-2xl border border-white/15 bg-[#071522]/80 px-4 py-3 shadow-xl shadow-black/20 backdrop-blur-sm md:w-auto md:max-w-none md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:backdrop-blur-none">
-                                        <h1 className="mx-0 max-w-[22rem] text-[2rem] font-black leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:drop-shadow-none lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
-                                            <span className="block">{headline.part1}</span>
-                                            {headline.part2 && (
-                                                <span className="mt-1 block text-[#E5B54A] md:text-[#A8750A] dark:md:text-[#E5B54A]">
-                                                    {headline.part2}
-                                                </span>
-                                            )}
-                                        </h1>
-
-                                        {subtitleText && (
-                                            <p className="mx-0 mt-2 line-clamp-3 max-w-[25rem] text-sm font-medium leading-[1.55] text-slate-100 drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)] md:mx-auto md:mt-3 md:line-clamp-2 md:max-w-lg md:text-sm md:leading-relaxed md:text-slate-600 md:drop-shadow-none lg:mx-0 lg:text-base dark:text-slate-300">
-                                                {subtitleText}
-                                            </p>
+                                    <h1 className="mx-0 max-w-[22rem] text-[2rem] font-black leading-[1.08] tracking-tight text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.95),0_4px_12px_rgba(0,0,0,0.9)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:[text-shadow:none] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
+                                        <span className="block">{headline.part1}</span>
+                                        {headline.part2 && (
+                                            <span className="mt-1 block text-[#E5B54A] [-webkit-text-stroke:0.75px_rgba(7,21,34,0.8)] [paint-order:stroke_fill] md:[-webkit-text-stroke:0] md:text-[#A8750A] dark:md:text-[#E5B54A]">
+                                                {headline.part2}
+                                            </span>
                                         )}
+                                    </h1>
 
-                                        <div className="mx-0 mt-4 grid w-fit max-w-full grid-cols-1 justify-items-start gap-2 md:mx-0 md:mt-6 md:w-auto md:max-w-none md:flex md:flex-wrap md:items-center md:justify-center md:gap-2.5 lg:justify-start">
+                                    {subtitleText && (
+                                        <p className="mx-0 mt-2 line-clamp-3 max-w-[25rem] text-sm font-semibold leading-[1.55] text-white [text-shadow:0_1px_3px_rgba(0,0,0,1),0_2px_10px_rgba(0,0,0,0.95)] md:mx-auto md:mt-3 md:line-clamp-2 md:max-w-lg md:text-sm md:font-medium md:leading-relaxed md:text-slate-600 md:[text-shadow:none] lg:mx-0 lg:text-base dark:text-slate-300">
+                                            {subtitleText}
+                                        </p>
+                                    )}
+
+                                    <div className="mx-0 mt-4 grid w-fit max-w-full grid-cols-1 justify-items-start gap-2 md:mx-0 md:mt-6 md:w-auto md:max-w-none md:flex md:flex-wrap md:items-center md:justify-center md:gap-2.5 lg:justify-start">
                                             <Link
                                                 href={slide.link}
                                                 prefetch={false}
@@ -423,7 +422,6 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                                     )}
                                                 </Link>
                                             )}
-                                        </div>
                                     </div>
                                 </div>
                             );
