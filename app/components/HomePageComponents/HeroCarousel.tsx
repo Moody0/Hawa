@@ -294,7 +294,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 }
             `}</style>
 
-            <div dir="ltr" className="relative grid h-[clamp(440px,65svh,550px)] grid-cols-1 md:h-auto md:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
+            <div dir="ltr" className="relative grid h-[clamp(420px,61svh,520px)] grid-cols-1 md:h-auto md:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
                 {/* Physical left: photography only with smooth crossfade */}
                 <div className="absolute inset-0 h-full overflow-hidden bg-slate-100 md:relative md:inset-auto md:h-[330px] lg:h-full dark:bg-slate-900">
                     {slides.map((slide, index) => {
