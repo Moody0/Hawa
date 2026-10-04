@@ -2,8 +2,9 @@ import { PARTNER_PRIDE_TITLE_AR, whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React from 'react';
 import LanguageToggle from '../LanguageToggle';
+import ManagerContactLinks from '../ManagerContactLinks';
 import CurrencyToggle from '../CurrencyToggle';
-import { FaFacebook, FaInstagram, FaWhatsapp } from 'react-icons/fa';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useLanguage } from '@/app/context/LanguageContext';
 
 interface TopBarProps {
@@ -14,8 +15,6 @@ const TopBar = ({ isVisible }: TopBarProps) => {
     const { dir, language } = useLanguage();
     const siteContacts = useSiteContacts();
     const isArabic = dir === 'rtl' || language === 'ar';
-    const whatsappNumber = siteContacts.whatsappDigits;
-    const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
 
     return (
         <div 
@@ -25,7 +24,7 @@ const TopBar = ({ isVisible }: TopBarProps) => {
         >
             <div className="container-custom h-9 flex items-center justify-between">
                 {/* Left Column: Slogan & B2B Identity */}
-                <div className="flex-1 flex items-center gap-2">
+                <div className="min-w-0 flex-1 flex items-center gap-2">
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <p className="text-xs font-bold text-[#0B192C] dark:text-gray-200 truncate">
                         {isArabic 
@@ -35,30 +34,7 @@ const TopBar = ({ isVisible }: TopBarProps) => {
                 </div>
                 
                 {/* Center Column: Sales Manager & General Manager Hotlines */}
-                <div className="hidden xl:flex items-center justify-center gap-3.5 text-xs font-bold text-[#0B192C] dark:text-gray-200">
-                    <a 
-                        href={`tel:${(siteContacts.phone || '+963 993 443 901').replace(/\s+/g, '')}`}
-                        className="hover:text-[#8A6305] transition-colors flex items-center gap-1.5"
-                        title={isArabic ? 'اتصال مباشر بمدير المبيعات' : 'Call Sales Manager'}
-                    >
-                        <span>📞</span>
-                        <span>{isArabic ? 'مدير المبيعات:' : 'Sales:'}</span>
-                        <span dir="ltr" className="font-extrabold text-[#8A6305]">{siteContacts.phone || '+963 993 443 901'}</span>
-                    </a>
-                    {siteContacts.managementPhone && (
-                        <>
-                            <span className="text-gray-300 dark:text-gray-700">|</span>
-                            <a 
-                                href={`tel:${siteContacts.managementPhone.replace(/\s+/g, '')}`}
-                                className="hover:text-[#8A6305] transition-colors flex items-center gap-1.5"
-                                title={isArabic ? 'اتصال مباشر بمدير الشركة' : 'Call General Management'}
-                            >
-                                <span>{isArabic ? 'مدير الشركة:' : 'Management:'}</span>
-                                <span dir="ltr" className="font-extrabold text-[#0B192C] dark:text-gray-100">{siteContacts.managementPhone}</span>
-                            </a>
-                        </>
-                    )}
-                </div>
+                <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} className="mx-4 shrink-0 flex-nowrap" linkClassName="text-[#0B192C] dark:text-gray-200 hover:text-[#8A6305] dark:hover:text-[#E5B54A]" />
                 
                 {/* Right Column: Switchers and Live WhatsApp Link */}
                 <div className="flex-1 flex flex-row items-center justify-end gap-4 text-sm">

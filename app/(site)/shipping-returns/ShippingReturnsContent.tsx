@@ -2,9 +2,10 @@
 
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '@/app/components/ManagerContactLinks';
 import React from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { Truck, CheckCircle2, Phone, RotateCcw } from 'lucide-react';
+import { Truck, CheckCircle2, RotateCcw } from 'lucide-react';
 import { FaWhatsapp } from "react-icons/fa";
 import { ShippingPolicyContent } from "@/lib/shipping-policy-content";
 
@@ -21,9 +22,6 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
     // Phone / WhatsApp setup with dedicated dispatch overrides
     const rawWa = siteContacts.whatsappDigits;
     const cleanWaNumber = rawWa.replace(/[^0-9]/g, '');
-    const rawPhone = siteContacts.phone;
-    const cleanPhoneNumber = rawPhone.replace(/[^0-9+]/g, '');
-    const phoneLabel = pageContent.phoneButtonLabel || (language === 'ar' || dir === 'rtl' ? 'اتصال مباشر' : 'Direct Call');
     const heroImage = siteSettings?.shippingReturnsImage?.trim();
 
     return (
@@ -277,14 +275,7 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
                                 <FaWhatsapp className="text-sm" />
                                 <span>{pageContent.whatsappButtonLabel}</span>
                             </a>
-                            <a
-                                href={`tel:${cleanPhoneNumber}`}
-                                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white dark:bg-[#132035] border border-slate-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-slate-50 dark:hover:bg-white/10 text-xs font-bold transition-all shadow-xs"
-                            >
-                                <Phone className="text-sm text-[#8A6305] dark:text-[#E5B54A]" />
-                                <span>{phoneLabel}</span>
-                                <span dir="ltr" className="text-slate-500 dark:text-slate-400 font-normal">({rawPhone})</span>
-                            </a>
+                            <ManagerContactLinks contacts={siteContacts} isArabic={language === 'ar' || dir === 'rtl'} className="flex-col items-start" />
                         </div>
                     </div>
 

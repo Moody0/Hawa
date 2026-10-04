@@ -1,6 +1,7 @@
 "use client";
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '@/app/components/ManagerContactLinks';
 import { laravelClientFetch } from '@/lib/laravel-client';
 
 
@@ -146,6 +147,7 @@ const CompleteOrderContent = () => {
                                 ? (isQuoteRequest ? 'أرسل المنتجات والكميات المطلوبة عبر واتساب للحصول على الأسعار وتأكيد التوفر.' : 'أرسل تفاصيل الطلب مباشرة إلى مسؤول المبيعات والتوزيع عبر واتساب لتسريع التجهيز')
                                 : (isQuoteRequest ? 'Send your products and quantities on WhatsApp to get prices and confirm availability.' : 'Send order details directly to our sales & distribution team via WhatsApp for fast processing')}
                         </p>
+                        <ManagerContactLinks contacts={siteContacts} isArabic={language === 'ar'} className="mt-2" />
                     </div>
                 </div>
                 <a

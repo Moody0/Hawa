@@ -2,6 +2,7 @@
 
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '../ManagerContactLinks';
 import React from 'react';
 import { CartItem } from '@/app/context/CartContext';
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -160,6 +161,7 @@ const OrderSummary = ({ items, subtotal, total, isQuoteRequest }: OrderSummaryPr
                     >
                         {t('checkout.speakWithExpert')}
                     </a>
+                    <ManagerContactLinks contacts={siteContacts} isArabic={isAr} className="mt-2 flex-col items-start" />
                 </div>
             </div>
         </aside>

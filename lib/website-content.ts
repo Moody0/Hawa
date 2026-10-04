@@ -1,3 +1,7 @@
+import { normalizeSyrianPhone } from './order-validation';
+
+export const DEFAULT_SALES_PHONE = '0993443901';
+export const DEFAULT_MANAGEMENT_PHONE = '0994166000';
 export const PARTNER_PRIDE_TITLE_AR = 'نَفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان';
 
 const LEGACY_PARTNER_PRIDE_TITLES_AR = [
@@ -12,7 +16,7 @@ export const DEFAULT_WEBSITE_CONTENT = {
     homeIntroDescriptionAr: 'تصفح كتالوج الجملة أو تواصل مع فريقنا لتوريد احتياجات متجرك.',
     homeBrandsTitle: 'Our partners', homeBrandsTitleAr: 'شركاؤنا',
     homeBrandsDescription: 'Explore products by brand.', homeBrandsDescriptionAr: 'تصفح المنتجات حسب الشركة.',
-    managementPhone: '+963 994 166 000', businessHours: '', businessHoursAr: '',
+    managementPhone: DEFAULT_MANAGEMENT_PHONE, businessHours: '', businessHoursAr: '',
     homePrideEnabled: true,
     homePrideBadge: 'Official distribution partner', homePrideBadgeAr: 'وكيل توزيع معتمد',
     homePrideTitle: 'Proud to represent and distribute Bitinjana Brothers products',
@@ -44,7 +48,31 @@ export function getWebsiteContent(raw: unknown): WebsiteContent {
     if (LEGACY_PARTNER_PRIDE_TITLES_AR.includes(result.homePrideTitleAr)) {
         result.homePrideTitleAr = PARTNER_PRIDE_TITLE_AR;
     }
+    result.managementPhone = result.managementPhone.trim() || DEFAULT_MANAGEMENT_PHONE;
     return result;
+}
+
+export function contactPhoneDigits(phone: string): string {
+    return normalizeSyrianPhone(phone).replace(/\D/g, '');
+}
+
+export function formatContactPhone(phone: string): string {
+    const digits = contactPhoneDigits(phone);
+    return /^9639\d{8}$/.test(digits) ? `0${digits.slice(3)}` : phone.trim();
+}
+
+export function updateSharedContact<T extends Record<string, string>>(contacts: T, field: string, value: string) {
+    const next: Record<string, string> = { [field]: value };
+    const previousWhatsApp = contactPhoneDigits(contacts.whatsappNumber || contacts.footerPhone || DEFAULT_SALES_PHONE);
+    if (field === 'footerPhone' && (!contacts.whatsappNumber || previousWhatsApp === contactPhoneDigits(contacts.footerPhone || DEFAULT_SALES_PHONE))) {
+        next.whatsappNumber = value;
+    }
+    if ('whatsappNumber' in next &&
+        /^https:\/\/wa\.me\/\d+\/?(?:\?.*)?$/.test(contacts.footerWhatsappUrl || '') &&
+        new URL(contacts.footerWhatsappUrl).pathname.replace(/\D/g, '') === previousWhatsApp) {
+        next.footerWhatsappUrl = '';
+    }
+    return { ...contacts, ...next };
 }
 
 export function publicContactUrl(value: unknown): string {
@@ -57,9 +85,9 @@ export function publicContactUrl(value: unknown): string {
 
 export function getSiteContacts(settings: Record<string, any> = {}) {
     const content = getWebsiteContent(settings.websiteContent);
-    const phone = typeof settings.footerPhone === 'string' ? settings.footerPhone.trim() : '';
-    const whatsappPhone = typeof settings.whatsappNumber === 'string' ? settings.whatsappNumber.trim() : phone;
-    const whatsappDigits = whatsappPhone.replace(/\D/g, '');
+    const phone = (typeof settings.footerPhone === 'string' ? settings.footerPhone.trim() : '') || DEFAULT_SALES_PHONE;
+    const whatsappPhone = (typeof settings.whatsappNumber === 'string' ? settings.whatsappNumber.trim() : '') || phone;
+    const whatsappDigits = contactPhoneDigits(whatsappPhone);
     return {
         content,
         phone, whatsappDigits,

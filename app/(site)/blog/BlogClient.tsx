@@ -7,6 +7,7 @@ import ResilientImage from '@/app/components/ResilientImage';
 import { Search, Calendar, Clock, ArrowRight, Store, ShieldCheck, FileText, Filter } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '@/app/components/ManagerContactLinks';
 import { whatsappHref } from '@/lib/website-content';
 
 export interface BlogPostItem {
@@ -335,6 +336,7 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
                                     ? 'تواصل مباشرة مع فريق إدارة المبيعات والتوريد في شركة حوا للحصول على كشوف الأسعار وجداول التوصيل لمحافظتك.'
                                     : 'Connect directly with Hawa Distribution sales team for current carton prices and scheduled delivery runs.'}
                             </p>
+                            <ManagerContactLinks contacts={contacts} isArabic={isAr} className="mt-2" />
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3 shrink-0">

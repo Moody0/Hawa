@@ -2,6 +2,7 @@
 import { whatsappHref } from '@/lib/website-content';
 import { navigationLinkEnabled } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from './ManagerContactLinks';
 import { laravelClientFetch } from '@/lib/laravel-client';
 
 
@@ -407,6 +408,8 @@ const MobileMenu = ({
                                 {isRtl ? <ChevronLeft className="text-lg shrink-0" /> : <ChevronRight className="text-lg shrink-0" />}
                             </a>
                         </div>
+
+                        <ManagerContactLinks contacts={siteContacts} isArabic={isRtl} className="mx-4 mb-4 flex-col items-start" />
 
                         {/* Social Links Footer */}
                         <div className="p-4 border-t border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-zinc-800/30 flex items-center justify-between mt-auto">

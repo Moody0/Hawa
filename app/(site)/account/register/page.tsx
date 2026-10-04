@@ -2,12 +2,13 @@
 
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '@/app/components/ManagerContactLinks';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCustomer } from '@/app/context/CustomerContext';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { Store, User, Phone, MapPin, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, Headset, ChevronDown, ShoppingBag, Home, Hourglass } from 'lucide-react';
+import { Store, User, Phone, MapPin, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, ChevronDown, ShoppingBag, Home, Hourglass } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { convertArabicToEnglishDigits, isValidSyrianPhone, normalizeSyrianPhone } from '@/lib/order-validation';
 
@@ -51,8 +52,6 @@ export default function MerchantRegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [submittedData, setSubmittedData] = useState<{ shopName: string; ownerName: string; phone: string; city: string } | null>(null);
-
-    const SALES_MANAGER_PHONE = siteContacts.phone;
 
     React.useEffect(() => {
         if (customer) {
@@ -205,6 +204,7 @@ export default function MerchantRegisterPage() {
                                 <FaWhatsapp className="text-lg" />
                                 <span>{isArabic ? 'تواصل مع مدير المبيعات حول حالة الطلب' : 'Ask Sales About Your Application'}</span>
                             </a>
+                            <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} className="justify-center mt-3" />
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
                                 <Link
@@ -310,21 +310,7 @@ export default function MerchantRegisterPage() {
 
                         {/* Direct Sales Support Box */}
                         <div className="pt-3.5 border-t border-slate-200/80 dark:border-white/10">
-                            <div className="flex items-center justify-between text-xs">
-                                <div className="flex items-center gap-1.5 text-[#475569] dark:text-slate-400">
-                                    <Headset className="text-base text-[#8A6305]" />
-                                    <span>{isArabic ? 'مساعدة في التسجيل:' : 'Support:'}</span>
-                                </div>
-                                <a 
-                                    href={whatsappHref(siteContacts, isArabic ? 'مرحباً، أرغب بالاستفسار عن تسجيل حساب تاجر جديد لدى شركة حوا' : 'Hello, I have a question about registering as a new merchant with Hawa')}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="font-bold text-[#8A6305] hover:text-[#735204] dark:text-[#E5B54A] flex items-center gap-1.5 font-mono"
-                                >
-                                    <FaWhatsapp className="text-sm text-green-600 shrink-0" />
-                                    <span dir="ltr">{SALES_MANAGER_PHONE}</span>
-                                </a>
-                            </div>
+                            <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} className="flex-col items-start" />
                         </div>
                     </div>
 

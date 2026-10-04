@@ -1,5 +1,6 @@
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '../ManagerContactLinks';
 import React from 'react';
 import ResilientImage from '@/app/components/ResilientImage';
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -85,7 +86,7 @@ export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeade
                 </div>
 
                 {/* Right Commercial Actions & Direct Supply Badge */}
-                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full lg:w-auto shrink-0 justify-center lg:justify-end pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-white/5">
+                <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto lg:max-w-md shrink-0 justify-center lg:justify-end pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-white/5">
                     <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800/80 border border-slate-200/70 dark:border-white/5 text-xs text-slate-600 dark:text-slate-300">
                         <Truck className="w-4 h-4 text-[#8A6305] shrink-0" />
                         <span className="font-semibold">{isArabic ? "توزيع وتوريد فوري" : "Direct Warehouse Supply"}</span>
@@ -100,6 +101,7 @@ export default function BrandHeroHeader({ brand, totalProducts }: BrandHeroHeade
                         <MessageCircle className="w-4 h-4 text-[#8A6305] dark:text-[#8A6305]" />
                         <span>{isArabic ? "طلب تسعير جملة" : "Wholesale Inquiry"}</span>
                     </a>
+                    <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} className="basis-full justify-center lg:justify-end" />
                 </div>
             </div>
         </div>

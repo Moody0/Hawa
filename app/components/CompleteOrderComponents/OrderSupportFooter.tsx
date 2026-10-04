@@ -2,13 +2,14 @@
 
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '../ManagerContactLinks';
 import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { ShoppingBag } from 'lucide-react';
 
 const OrderSupportFooter = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const siteContacts = useSiteContacts();
 
     return (
@@ -34,6 +35,7 @@ const OrderSupportFooter = () => {
                         {t('footer.contactUs')}
                     </a>
                 </p>
+                <ManagerContactLinks contacts={siteContacts} isArabic={language === 'ar'} className="justify-center" />
             </div>
         </>
     );

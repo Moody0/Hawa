@@ -1,4 +1,4 @@
-import { getSiteContacts, PARTNER_PRIDE_TITLE_AR } from '@/lib/website-content';
+import { contactPhoneDigits, formatContactPhone, getSiteContacts, PARTNER_PRIDE_TITLE_AR } from '@/lib/website-content';
 import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
@@ -272,16 +272,16 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                             {/* Phone */}
                             {wholesalePhone && <div className="flex items-center gap-2.5">
                                 <Phone className="w-4 h-4 text-[#E5B54A] shrink-0" aria-hidden="true" />
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                                     <span className="text-slate-400 font-medium text-xs">
-                                        {isArabic ? 'مبيعات الجملة:' : 'Wholesale:'}
+                                        {isArabic ? 'مدير المبيعات:' : 'Sales Manager:'}
                                     </span>
                                     <a
-                                        href={`tel:${wholesalePhone.replace(/\s+/g, '')}`}
+                                        href={`tel:+${contactPhoneDigits(wholesalePhone)}`}
                                         dir="ltr"
                                         className="font-bold text-white hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                                     >
-                                        {wholesalePhone}
+                                        {formatContactPhone(wholesalePhone)}
                                     </a>
                                 </div>
                             </div>}
@@ -289,16 +289,16 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                             {/* Management Phone */}
                             {contacts.managementPhone && <div className="flex items-center gap-2.5">
                                 <Phone className="w-4 h-4 text-[#E5B54A] shrink-0" aria-hidden="true" />
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                                     <span className="text-slate-400 font-medium text-xs">
-                                        {isArabic ? 'إدارة الشركة:' : 'Management:'}
+                                        {isArabic ? 'مدير الشركة:' : 'Company Manager:'}
                                     </span>
                                     <a
-                                        href={`tel:${contacts.managementPhone.replace(/\s+/g, '')}`}
+                                        href={`tel:+${contactPhoneDigits(contacts.managementPhone)}`}
                                         dir="ltr"
                                         className="font-bold text-white hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
                                     >
-                                        {contacts.managementPhone}
+                                        {formatContactPhone(contacts.managementPhone)}
                                     </a>
                                 </div>
                             </div>}

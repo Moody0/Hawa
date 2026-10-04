@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { ContactPageContent as ContactPageContentType } from "@/lib/contact-page-content";
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
-import { whatsappHref } from '@/lib/website-content';
+import { contactPhoneDigits, formatContactPhone, whatsappHref } from '@/lib/website-content';
 
 interface ContactPageContentProps {
     siteSettings: any;
@@ -22,10 +22,7 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
     const isAr = language === "ar" || dir === "rtl";
     const pageContent = isAr ? content.ar : content.en;
 
-    // Numbers cleanup
-    const cleanNumber = (val?: string) => (val || "").replace(/[^0-9]/g, "");
-
-    const gmWaClean = cleanNumber(pageContent.gmWhatsapp);
+    const gmWaClean = contactPhoneDigits(pageContent.gmWhatsapp);
 
     const [formData, setFormData] = useState({
         shopName: "",
@@ -164,7 +161,7 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
                                 </p>
                                 {pageContent.salesPhone && (
                                     <p className="text-sm font-extrabold text-[#0B192C] dark:text-white mt-2 font-mono" dir="ltr">
-                                        {pageContent.salesPhone}
+                                        {formatContactPhone(pageContent.salesPhone)}
                                     </p>
                                 )}
                                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-emerald-500/20 flex-wrap">
@@ -179,7 +176,7 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
                                     </a>
                                     {pageContent.salesPhone && (
                                         <a
-                                            href={`tel:${pageContent.salesPhone.replace(/\s+/g, '')}`}
+                                            href={`tel:+${contactPhoneDigits(pageContent.salesPhone)}`}
                                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/10 text-[#0B192C] dark:text-white hover:bg-gray-50 dark:hover:bg-zinc-700 text-xs font-bold transition-all shadow-xs"
                                         >
                                             <Phone className="w-3.5 h-3.5" />
@@ -211,13 +208,13 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
                                 </p>
                                 {pageContent.gmPhone && (
                                     <p className="text-sm font-extrabold text-[#0B192C] dark:text-white mt-2 font-mono" dir="ltr">
-                                        {pageContent.gmPhone}
+                                        {formatContactPhone(pageContent.gmPhone)}
                                     </p>
                                 )}
                                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#8A6305]/20 flex-wrap">
                                     {pageContent.gmPhone && (
                                         <a
-                                            href={`tel:${pageContent.gmPhone.replace(/\s+/g, '')}`}
+                                            href={`tel:+${contactPhoneDigits(pageContent.gmPhone)}`}
                                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B192C] hover:bg-[#1a2e4c] dark:bg-[#8A6305] dark:hover:bg-[#725204] text-white text-xs font-bold transition-all shadow-xs"
                                         >
                                             <Phone className="w-3.5 h-3.5" />

@@ -2,6 +2,7 @@
 
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '../ManagerContactLinks';
 import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -123,6 +124,7 @@ const CartSummary = ({ subtotal, hasUnpricedItems = false }: CartSummaryProps) =
                     >
                         {t('footer.helpCenter')}
                     </a>
+                    <ManagerContactLinks contacts={siteContacts} isArabic={language === 'ar'} className="mt-2 flex-col items-start" />
                 </div>
             </div>
         </aside>

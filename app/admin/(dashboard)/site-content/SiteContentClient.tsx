@@ -1,6 +1,6 @@
 "use client";
 
-import { getWebsiteContent } from '@/lib/website-content';
+import { DEFAULT_SALES_PHONE, getWebsiteContent, updateSharedContact } from '@/lib/website-content';
 import WebsiteControlsSection from './WebsiteControlsSection';
 import AboutValuesSection, { ABOUT_VALUE_FIELDS } from './AboutValuesSection';
 import ImageUploadField from '../../components/ImageUploadField';
@@ -382,7 +382,7 @@ export default function SiteContentClient({
         footerContactTitleAr: initialSettings?.footerContactTitleAr || "تواصل معنا",
         footerAddress: initialSettings?.footerAddress ?? "",
         footerAddressAr: initialSettings?.footerAddressAr ?? "",
-        footerPhone: initialSettings?.footerPhone ?? "",
+        footerPhone: initialSettings?.footerPhone?.trim() || DEFAULT_SALES_PHONE,
         footerEmail: initialSettings?.footerEmail ?? "",
         footerInstagramUrl: initialSettings?.footerInstagramUrl || "",
         footerFacebookUrl: initialSettings?.footerFacebookUrl || "",
@@ -496,10 +496,7 @@ export default function SiteContentClient({
     const [exchangeRate, setExchangeRate] = useState(initialSettings?.exchangeRate || 135);
 
     const handleFooterFieldChange = (field: string, value: string) => {
-        setFooterContent((current) => ({
-            ...current,
-            [field]: value,
-        }));
+        setFooterContent((current) => updateSharedContact(current, field, value));
     };
 
     const handleSaveAll = async (e?: React.FormEvent) => {
@@ -711,7 +708,7 @@ export default function SiteContentClient({
             <div className="flex-1 overflow-y-auto p-6 md:p-10">
                 <div className="max-w-6xl mx-auto pb-12">
                     {/* TAB 1: CURRENCY & EXCHANGE RATES */}
-                    {activeTab === "website" && <WebsiteControlsSection value={websiteContent} onChange={setWebsiteContent} contacts={footerContent} onContactChange={(key, value) => setFooterContent(prev => ({ ...prev, [key]: value }))} isArabic={language === "ar"} />}
+                    {activeTab === "website" && <WebsiteControlsSection value={websiteContent} onChange={setWebsiteContent} contacts={footerContent} onContactChange={handleFooterFieldChange} isArabic={language === "ar"} />}
                     {activeTab === "about" && <AboutValuesSection value={aboutValues} onChange={setAboutValues} isArabic={language === "ar"} />}
                     {activeTab === "currency" && (
                         <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
@@ -881,6 +878,8 @@ export default function SiteContentClient({
                                 footerContent={footerContent}
                                 categories={categories}
                                 onFieldChange={handleFooterFieldChange}
+                                managementPhone={websiteContent.managementPhone}
+                                onManagementPhoneChange={(managementPhone) => setWebsiteContent(current => ({ ...current, managementPhone }))}
                                 t={t}
                             />
                         </div>

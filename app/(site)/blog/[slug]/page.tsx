@@ -12,6 +12,7 @@ import { getSiteSettings } from '@/lib/public-queries';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getSiteContacts, whatsappHref } from '@/lib/website-content';
+import ManagerContactLinks from '@/app/components/ManagerContactLinks';
 import { SITE_ORIGIN } from '@/lib/site-config';
 
 export const revalidate = 60;
@@ -181,6 +182,7 @@ export default async function BlogPostPage(
                             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                                 مندوب المبيعات المختص بمحافظتك جاهز لتزويدك بالأسعار الفورية وتجهيز طلبيتك.
                             </p>
+                            <ManagerContactLinks contacts={contacts} isArabic className="mt-2" />
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3 shrink-0">

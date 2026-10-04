@@ -2,6 +2,7 @@
 
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '@/app/components/ManagerContactLinks';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -25,8 +26,6 @@ export default function MerchantLoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [pendingAccount, setPendingAccount] = useState<{ shopName?: string; phone: string } | null>(null);
     const [showForgotModal, setShowForgotModal] = useState(false);
-
-    const SALES_MANAGER_PHONE = siteContacts.phone;
 
     // If already logged in, redirect to portal
     React.useEffect(() => {
@@ -163,21 +162,7 @@ export default function MerchantLoginPage() {
 
                         {/* Direct Sales Support Box */}
                         <div className="pt-4 border-t border-slate-200/80 dark:border-white/10">
-                            <div className="flex items-center justify-between text-xs">
-                                <div className="flex items-center gap-2 text-[#475569] dark:text-slate-400">
-                                    <Headset className="text-base text-[#8A6305]" />
-                                    <span>{isArabic ? 'مدير المبيعات المباشر:' : 'Sales Manager:'}</span>
-                                </div>
-                                <a
-                                    href={whatsappHref(siteContacts, isArabic ? 'مرحباً، أحتاج مساعدة في حساب التاجر لدى شركة حوا' : 'Hello, I need assistance with my Hawa merchant account')}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="font-bold text-[#8A6305] hover:text-[#735204] dark:text-[#E5B54A] flex items-center gap-1.5 font-mono"
-                                >
-                                    <FaWhatsapp className="text-sm text-green-600 shrink-0" />
-                                    <span dir="ltr">{SALES_MANAGER_PHONE}</span>
-                                </a>
-                            </div>
+                            <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} className="flex-col items-start" />
                         </div>
                     </div>
 
@@ -219,6 +204,7 @@ export default function MerchantLoginPage() {
                                         <FaWhatsapp className="text-sm" />
                                         <span>{isArabic ? 'تواصل مع مدير المبيعات حول حالة الطلب' : 'Ask Sales About Your Application'}</span>
                                     </a>
+                                    <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} className="mt-2" />
                                 </div>
                             )}
 
@@ -358,6 +344,7 @@ export default function MerchantLoginPage() {
                                 <FaWhatsapp className="text-base" />
                                 <span>{isArabic ? 'تواصل مع مدير المبيعات عبر واتساب' : 'Contact Sales on WhatsApp'}</span>
                             </a>
+                            <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} className="justify-center" />
                             <button
                                 type="button"
                                 onClick={() => setShowForgotModal(false)}

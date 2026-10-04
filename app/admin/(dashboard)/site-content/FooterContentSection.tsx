@@ -13,6 +13,8 @@ interface FooterContentSectionProps {
     footerContent: Record<string, string>;
     categories?: FooterCategoryOption[];
     onFieldChange: (field: string, value: string) => void;
+    managementPhone: string;
+    onManagementPhoneChange: (value: string) => void;
     t: (key: string) => string;
 }
 
@@ -158,6 +160,8 @@ function LinkEditor({
 export default function FooterContentSection({
     footerContent,
     onFieldChange,
+    managementPhone,
+    onManagementPhoneChange,
     t,
 }: FooterContentSectionProps) {
     return (
@@ -349,19 +353,27 @@ export default function FooterContentSection({
                     />
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
                         <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
                             <Phone className="w-4 h-4 text-[#8A6305]" />
-                            <span className="text-xs font-bold uppercase">Wholesale Phone</span>
+                            <span className="text-xs font-bold uppercase">مدير المبيعات / Sales Manager</span>
                         </div>
                         <TextField
                             label="Direct Line"
                             value={footerContent.footerPhone}
                             onChange={(value) => onFieldChange('footerPhone', value)}
-                            placeholder="+963 993 443 901"
+                            placeholder="0993443901"
                             dir="ltr"
                         />
+                    </div>
+
+                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
+                        <div className="mb-2 flex items-center gap-2 text-slate-800 dark:text-white">
+                            <Phone className="w-4 h-4 text-[#8A6305]" />
+                            <span className="text-xs font-bold uppercase">مدير الشركة / Company Manager</span>
+                        </div>
+                        <TextField label="Direct Line" value={managementPhone} onChange={onManagementPhoneChange} placeholder="0994166000" dir="ltr" />
                     </div>
 
                     <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-gray-800/40 p-4">
@@ -386,13 +398,7 @@ export default function FooterContentSection({
                         <TextField
                             label="Target WhatsApp Number"
                             value={footerContent.whatsappNumber}
-                            onChange={(value) => {
-                                onFieldChange('whatsappNumber', value);
-                                if (!footerContent.footerWhatsappUrl || footerContent.footerWhatsappUrl === '#' || footerContent.footerWhatsappUrl.startsWith('https://wa.me/')) {
-                                    const cleaned = value.replace(/[^0-9]/g, '');
-                                    onFieldChange('footerWhatsappUrl', `https://wa.me/${cleaned}`);
-                                }
-                            }}
+                            onChange={(value) => onFieldChange('whatsappNumber', value)}
                             placeholder="+963 993 443 901"
                             dir="ltr"
                         />

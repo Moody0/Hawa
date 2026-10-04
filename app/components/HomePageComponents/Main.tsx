@@ -178,7 +178,8 @@ const Main = async ({
                         language={language}
                         dir={dir}
                         content={content}
-                        salesPhone={siteContacts.phone || '+963 993 443 901'}
+                        salesPhone={siteContacts.phone}
+                        managementPhone={siteContacts.managementPhone}
                         whatsappUrl={siteContacts.whatsappUrl}
                     />
                 </ScrollReveal>

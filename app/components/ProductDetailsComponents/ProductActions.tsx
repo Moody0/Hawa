@@ -2,6 +2,7 @@
 
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '../ManagerContactLinks';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from "@/app/context/CartContext";
@@ -331,19 +332,22 @@ const ProductActions = ({ product, stock }: ProductActionsProps) => {
 
             {/* 5. Direct Fast Action: Fast Checkout (Logged In) OR Direct Sales WhatsApp (Guest) */}
             {isLockedForGuest ? (
-                <a
-                    href={whatsappHref(siteContacts,
-                        isArabic
-                            ? `مرحباً مدير المبيعات بشركة حوا، أود الاستفسار عن توفر وتسعير جملة لمنتج: ${displayName} (${quantity} ${formatPackaging(product.packaging, 'ar')})`
-                            : `Hello Hawa Sales, I would like to inquire about wholesale pricing for: ${displayName}`
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full h-11 bg-emerald-50/50 hover:bg-emerald-100/60 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-500/25 rounded-[10px] font-bold text-xs flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
-                >
-                    <FaWhatsapp className="text-base text-emerald-600" />
-                    <span>{isArabic ? 'أو استفسر فوراً عن تسعير الجملة عبر واتساب' : 'Inquire via Sales WhatsApp'}</span>
-                </a>
+                <div className="space-y-2">
+                    <a
+                        href={whatsappHref(siteContacts,
+                            isArabic
+                                ? `مرحباً مدير المبيعات بشركة حوا، أود الاستفسار عن توفر وتسعير جملة لمنتج: ${displayName} (${quantity} ${formatPackaging(product.packaging, 'ar')})`
+                                : `Hello Hawa Sales, I would like to inquire about wholesale pricing for: ${displayName}`
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full h-11 bg-emerald-50/50 hover:bg-emerald-100/60 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-500/25 rounded-[10px] font-bold text-xs flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
+                    >
+                        <FaWhatsapp className="text-base text-emerald-600" />
+                        <span>{isArabic ? 'أو استفسر فوراً عن تسعير الجملة عبر واتساب' : 'Inquire via Sales WhatsApp'}</span>
+                    </a>
+                    <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} />
+                </div>
             ) : (
                 <button
                     type="button"

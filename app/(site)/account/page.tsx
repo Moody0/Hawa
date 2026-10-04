@@ -1,6 +1,7 @@
 'use client';
 import { whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
+import ManagerContactLinks from '@/app/components/ManagerContactLinks';
 import { laravelClientFetch } from '@/lib/laravel-client';
 
 
@@ -350,7 +351,8 @@ export default function MerchantPortalPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <div className="flex flex-col items-start gap-2 sm:gap-3 shrink-0">
+                        <ManagerContactLinks contacts={siteContacts} isArabic={isArabic} className="flex-col items-start" linkClassName="text-slate-200 hover:text-[#E5B54A]" />
                         <a
                             href={whatsappHref(siteContacts,
                                 isArabic

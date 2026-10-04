@@ -1,5 +1,7 @@
 'use client';
 import type { WebsiteContent } from '@/lib/website-content';
+import { getSiteContacts } from '@/lib/website-content';
+import ManagerContactLinks from '@/app/components/ManagerContactLinks';
 
 const toggles: [keyof WebsiteContent, string, string][] = [
     ['homeHeroEnabled', 'Home banners', 'بنرات الرئيسية'], ['homePrideEnabled', 'Bitinjana Brothers pride banner', 'بانر تمثيل وتوزيع بيتنجانة إخوان'],
@@ -24,12 +26,7 @@ export default function WebsiteControlsSection({ value, onChange, contacts, onCo
     contacts: Record<string, string>; onContactChange: (field: string, value: string) => void; isArabic: boolean;
 }) {
     const inputClass = 'w-full rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
-    const updateContact = (key: string, text: string) => {
-        if (key === 'whatsappNumber' && /^https:\/\/wa\.me\/\d+\/?(?:\?.*)?$/.test(contacts.footerWhatsappUrl || '')) {
-            onContactChange('footerWhatsappUrl', '');
-        }
-        onContactChange(key, text);
-    };
+    const updateContact = onContactChange;
     return <div className="space-y-8">
         <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
             <h3 className="text-xl font-bold mb-2">{isArabic ? 'التحكم العام بالموقع' : 'Website controls'}</h3>
@@ -43,16 +40,19 @@ export default function WebsiteControlsSection({ value, onChange, contacts, onCo
         <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
             <h3 className="text-xl font-bold mb-2">{isArabic ? 'بيانات التواصل الموحدة' : 'Shared contact information'}</h3>
             <p className="text-sm text-slate-500 mb-5">{isArabic ? 'تطبق هذه البيانات على الترويسة والفوتر وحسابات التجار والسلة وصفحة التواصل وبقية روابط الدعم. تترك روابط التواصل الاجتماعي الفارغة مخفية.' : 'These details apply to the header, footer, merchant support, cart, contact page, and other support links. Blank social links stay hidden.'}</p>
-            <label className="block mb-5">{isArabic ? 'هاتف إدارة الشركة (مدير الشركة)' : 'Company Director / Management phone'}<input type="tel" className={inputClass} value={value.managementPhone} onChange={e => onChange({ ...value, managementPhone: e.target.value })} maxLength={32} dir="ltr" /></label>
+            <div className="grid gap-5 sm:grid-cols-2 mb-5">
+                <label className="text-sm font-semibold space-y-2">{isArabic ? 'رقم مدير الشركة' : 'Company Manager phone'}<input type="tel" className={inputClass} value={value.managementPhone} onChange={e => onChange({ ...value, managementPhone: e.target.value })} placeholder="0994166000" maxLength={32} dir="ltr" /></label>
+                <label className="text-sm font-semibold space-y-2">{isArabic ? 'رقم مدير المبيعات' : 'Sales Manager phone'}<input type="tel" className={inputClass} value={contacts.footerPhone || ''} onChange={e => updateContact('footerPhone', e.target.value)} placeholder="0993443901" maxLength={32} dir="ltr" /></label>
+            </div>
             <div className="grid gap-5 sm:grid-cols-2">{[
-                ['footerPhone', 'Wholesale Sales phone (Sales Manager)', 'هاتف مبيعات الجملة (مدير المبيعات)'], ['whatsappNumber', 'WhatsApp number', 'رقم واتساب'],
+                ['whatsappNumber', 'Sales WhatsApp number', 'رقم واتساب المبيعات'],
                 ['footerEmail', 'Email', 'البريد الإلكتروني'], ['footerAddress', 'Address (English)', 'العنوان بالإنجليزية'],
                 ['footerAddressAr', 'Address (Arabic)', 'العنوان بالعربية'], ['footerFacebookUrl', 'Facebook URL', 'رابط فيسبوك'],
                 ['footerInstagramUrl', 'Instagram URL', 'رابط إنستغرام'], ['footerLinkedinUrl', 'LinkedIn URL', 'رابط لينكدإن'],
                 ['footerWhatsappUrl', 'WhatsApp link override (optional)', 'رابط واتساب مخصص (اختياري)'],
             ].map(([key, en, ar]) => <label key={key} className="text-sm font-semibold space-y-2">{isArabic ? ar : en}<input className={inputClass} value={contacts[key] === '#' ? '' : contacts[key] || ''} onChange={e => updateContact(key, e.target.value)} maxLength={1000} type={key === 'footerEmail' ? 'email' : key.endsWith('Url') ? 'url' : 'text'} dir={key.endsWith('Ar') ? 'rtl' : 'ltr'} /></label>)}</div>
             <div className="mt-6 rounded-lg bg-slate-50 dark:bg-slate-800 p-4 text-sm space-y-2" aria-label={isArabic ? 'معاينة بيانات التواصل' : 'Contact details preview'}>
-                <p>{isArabic ? contacts.footerAddressAr : contacts.footerAddress}</p><p dir="ltr">{contacts.footerPhone}</p><p dir="ltr">{contacts.footerEmail}</p>
+                <p>{isArabic ? contacts.footerAddressAr : contacts.footerAddress}</p><ManagerContactLinks contacts={getSiteContacts({ ...contacts, websiteContent: value })} isArabic={isArabic} /><p dir="ltr">{contacts.footerEmail}</p>
             </div>
         </section>
     </div>;

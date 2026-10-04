@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { PARTNER_PRIDE_TITLE_AR, type WebsiteContent } from '@/lib/website-content';
+import { DEFAULT_MANAGEMENT_PHONE, DEFAULT_SALES_PHONE, PARTNER_PRIDE_TITLE_AR, contactPhoneDigits, type WebsiteContent } from '@/lib/website-content';
+import ManagerContactLinks from '../ManagerContactLinks';
 
 interface PartnerPrideBannerProps {
     language: string;
@@ -16,8 +17,8 @@ export default function PartnerPrideBanner({
     language,
     dir,
     content,
-    salesPhone = '+963 993 443 901',
-    managementPhone,
+    salesPhone = DEFAULT_SALES_PHONE,
+    managementPhone = DEFAULT_MANAGEMENT_PHONE,
     whatsappUrl,
 }: PartnerPrideBannerProps) {
     const isArabic = language === 'ar' || dir === 'rtl';
@@ -39,9 +40,7 @@ export default function PartnerPrideBanner({
         : (content?.homePrideButton || 'Browse products');
 
     const buttonLink = content?.homePrideLink || '/products';
-    const cleanSalesPhone = salesPhone.replace(/\s+/g, '');
-    const cleanManagementPhone = managementPhone?.replace(/\s+/g, '');
-    const fallbackWhatsappUrl = `https://wa.me/${cleanSalesPhone.replace(/\+/g, '')}?text=${encodeURIComponent(
+    const fallbackWhatsappUrl = `https://wa.me/${contactPhoneDigits(salesPhone)}?text=${encodeURIComponent(
         isArabic
             ? 'مرحباً، أود الاستفسار عن أصناف شركة بيتنجانة إخوان وأسعار الجملة.'
             : 'Hello, I would like to ask about Bitinjana Brothers products and wholesale prices.',
@@ -79,24 +78,7 @@ export default function PartnerPrideBanner({
                         </Link>
 
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
-                            <a
-                                href={`tel:${cleanSalesPhone}`}
-                                dir="ltr"
-                                className="inline-flex items-center gap-1.5 font-medium text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A]"
-                            >
-                                <Phone className="h-3.5 w-3.5" />
-                                <span>{isArabic ? 'المبيعات:' : 'Sales:'} {salesPhone}</span>
-                            </a>
-                            {managementPhone && cleanManagementPhone && (
-                                <a
-                                    href={`tel:${cleanManagementPhone}`}
-                                    dir="ltr"
-                                    className="inline-flex items-center gap-1.5 font-medium text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A]"
-                                >
-                                    <Phone className="h-3.5 w-3.5" />
-                                    <span>{isArabic ? 'الإدارة:' : 'Office:'} {managementPhone}</span>
-                                </a>
-                            )}
+                            <ManagerContactLinks contacts={{ phone: salesPhone, managementPhone }} isArabic={isArabic} className="flex-col items-start" />
                             <a
                                 href={whatsappUrl || fallbackWhatsappUrl}
                                 target="_blank"
@@ -104,7 +86,7 @@ export default function PartnerPrideBanner({
                                 className="inline-flex items-center gap-1.5 font-medium text-emerald-700 transition-colors hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
                             >
                                 <FaWhatsapp className="h-3.5 w-3.5" />
-                                {isArabic ? 'واتساب' : 'WhatsApp'}
+                                {isArabic ? 'واتساب المبيعات' : 'Sales WhatsApp'}
                             </a>
                         </div>
                     </div>
