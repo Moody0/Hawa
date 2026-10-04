@@ -1,4 +1,4 @@
-import { whatsappHref } from '@/lib/website-content';
+import { PARTNER_PRIDE_TITLE_AR, whatsappHref } from '@/lib/website-content';
 import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React from 'react';
 import LanguageToggle from '../LanguageToggle';
@@ -29,8 +29,8 @@ const TopBar = ({ isVisible }: TopBarProps) => {
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <p className="text-xs font-bold text-[#0B192C] dark:text-gray-200 truncate">
                         {isArabic 
-                            ? '✨ نفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان | كل منتجات وكالاتك… بطلب واحد' 
-                            : '✨ Proud distributor of Bitinjana Brothers | All your agency products in one order'}
+                            ? `${PARTNER_PRIDE_TITLE_AR} | كل منتجات وكالاتك… بطلب واحد`
+                            : 'Proud distributor of Bitinjana Brothers | All your agency products in one order'}
                     </p>
                 </div>
                 

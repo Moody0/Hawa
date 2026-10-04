@@ -1,4 +1,4 @@
-import { getSiteContacts } from '@/lib/website-content';
+import { getSiteContacts, PARTNER_PRIDE_TITLE_AR } from '@/lib/website-content';
 import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
@@ -225,10 +225,9 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                             {brandDescription}
                         </p>
 
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#8A6305]/25 to-transparent border border-[#8A6305]/40 text-[#E5B54A] text-xs font-bold w-fit">
-                            <span>✨</span>
-                            <span>{isArabic ? 'نفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان' : 'Proud distributor of Bitinjana Brothers products'}</span>
-                        </div>
+                        <p className="w-fit border-s-2 border-[#8A6305]/60 ps-3 text-xs font-medium leading-relaxed text-slate-400">
+                            {isArabic ? PARTNER_PRIDE_TITLE_AR : 'Proud distributor of Bitinjana Brothers products'}
+                        </p>
 
                         {/* Social Channels */}
                         {socialLinks.length > 0 && <div className="flex flex-col gap-2 pt-2">

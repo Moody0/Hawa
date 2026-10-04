@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import type { WebsiteContent } from '@/lib/website-content';
+import { PARTNER_PRIDE_TITLE_AR, type WebsiteContent } from '@/lib/website-content';
 
 interface PartnerPrideBannerProps {
     language: string;
@@ -27,7 +27,7 @@ export default function PartnerPrideBanner({
         : (content?.homePrideBadge || 'Authorized distributor');
 
     const title = isArabic
-        ? (content?.homePrideTitleAr || 'نفخر بتمثيل وتوزيع أصناف شركة بيتنجانة إخوان')
+        ? (content?.homePrideTitleAr || PARTNER_PRIDE_TITLE_AR)
         : (content?.homePrideTitle || 'Proud to represent Bitinjana Brothers');
 
     const description = isArabic
@@ -50,13 +50,19 @@ export default function PartnerPrideBanner({
     return (
         <section aria-label={title} className="w-full py-8 sm:py-12">
             <div className="container-custom">
-                <div className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#0f172a] sm:p-7 md:flex-row md:items-center md:justify-between">
+                <div className="mx-auto flex max-w-6xl flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#0f172a] sm:p-7 md:flex-row md:items-center md:justify-between">
                     <div className="max-w-2xl space-y-2.5">
-                        <p className="text-xs font-bold text-[#8A6305] dark:text-[#E5B54A]">
+                        <p className="flex items-center gap-2 text-xs font-semibold text-[#8A6305] dark:text-[#E5B54A]">
+                            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
                             {badge}
                         </p>
-                        <h2 className="text-xl font-bold leading-snug text-slate-900 dark:text-white sm:text-2xl">
-                            {title}
+                        <h2 className="text-xl font-bold leading-snug tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+                            {isArabic && title === PARTNER_PRIDE_TITLE_AR ? (
+                                <>
+                                    <span className="text-[#8A6305] dark:text-[#E5B54A]">نَفْخَرُ</span>
+                                    {title.slice('نَفْخَرُ'.length)}
+                                </>
+                            ) : title}
                         </h2>
                         <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                             {description}
