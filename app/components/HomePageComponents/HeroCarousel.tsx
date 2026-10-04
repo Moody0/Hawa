@@ -359,7 +359,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 </div>
 
                 {/* Physical right: clean HTML content panel with smooth crossfade */}
-                <div dir={dir} className="absolute inset-x-0 bottom-0 z-20 flex items-end bg-transparent px-6 pb-10 pt-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
+                <div dir={dir} className="absolute inset-0 z-20 flex items-end bg-transparent px-6 py-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
                     <div className="relative h-full min-h-[240px] w-full max-w-xl md:min-h-[260px] lg:min-h-[280px]">
                         {slides.map((slide, index) => {
                             const isActive = index === currentIndex;
@@ -372,7 +372,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             return (
                                 <div
                                     key={slide.id}
-                                    className={`absolute inset-0 flex flex-col items-start justify-end text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:items-center md:text-center lg:items-start lg:text-start ${
+                                    className={`absolute inset-0 flex flex-col items-start justify-center text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:justify-end md:items-center md:text-center lg:items-start lg:text-start ${
                                         isActive
                                             ? 'opacity-100 translate-y-0 z-10 pointer-events-auto'
                                             : 'opacity-0 translate-y-2 pointer-events-none z-0'
