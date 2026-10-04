@@ -8,6 +8,7 @@ interface PartnerPrideBannerProps {
     dir: 'ltr' | 'rtl';
     content?: Partial<WebsiteContent>;
     salesPhone?: string;
+    managementPhone?: string;
     whatsappUrl?: string;
 }
 
@@ -16,6 +17,7 @@ export default function PartnerPrideBanner({
     dir,
     content,
     salesPhone = '+963 993 443 901',
+    managementPhone,
     whatsappUrl,
 }: PartnerPrideBannerProps) {
     const isArabic = language === 'ar' || dir === 'rtl';
@@ -38,6 +40,7 @@ export default function PartnerPrideBanner({
 
     const buttonLink = content?.homePrideLink || '/products';
     const cleanSalesPhone = salesPhone.replace(/\s+/g, '');
+    const cleanManagementPhone = managementPhone?.replace(/\s+/g, '');
     const fallbackWhatsappUrl = `https://wa.me/${cleanSalesPhone.replace(/\+/g, '')}?text=${encodeURIComponent(
         isArabic
             ? 'مرحباً، أود الاستفسار عن أصناف شركة بيتنجانة إخوان وأسعار الجملة.'
@@ -76,8 +79,18 @@ export default function PartnerPrideBanner({
                                 className="inline-flex items-center gap-1.5 font-medium text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A]"
                             >
                                 <Phone className="h-3.5 w-3.5" />
-                                {salesPhone}
+                                <span>{isArabic ? 'المبيعات:' : 'Sales:'} {salesPhone}</span>
                             </a>
+                            {managementPhone && cleanManagementPhone && (
+                                <a
+                                    href={`tel:${cleanManagementPhone}`}
+                                    dir="ltr"
+                                    className="inline-flex items-center gap-1.5 font-medium text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A]"
+                                >
+                                    <Phone className="h-3.5 w-3.5" />
+                                    <span>{isArabic ? 'الإدارة:' : 'Office:'} {managementPhone}</span>
+                                </a>
+                            )}
                             <a
                                 href={whatsappUrl || fallbackWhatsappUrl}
                                 target="_blank"
