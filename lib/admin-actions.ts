@@ -181,6 +181,7 @@ export interface BannerInput {
     titleAr: string;
     subtitleAr?: string;
     image: string;
+    imageMobile?: string | null;
     buttonText?: string;
     buttonTextAr?: string;
     link?: string;

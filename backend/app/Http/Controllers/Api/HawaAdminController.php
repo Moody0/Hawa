@@ -53,7 +53,7 @@ class HawaAdminController extends Controller
         'categories' => ['name', 'slug', 'description', 'image', 'mainCategoryId', 'isFeatured', 'isActive'],
         'main-categories' => ['name', 'slug', 'description', 'image', 'isActive', 'isFeatured', 'showInNav', 'navOrder'],
         'products' => ['name', 'nameAr', 'nameEn', 'slug', 'description', 'descriptionAr', 'descriptionEn', 'price', 'discountPrice', 'discountType', 'discountValue', 'stock', 'minOrder', 'packaging', 'itemsPerPackage', 'options', 'sku', 'images', 'brandId', 'categoryId', 'mainCategoryId', 'isTrending', 'hidePrice'],
-        'banners' => ['title', 'subtitle', 'titleAr', 'subtitleAr', 'image', 'buttonText', 'buttonTextAr', 'link', 'badge', 'badgeAr', 'isActive'],
+        'banners' => ['title', 'subtitle', 'titleAr', 'subtitleAr', 'image', 'imageMobile', 'buttonText', 'buttonTextAr', 'link', 'badge', 'badgeAr', 'isActive'],
         'promo-codes' => ['code', 'discountPercentage', 'delegateName', 'isActive'],
         'customers' => ['shopName', 'ownerName', 'phone', 'city', 'address', 'password', 'notes', 'isActive'],
         'reviews' => ['isApproved'], 'blog' => ['title', 'titleAr', 'slug', 'excerpt', 'excerptAr', 'content', 'contentAr', 'image', 'category', 'categoryAr', 'isPublished'],
@@ -165,7 +165,7 @@ class HawaAdminController extends Controller
         }
         $rules = [];
         foreach ($fields as $field) {
-            $nullable = in_array($field, ['mainCategoryId', 'discountPrice', 'discountType', 'discountValue', 'description', 'descriptionAr', 'descriptionEn', 'image', 'notes', 'nameAr', 'nameEn', 'options', 'sku', 'itemsPerPackage', 'excerpt', 'excerptAr', 'contentAr', 'titleAr', 'subtitle', 'subtitleAr', 'badge', 'badgeAr', 'link', 'buttonText', 'buttonTextAr', 'delegateName', 'nameEn'], true);
+            $nullable = in_array($field, ['mainCategoryId', 'discountPrice', 'discountType', 'discountValue', 'description', 'descriptionAr', 'descriptionEn', 'image', 'imageMobile', 'notes', 'nameAr', 'nameEn', 'options', 'sku', 'itemsPerPackage', 'excerpt', 'excerptAr', 'contentAr', 'titleAr', 'subtitle', 'subtitleAr', 'badge', 'badgeAr', 'link', 'buttonText', 'buttonTextAr', 'delegateName', 'nameEn'], true);
             if (in_array($field, ['price', 'discountPrice', 'discountValue'])) {
                 $rules[$field] = ['sometimes', $nullable ? 'nullable' : 'required', 'numeric', 'between:0,99999999.99'];
             } elseif (in_array($field, ['stock', 'minOrder', 'navOrder', 'discountPercentage'])) {

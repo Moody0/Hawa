@@ -14,6 +14,7 @@ export interface Banner {
     titleAr: string | null;
     subtitleAr: string | null;
     image: string;
+    imageMobile?: string | null;
     buttonText: string | null;
     buttonTextAr?: string | null;
     link: string | null;
@@ -38,13 +39,12 @@ interface SlideItem {
     secondaryLink?: string;
     secondaryIcon?: 'agencies' | 'whatsapp';
     image: string;
+    imageMobile?: string | null;
 }
 
 interface HeroCarouselProps {
     banners?: Banner[];
 }
-
-// Rich, curated default wholesale slides highlighting Hawa's core capabilities
 
 const SLIDE_DURATION = 6000; // 6 seconds per slide
 
@@ -110,7 +110,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     const { dir } = useLanguage();
     const isArabic = dir === 'rtl';
 
-    // Use the configured banner copy as-is. Built-in slides are only for an empty banner list.
+    // Map active banners to slides
     const slides: SlideItem[] = React.useMemo(() => {
         const activeBanners = (banners || []).filter((b) => b.isActive !== false);
 
@@ -130,6 +130,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             buttonTextAr: b.buttonTextAr || 'تصفح المنتجات',
             link: b.link || '/products',
             image: b.image || '/images/hero-showcase-perfect.webp',
+            imageMobile: b.imageMobile || null,
         }));
 
         return mapped;
@@ -147,6 +148,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
 
     const touchStartX = useRef<number | null>(null);
     const touchEndX = useRef<number | null>(null);
+    const isDragging = useRef<boolean>(false);
 
     const isPaused = isHoverPaused || isFocusPaused || isDragPaused || isDocumentHidden || reduceMotion;
 
@@ -203,8 +205,6 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
         }
     };
 
-    const isDragging = useRef<boolean>(false);
-
     // Touch and pointer swipe handlers
     const handleSwipeStart = (clientX: number) => {
         touchStartX.current = clientX;
@@ -229,10 +229,12 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             if (Math.abs(distance) > threshold) {
                 if (distance > 0) {
                     // Swiped Left
-                    goToNext();
+                    if (isArabic) goToPrev();
+                    else goToNext();
                 } else {
                     // Swiped Right
-                    goToPrev();
+                    if (isArabic) goToNext();
+                    else goToPrev();
                 }
             }
         }
@@ -255,6 +257,8 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
 
     if (!slides.length) return null;
 
+    const animClass = isArabic ? 'animate-hero-slide-rtl' : 'animate-hero-slide-ltr';
+
     return (
         <section
             ref={heroContainerRef}
@@ -274,7 +278,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
-            className="group/hero relative w-full overflow-hidden border-b border-slate-200 bg-white dark:border-white/10 dark:bg-[#0B192C] focus:outline-hidden touch-pan-y"
+            className="group/hero relative w-full h-[520px] sm:h-[580px] md:h-[620px] lg:h-[660px] xl:h-[700px] overflow-hidden bg-slate-950 focus:outline-hidden touch-pan-y select-none"
         >
             <style jsx>{`
                 @keyframes heroProgress {
@@ -288,27 +292,78 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                     animation: heroProgress ${SLIDE_DURATION}ms linear forwards;
                     animation-play-state: paused;
                 }
+                @keyframes heroSlideInRTL {
+                    0% {
+                        opacity: 0;
+                        transform: translate3d(55px, 0, 0);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translate3d(0, 0, 0);
+                    }
+                }
+                @keyframes heroSlideInLTR {
+                    0% {
+                        opacity: 0;
+                        transform: translate3d(-55px, 0, 0);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translate3d(0, 0, 0);
+                    }
+                }
+                .animate-hero-slide-rtl {
+                    animation-name: heroSlideInRTL;
+                    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+                    animation-fill-mode: both;
+                }
+                .animate-hero-slide-ltr {
+                    animation-name: heroSlideInLTR;
+                    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+                    animation-fill-mode: both;
+                }
                 @media (prefers-reduced-motion: reduce) {
                     .hero-progress-fill,
-                    .hero-progress-fill-paused { animation: none; width: 100%; }
+                    .hero-progress-fill-paused {
+                        animation: none;
+                        width: 100%;
+                    }
+                    .animate-hero-slide-rtl,
+                    .animate-hero-slide-ltr {
+                        animation: none !important;
+                        opacity: 1 !important;
+                        transform: none !important;
+                    }
                 }
             `}</style>
 
-            <div dir="ltr" className="relative grid h-[clamp(420px,61svh,520px)] grid-cols-1 md:h-auto md:min-h-[500px] lg:h-[520px] lg:min-h-0 lg:grid-cols-[58%_42%] xl:h-[560px] 2xl:h-[600px]">
-                {/* Physical left: photography only with smooth crossfade */}
-                <div className="absolute inset-0 h-full overflow-hidden bg-slate-100 md:relative md:inset-auto md:h-[330px] lg:h-full dark:bg-slate-900">
-                    {slides.map((slide, index) => {
-                        const isActive = index === currentIndex;
-                        return (
-                            <div
-                                key={slide.id}
-                                className={`absolute inset-0 transition-opacity duration-700 ease-in-out motion-reduce:transition-none ${
-                                    isActive
-                                        ? 'opacity-100 z-10 pointer-events-auto'
-                                        : 'opacity-0 z-0 pointer-events-none'
-                                }`}
-                                aria-hidden={!isActive}
-                            >
+            {/* Slides Track */}
+            <div className="relative w-full h-full">
+                {slides.map((slide, index) => {
+                    const isActive = index === currentIndex;
+                    const headline = parseHeadline(isArabic ? slide.titleAr : slide.title, isArabic);
+                    const subtitleText = isArabic ? slide.subtitleAr : slide.subtitle;
+                    const primaryButtonText = isArabic ? slide.buttonTextAr : slide.buttonText;
+                    const badgeText = isArabic ? (slide.badgeAr || 'توزيع جملة معتمد') : (slide.badge || 'Certified Wholesale');
+
+                    const secondaryBtnText = isArabic
+                        ? (slide.secondaryButtonTextAr || 'طلب جملة عبر واتساب')
+                        : (slide.secondaryButtonText || 'Direct WhatsApp Order');
+                    const secondaryHref = slide.secondaryLink || 'https://wa.me/963993443901?text=' + encodeURIComponent(isArabic ? 'مرحباً، أود الاستفسار عن توريد بضائع بالجملة' : 'Hello, I would like to inquire about wholesale supply');
+                    const isSecExternal = secondaryHref.startsWith('http') || secondaryHref.startsWith('https');
+
+                    return (
+                        <div
+                            key={slide.id}
+                            className={`absolute inset-0 transition-opacity duration-700 ease-in-out motion-reduce:transition-none ${
+                                isActive
+                                    ? 'opacity-100 z-10 pointer-events-auto'
+                                    : 'opacity-0 z-0 pointer-events-none'
+                            }`}
+                            aria-hidden={!isActive}
+                        >
+                            {/* Full-bleed background image with subtle Ken Burns scale */}
+                            <div className="absolute inset-0 overflow-hidden">
                                 <Image
                                     src={slide.image}
                                     alt={isArabic ? (slide.titleAr || 'بنر الصفحة الرئيسية') : (slide.title || 'Hero banner')}
@@ -316,172 +371,202 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     priority={index === 0}
                                     loading={index === 0 ? "eager" : "lazy"}
                                     unoptimized={slide.image.startsWith('/uploads/')}
-                                    sizes="(max-width: 640px) 100vw, (max-width: 1023px) 100vw, (max-width: 1536px) 58vw, 850px"
-                                    className="object-cover object-center w-full h-full pointer-events-none"
+                                    sizes="100vw"
+                                    className={`object-cover object-center w-full h-full pointer-events-none transition-transform duration-[7000ms] ease-out motion-reduce:transform-none ${
+                                        isActive ? 'scale-105' : 'scale-100'
+                                    } ${slide.imageMobile ? 'hidden md:block' : ''}`}
                                 />
+                                {slide.imageMobile && (
+                                    <Image
+                                        src={slide.imageMobile}
+                                        alt={isArabic ? (slide.titleAr || 'بنر الصفحة الرئيسية') : (slide.title || 'Hero banner')}
+                                        fill
+                                        priority={index === 0}
+                                        loading={index === 0 ? "eager" : "lazy"}
+                                        unoptimized={slide.imageMobile.startsWith('/uploads/')}
+                                        sizes="100vw"
+                                        className={`object-cover object-center w-full h-full pointer-events-none transition-transform duration-[7000ms] ease-out motion-reduce:transform-none ${
+                                            isActive ? 'scale-105' : 'scale-100'
+                                        } md:hidden`}
+                                    />
+                                )}
                             </div>
-                        );
-                    })}
 
-                    {/* A subtle mobile scrim keeps the hero text readable while preserving the photo. */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[38%] bg-gradient-to-t from-[#071522]/45 via-[#071522]/10 to-transparent md:hidden" aria-hidden="true" />
+                            {/* Base dark scrim */}
+                            <div className="absolute inset-0 bg-black/45 pointer-events-none" aria-hidden="true" />
 
-                    {/* Small progress marks keep slide navigation out of the CTA area. */}
-                    <div dir={dir} className="absolute bottom-5 start-5 z-30 flex items-center gap-1.5 md:hidden" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
-                        <div dir={dir} className="flex items-center gap-1.5" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
-                            {slides.map((_, idx) => {
-                                const isActive = idx === currentIndex;
-                                return (
-                                    <button
-                                        key={idx}
-                                        type="button"
-                                        role="tab"
-                                        aria-selected={isActive}
-                                        aria-label={isArabic ? `الانتقال إلى البنر ${idx + 1}` : `Go to banner ${idx + 1}`}
-                                        onClick={() => goToSlide(idx)}
-                                        className={`relative h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] ${
-                                            isActive ? 'w-7 bg-white/70' : 'w-1.5 bg-white/65 hover:bg-white'
-                                        }`}
+                            {/* Directional gradient overlay for text readability */}
+                            <div
+                                className={`absolute inset-0 pointer-events-none ${
+                                    isArabic
+                                        ? 'bg-gradient-to-l from-black/95 via-black/75 to-transparent'
+                                        : 'bg-gradient-to-r from-black/95 via-black/75 to-transparent'
+                                }`}
+                                aria-hidden="true"
+                            />
+
+                            {/* Bottom vignette for smooth transition */}
+                            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" aria-hidden="true" />
+
+                            {/* Content Layer (Gordon Food Service / B2B style) */}
+                            <div className="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+                                {isActive && (
+                                    <div
+                                        key={`slide-content-${slide.id}-${animKey}`}
+                                        className="w-full max-w-2xl lg:max-w-3xl flex flex-col items-start text-start py-12 md:py-16"
                                     >
-                                        {isActive && (
-                                            <span
-                                                key={`mobile-prog-${animKey}`}
-                                                className={`absolute inset-y-0 start-0 rounded-full bg-[#E5B54A] ${
-                                                    isPaused ? 'hero-progress-fill-paused' : 'hero-progress-fill'
-                                                }`}
-                                            />
+                                        {/* 1. Eyebrow Badge */}
+                                        <div
+                                            style={reduceMotion ? undefined : { animationDuration: '700ms', animationDelay: '80ms' }}
+                                            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold backdrop-blur-md mb-4 sm:mb-5 shadow-xs ${animClass}`}
+                                        >
+                                            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" aria-hidden="true" />
+                                            <span>{badgeText}</span>
+                                        </div>
+
+                                        {/* 2. Main Headline */}
+                                        <h1
+                                            style={reduceMotion ? undefined : { animationDuration: '800ms', animationDelay: '200ms' }}
+                                            className={`text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-black tracking-tight text-white leading-[1.18] sm:leading-[1.15] drop-shadow-md [text-shadow:0_2px_12px_rgba(0,0,0,0.8)] ${animClass}`}
+                                        >
+                                            <span className="block">{headline.part1}</span>
+                                            {headline.part2 && (
+                                                <span className="mt-1 sm:mt-1.5 block text-[#E5B54A]">
+                                                    {headline.part2}
+                                                </span>
+                                            )}
+                                        </h1>
+
+                                        {/* 3. Subtitle / Description */}
+                                        {subtitleText && (
+                                            <p
+                                                style={reduceMotion ? undefined : { animationDuration: '800ms', animationDelay: '320ms' }}
+                                                className={`mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-slate-200 font-normal leading-relaxed max-w-2xl line-clamp-3 md:line-clamp-none text-pretty drop-shadow-xs [text-shadow:0_1px_6px_rgba(0,0,0,0.8)] ${animClass}`}
+                                            >
+                                                {subtitleText}
+                                            </p>
                                         )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
 
-                {/* Physical right: clean HTML content panel with smooth crossfade */}
-                <div dir={dir} className="absolute inset-0 z-20 flex items-end bg-transparent px-6 py-8 md:relative md:inset-auto md:min-h-[270px] md:items-center md:bg-white md:px-10 md:pb-14 md:pt-8 lg:min-h-0 lg:px-10 lg:pb-16 lg:pt-12 xl:px-14 dark:md:bg-[#0B192C]">
-                    <div className="relative h-full min-h-[240px] w-full max-w-xl md:min-h-[260px] lg:min-h-[280px]">
-                        {slides.map((slide, index) => {
-                            const isActive = index === currentIndex;
-                            const headline = parseHeadline(isArabic ? slide.titleAr : slide.title, isArabic);
-                            const subtitleText = isArabic ? slide.subtitleAr : slide.subtitle;
-                            const primaryButtonText = isArabic ? slide.buttonTextAr : slide.buttonText;
-                            const secondaryButtonText = isArabic ? slide.secondaryButtonTextAr : slide.secondaryButtonText;
-                            const secondaryLink = slide.secondaryLink || '/brands';
-
-                            return (
-                                <div
-                                    key={slide.id}
-                                    className={`absolute inset-0 flex flex-col items-start justify-center text-start transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none md:justify-end md:items-center md:text-center lg:items-start lg:text-start ${
-                                        isActive
-                                            ? 'opacity-100 translate-y-0 z-10 pointer-events-auto'
-                                            : 'opacity-0 translate-y-2 pointer-events-none z-0'
-                                    }`}
-                                    aria-hidden={!isActive}
-                                >
-                                    <h1 className="mx-0 max-w-[min(58vw,22rem)] text-[2rem] font-black leading-[1.08] tracking-tight text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.95),0_4px_12px_rgba(0,0,0,0.9)] md:mx-auto md:max-w-none md:text-4xl md:text-[#0B192C] md:[text-shadow:none] lg:mx-0 lg:text-[2.6rem] xl:text-5xl dark:text-white">
-                                        <span className="block">{headline.part1}</span>
-                                        {headline.part2 && (
-                                            <span className="mt-1 block text-white md:text-[#A8750A] dark:md:text-[#E5B54A]">
-                                                {headline.part2}
-                                            </span>
-                                        )}
-                                    </h1>
-
-                                    {subtitleText && (
-                                        <p className="mx-0 mt-2 line-clamp-3 max-w-[min(62vw,25rem)] text-sm font-semibold leading-[1.55] text-white [text-shadow:0_1px_3px_rgba(0,0,0,1),0_2px_10px_rgba(0,0,0,0.95)] md:mx-auto md:mt-3 md:line-clamp-2 md:max-w-lg md:text-sm md:font-medium md:leading-relaxed md:text-slate-600 md:[text-shadow:none] lg:mx-0 lg:text-base dark:text-slate-300">
-                                            {subtitleText}
-                                        </p>
-                                    )}
-
-                                    <div className="mx-0 mt-4 grid w-fit max-w-full grid-cols-1 justify-items-start gap-2 md:mx-0 md:mt-6 md:w-auto md:max-w-none md:flex md:flex-wrap md:items-center md:justify-center md:gap-2.5 lg:justify-start">
+                                        {/* 4. Action Buttons */}
+                                        <div
+                                            style={reduceMotion ? undefined : { animationDuration: '850ms', animationDelay: '440ms' }}
+                                            className={`mt-6 sm:mt-8 flex flex-wrap items-center gap-3 sm:gap-4 ${animClass}`}
+                                        >
                                             <Link
                                                 href={slide.link}
                                                 prefetch={false}
                                                 tabIndex={isActive ? 0 : -1}
-                                                className="group/btn inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-lg border border-[#B68012] bg-[#B68012] px-5 text-[13px] font-bold leading-tight text-white shadow-lg shadow-black/20 transition-colors hover:bg-[#946809] active:scale-[0.98] md:rounded-lg md:px-6 md:text-sm md:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] focus-visible:ring-offset-2"
+                                                className="group/btn inline-flex min-h-12 items-center justify-center gap-2.5 rounded-xl border border-[#B68012] bg-[#B68012] px-6 sm:px-8 py-3.5 text-sm sm:text-base font-bold text-white shadow-lg shadow-black/40 transition-all duration-200 hover:bg-[#9E6F0C] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                                             >
                                                 <span>{primaryButtonText}</span>
-                                                <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:-translate-x-0.5 rtl:group-hover/btn:translate-x-0.5" aria-hidden="true" />
+                                                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover/btn:-translate-x-1 rtl:group-hover/btn:translate-x-1" aria-hidden="true" />
                                             </Link>
 
-                                            {secondaryButtonText && (
-                                                <Link
-                                                    href={secondaryLink}
-                                                    prefetch={false}
-                                                    tabIndex={isActive ? 0 : -1}
-                                                    target={secondaryLink.startsWith('http') ? '_blank' : undefined}
-                                                    rel={secondaryLink.startsWith('http') ? 'noopener noreferrer' : undefined}
-                                                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/70 bg-[#0B192C]/75 px-4 text-xs font-bold leading-tight text-white transition-colors hover:bg-[#0B192C] active:scale-[0.98] md:rounded-lg md:border-[#0B192C] md:px-6 md:text-sm md:hover:bg-[#152841] dark:md:border-white dark:md:bg-white dark:md:text-[#0B192C] dark:md:hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#071522] md:focus-visible:ring-[#8A6305] md:focus-visible:ring-offset-white"
-                                                >
-                                                    <span>{secondaryButtonText}</span>
-                                                    {slide.secondaryIcon === 'whatsapp' ? (
-                                                        <FaWhatsapp className="w-4 h-4 text-emerald-500" aria-hidden="true" />
-                                                    ) : (
-                                                        <Building2 className="w-4 h-4" aria-hidden="true" />
-                                                    )}
-                                                </Link>
-                                            )}
+                                            <Link
+                                                href={secondaryHref}
+                                                prefetch={false}
+                                                tabIndex={isActive ? 0 : -1}
+                                                target={isSecExternal ? '_blank' : undefined}
+                                                rel={isSecExternal ? 'noopener noreferrer' : undefined}
+                                                className="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-xl border border-white/30 bg-white/10 px-5 sm:px-6 py-3.5 text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-200 hover:bg-white/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                            >
+                                                {slide.secondaryIcon === 'agencies' ? (
+                                                    <Building2 className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
+                                                ) : (
+                                                    <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" aria-hidden="true" />
+                                                )}
+                                                <span>{secondaryBtnText}</span>
+                                            </Link>
+                                        </div>
+
+                                        {/* 5. Trust / Hotline Micro-row */}
+                                        <div
+                                            style={reduceMotion ? undefined : { animationDuration: '850ms', animationDelay: '560ms' }}
+                                            className={`mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-white/15 w-full flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-300 ${animClass}`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-emerald-400" aria-hidden="true" />
+                                                <span>{isArabic ? "توزيع وتوريد مباشر لكافة المحافظات" : "Direct Supply & Nationwide Delivery"}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-slate-300/80">
+                                                <span>{isArabic ? "هاتف المبيعات المباشر:" : "Direct Sales Hotline:"}</span>
+                                                <a href="tel:0993443901" className="font-mono font-bold text-amber-300 hover:text-amber-200 hover:underline dir-ltr">
+                                                    0993 443 901
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Floating Navigation Arrows (Only shown when multiple slides exist) */}
+            {slides.length > 1 && (
+                <>
+                    <button
+                        type="button"
+                        onClick={isArabic ? goToNext : goToPrev}
+                        aria-label={isArabic ? "الشريحة السابقة" : "Previous slide"}
+                        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md shadow-lg transition-all duration-200 hover:bg-black/70 hover:scale-105 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] opacity-75 hover:opacity-100 group-hover/hero:opacity-100"
+                    >
+                        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={isArabic ? goToPrev : goToNext}
+                        aria-label={isArabic ? "الشريحة التالية" : "Next slide"}
+                        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md shadow-lg transition-all duration-200 hover:bg-black/70 hover:scale-105 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] opacity-75 hover:opacity-100 group-hover/hero:opacity-100"
+                    >
+                        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </button>
+                </>
+            )}
+
+            {/* Bottom Pagination & Progress Indicators */}
+            {slides.length > 1 && (
+                <div
+                    className="absolute bottom-5 sm:bottom-6 inset-x-0 z-30 flex items-center justify-center gap-2"
+                    aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}
+                >
+                    <div
+                        className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15"
+                        role="tablist"
+                        aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}
+                    >
+                        {slides.map((_, idx) => {
+                            const isActive = idx === currentIndex;
+                            return (
+                                <button
+                                    key={idx}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={isActive}
+                                    aria-label={isArabic ? `الانتقال إلى البنر ${idx + 1}` : `Go to banner ${idx + 1}`}
+                                    onClick={() => goToSlide(idx)}
+                                    className={`relative transition-all duration-300 rounded-full cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] ${
+                                        isActive
+                                            ? 'w-8 sm:w-10 h-2 bg-white/25'
+                                            : 'w-2 h-2 bg-white/40 hover:bg-white/70'
+                                    }`}
+                                >
+                                    {isActive && (
+                                        <span
+                                            key={`prog-${animKey}`}
+                                            className={`absolute inset-y-0 start-0 bg-[#E5B54A] rounded-full ${
+                                                isPaused ? 'hero-progress-fill-paused' : 'hero-progress-fill'
+                                            }`}
+                                        />
+                                    )}
+                                </button>
                             );
                         })}
                     </div>
                 </div>
-            </div>
-
-            {/* Circular Floating Left Arrow Button (Physically on left side with arrow pointing left) */}
-            <button
-                type="button"
-                onClick={isArabic ? goToNext : goToPrev}
-                aria-label={isArabic ? "الشريحة السابقة" : "Previous slide"}
-                className="absolute left-3 top-[145px] md:top-[165px] lg:top-1/2 -translate-y-1/2 z-30 hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-xs transition-all duration-200 hover:bg-slate-100 active:scale-95 md:flex cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] opacity-0 pointer-events-none group-hover/hero:opacity-100 group-hover/hero:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
-            >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
-
-            {/* Circular Floating Right Arrow Button (Physically on right side with arrow pointing right) */}
-            <button
-                type="button"
-                onClick={isArabic ? goToPrev : goToNext}
-                aria-label={isArabic ? "الشريحة التالية" : "Next slide"}
-                className="absolute right-3 top-[145px] md:top-[165px] lg:top-1/2 -translate-y-1/2 z-30 hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-xs transition-all duration-200 hover:bg-slate-100 active:scale-95 md:flex cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] opacity-0 pointer-events-none group-hover/hero:opacity-100 group-hover/hero:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
-            >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
-
-            {/* Desktop slide progress navigation */}
-            <div className="absolute bottom-5 inset-x-0 z-30 hidden items-center justify-center gap-2.5 md:flex" aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}>
-                <div className="flex items-center justify-center gap-2" role="tablist" aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}>
-                    {slides.map((_, idx) => {
-                        const isActive = idx === currentIndex;
-                        return (
-                            <button
-                                key={idx}
-                                type="button"
-                                role="tab"
-                                aria-selected={isActive}
-                                aria-label={isArabic ? `الانتقال إلى البنر ${idx + 1}` : `Go to banner ${idx + 1}`}
-                                onClick={() => goToSlide(idx)}
-                                className={`relative transition-all duration-300 rounded-full cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305] ${
-                                    isActive
-                                        ? 'w-8 md:w-10 h-2 bg-slate-300 dark:bg-white/30 ring-1 ring-slate-400/50 dark:ring-white/40'
-                                        : 'w-2 h-2 bg-slate-300 hover:bg-slate-400 dark:bg-white/30 dark:hover:bg-white/50'
-                                }`}
-                            >
-                                {isActive && (
-                                    <span
-                                        key={`prog-${animKey}`}
-                                        className={`absolute inset-y-0 start-0 bg-[#8A6305] dark:bg-[#E5B54A] rounded-full ${
-                                            isPaused ? 'hero-progress-fill-paused' : 'hero-progress-fill'
-                                        }`}
-                                    />
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
+            )}
         </section>
     );
 };

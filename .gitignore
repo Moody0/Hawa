@@ -45,6 +45,7 @@ yarn-error.log*
 next-env.d.ts
 
 screenshots/
+hero-concepts/
 
 !.env.example
 !backend/.env.example

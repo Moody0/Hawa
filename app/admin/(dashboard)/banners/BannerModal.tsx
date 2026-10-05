@@ -19,6 +19,7 @@ interface BannerModalProps {
         titleAr: string | null;
         subtitleAr: string | null;
         image: string;
+        imageMobile?: string | null;
         buttonText: string | null;
         buttonTextAr?: string | null;
         link: string | null;
@@ -45,6 +46,7 @@ export default function BannerModal({ isOpen, onClose, banner, mainCategories }:
     const [buttonText, setButtonText] = useState("Explore Products");
     const [buttonTextAr, setButtonTextAr] = useState("تصفح المنتجات");
     const [image, setImage] = useState("");
+    const [imageMobile, setImageMobile] = useState("");
     const [link, setLink] = useState("/products");
     const [isActive, setIsActive] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,6 +58,7 @@ export default function BannerModal({ isOpen, onClose, banner, mainCategories }:
             setTitleAr(banner.titleAr || "");
             setSubtitleAr(banner.subtitleAr || "");
             setImage(banner.image || "");
+            setImageMobile(banner.imageMobile || "");
             setBadge(banner.badge || "Certified Wholesale");
             setBadgeAr(banner.badgeAr || "توزيع جملة معتمد");
             setButtonText(banner.buttonText || "Explore Products");
@@ -68,6 +71,7 @@ export default function BannerModal({ isOpen, onClose, banner, mainCategories }:
             setTitleAr("");
             setSubtitleAr("");
             setImage("");
+            setImageMobile("");
             setBadge("Certified Wholesale");
             setBadgeAr("توزيع جملة معتمد");
             setButtonText("Explore Products");
@@ -101,6 +105,7 @@ export default function BannerModal({ isOpen, onClose, banner, mainCategories }:
                 buttonText: buttonText || undefined,
                 buttonTextAr: buttonTextAr || undefined,
                 image,
+                imageMobile: imageMobile || null,
                 link: link || undefined,
                 isActive,
             };
@@ -304,13 +309,27 @@ export default function BannerModal({ isOpen, onClose, banner, mainCategories }:
                         <div className="space-y-5">
                             {/* Image Upload Component */}
                             <ImageUploadField
-                                label={isArabic ? "صورة البنر (نسبة 16:9 أو 4:3 موصى بها)" : "Banner Image (16:9 recommended)"}
+                                label={isArabic ? "صورة أجهزة الكمبيوتر والشاشات الكبيرة (Desktop - نسبة 16:9 موصى بها)" : "Desktop Image - Large Screens (16:9 recommended)"}
                                 folder="banners"
                                 value={image}
                                 onChange={(url) => setImage(url)}
                                 placeholder="https://..."
                                 required
                             />
+
+                            {/* Mobile Image Upload Component */}
+                            <ImageUploadField
+                                label={isArabic ? "صورة الجوال والشاشات الصغيرة (Mobile - اختياري)" : "Mobile Image - Small Screens (Optional)"}
+                                folder="banners"
+                                value={imageMobile}
+                                onChange={(url) => setImageMobile(url)}
+                                placeholder="https://..."
+                            />
+                            <p className="text-[11px] text-slate-400 -mt-2">
+                                {isArabic
+                                    ? "في حال عدم رفع صورة مخصصة للجوال، سيتم عرض صورة الشاشات الكبيرة تلقائياً على كافة الأجهزة."
+                                    : "If no mobile image is uploaded, the desktop image will automatically be shown on mobile screens."}
+                            </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">

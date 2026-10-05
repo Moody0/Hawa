@@ -19,6 +19,7 @@ interface Banner {
     titleAr: string | null;
     subtitleAr: string | null;
     image: string;
+    imageMobile?: string | null;
     buttonText: string | null;
     buttonTextAr?: string | null;
     link: string | null;
@@ -133,6 +134,12 @@ export default function BannersClient({ banners, mainCategories }: { banners: Ba
                                         className="w-full h-full object-cover"
                                         src={banner.image}
                                     />
+                                    {banner.imageMobile && (
+                                        <span className="absolute bottom-2 start-2 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs z-10">
+                                            <span>📱</span>
+                                            <span>{isArabic ? "شاشات الجوال" : "Mobile Ready"}</span>
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="p-6 flex-1 flex flex-col justify-between">
                                     <div className="flex flex-col gap-3">

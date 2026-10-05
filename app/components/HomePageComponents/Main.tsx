@@ -26,6 +26,7 @@ interface Banner {
     titleAr: string | null;
     subtitleAr: string | null;
     image: string;
+    imageMobile?: string | null;
     buttonText: string | null;
     buttonTextAr?: string | null;
     link: string | null;
