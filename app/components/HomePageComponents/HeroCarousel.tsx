@@ -278,7 +278,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
-            className="group/hero relative w-full h-[520px] sm:h-[580px] md:h-[620px] lg:h-[660px] xl:h-[700px] overflow-hidden bg-slate-950 focus:outline-hidden touch-pan-y select-none"
+            className="group/hero relative w-full h-[460px] sm:h-[500px] md:h-[520px] lg:h-[540px] xl:h-[580px] overflow-hidden bg-slate-950 focus:outline-hidden touch-pan-y select-none"
         >
             <style jsx>{`
                 @keyframes heroProgress {
@@ -362,7 +362,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             }`}
                             aria-hidden={!isActive}
                         >
-                            {/* Full-bleed background image with subtle Ken Burns scale */}
+                            {/* Full-bleed background image with natural unzoomed scale */}
                             <div className="absolute inset-0 overflow-hidden">
                                 <Image
                                     src={slide.image}
@@ -372,9 +372,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     loading={index === 0 ? "eager" : "lazy"}
                                     unoptimized={slide.image.startsWith('/uploads/')}
                                     sizes="100vw"
-                                    className={`object-cover object-center w-full h-full pointer-events-none transition-transform duration-[7000ms] ease-out motion-reduce:transform-none ${
-                                        isActive ? 'scale-105' : 'scale-100'
-                                    } ${slide.imageMobile ? 'hidden md:block' : ''}`}
+                                    className={`object-cover object-center w-full h-full pointer-events-none ${slide.imageMobile ? 'hidden md:block' : ''}`}
                                 />
                                 {slide.imageMobile && (
                                     <Image
@@ -385,35 +383,27 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                         loading={index === 0 ? "eager" : "lazy"}
                                         unoptimized={slide.imageMobile.startsWith('/uploads/')}
                                         sizes="100vw"
-                                        className={`object-cover object-center w-full h-full pointer-events-none transition-transform duration-[7000ms] ease-out motion-reduce:transform-none ${
-                                            isActive ? 'scale-105' : 'scale-100'
-                                        } md:hidden`}
+                                        className="object-cover object-center w-full h-full pointer-events-none md:hidden"
                                     />
                                 )}
                             </div>
 
-                            {/* Base dark scrim */}
-                            <div className="absolute inset-0 bg-black/45 pointer-events-none" aria-hidden="true" />
-
-                            {/* Directional gradient overlay for text readability */}
+                            {/* Soft directional gradient overlay behind text only for legibility without blacking out the image */}
                             <div
                                 className={`absolute inset-0 pointer-events-none ${
                                     isArabic
-                                        ? 'bg-gradient-to-l from-black/95 via-black/75 to-transparent'
-                                        : 'bg-gradient-to-r from-black/95 via-black/75 to-transparent'
+                                        ? 'bg-gradient-to-l from-black/60 via-black/25 to-transparent'
+                                        : 'bg-gradient-to-r from-black/60 via-black/25 to-transparent'
                                 }`}
                                 aria-hidden="true"
                             />
-
-                            {/* Bottom vignette for smooth transition */}
-                            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" aria-hidden="true" />
 
                             {/* Content Layer (Gordon Food Service / B2B style) */}
                             <div className="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
                                 {isActive && (
                                     <div
                                         key={`slide-content-${slide.id}-${animKey}`}
-                                        className="w-full max-w-2xl lg:max-w-3xl flex flex-col items-start text-start py-12 md:py-16"
+                                        className="w-full max-w-2xl lg:max-w-3xl flex flex-col items-start text-start py-8 md:py-12"
                                     >
                                         {/* 1. Eyebrow Badge */}
                                         <div
@@ -477,23 +467,6 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                                 )}
                                                 <span>{secondaryBtnText}</span>
                                             </Link>
-                                        </div>
-
-                                        {/* 5. Trust / Hotline Micro-row */}
-                                        <div
-                                            style={reduceMotion ? undefined : { animationDuration: '850ms', animationDelay: '560ms' }}
-                                            className={`mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-white/15 w-full flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-300 ${animClass}`}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <span className="w-2 h-2 rounded-full bg-emerald-400" aria-hidden="true" />
-                                                <span>{isArabic ? "توزيع وتوريد مباشر لكافة المحافظات" : "Direct Supply & Nationwide Delivery"}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-slate-300/80">
-                                                <span>{isArabic ? "هاتف المبيعات المباشر:" : "Direct Sales Hotline:"}</span>
-                                                <a href="tel:0993443901" className="font-mono font-bold text-amber-300 hover:text-amber-200 hover:underline dir-ltr">
-                                                    0993 443 901
-                                                </a>
-                                            </div>
                                         </div>
                                     </div>
                                 )}
