@@ -388,27 +388,27 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                 )}
                             </div>
 
-                            {/* Soft directional gradient overlay behind text only for legibility without blacking out the image */}
+                            {/* Soft directional gradient overlay: vertical on mobile, horizontal on desktop */}
                             <div
                                 className={`absolute inset-0 pointer-events-none ${
                                     isArabic
-                                        ? 'bg-gradient-to-l from-black/60 via-black/25 to-transparent'
-                                        : 'bg-gradient-to-r from-black/60 via-black/25 to-transparent'
+                                        ? 'bg-gradient-to-t from-black/85 via-black/45 via-45% to-transparent sm:bg-gradient-to-l sm:from-black/60 sm:via-black/25 sm:to-transparent'
+                                        : 'bg-gradient-to-t from-black/85 via-black/45 via-45% to-transparent sm:bg-gradient-to-r sm:from-black/60 sm:via-black/25 sm:to-transparent'
                                 }`}
                                 aria-hidden="true"
                             />
 
                             {/* Content Layer (Gordon Food Service / B2B style) */}
-                            <div className="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+                            <div className="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end sm:items-center pb-14 sm:pb-0">
                                 {isActive && (
                                     <div
                                         key={`slide-content-${slide.id}-${animKey}`}
-                                        className="w-full max-w-2xl lg:max-w-3xl flex flex-col items-start text-start py-8 md:py-12"
+                                        className="w-full max-w-2xl lg:max-w-3xl flex flex-col items-start text-start py-6 sm:py-8 md:py-12"
                                     >
                                         {/* 1. Eyebrow Badge */}
                                         <div
                                             style={reduceMotion ? undefined : { animationDuration: '700ms', animationDelay: '80ms' }}
-                                            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold backdrop-blur-md mb-4 sm:mb-5 shadow-xs ${animClass}`}
+                                            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold backdrop-blur-md mb-3 sm:mb-5 shadow-xs ${animClass}`}
                                         >
                                             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" aria-hidden="true" />
                                             <span>{badgeText}</span>
@@ -417,7 +417,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                         {/* 2. Main Headline */}
                                         <h1
                                             style={reduceMotion ? undefined : { animationDuration: '800ms', animationDelay: '200ms' }}
-                                            className={`text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-black tracking-tight text-white leading-[1.18] sm:leading-[1.15] drop-shadow-md [text-shadow:0_2px_12px_rgba(0,0,0,0.8)] ${animClass}`}
+                                            className={`text-2xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-black tracking-tight text-white leading-[1.2] sm:leading-[1.15] drop-shadow-md [text-shadow:0_2px_12px_rgba(0,0,0,0.8)] ${animClass}`}
                                         >
                                             <span className="block">{headline.part1}</span>
                                             {headline.part2 && (
@@ -431,7 +431,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                         {subtitleText && (
                                             <p
                                                 style={reduceMotion ? undefined : { animationDuration: '800ms', animationDelay: '320ms' }}
-                                                className={`mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-slate-200 font-normal leading-relaxed max-w-2xl line-clamp-3 md:line-clamp-none text-pretty drop-shadow-xs [text-shadow:0_1px_6px_rgba(0,0,0,0.8)] ${animClass}`}
+                                                className={`mt-3 sm:mt-5 text-xs sm:text-base md:text-lg text-slate-200 font-normal leading-relaxed max-w-2xl line-clamp-2 sm:line-clamp-none text-pretty drop-shadow-xs [text-shadow:0_1px_6px_rgba(0,0,0,0.8)] ${animClass}`}
                                             >
                                                 {subtitleText}
                                             </p>
@@ -440,13 +440,13 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                         {/* 4. Action Buttons */}
                                         <div
                                             style={reduceMotion ? undefined : { animationDuration: '850ms', animationDelay: '440ms' }}
-                                            className={`mt-6 sm:mt-8 flex flex-wrap items-center gap-3 sm:gap-4 ${animClass}`}
+                                            className={`mt-5 sm:mt-8 flex flex-wrap items-center gap-3 sm:gap-4 ${animClass}`}
                                         >
                                             <Link
                                                 href={slide.link}
                                                 prefetch={false}
                                                 tabIndex={isActive ? 0 : -1}
-                                                className="group/btn inline-flex min-h-12 items-center justify-center gap-2.5 rounded-xl border border-[#B68012] bg-[#B68012] px-6 sm:px-8 py-3.5 text-sm sm:text-base font-bold text-white shadow-lg shadow-black/40 transition-all duration-200 hover:bg-[#9E6F0C] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                                className="group/btn inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-2.5 rounded-xl border border-[#B68012] bg-[#B68012] px-6 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-base font-bold text-white shadow-lg shadow-black/40 transition-all duration-200 hover:bg-[#9E6F0C] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                                             >
                                                 <span>{primaryButtonText}</span>
                                                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover/btn:-translate-x-1 rtl:group-hover/btn:translate-x-1" aria-hidden="true" />
@@ -458,7 +458,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                                 tabIndex={isActive ? 0 : -1}
                                                 target={isSecExternal ? '_blank' : undefined}
                                                 rel={isSecExternal ? 'noopener noreferrer' : undefined}
-                                                className="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-xl border border-white/30 bg-white/10 px-5 sm:px-6 py-3.5 text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-200 hover:bg-white/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                                className="hidden sm:inline-flex min-h-12 items-center justify-center gap-2.5 rounded-xl border border-white/30 bg-white/10 px-5 sm:px-6 py-3.5 text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-200 hover:bg-white/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                                             >
                                                 {slide.secondaryIcon === 'agencies' ? (
                                                     <Building2 className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
@@ -476,14 +476,14 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 })}
             </div>
 
-            {/* Floating Navigation Arrows (Only shown when multiple slides exist) */}
+            {/* Floating Navigation Arrows (Only shown on medium screens and up) */}
             {slides.length > 1 && (
                 <>
                     <button
                         type="button"
                         onClick={isArabic ? goToNext : goToPrev}
                         aria-label={isArabic ? "الشريحة السابقة" : "Previous slide"}
-                        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md shadow-lg transition-all duration-200 hover:bg-black/70 hover:scale-105 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] opacity-75 hover:opacity-100 group-hover/hero:opacity-100"
+                        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 hidden md:flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md shadow-lg transition-all duration-200 hover:bg-black/70 hover:scale-105 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] opacity-75 hover:opacity-100 group-hover/hero:opacity-100"
                     >
                         <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
@@ -492,7 +492,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                         type="button"
                         onClick={isArabic ? goToPrev : goToNext}
                         aria-label={isArabic ? "الشريحة التالية" : "Next slide"}
-                        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md shadow-lg transition-all duration-200 hover:bg-black/70 hover:scale-105 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] opacity-75 hover:opacity-100 group-hover/hero:opacity-100"
+                        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 hidden md:flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md shadow-lg transition-all duration-200 hover:bg-black/70 hover:scale-105 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] opacity-75 hover:opacity-100 group-hover/hero:opacity-100"
                     >
                         <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
