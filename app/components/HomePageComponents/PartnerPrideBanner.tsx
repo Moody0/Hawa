@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { DEFAULT_MANAGEMENT_PHONE, DEFAULT_SALES_PHONE, PARTNER_PRIDE_TITLE_AR, contactPhoneDigits, type WebsiteContent } from '@/lib/website-content';
-import ManagerContactLinks from '../ManagerContactLinks';
+import { DEFAULT_MANAGEMENT_PHONE, DEFAULT_SALES_PHONE, PARTNER_PRIDE_TITLE_AR, contactPhoneDigits, formatContactPhone, type WebsiteContent } from '@/lib/website-content';
 
 interface PartnerPrideBannerProps {
     language: string;
@@ -68,7 +67,7 @@ export default function PartnerPrideBanner({
                         </p>
                     </div>
 
-                    <div className="flex shrink-0 flex-col items-start gap-3 sm:flex-row sm:items-center md:flex-col md:items-start">
+                    <div className="flex shrink-0 flex-col items-start gap-3.5">
                         <Link
                             href={buttonLink}
                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B192C] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#16304d] dark:bg-[#E5B54A] dark:text-[#0B192C] dark:hover:bg-[#f0c35d]"
@@ -77,16 +76,32 @@ export default function PartnerPrideBanner({
                             {isArabic ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
                         </Link>
 
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
-                            <ManagerContactLinks contacts={{ phone: salesPhone, managementPhone }} isArabic={isArabic} className="flex-col items-start" />
+                        <div className="flex flex-col items-start gap-1.5 text-xs">
+                            <a
+                                href={`tel:+${contactPhoneDigits(salesPhone)}`}
+                                className="inline-flex items-center gap-1.5 rounded-sm text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A] focus-visible:outline-2 focus-visible:outline-offset-2"
+                            >
+                                <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                <span>{isArabic ? 'مدير المبيعات:' : 'Sales Manager:'}</span>
+                                <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
+                            </a>
+                            <a
+                                href={`tel:+${contactPhoneDigits(managementPhone)}`}
+                                className="inline-flex items-center gap-1.5 rounded-sm text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A] focus-visible:outline-2 focus-visible:outline-offset-2"
+                            >
+                                <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                <span>{isArabic ? 'مدير الشركة:' : 'Company Manager:'}</span>
+                                <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(managementPhone)}</span>
+                            </a>
                             <a
                                 href={whatsappUrl || fallbackWhatsappUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 font-medium text-emerald-700 transition-colors hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+                                className="inline-flex items-center gap-1.5 font-medium text-emerald-700 transition-colors hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 focus-visible:outline-2 focus-visible:outline-offset-2"
                             >
-                                <FaWhatsapp className="h-3.5 w-3.5" />
-                                {isArabic ? 'واتساب المبيعات' : 'Sales WhatsApp'}
+                                <FaWhatsapp className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                                <span>{isArabic ? 'واتساب المبيعات:' : 'Sales WhatsApp:'}</span>
+                                <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
                             </a>
                         </div>
                     </div>
