@@ -19,6 +19,8 @@ import {
     Save,
     X,
     ExternalLink,
+    Archive,
+    ArchiveRestore,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "react-hot-toast";
@@ -39,6 +41,7 @@ interface ContactMessageItem {
     notes: string | null;
     ipAddress: string | null;
     createdAt: string;
+    archivedAt?: string | null;
 }
 
 export default function MessagesClient() {
@@ -50,12 +53,13 @@ export default function MessagesClient() {
     const [messages, setMessages] = useState<ContactMessageItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-    const [statusFilter, setStatusFilter] = useState<"ALL" | "UNREAD" | "READ">("ALL");
+    const [statusFilter, setStatusFilter] = useState<"ALL" | "UNREAD" | "READ" | "ARCHIVED">("ALL");
 
     // Metrics
     const [totalCount, setTotalCount] = useState(0);
     const [unreadCount, setUnreadCount] = useState(0);
     const [todayCount, setTodayCount] = useState(0);
+    const [archivedCount, setArchivedCount] = useState(0);
 
     // Selected message for detail modal
     const [selectedMessage, setSelectedMessage] = useState<ContactMessageItem | null>(null);
@@ -69,7 +73,11 @@ export default function MessagesClient() {
         if (!silent) setIsLoading(true);
         try {
             const params = new URLSearchParams();
-            if (statusFilter !== "ALL") params.set("status", statusFilter);
+            if (statusFilter === "ARCHIVED") {
+                params.set("archived", "true");
+            } else if (statusFilter !== "ALL") {
+                params.set("status", statusFilter);
+            }
             if (searchQuery.trim()) params.set("search", searchQuery.trim());
             params.set("_t", Date.now().toString());
 
@@ -82,6 +90,7 @@ export default function MessagesClient() {
                 setTotalCount(data.total ?? 0);
                 setUnreadCount(data.unreadCount ?? 0);
                 setTodayCount(data.todayCount ?? 0);
+                setArchivedCount(data.archivedCount ?? 0);
 
                 // If new unread message arrives while tab is open, alert admin
                 if (!isFirstLoadRef.current && prevUnreadRef.current !== null && (data.unreadCount ?? 0) > prevUnreadRef.current) {
@@ -190,14 +199,77 @@ export default function MessagesClient() {
         }
     };
 
-    const handleDelete = async (id: string, e?: React.MouseEvent) => {
+    const handleRestore = async (id: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
 
+        try {
+            const res = await laravelClientFetch(`/api/admin/messages/${id}/restore`, {
+                method: "POST",
+            });
+
+            if (res.ok) {
+                toast.success(isArabic ? "تمت استعادة الرسالة إلى صندوق الوارد بنجاح" : "Message restored to inbox successfully");
+                setMessages(prev => prev.filter(m => m.id !== id));
+                setArchivedCount(prev => Math.max(0, prev - 1));
+                setTotalCount(prev => prev + 1);
+
+                if (selectedMessage?.id === id) {
+                    setSelectedMessage(null);
+                }
+
+                fetchMessages(true);
+            } else {
+                toast.error(isArabic ? "فشل استعادة الرسالة" : "Failed to restore message");
+            }
+        } catch (error) {
+            console.error("Failed to restore message:", error);
+            toast.error(isArabic ? "حدث خطأ أثناء استعادة الرسالة" : "Error restoring message");
+        }
+    };
+
+    const handleDelete = async (id: string, isArchived = false, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+
+        if (isArchived) {
+            const ok = await confirm({
+                title: isArabic ? "حذف الرسالة نهائياً" : "Delete Message Permanently",
+                message: isArabic
+                    ? "هل أنت متأكد من رغبتك بحذف هذه الرسالة نهائياً؟ لن تتمكن من استعادتها لاحقاً."
+                    : "Are you sure you want to permanently delete this message? This action cannot be undone.",
+                confirmText: isArabic ? "حذف نهائي" : "Delete Permanently",
+                cancelText: isArabic ? "إلغاء" : "Cancel",
+                variant: "danger",
+            });
+            if (!ok) return;
+
+            try {
+                const res = await laravelClientFetch(`/api/admin/messages/${id}?force=true`, {
+                    method: "DELETE",
+                });
+
+                if (res.ok) {
+                    toast.success(isArabic ? "تم حذف الرسالة نهائياً" : "Message permanently deleted");
+                    setMessages(prev => prev.filter(m => m.id !== id));
+                    setArchivedCount(prev => Math.max(0, prev - 1));
+                    if (selectedMessage?.id === id) {
+                        setSelectedMessage(null);
+                    }
+                    fetchMessages(true);
+                } else {
+                    toast.error(isArabic ? "فشل حذف الرسالة" : "Failed to delete message");
+                }
+            } catch (error) {
+                console.error("Failed to delete message permanently:", error);
+                toast.error(isArabic ? "حدث خطأ أثناء الحذف" : "Error deleting message");
+            }
+            return;
+        }
+
         const ok = await confirm({
-            title: isArabic ? "أرشفة / حذف الرسالة" : "Archive Message",
+            title: isArabic ? "أرشفة الرسالة" : "Archive Message",
             message: isArabic
-                ? "هل أنت متأكد من رغبتك بأرشفة هذه الرسالة؟ لن تظهر في قائمة الرسائل النشطة."
-                : "Are you sure you want to archive this message? It will be removed from active inbox.",
+                ? "هل أنت متأكد من رغبتك بأرشفة هذه الرسالة؟ ستُنقل إلى تبويب «المؤرشفة» ويمكنك استعادتها في أي وقت."
+                : "Are you sure you want to archive this message? It will be moved to the 'Archived' tab and can be restored at any time.",
             confirmText: isArabic ? "أرشفة" : "Archive",
             cancelText: isArabic ? "إلغاء" : "Cancel",
             variant: "danger",
@@ -210,12 +282,13 @@ export default function MessagesClient() {
             });
 
             if (res.ok) {
-                toast.success(isArabic ? "تمت أرشفة الرسالة بنجاح" : "Message archived successfully");
+                toast.success(isArabic ? "تمت أرشفة الرسالة بنجاح (تجدها في تبويب «المؤرشفة»)" : "Message archived (view in 'Archived' tab)");
                 
                 // Immediately synchronize local message list and metric counters
                 const target = messages.find(m => m.id === id);
                 setMessages(prev => prev.filter(m => m.id !== id));
                 setTotalCount(prev => Math.max(0, prev - 1));
+                setArchivedCount(prev => prev + 1);
                 if (target && !target.isRead) {
                     setUnreadCount(prev => {
                         const next = Math.max(0, prev - 1);
@@ -238,11 +311,11 @@ export default function MessagesClient() {
                 // Silent background sync
                 fetchMessages(true);
             } else {
-                toast.error(isArabic ? "فشل حذف الرسالة" : "Failed to archive message");
+                toast.error(isArabic ? "فشل أرشفة الرسالة" : "Failed to archive message");
             }
         } catch (error) {
-            console.error("Failed to delete message:", error);
-            toast.error(isArabic ? "حدث خطأ أثناء الحذف" : "Error archiving message");
+            console.error("Failed to archive message:", error);
+            toast.error(isArabic ? "حدث خطأ أثناء الأرشفة" : "Error archiving message");
         }
     };
 
@@ -409,24 +482,34 @@ export default function MessagesClient() {
 
                         {/* Status Tabs */}
                         <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto">
-                            {(["ALL", "UNREAD", "READ"] as const).map((status) => {
+                            {(["ALL", "UNREAD", "READ", "ARCHIVED"] as const).map((status) => {
                                 const labels: Record<string, string> = {
                                     ALL: isArabic ? "كافة الرسائل" : "All",
                                     UNREAD: isArabic ? "غير مقروءة" : "Unread",
                                     READ: isArabic ? "مقروءة" : "Read",
+                                    ARCHIVED: isArabic ? "المؤرشفة" : "Archived",
                                 };
+                                const count = status === "UNREAD" ? unreadCount : status === "ARCHIVED" ? archivedCount : status === "ALL" ? totalCount : null;
                                 const isActive = statusFilter === status;
                                 return (
                                     <button
                                         key={status}
                                         onClick={() => setStatusFilter(status)}
-                                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                                        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                                             isActive
-                                                ? "bg-[#0B192C] text-white shadow-xs"
+                                                ? (status === "ARCHIVED" ? "bg-amber-800 text-white shadow-xs" : "bg-[#0B192C] text-white shadow-xs")
                                                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                                         }`}
                                     >
+                                        {status === "ARCHIVED" && <Archive className="w-3.5 h-3.5" />}
                                         <span>{labels[status]}</span>
+                                        {count !== null && count > 0 && (
+                                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                                isActive ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                                            }`}>
+                                                {count}
+                                            </span>
+                                        )}
                                     </button>
                                 );
                             })}
@@ -442,14 +525,24 @@ export default function MessagesClient() {
                             </div>
                         ) : messages.length === 0 ? (
                             <div className="p-16 text-center text-slate-400">
-                                <MailOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                                {statusFilter === "ARCHIVED" ? (
+                                    <Archive className="w-12 h-12 mx-auto mb-3 opacity-30 text-amber-500" />
+                                ) : (
+                                    <MailOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                                )}
                                 <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
-                                    {isArabic ? "لا توجد رسائل مطابقة" : "No messages found"}
+                                    {statusFilter === "ARCHIVED"
+                                        ? (isArabic ? "لا توجد رسائل مؤرشفة" : "No archived messages")
+                                        : (isArabic ? "لا توجد رسائل مطابقة" : "No messages found")}
                                 </p>
                                 <p className="text-xs text-slate-400 mt-1">
-                                    {isArabic
-                                        ? "عندما يقوم العملاء بإرسال استفسارات من صفحة تواصل معنا ستظهر هنا مباشرة."
-                                        : "Inquiries submitted via /contact will appear here directly."}
+                                    {statusFilter === "ARCHIVED"
+                                        ? (isArabic
+                                            ? "الرسائل التي تقوم بأرشفتها ستظهر هنا ويمكنك استعادتها إلى صندوق الوارد في أي وقت."
+                                            : "Messages you archive will appear here and can be restored to your inbox at any time.")
+                                        : (isArabic
+                                            ? "عندما يقوم العملاء بإرسال استفسارات من صفحة تواصل معنا ستظهر هنا مباشرة."
+                                            : "Inquiries submitted via /contact will appear here directly.")}
                                 </p>
                             </div>
                         ) : (
@@ -488,6 +581,12 @@ export default function MessagesClient() {
                                                         <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                                                             <MapPin className="w-3 h-3" />
                                                             <span>{msg.city}</span>
+                                                        </span>
+                                                    )}
+                                                    {Boolean(msg.archivedAt || statusFilter === "ARCHIVED") && (
+                                                        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold">
+                                                            <Archive className="w-3 h-3" />
+                                                            <span>{isArabic ? "مؤرشفة" : "Archived"}</span>
                                                         </span>
                                                     )}
                                                 </div>
@@ -545,14 +644,35 @@ export default function MessagesClient() {
                                                 <Eye className="w-4 h-4" />
                                             </button>
 
-                                            <button
-                                                type="button"
-                                                onClick={(e) => handleDelete(msg.id, e)}
-                                                title={isArabic ? "أرشفة" : "Archive"}
-                                                className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            {Boolean(msg.archivedAt || statusFilter === "ARCHIVED") ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => handleRestore(msg.id, e)}
+                                                        title={isArabic ? "استعادة إلى صندوق الوارد" : "Restore to Inbox"}
+                                                        className="p-2 rounded-xl text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
+                                                    >
+                                                        <ArchiveRestore className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => handleDelete(msg.id, true, e)}
+                                                        title={isArabic ? "حذف نهائي" : "Delete Permanently"}
+                                                        className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => handleDelete(msg.id, false, e)}
+                                                    title={isArabic ? "أرشفة" : "Archive"}
+                                                    className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -575,15 +695,23 @@ export default function MessagesClient() {
                         {/* Modal Header */}
                         <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-white/5 mb-5">
                             <div>
-                                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-extrabold mb-1 ${
-                                    selectedMessage.isRead
-                                        ? "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                                        : "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
-                                }`}>
-                                    {selectedMessage.isRead
-                                        ? (isArabic ? "رسالة مقروءة" : "Read")
-                                        : (isArabic ? "رسالة جديدة" : "New / Unread")}
-                                </span>
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${
+                                        selectedMessage.isRead
+                                            ? "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                                            : "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
+                                    }`}>
+                                        {selectedMessage.isRead
+                                            ? (isArabic ? "رسالة مقروءة" : "Read")
+                                            : (isArabic ? "رسالة جديدة" : "New / Unread")}
+                                    </span>
+                                    {Boolean(selectedMessage.archivedAt || statusFilter === "ARCHIVED") && (
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                                            <Archive className="w-3 h-3" />
+                                            <span>{isArabic ? "مؤرشفة" : "Archived"}</span>
+                                        </span>
+                                    )}
+                                </div>
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                                     {selectedMessage.name}
                                 </h3>
@@ -713,13 +841,33 @@ export default function MessagesClient() {
                                         : (isArabic ? "تحديد كمقروء" : "Mark Read")}
                                 </button>
 
-                                <button
-                                    type="button"
-                                    onClick={() => handleDelete(selectedMessage.id)}
-                                    className="px-3.5 py-2 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-bold transition-colors"
-                                >
-                                    {isArabic ? "أرشفة الرسالة" : "Archive"}
-                                </button>
+                                {Boolean(selectedMessage.archivedAt || statusFilter === "ARCHIVED") ? (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRestore(selectedMessage.id)}
+                                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs"
+                                        >
+                                            <ArchiveRestore className="w-3.5 h-3.5" />
+                                            <span>{isArabic ? "استعادة إلى الوارد" : "Restore to Inbox"}</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(selectedMessage.id, true)}
+                                            className="px-3.5 py-2 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-bold transition-colors"
+                                        >
+                                            {isArabic ? "حذف نهائي" : "Delete Permanently"}
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDelete(selectedMessage.id, false)}
+                                        className="px-3.5 py-2 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-bold transition-colors"
+                                    >
+                                        {isArabic ? "أرشفة الرسالة" : "Archive"}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

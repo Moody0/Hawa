@@ -66,6 +66,7 @@ Route::prefix('admin')->group(function () {
 
             return app(OrderController::class)->destroy($id);
         });
+        Route::post('/{resource}/{id}/restore', [HawaAdminController::class, 'restore']);
         Route::get('/{resource}', [HawaAdminController::class, 'index']);
         Route::post('/{resource}', [HawaAdminController::class, 'save']);
         Route::patch('/{resource}/{id?}', [HawaAdminController::class, 'save']);

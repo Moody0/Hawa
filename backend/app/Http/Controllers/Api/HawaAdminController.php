@@ -65,7 +65,7 @@ class HawaAdminController extends Controller
         [$class,$permission] = $this->resource($resource);
         AdminAccess::check($permission.'_VIEW');
         $query = $class::query();
-        if ($request->query('archived') === 'true' && Schema::hasColumn((new $class)->getTable(), 'archived_at')) {
+        if (($request->query('archived') === 'true' || $request->query('status') === 'ARCHIVED') && Schema::hasColumn((new $class)->getTable(), 'archived_at')) {
             $query->withoutGlobalScope('active_records')->whereNotNull('archived_at');
         }
         if ($resource === 'products') {
@@ -143,7 +143,7 @@ class HawaAdminController extends Controller
         $rows = $resource === 'brands' ? $this->serializeBrands($records) : $records->map(fn ($row) => $this->serialize($row, $resource))->values();
         $pagination = ['total' => $total, 'pages' => (int) ceil($total / $limit), 'page' => $page, 'limit' => $limit];
         if (in_array($resource, ['blog', 'reviews', 'customers', 'messages', 'audit-logs'])) {
-            return response()->json(['success' => true, 'items' => $rows, 'posts' => $resource === 'blog' ? $rows : [], 'customers' => $resource === 'customers' ? $rows : [], 'messages' => $resource === 'messages' ? $rows : [], 'total' => $total, 'unreadCount' => $resource === 'messages' ? ContactMessage::where('is_read', false)->count() : 0, 'todayCount' => $resource === 'messages' ? ContactMessage::whereDate('created_at', today())->count() : 0, 'nextCursor' => $rows->count() === $limit ? ($rows->last()['id'] ?? null) : null, 'previousCursor' => $cursor ?? null, 'pagination' => [...$pagination, 'hasMore' => $page * $limit < $total, 'nextCursor' => $rows->count() === $limit ? ($rows->last()['id'] ?? null) : null]]);
+            return response()->json(['success' => true, 'items' => $rows, 'posts' => $resource === 'blog' ? $rows : [], 'customers' => $resource === 'customers' ? $rows : [], 'messages' => $resource === 'messages' ? $rows : [], 'total' => $total, 'unreadCount' => $resource === 'messages' ? ContactMessage::where('is_read', false)->count() : 0, 'todayCount' => $resource === 'messages' ? ContactMessage::whereDate('created_at', today())->count() : 0, 'archivedCount' => $resource === 'messages' ? ContactMessage::withoutGlobalScope('active_records')->whereNotNull('archived_at')->count() : 0, 'nextCursor' => $rows->count() === $limit ? ($rows->last()['id'] ?? null) : null, 'previousCursor' => $cursor ?? null, 'pagination' => [...$pagination, 'hasMore' => $page * $limit < $total, 'nextCursor' => $rows->count() === $limit ? ($rows->last()['id'] ?? null) : null]]);
         }
         if ($resource === 'orders') {
             return response()->json(['orders' => $rows, 'pagination' => $pagination]);
@@ -161,7 +161,7 @@ class HawaAdminController extends Controller
         AdminAccess::check($import ? 'PRODUCTS_IMPORT' : $permission.'_MANAGE');
         abort_unless(isset(self::FIELDS[$resource]), 405);
         $id = $id ?: $request->input('id');
-        $record = $id ? $class::whereKey($id)->firstOrFail() : new $class;
+        $record = $id ? $class::withoutGlobalScopes()->whereKey($id)->firstOrFail() : new $class;
         $fields = self::FIELDS[$resource];
         if ($resource === 'categories' && is_string($request->input('name'))) {
             $request->merge(['name' => trim(preg_replace('/\s+/u', ' ', $request->input('name')) ?? $request->input('name'))]);
@@ -275,9 +275,17 @@ class HawaAdminController extends Controller
         [$class,$permission] = $this->resource($resource);
         AdminAccess::check($permission.'_ARCHIVE');
         $id = $id ?: $request->input('id');
-        $record = $class::whereKey($id)->firstOrFail();
+        $record = $class::withoutGlobalScopes()->whereKey($id)->firstOrFail();
         if ($resource === 'users') {
             abort(405);
+        }
+        if ($request->boolean('force') || $request->query('force') === 'true') {
+            DB::transaction(function () use ($record) {
+                $record->delete();
+                AdminAccess::audit('FORCE_DELETE', get_class($record), $record->id);
+            });
+
+            return response()->json(['success' => true, 'ok' => true, 'deleted' => true]);
         }
         if (in_array($resource, ['brands', 'categories', 'main-categories'])) {
             $column = match ($resource) {
@@ -294,6 +302,20 @@ class HawaAdminController extends Controller
         });
 
         return response()->json(['success' => true, 'ok' => true]);
+    }
+
+    public function restore(Request $request, string $resource, ?string $id = null)
+    {
+        [$class,$permission] = $this->resource($resource);
+        AdminAccess::check($permission.'_ARCHIVE');
+        $id = $id ?: $request->input('id');
+        $record = $class::withoutGlobalScopes()->whereKey($id)->firstOrFail();
+        DB::transaction(function () use ($record) {
+            $record->update(['archived_at' => null]);
+            AdminAccess::audit('RESTORE', get_class($record), $record->id);
+        });
+
+        return response()->json(['success' => true, 'ok' => true, 'data' => $this->serialize($record->fresh(), $resource)]);
     }
 
     public function settings(Request $request)
