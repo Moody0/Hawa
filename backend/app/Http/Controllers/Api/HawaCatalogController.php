@@ -17,7 +17,7 @@ class HawaCatalogController extends CatalogController
 {
     public static function available()
     {
-        return Product::whereHas('brand', fn ($q) => $q->where('is_active', true))->whereHas('category', fn ($q) => $q->where('is_active', true));
+        return Product::where('is_active', true)->whereHas('brand', fn ($q) => $q->where('is_active', true))->whereHas('category', fn ($q) => $q->where('is_active', true));
     }
 
     public static function department($query, string $id)

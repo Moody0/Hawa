@@ -52,7 +52,7 @@ class HawaAdminController extends Controller
         'brands' => ['name', 'nameEn', 'slug', 'description', 'image', 'group', 'isActive', 'isFeatured', 'mainCategoryId'],
         'categories' => ['name', 'slug', 'description', 'image', 'mainCategoryId', 'isFeatured', 'isActive'],
         'main-categories' => ['name', 'slug', 'description', 'image', 'isActive', 'isFeatured', 'showInNav', 'navOrder'],
-        'products' => ['name', 'nameAr', 'nameEn', 'slug', 'description', 'descriptionAr', 'descriptionEn', 'price', 'discountPrice', 'discountType', 'discountValue', 'stock', 'minOrder', 'packaging', 'itemsPerPackage', 'options', 'sku', 'images', 'brandId', 'categoryId', 'mainCategoryId', 'isTrending', 'hidePrice'],
+        'products' => ['name', 'nameAr', 'nameEn', 'slug', 'description', 'descriptionAr', 'descriptionEn', 'price', 'discountPrice', 'discountType', 'discountValue', 'stock', 'minOrder', 'packaging', 'itemsPerPackage', 'options', 'sku', 'images', 'brandId', 'categoryId', 'mainCategoryId', 'isTrending', 'isActive', 'hidePrice'],
         'banners' => ['title', 'subtitle', 'titleAr', 'subtitleAr', 'image', 'imageMobile', 'buttonText', 'buttonTextAr', 'link', 'badge', 'badgeAr', 'isActive'],
         'promo-codes' => ['code', 'discountPercentage', 'delegateName', 'isActive'],
         'customers' => ['shopName', 'ownerName', 'phone', 'city', 'address', 'password', 'notes', 'isActive'],
@@ -111,6 +111,9 @@ class HawaAdminController extends Controller
         }
         if ($resource === 'products' && $request->query('isTrending') === 'true') {
             $query->where('is_trending', true);
+        }
+        if ($resource === 'products' && in_array($request->query('isActive'), ['true', 'false'], true)) {
+            $query->where('is_active', $request->query('isActive') === 'true');
         }
         if ($resource === 'customers' && in_array($request->query('status'), ['active', 'pending'])) {
             $query->where('is_active', $request->query('status') === 'active');
@@ -448,7 +451,7 @@ class HawaAdminController extends Controller
 
     public function bulk(Request $request)
     {
-        $data = $request->validate(['action' => ['required', Rule::in(['toggleTrending', 'removeSale', 'deleteProducts', 'deleteCategories', 'renameCategories'])], 'ids' => ['nullable', 'array', 'max:500'], 'ids.*' => ['string', 'max:191'], 'value' => ['nullable', 'boolean'], 'mapping' => ['nullable', 'array', 'max:500'], 'mapping.*.id' => ['required', 'string'], 'mapping.*.newName' => ['required', 'string', 'max:191']]);
+        $data = $request->validate(['action' => ['required', Rule::in(['toggleTrending', 'toggleActive', 'removeSale', 'deleteProducts', 'deleteCategories', 'renameCategories'])], 'ids' => ['nullable', 'array', 'max:500'], 'ids.*' => ['string', 'max:191'], 'value' => ['nullable', 'boolean'], 'mapping' => ['nullable', 'array', 'max:500'], 'mapping.*.id' => ['required', 'string'], 'mapping.*.newName' => ['required', 'string', 'max:191']]);
         $action = $data['action'];
         AdminAccess::check(match ($action) {
             'deleteProducts' => 'PRODUCTS_ARCHIVE','deleteCategories' => 'CATEGORIES_ARCHIVE','renameCategories' => 'CATEGORIES_MANAGE',default => 'PRODUCTS_MANAGE'
@@ -464,7 +467,10 @@ class HawaAdminController extends Controller
                 }
             } else {
                 Product::whereIn('id', $data['ids'] ?? [])->update(match ($action) {
-                    'toggleTrending' => ['is_trending' => $data['value'] ?? false],'removeSale' => ['discount_price' => null, 'discount_type' => null, 'discount_value' => null],default => ['archived_at' => now()]
+                    'toggleTrending' => ['is_trending' => $data['value'] ?? false],
+                    'toggleActive' => ['is_active' => $data['value'] ?? true],
+                    'removeSale' => ['discount_price' => null, 'discount_type' => null, 'discount_value' => null],
+                    default => ['archived_at' => now()]
                 });
             }AdminAccess::audit('BULK', 'Catalog', null, ['action' => $action, 'ids' => $data['ids'] ?? []]);
         });

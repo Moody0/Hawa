@@ -3,6 +3,7 @@ import { laravelClientFetch } from '@/lib/laravel-client';
 
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { X, ChevronDown, RefreshCw, CheckCircle2, UploadCloud } from 'lucide-react';
 import { createProduct, updateProduct } from "../../../../lib/admin-actions";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -52,6 +53,7 @@ interface Product {
     itemsPerPackage?: string | null;
     minOrder?: number | null;
     hidePrice?: boolean;
+    isActive?: boolean;
 }
 
 interface AddProductModalProps {
@@ -64,6 +66,7 @@ interface AddProductModalProps {
 }
 
 export default function AddProductModal({ isOpen, onClose, categories, brands, mainCategories = [], product }: AddProductModalProps) {
+    const router = useRouter();
     const { t, language } = useLanguage();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -87,6 +90,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
         itemsPerPackage: "",
         minOrder: "1",
         hidePrice: false,
+        isActive: true,
     });
 
     const [imageLink, setImageLink] = useState("");
@@ -158,6 +162,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                 itemsPerPackage: product.itemsPerPackage || "",
                 minOrder: (product.minOrder || 1).toString(),
                 hidePrice: Boolean(product.hidePrice),
+                isActive: product.isActive !== undefined ? Boolean(product.isActive) : true,
             });
         } else if (isOpen) {
             setFormData({
@@ -181,6 +186,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                 itemsPerPackage: "",
                 minOrder: "1",
                 hidePrice: false,
+                isActive: true,
             });
         }
     }, [product, isOpen, brands, categories, mainCategories]);
@@ -222,6 +228,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                 itemsPerPackage: formData.itemsPerPackage || null,
                 minOrder: parseInt(formData.minOrder) || 1,
                 hidePrice: formData.hidePrice,
+                isActive: formData.isActive,
             };
 
             const result = product
@@ -230,6 +237,7 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
 
             if (result.success) {
                 toast.success(product ? (t("admin.productUpdated") || "Product updated") : (t("admin.productCreated") || "Product created"));
+                router.refresh();
                 onClose();
             } else {
                 toast.error(result.error || (product ? "Failed to update product" : "Failed to create product"));
@@ -680,6 +688,31 @@ export default function AddProductModal({ isOpen, onClose, categories, brands, m
                                             {language === 'ar' 
                                                 ? 'عند تفعيل هذا الخيار، سيظهر للمحلات "السعر يحدد حسب الوكالة" بدلاً من الرقم، مع بقاء زر الإضافة للطلب عبر واتساب نشطاً.'
                                                 : 'When enabled, store visitors see "Price on Inquiry" instead of numbers, while still being able to order wholesale via WhatsApp.'}
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {/* Active Status Toggle */}
+                            <div className="md:col-span-3 pt-1">
+                                <label className="relative flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-white/10 cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.isActive}
+                                        onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                                        className="mt-1 h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-bold text-[#0B192C] dark:text-white flex items-center gap-2">
+                                            {language === 'ar' ? 'المنتج نشط ومتاح في المتجر' : 'Product is active and visible in store'}
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${formData.isActive ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-gray-400'}`}>
+                                                {formData.isActive ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'معطل' : 'Inactive')}
+                                            </span>
+                                        </span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            {language === 'ar'
+                                                ? 'عند إلغاء التفعيل (تعطيل المنتج)، سيتم إخفاؤه بالكامل من واجهة المتجر والبحث مع بقائه متاحاً للإدارة في لوحة التحكم.'
+                                                : 'When disabled, the product is completely hidden from the storefront and customer search while remaining accessible in the admin panel.'}
                                         </span>
                                     </div>
                                 </label>

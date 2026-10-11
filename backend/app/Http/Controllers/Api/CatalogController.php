@@ -126,7 +126,7 @@ class CatalogController extends Controller
 
     public function product(string $slug)
     {
-        $product = Product::with(['brand', 'category', 'mainCategory'])->where('slug', $slug)->whereHas('brand', fn ($q) => $q->where('is_active', true))->whereHas('category', fn ($q) => $q->where('is_active', true))->firstOrFail();
+        $product = Product::with(['brand', 'category', 'mainCategory'])->where('slug', $slug)->where('is_active', true)->whereHas('brand', fn ($q) => $q->where('is_active', true))->whereHas('category', fn ($q) => $q->where('is_active', true))->firstOrFail();
 
         return response()->json(ApiJson::camel($product))->header('Cache-Control', 'private, no-store');
     }

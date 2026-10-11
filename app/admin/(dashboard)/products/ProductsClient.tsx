@@ -6,12 +6,12 @@ import { useAdminSidebar } from "../../context/AdminSidebarContext";
 import { useConfirm } from "../../context/ConfirmDialogContext";
 import AdminHeader from "../../components/AdminHeader";
 import AddProductModal from "./AddProductModal";
-import { deleteProduct, toggleProductTrending, bulkToggleTrending, bulkCreateProducts, bulkRemoveSale, bulkDeleteProducts } from "../../../../lib/admin-actions";
+import { deleteProduct, toggleProductTrending, toggleProductActive, bulkToggleTrending, bulkToggleProductsActive, bulkCreateProducts, bulkRemoveSale, bulkDeleteProducts } from "../../../../lib/admin-actions";
 import { toast } from "react-hot-toast";
 import { useSession } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
 import { getSafeImageUrl } from '@/lib/image-utils';
-import { ChevronRight, ChevronLeft, Upload, Download, Plus, Search, ChevronDown, Flame, Tag, Trash2, Pencil, RefreshCw, ArrowUp, ArrowDown, Share2, Copy, TrendingDown, CircleSlash, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Upload, Download, Plus, Search, ChevronDown, Flame, Tag, Trash2, Pencil, RefreshCw, ArrowUp, ArrowDown, Share2, Copy, TrendingDown, CircleSlash, X, ToggleLeft, ToggleRight } from 'lucide-react';
 import { FaFacebook, FaWhatsapp } from 'react-icons/fa';
 import { hasAdminPermission } from '@/lib/admin-permissions';
 
@@ -37,6 +37,7 @@ interface Product {
     options?: string | null;
     images: string;
     isTrending: boolean;
+    isActive?: boolean;
     brandId: string;
     packaging?: string | null;
     itemsPerPackage?: string | null;
@@ -84,7 +85,7 @@ interface MainCategory {
 type ImportRow = Record<string, string | number | boolean | null | undefined>;
 
 export default function ProductsClient({ 
-    products, 
+    products: initialProducts, 
     categories, 
     brands,
     mainCategories = []
@@ -94,6 +95,11 @@ export default function ProductsClient({
     brands: Brand[],
     mainCategories?: MainCategory[]
 }) {
+    const [products, setProducts] = useState<Product[]>(initialProducts);
+    useEffect(() => {
+        setProducts(initialProducts);
+    }, [initialProducts]);
+
     const { data: session } = useSession() || {};
     const { t, dir, language } = useLanguage();
     const isArabic = language === 'ar';
@@ -217,6 +223,8 @@ export default function ProductsClient({
             if (selectedStockStatus === "in-stock") matchesStock = Number(p.stock) > 10;
             else if (selectedStockStatus === "low-stock") matchesStock = Number(p.stock) > 0 && Number(p.stock) <= 10;
             else if (selectedStockStatus === "out-of-stock") matchesStock = Number(p.stock) <= 0;
+            else if (selectedStockStatus === "active") matchesStock = p.isActive !== false;
+            else if (selectedStockStatus === "inactive") matchesStock = p.isActive === false;
 
             const matchesTrending = !showTrendingOnly || p.isTrending;
             const matchesOnSale = !showOnSaleOnly || p.discountPrice !== null;
@@ -247,9 +255,9 @@ export default function ProductsClient({
                 const valB = String(b.brand?.name || '').toLowerCase();
                 comparison = valA.localeCompare(valB);
             } else if (key === 'status') {
-                // Determine status value: stock > 0 => 1 (active), stock <= 0 => 0 (draft/inactive)
-                const valA = Number(a.stock) > 0 ? 1 : 0;
-                const valB = Number(b.stock) > 0 ? 1 : 0;
+                // Determine status value: true => 1 (active), false => 0 (inactive)
+                const valA = a.isActive !== false ? 1 : 0;
+                const valB = b.isActive !== false ? 1 : 0;
                 comparison = valA - valB;
             } else {
                 // Default string comparison for name, etc.
@@ -323,6 +331,7 @@ export default function ProductsClient({
         try {
             const result = await deleteProduct(id);
             if (result.success) {
+                setProducts(prev => prev.filter(p => p.id !== id));
                 toast.success(t('admin.productDeleted'));
             } else {
                 toast.error(t(`admin.${result.error}`) || t('admin.deleteProductError'));
@@ -393,6 +402,7 @@ export default function ProductsClient({
         try {
             const result = await bulkDeleteProducts(ids);
             if (result.success) {
+                setProducts(prev => prev.filter(p => !ids.includes(p.id)));
                 if (result.partial) {
                     toast(t('admin.bulkDeleteProductsPartial')
                         .replace('{count}', result.count?.toString() || '0')
@@ -415,19 +425,73 @@ export default function ProductsClient({
     };
 
     const handleToggleTrending = async (id: string, currentStatus: boolean) => {
+        const nextStatus = !currentStatus;
         setLoadingMap(prev => ({ ...prev, [id]: true }));
+        setProducts(prev => prev.map(p => p.id === id ? { ...p, isTrending: nextStatus } : p));
         try {
-            const result = await toggleProductTrending(id, !currentStatus);
+            const result = await toggleProductTrending(id, nextStatus);
             if (result.success) {
-                toast.success(`Product ${!currentStatus ? 'marked as trending' : 'removed from trending'} successfully`);
+                toast.success(nextStatus
+                    ? (isArabic ? "تم تمييز المنتج كمنتج رائج" : "Product marked as trending")
+                    : (isArabic ? "تمت إزالة المنتج من المنتجات الرائجة" : "Product removed from trending"));
             } else {
+                setProducts(prev => prev.map(p => p.id === id ? { ...p, isTrending: currentStatus } : p));
                 toast.error(result.error || "Failed to update status");
             }
         } catch (error) {
             console.error("Error toggling product trending status:", error);
+            setProducts(prev => prev.map(p => p.id === id ? { ...p, isTrending: currentStatus } : p));
             toast.error("An unexpected error occurred");
         } finally {
             setLoadingMap(prev => ({ ...prev, [id]: false }));
+        }
+    };
+
+    const handleToggleActive = async (id: string, currentStatus?: boolean) => {
+        const nextStatus = !(currentStatus ?? true);
+        setLoadingMap(prev => ({ ...prev, [`active-${id}`]: true }));
+        setProducts(prev => prev.map(p => p.id === id ? { ...p, isActive: nextStatus } : p));
+        try {
+            const result = await toggleProductActive(id, nextStatus);
+            if (result.success) {
+                toast.success(nextStatus
+                    ? (isArabic ? "تم تفعيل المنتج بنجاح" : "Product activated successfully")
+                    : (isArabic ? "تم تعطيل المنتج بنجاح" : "Product deactivated successfully"));
+            } else {
+                setProducts(prev => prev.map(p => p.id === id ? { ...p, isActive: currentStatus ?? true } : p));
+                toast.error(result.error || (isArabic ? "فشل تحديث حالة المنتج" : "Failed to update status"));
+            }
+        } catch (error) {
+            console.error("Error toggling product active status:", error);
+            setProducts(prev => prev.map(p => p.id === id ? { ...p, isActive: currentStatus ?? true } : p));
+            toast.error(isArabic ? "حدث خطأ غير متوقع" : "An unexpected error occurred");
+        } finally {
+            setLoadingMap(prev => ({ ...prev, [`active-${id}`]: false }));
+        }
+    };
+
+    const handleBulkToggleActive = async (targetActive: boolean) => {
+        if (selectedIds.size === 0) return;
+        const ids = Array.from(selectedIds);
+        setIsSubmittingBulk(true);
+        setProducts(prev => prev.map(p => ids.includes(p.id) ? { ...p, isActive: targetActive } : p));
+        try {
+            const result = await bulkToggleProductsActive(ids, targetActive);
+            if (result.success) {
+                toast.success(targetActive
+                    ? (isArabic ? `تم تفعيل ${ids.length} منتجات بنجاح` : `Activated ${ids.length} products successfully`)
+                    : (isArabic ? `تم تعطيل ${ids.length} منتجات بنجاح` : `Deactivated ${ids.length} products successfully`));
+                setSelectedIds(new Set());
+            } else {
+                setProducts(prev => prev.map(p => ids.includes(p.id) ? { ...p, isActive: !targetActive } : p));
+                toast.error(result.error || "Failed to update products");
+            }
+        } catch (error) {
+            console.error("Error in bulk active toggle:", error);
+            setProducts(prev => prev.map(p => ids.includes(p.id) ? { ...p, isActive: !targetActive } : p));
+            toast.error("An unexpected error occurred");
+        } finally {
+            setIsSubmittingBulk(false);
         }
     };
 
@@ -810,6 +874,8 @@ export default function ProductsClient({
                                         onChange={(e) => setSelectedStockStatus(e.target.value)}
                                     >
                                         <option value={ALL_FILTER_VALUE}>{t('admin.stockStatus')}</option>
+                                        <option value="active">{isArabic ? 'المنتجات النشطة' : 'Active Products'}</option>
+                                        <option value="inactive">{isArabic ? 'المنتجات المعطلة' : 'Inactive Products'}</option>
                                         <option value="in-stock">{t('admin.inStock')}</option>
                                         <option value="low-stock">{t('admin.lowStock')}</option>
                                         <option value="out-of-stock">{t('admin.outOfStock')}</option>
@@ -875,7 +941,27 @@ export default function ProductsClient({
                                         {t('admin.deselectAll')}
                                     </button>
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {canEdit && (
+                                        <button
+                                            onClick={() => handleBulkToggleActive(true)}
+                                            disabled={isSubmittingBulk}
+                                            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/30 transition-all border border-emerald-200 dark:border-emerald-800/50 disabled:opacity-50 cursor-pointer"
+                                        >
+                                            <ToggleRight className="text-[18px]" />
+                                            {isArabic ? 'تفعيل المحدد' : 'Activate Selected'}
+                                        </button>
+                                    )}
+                                    {canEdit && (
+                                        <button
+                                            onClick={() => handleBulkToggleActive(false)}
+                                            disabled={isSubmittingBulk}
+                                            className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all border border-slate-200 dark:border-white/10 disabled:opacity-50 cursor-pointer"
+                                        >
+                                            <ToggleLeft className="text-[18px]" />
+                                            {isArabic ? 'تعطيل المحدد' : 'Deactivate Selected'}
+                                        </button>
+                                    )}
                                     {canEdit && (
                                         <button
                                             onClick={handleBulkRemoveTrending}
@@ -1097,13 +1183,31 @@ export default function ProductsClient({
                                                     </button>
                                                 </td>
                                                 <td className="p-3 sm:p-5">
-                                                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium border ${Number(product.stock) > 0
-                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-800/50'
-                                                        : 'bg-gray-50 text-gray-700 border-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-white/[0.04]'
-                                                        }`}>
-                                                        <span className={`size-1 sm:size-1.5 rounded-full ${Number(product.stock) > 0 ? 'bg-emerald-500' : 'bg-gray-400'}`}></span>
-                                                        {Number(product.stock) > 0 ? t('admin.active') : t('admin.draft')}
-                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleToggleActive(product.id, product.isActive ?? true)}
+                                                        disabled={Boolean(loadingMap[`active-${product.id}`]) || !canEdit}
+                                                        title={(product.isActive ?? true)
+                                                            ? (isArabic ? 'اضغط لتعطيل المنتج (إيقافه)' : 'Click to deactivate product')
+                                                            : (isArabic ? 'اضغط لتفعيل المنتج (تشغيله)' : 'Click to activate product')}
+                                                        aria-label={(product.isActive ?? true)
+                                                            ? (isArabic ? `تعطيل ${product.name}` : `Deactivate ${product.name}`)
+                                                            : (isArabic ? `تفعيل ${product.name}` : `Activate ${product.name}`)}
+                                                        className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold border transition-all cursor-pointer hover:shadow-xs active:scale-95 disabled:cursor-wait disabled:opacity-60 ${
+                                                            (product.isActive ?? true)
+                                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50'
+                                                                : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:border-slate-300 dark:bg-zinc-800 dark:text-gray-400 dark:border-white/10'
+                                                        }`}
+                                                    >
+                                                        {loadingMap[`active-${product.id}`] ? (
+                                                            <RefreshCw className="size-3 animate-spin text-inherit" />
+                                                        ) : (
+                                                            <span className={`size-1.5 rounded-full ${
+                                                                (product.isActive ?? true) ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-slate-400'
+                                                            }`}></span>
+                                                        )}
+                                                        <span>{(product.isActive ?? true) ? t('admin.active') : (isArabic ? 'معطل' : 'Inactive')}</span>
+                                                    </button>
                                                 </td>
                                                 <td className={`p-3 sm:p-5 ${dir === 'rtl' ? 'text-start' : 'text-end'}`}>
                                                     <div className={`flex items-center ${dir === 'rtl' ? 'justify-start' : 'justify-end'} gap-1 sm:gap-2`}>

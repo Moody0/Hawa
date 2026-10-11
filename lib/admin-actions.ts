@@ -230,6 +230,7 @@ export async function toggleMainCategoryFeatured(id: string, isFeatured: boolean
 export async function toggleCategoryActive(id: string, isActive: boolean) { return mutation(`/admin/categories/${encodeURIComponent(id)}`, 'PATCH', { isActive }); }
 export async function toggleCategoryFeatured(id: string, isFeatured: boolean) { return mutation(`/admin/categories/${encodeURIComponent(id)}`, 'PATCH', { isFeatured }); }
 export async function toggleProductTrending(id: string, isTrending: boolean) { return mutation(`/admin/products/${encodeURIComponent(id)}`, 'PATCH', { isTrending }); }
+export async function toggleProductActive(id: string, isActive: boolean) { return mutation(`/admin/products/${encodeURIComponent(id)}`, 'PATCH', { isActive }); }
 export async function toggleBannerStatus(id: string, isActive: boolean) { return mutation(`/admin/banners/${encodeURIComponent(id)}`, 'PATCH', { isActive }); }
 export async function togglePromoCodeStatus(id: string, isActive: boolean) { return mutation(`/admin/promo-codes/${encodeURIComponent(id)}`, 'PATCH', { isActive }); }
 export async function getDashboardStats(): Promise<DashboardStats> { return request('/admin/dashboard'); }
@@ -316,6 +317,7 @@ export async function updateAdminCredentials(data: {
 export async function updateSiteSettings(data: Record<string, unknown>) { return mutation('/admin/settings', 'PUT', data); }
 export async function updatePrivacyPolicyContent(input: unknown) { return mutation('/admin/settings', 'PUT', { privacyPolicyContent: input }); }
 export async function bulkToggleTrending(ids: string[], value: boolean) { return mutation('/admin/bulk', 'POST', { action: 'toggleTrending', ids, value }); }
+export async function bulkToggleProductsActive(ids: string[], value: boolean) { return mutation('/admin/bulk', 'POST', { action: 'toggleActive', ids, value }); }
 export async function bulkRemoveSale(ids: string[]) { return mutation('/admin/bulk', 'POST', { action: 'removeSale', ids }); }
 export async function bulkDeleteProducts(ids: string[]) { return mutation('/admin/bulk', 'POST', { action: 'deleteProducts', ids }); }
 export async function bulkDeleteCategories(ids: string[]) { return mutation('/admin/bulk', 'POST', { action: 'deleteCategories', ids }); }

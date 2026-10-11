@@ -20,7 +20,7 @@ class Product extends Model
         return $this->hide_price || ($this->price !== null && (float) $this->price <= 0);
     }
 
-    protected $attributes = ['is_trending' => false, 'stock' => 0, 'packaging' => 'طرد', 'min_order' => 1, 'hide_price' => false];
+    protected $attributes = ['is_trending' => false, 'is_active' => true, 'stock' => 0, 'packaging' => 'طرد', 'min_order' => 1, 'hide_price' => false];
 
     public $incrementing = false;
 
@@ -28,7 +28,7 @@ class Product extends Model
 
     protected function casts(): array
     {
-        return ['is_trending' => 'boolean', 'price' => 'decimal:2', 'discount_price' => 'decimal:2', 'discount_value' => 'decimal:2', 'stock' => 'integer', 'min_order' => 'integer', 'hide_price' => 'boolean', 'created_at' => 'datetime', 'updated_at' => 'datetime', 'archived_at' => 'datetime'];
+        return ['is_trending' => 'boolean', 'is_active' => 'boolean', 'price' => 'decimal:2', 'discount_price' => 'decimal:2', 'discount_value' => 'decimal:2', 'stock' => 'integer', 'min_order' => 'integer', 'hide_price' => 'boolean', 'created_at' => 'datetime', 'updated_at' => 'datetime', 'archived_at' => 'datetime'];
     }
 
     protected static function booted(): void
