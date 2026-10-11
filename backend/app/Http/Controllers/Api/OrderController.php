@@ -64,19 +64,19 @@ class OrderController extends Controller
         ];
         $errors = [];
         if (mb_strlen($clean['shopName']) < 2) {
-            $errors['shopName'] = 'Enter your store name';
+            $errors['shopName'] = 'يرجى إدخال اسم المحل أو المتجر';
         }
         if (mb_strlen($clean['ownerName']) < 2) {
-            $errors['ownerName'] = 'Enter the contact person name';
+            $errors['ownerName'] = 'يرجى إدخال اسم صاحب المحل أو المستلم';
         }
         if (! $phone) {
-            $errors['phone'] = 'Enter a valid mobile number';
+            $errors['phone'] = 'يرجى إدخال رقم هاتف محمول صحيح';
         }
         if (! $city) {
-            $errors['city'] = 'Select a governorate';
+            $errors['city'] = 'يرجى اختيار المحافظة';
         }
         if (mb_strlen($clean['streetAddress']) < 4) {
-            $errors['streetAddress'] = 'Enter a detailed delivery address';
+            $errors['streetAddress'] = 'يرجى إدخال عنوان التوصيل بالتفصيل';
         }
         if ($errors) {
             return response()->json(['message' => reset($errors), 'errors' => $errors], 400);
@@ -86,7 +86,7 @@ class OrderController extends Controller
         usort($lines, fn ($a, $b) => strcmp($a['productId'].'|'.($a['options'] ?? ''), $b['productId'].'|'.($b['options'] ?? '')));
         $key = $request->header('X-Idempotency-Key') ?: $request->header('Idempotency-Key') ?: ($body['idempotencyKey'] ?? '');
         if (! is_string($key) || ! preg_match('/^[A-Za-z0-9._:-]{16,128}$/', trim($key))) {
-            return response()->json(['message' => 'A valid order request key is required.'], 400);
+            return response()->json(['message' => 'مفتاح الطلب غير صالح، يرجى إعادة المحاولة.'], 400);
         }
         $key = trim($key);
         $promoId = $body['promoCodeId'] ?? null;
@@ -101,7 +101,13 @@ class OrderController extends Controller
                 $ids = collect($lines)->pluck('productId')->unique()->sort()->values();
                 $products = HawaCatalogController::available()->with('brand')->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
                 if ($products->count() !== $ids->count()) {
-                    throw new HttpException(409, 'A product in your cart is no longer available.');
+                    $missingIds = $ids->diff($products->keys());
+                    $missingProduct = Product::withoutGlobalScopes()->whereIn('id', $missingIds)->first();
+                    $name = $missingProduct ? ($missingProduct->name_ar ?: $missingProduct->name) : null;
+                    $msg = $name
+                        ? "عذراً، المنتج «{$name}» لم يعد متوفراً حالياً في المتجر. يرجى إزالته من السلة لمتابعة إتمام الطلب."
+                        : "عذراً، أحد المنتجات الموجودة في سلتك لم يعد متوفراً حالياً في المستودع. يرجى مراجعة السلة وتعديل الأصناف للمتابعة.";
+                    throw new HttpException(409, $msg);
                 }
                 // Any unpriced line makes the entire submission a quotation inquiry.
                 $isQuoteRequest = $products->contains(fn ($product) => $product->requires_quote);
@@ -109,26 +115,36 @@ class OrderController extends Controller
                 foreach ($lines as $line) {
                     $product = $products->get($line['productId']);
                     if (! $product || ! $product->brand?->is_active) {
-                        throw new HttpException(409, 'A product in your cart is no longer available.');
+                        $name = $product ? ($product->name_ar ?: $product->name) : null;
+                        $msg = $name
+                            ? "عذراً، المنتج «{$name}» غير متاح للطلب حالياً نظراً لتحديث بيانات الوكالة أو الصنف. يرجى إزالته من السلة."
+                            : "عذراً، أحد المنتجات في سلتك غير متاح للطلب حالياً. يرجى مراجعة السلة.";
+                        throw new HttpException(409, $msg);
                     }
                     if (! $isQuoteRequest && $product->price === null) {
-                        throw new HttpException(409, 'The package price for '.($product->name_ar ?: $product->name).' is being reviewed.');
+                        $name = $product->name_ar ?: $product->name;
+                        throw new HttpException(409, "سعر الطرد للمنتج «{$name}» قيد المراجعة حالياً من قِبل إدارة المبيعات. يرجى التواصل معنا أو إزالته للمتابعة.");
                     }
                     if ($line['options'] && ! in_array($line['options'], array_map('trim', explode(',', (string) $product->options)), true)) {
-                        throw new HttpException(409, 'The selected product option is no longer available.');
+                        $name = $product->name_ar ?: $product->name;
+                        throw new HttpException(409, "الخيار أو الحجم المحدد للمنتج «{$name}» لم يعد متوفراً حالياً. يرجى اختيار نوع آخر من السلة.");
                     }
                     $qtyByProduct[$product->id] = ($qtyByProduct[$product->id] ?? 0) + $line['quantity'];
                 }
                 foreach ($qtyByProduct as $id => $quantity) {
                     $product = $products->get($id);
+                    $name = $product->name_ar ?: $product->name;
                     if ($quantity < $product->min_order) {
-                        throw new HttpException(422, 'Minimum order for '.($product->name_ar ?: $product->name).' is '.$product->min_order.'.');
+                        throw new HttpException(422, "الحد الأدنى لطلب المنتج «{$name}» هو {$product->min_order} طرد (الكمية الحالية: {$quantity}). يرجى زيادة الكمية.");
                     }
                     if ($quantity > self::MAX_PACKAGES) {
-                        throw new HttpException(400, 'Too many packages requested for a product.');
+                        throw new HttpException(400, "الكمية المطلوبة للمنتج «{$name}» تتجاوز الحد الأقصى المسموح به للطلب الواحد.");
                     }
                     if (! $isQuoteRequest && $product->stock !== null && $product->stock < $quantity) {
-                        throw new HttpException(409, 'Not enough packages available for '.($product->name_ar ?: $product->name).'.');
+                        $stockMsg = $product->stock > 0
+                            ? "الكمية المتوفرة حالياً في المستودع من «{$name}» هي {$product->stock} طرد فقط (الكمية في سلتك: {$quantity} طرد). يرجى تقليل الكمية للمتابعة."
+                            : "نفدت كمية المنتج «{$name}» من المستودع حالياً. يرجى إزالته من السلة لمتابعة إتمام الطلب.";
+                        throw new HttpException(409, $stockMsg);
                     }
                     if (! $isQuoteRequest && $product->stock !== null) {
                         $product->decrement('stock', $quantity);
@@ -149,14 +165,14 @@ class OrderController extends Controller
                     $items[] = ['product_id' => $product->id, 'quantity' => $line['quantity'], 'options' => $line['options'], 'price' => number_format($unitCents / 100, 2, '.', '')];
                 }
                 if ($subtotal > self::MAX_TOTAL_CENTS) {
-                    throw new HttpException(422, 'Order amount exceeds the supported limit.');
+                    throw new HttpException(422, 'إجمالي قيمة الطلب يتجاوز الحد الأقصى المسموح به للطلب الواحد.');
                 }
                 $discount = 0;
                 $promo = null;
                 if ($promoId && ! $isQuoteRequest) {
                     $promo = PromoCode::whereKey($promoId)->lockForUpdate()->first();
                     if (! $promo || ! $promo->is_active || $promo->discount_percentage < 0 || $promo->discount_percentage > 100) {
-                        throw new HttpException(409, 'Promo code is no longer valid.');
+                        throw new HttpException(409, 'كود الخصم المستخدم لم يعد صالحاً للاستخدام.');
                     }
                     $discount = intdiv($subtotal * $promo->discount_percentage + 50, 100);
                 }

@@ -245,12 +245,36 @@ const PlaceOrderPage = () => {
                 }
 
                 let category: SubmissionFeedback['category'] = 'server';
-                let feedbackMsg = error.message || (isAr ? "فشل في تسجيل الطلب، يرجى المحاولة مرة أخرى" : "Failed to place order");
+                const rawMsg = error.message || (isAr ? "فشل في تسجيل الطلب، يرجى المحاولة مرة أخرى" : "Failed to place order");
+
+                // Map any legacy or raw English error strings to clear Modern Standard Arabic
+                let feedbackMsg = rawMsg;
+                if (isAr) {
+                    if (/product in your cart is no longer available/i.test(rawMsg)) {
+                        feedbackMsg = "عذراً، أحد المنتجات الموجودة في سلتك لم يعد متوفراً حالياً في المستودع. يُرجى مراجعة السلة وتعديل الأصناف لمتابعة إتمام الطلب.";
+                    } else if (/package price for .* is being reviewed/i.test(rawMsg)) {
+                        feedbackMsg = "سعر الطرد لبعض المنتجات في سلتك قيد المراجعة حالياً من قِبل إدارة المبيعات، يرجى التواصل معنا أو إزالتها للمتابعة.";
+                    } else if (/product option is no longer available/i.test(rawMsg)) {
+                        feedbackMsg = "الخيار أو الحجم المحدد لأحد المنتجات لم يعد متوفراً حالياً. يرجى اختيار نوع آخر من السلة.";
+                    } else if (/minimum order for (.*) is (\d+)/i.test(rawMsg)) {
+                        const match = rawMsg.match(/minimum order for (.*) is (\d+)/i);
+                        feedbackMsg = `الحد الأدنى للطلب من «${match?.[1] || 'هذا المنتج'}» هو ${match?.[2]} طرد.`;
+                    } else if (/not enough packages available for (.*)/i.test(rawMsg)) {
+                        const match = rawMsg.match(/not enough packages available for (.*)/i);
+                        feedbackMsg = `الكمية المتوفرة في المستودع من «${match?.[1] || 'المنتج'}» غير كافية لتغطية طلبك. يرجى تقليل الكمية في السلة.`;
+                    } else if (/too many packages/i.test(rawMsg)) {
+                        feedbackMsg = "الكمية المطلوبة تتجاوز الحد الأقصى المسموح به للطلب الواحد.";
+                    } else if (/order amount exceeds/i.test(rawMsg)) {
+                        feedbackMsg = "إجمالي قيمة الطلب يتجاوز الحد الأقصى المسموح به للطلب الواحد.";
+                    } else if (/promo code is no longer valid/i.test(rawMsg)) {
+                        feedbackMsg = "كود الخصم المستخدم لم يعد صالحاً للاستخدام.";
+                    }
+                }
 
                 if (response.status === 401 || response.status === 403) {
                     category = 'session';
                     feedbackMsg = isAr ? "انتهت صلاحية جلسة الحساب أو الحساب غير مصرح له بتأكيد الطلب." : "Session expired or unauthorized.";
-                } else if (response.status === 409 || error.error === 'INSUFFICIENT_STOCK' || /المتوفرة|المخزون|الكمية/.test(feedbackMsg)) {
+                } else if (response.status === 409 || error.error === 'INSUFFICIENT_STOCK' || /المتوفرة|المخزون|الكمية|متوفر|نفدت/.test(feedbackMsg)) {
                     category = 'stock';
                 } else if (response.status === 400 || error.error === 'VALIDATION_ERROR') {
                     category = 'validation';
