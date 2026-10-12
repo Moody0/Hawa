@@ -265,7 +265,7 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
                             </p>
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2.5 shrink-0">
+                        <div className="flex flex-col items-center gap-2.5 shrink-0">
                             <a
                                 href={whatsappHref(siteContacts, pageContent.whatsappMessage)}
                                 target="_blank"
@@ -275,7 +275,7 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
                                 <FaWhatsapp className="text-sm" />
                                 <span>{pageContent.whatsappButtonLabel}</span>
                             </a>
-                            <ManagerContactLinks contacts={siteContacts} isArabic={language === 'ar' || dir === 'rtl'} className="flex-col items-start" />
+                            <ManagerContactLinks contacts={siteContacts} isArabic={language === 'ar' || dir === 'rtl'} className="justify-center sm:flex-nowrap" />
                         </div>
                     </div>
 
