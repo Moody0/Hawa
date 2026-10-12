@@ -387,6 +387,7 @@ class HawaMigrationTest extends TestCase
         $this->postJson('/api/admin/auth/login', ['username' => 'editor', 'password' => 'secure-editor-password'])->assertOk();
         $this->getJson('/api/admin/brands')->assertOk();
         $this->getJson('/api/admin/blog')->assertOk();
+        $this->getJson('/api/admin/dashboard')->assertForbidden();
         $this->postJson('/api/admin/brands', ['name' => 'Blocked'])->assertForbidden();
     }
 

@@ -552,7 +552,7 @@ class HawaAdminController extends Controller
 
     public function dashboard()
     {
-        AdminAccess::check('ORDERS_VIEW');
+        AdminAccess::checkSuperAdmin();
         $orders = Order::where('status', '!=', 'CANCELLED');
         $revenue = (float) (clone $orders)->sum('total_amount');
         $total = Order::count();

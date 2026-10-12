@@ -7,7 +7,7 @@ import { LayoutDashboard, ShoppingBag, Store, FolderTree, Package, Users, Settin
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "@/lib/admin-session";
 import { useLanguage } from "@/app/context/LanguageContext";
-import type { AdminPermission } from "@/lib/admin-permissions";
+import { adminLandingPath, type AdminPermission } from "@/lib/admin-permissions";
 import toast from 'react-hot-toast';
 
 interface AdminSidebarProps {
@@ -45,7 +45,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         {
             title: t('admin.overview') || "Overview",
             items: [
-                { href: "/admin/dashboard", icon: LayoutDashboard, label: t('admin.dashboard') }
+                { href: "/admin/dashboard", icon: LayoutDashboard, label: t('admin.dashboard'), superAdminOnly: true }
             ]
         },
         {
@@ -109,7 +109,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     <div className="flex flex-col gap-6">
                         {/* Logo & Brand Header */}
                         <div className="flex items-center justify-between px-2 pb-2 border-b border-slate-100 dark:border-white/5">
-                            <Link href="/admin/dashboard" className="flex items-center gap-3 group">
+                            <Link href={isSuperAdmin ? "/admin/dashboard" : adminLandingPath(session?.user || { role: 'ADMIN', permissions: [] })} className="flex items-center gap-3 group">
                                 <Image
                                     src="/logo.png"
                                     alt={t('common.brandName')}

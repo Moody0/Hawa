@@ -28,6 +28,15 @@ class AdminAccess
         return $user;
     }
 
+    public static function checkSuperAdmin(): User
+    {
+        $user = Auth::guard('web')->user();
+        abort_unless($user && ! $user->disabled_at && ! $user->archived_at, 401);
+        abort_unless($user->role === 'SUPER_ADMIN', 403, 'The dashboard overview is restricted to super administrators.');
+
+        return $user;
+    }
+
     public static function audit(string $action, string $type, ?string $id = null, array $metadata = []): AdminAuditLog
     {
         return AdminAuditLog::create(['actor_id' => Auth::guard('web')->id(), 'action' => $action, 'entity_type' => $type, 'entity_id' => $id, 'metadata' => $metadata, 'created_at' => now()]);

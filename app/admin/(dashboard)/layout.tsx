@@ -21,8 +21,15 @@ export default async function AdminLayout({
     }
     const incoming = await headers();
     const path = (incoming.get('x-admin-return-to') || '/admin/dashboard').split('?')[0];
-    const permission = ADMIN_PAGE_PERMISSIONS[path.split('/')[2]];
-    if ((permission && !hasAdminPermission(adminUser.permissions, permission, adminUser.role === 'SUPER_ADMIN')) || (path === '/admin/users' && adminUser.role !== 'SUPER_ADMIN')) {
+    const segment = path.split('/')[2];
+    const isSuperAdminOnly = segment === 'dashboard' || segment === 'users' || segment === 'settings';
+
+    if (isSuperAdminOnly && adminUser.role !== 'SUPER_ADMIN') {
+        redirect(adminLandingPath(adminUser));
+    }
+
+    const permission = ADMIN_PAGE_PERMISSIONS[segment];
+    if (permission && !hasAdminPermission(adminUser.permissions, permission, adminUser.role === 'SUPER_ADMIN')) {
         redirect(adminLandingPath(adminUser));
     }
 
