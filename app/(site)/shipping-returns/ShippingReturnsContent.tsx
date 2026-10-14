@@ -275,7 +275,7 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
                                 <FaWhatsapp className="text-sm" />
                                 <span>{pageContent.whatsappButtonLabel}</span>
                             </a>
-                            <ManagerContactLinks contacts={siteContacts} isArabic={language === 'ar' || dir === 'rtl'} className="justify-center sm:flex-nowrap" />
+                            <ManagerContactLinks contacts={siteContacts} isArabic={language === 'ar' || dir === 'rtl'} direction="col" className="items-center" />
                         </div>
                     </div>
 
