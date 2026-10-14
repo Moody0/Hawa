@@ -802,50 +802,6 @@ export default function HomeCategoriesContentSection({
                         </div>
                     </div>
 
-                    {onSave && (
-                        <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200/80 dark:border-white/10 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky bottom-4 z-10 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-xl bg-amber-500/10 text-[#8A6305] dark:text-amber-300 shrink-0">
-                                    <FolderTree className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-slate-900 dark:text-white">
-                                        {selectedCategoryIds.length > 0
-                                            ? (isArabic
-                                                ? `تم اختيار ${selectedCategoryIds.length} تصنيف معروض في شريط الصفحة الرئيسية`
-                                                : `${selectedCategoryIds.length} categories configured for the homepage rail`)
-                                            : (isArabic
-                                                ? "الوضع الحالي: عرض تلقائي لجميع التصنيفات المميزة"
-                                                : "Current mode: Auto-displaying all featured categories")}
-                                    </p>
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                        {isArabic
-                                            ? "اضغط حفظ لتطبيق التغييرات وتحديث الصفحة الرئيسية مباشرة بدون تأخير."
-                                            : "Click save to apply selections and rail order to the homepage immediately."}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() => onSave()}
-                                disabled={isSaving}
-                                className="px-6 py-2.5 rounded-xl bg-[#0B192C] hover:bg-[#1e293b] text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shrink-0"
-                            >
-                                {isSaving ? (
-                                    <>
-                                        <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
-                                        <span>{isArabic ? "جاري الحفظ..." : "Saving..."}</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="w-4 h-4 text-amber-400" />
-                                        <span>{isArabic ? "حفظ التعديلات في شريط الأقسام الآن" : "Save Rail Changes Now"}</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    )}
                 </div>
             )}
         </div>
