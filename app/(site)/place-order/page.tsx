@@ -19,6 +19,66 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { useCustomer } from '@/app/context/CustomerContext';
 import { validateOrderForm, findGovernorate, normalizeSyrianPhone, isValidSyrianPhone, convertArabicToEnglishDigits } from '@/lib/order-validation';
 
+export function localizeOrderError(raw: string, isAr: boolean): string {
+    if (!raw) return isAr ? "فشل في تسجيل الطلب، يرجى المحاولة مرة أخرى" : "Failed to place order";
+
+    // If it already contains Arabic characters, return as is
+    if (/[\u0600-\u06FF]/.test(raw)) {
+        return raw;
+    }
+
+    if (isAr) {
+        if (/no longer available/i.test(raw) || /not available/i.test(raw)) {
+            if (/option/i.test(raw)) {
+                return "الخيار أو الحجم المحدد لأحد المنتجات لم يعد متوفراً حالياً. يرجى اختيار نوع آخر من السلة.";
+            }
+            return "عذراً، أحد المنتجات الموجودة في سلتك لم يعد متوفراً حالياً في المستودع. يُرجى مراجعة السلة وتعديل الأصناف لمتابعة إتمام الطلب.";
+        }
+        if (/price.*being reviewed/i.test(raw)) {
+            return "سعر الطرد لبعض المنتجات في سلتك قيد المراجعة حالياً من قِبل إدارة المبيعات، يرجى التواصل معنا أو إزالتها للمتابعة.";
+        }
+        if (/minimum order for (.*) is (\d+)/i.test(raw)) {
+            const match = raw.match(/minimum order for (.*) is (\d+)/i);
+            return `الحد الأدنى للطلب من «${match?.[1] || 'هذا المنتج'}» هو ${match?.[2]} طرد.`;
+        }
+        if (/not enough packages/i.test(raw)) {
+            const match = raw.match(/not enough packages (?:available )?for (.*)/i);
+            return match?.[1]
+                ? `الكمية المتوفرة في المستودع من «${match[1]}» غير كافية لتغطية طلبك. يرجى تقليل الكمية في السلة.`
+                : "الكمية المتوفرة في المستودع لبعض المنتجات غير كافية لتغطية طلبك. يرجى مراجعة السلة.";
+        }
+        if (/too many packages/i.test(raw)) {
+            return "الكمية المطلوبة تتجاوز الحد الأقصى المسموح به للطلب الواحد.";
+        }
+        if (/order amount exceeds/i.test(raw) || /amount exceeds/i.test(raw)) {
+            return "إجمالي قيمة الطلب يتجاوز الحد الأقصى المسموح به للطلب الواحد.";
+        }
+        if (/promo code/i.test(raw)) {
+            return "كود الخصم المستخدم لم يعد صالحاً للاستخدام.";
+        }
+        if (/unauthorized|session expired/i.test(raw)) {
+            return "انتهت صلاحية جلسة الحساب أو الحساب غير مصرح له بتأكيد الطلب.";
+        }
+        if (/too many orders/i.test(raw) || /rate limit/i.test(raw)) {
+            return "تم إرسال طلبات متعددة، يرجى الانتظار دقيقة ثم المحاولة مجدداً.";
+        }
+        if (/order request is too large/i.test(raw)) {
+            return "حجم بيانات الطلب كبير جداً، يرجى تقليل الأصناف والمحاولة.";
+        }
+        if (/request key/i.test(raw)) {
+            return "مفتاح الطلب غير صالح أو مستخدم مسبقاً، يرجى إعادة المحاولة.";
+        }
+        if (/invalid order line/i.test(raw) || /positive package quantity/i.test(raw)) {
+            return "بيانات الأصناف في السلة غير صحيحة، يرجى مراجعة السلة.";
+        }
+        if (/network|failed to fetch/i.test(raw)) {
+            return "تعذر الاتصال بالخادم، يرجى التحقق من اتصال الإنترنت وإعادة المحاولة.";
+        }
+    }
+
+    return raw;
+}
+
 function PlaceOrderSkeleton() {
     return (
         <div className="grow w-full bg-[#F6F7F9] dark:bg-[#081524]">
@@ -245,36 +305,15 @@ const PlaceOrderPage = () => {
                 }
 
                 let category: SubmissionFeedback['category'] = 'server';
-                const rawMsg = error.message || (isAr ? "فشل في تسجيل الطلب، يرجى المحاولة مرة أخرى" : "Failed to place order");
+                const rawMsg = error.message || error.error || (isAr ? "فشل في تسجيل الطلب، يرجى المحاولة مرة أخرى" : "Failed to place order");
 
                 // Map any legacy or raw English error strings to clear Modern Standard Arabic
-                let feedbackMsg = rawMsg;
-                if (isAr) {
-                    if (/product in your cart is no longer available/i.test(rawMsg)) {
-                        feedbackMsg = "عذراً، أحد المنتجات الموجودة في سلتك لم يعد متوفراً حالياً في المستودع. يُرجى مراجعة السلة وتعديل الأصناف لمتابعة إتمام الطلب.";
-                    } else if (/package price for .* is being reviewed/i.test(rawMsg)) {
-                        feedbackMsg = "سعر الطرد لبعض المنتجات في سلتك قيد المراجعة حالياً من قِبل إدارة المبيعات، يرجى التواصل معنا أو إزالتها للمتابعة.";
-                    } else if (/product option is no longer available/i.test(rawMsg)) {
-                        feedbackMsg = "الخيار أو الحجم المحدد لأحد المنتجات لم يعد متوفراً حالياً. يرجى اختيار نوع آخر من السلة.";
-                    } else if (/minimum order for (.*) is (\d+)/i.test(rawMsg)) {
-                        const match = rawMsg.match(/minimum order for (.*) is (\d+)/i);
-                        feedbackMsg = `الحد الأدنى للطلب من «${match?.[1] || 'هذا المنتج'}» هو ${match?.[2]} طرد.`;
-                    } else if (/not enough packages available for (.*)/i.test(rawMsg)) {
-                        const match = rawMsg.match(/not enough packages available for (.*)/i);
-                        feedbackMsg = `الكمية المتوفرة في المستودع من «${match?.[1] || 'المنتج'}» غير كافية لتغطية طلبك. يرجى تقليل الكمية في السلة.`;
-                    } else if (/too many packages/i.test(rawMsg)) {
-                        feedbackMsg = "الكمية المطلوبة تتجاوز الحد الأقصى المسموح به للطلب الواحد.";
-                    } else if (/order amount exceeds/i.test(rawMsg)) {
-                        feedbackMsg = "إجمالي قيمة الطلب يتجاوز الحد الأقصى المسموح به للطلب الواحد.";
-                    } else if (/promo code is no longer valid/i.test(rawMsg)) {
-                        feedbackMsg = "كود الخصم المستخدم لم يعد صالحاً للاستخدام.";
-                    }
-                }
+                let feedbackMsg = localizeOrderError(rawMsg, isAr);
 
                 if (response.status === 401 || response.status === 403) {
                     category = 'session';
                     feedbackMsg = isAr ? "انتهت صلاحية جلسة الحساب أو الحساب غير مصرح له بتأكيد الطلب." : "Session expired or unauthorized.";
-                } else if (response.status === 409 || error.error === 'INSUFFICIENT_STOCK' || /المتوفرة|المخزون|الكمية|متوفر|نفدت/.test(feedbackMsg)) {
+                } else if (response.status === 409 || error.error === 'INSUFFICIENT_STOCK' || /المتوفرة|المخزون|الكمية|متوفر|نفدت|available|stock/i.test(rawMsg) || /المتوفرة|المخزون|الكمية|متوفر|نفدت/.test(feedbackMsg)) {
                     category = 'stock';
                 } else if (response.status === 400 || error.error === 'VALIDATION_ERROR') {
                     category = 'validation';

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateOrderForm, OrderFormFields } from '@/lib/order-validation';
+import { localizeOrderError } from '@/app/(site)/place-order/page';
 describe('API Validation Tests', () => {
     describe('Order Form Payload Validation', () => {
         it('accepts valid order submission payload in Arabic', () => {
@@ -54,4 +55,20 @@ describe('API Validation Tests', () => {
         });
     });
 
+    describe('localizeOrderError', () => {
+        it('translates legacy "A product in your cart is no longer available." to Modern Standard Arabic', () => {
+            const translated = localizeOrderError('A product in your cart is no longer available.', true);
+            expect(translated).toContain('أحد المنتجات الموجودة في سلتك لم يعد متوفراً حالياً في المستودع');
+        });
+
+        it('translates product option not available error', () => {
+            const translated = localizeOrderError('The selected product option is no longer available.', true);
+            expect(translated).toContain('الخيار أو الحجم المحدد لأحد المنتجات لم يعد متوفراً حالياً');
+        });
+
+        it('preserves existing Arabic messages without altering them', () => {
+            const arMsg = 'عذراً، المنتج «حليبنا» غير متاح للطلب حالياً.';
+            expect(localizeOrderError(arMsg, true)).toBe(arMsg);
+        });
+    });
 });

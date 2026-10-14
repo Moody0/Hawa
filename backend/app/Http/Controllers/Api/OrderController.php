@@ -39,11 +39,11 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         if (strlen($request->getContent()) > 100000) {
-            return response()->json(['message' => 'Order request is too large'], 413);
+            return response()->json(['message' => 'حجم بيانات الطلب كبير جداً.'], 413);
         }
         $key = 'order:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 10)) {
-            return response()->json(['message' => 'Too many orders. Please try again shortly.'], 429)->header('Retry-After', RateLimiter::availableIn($key));
+            return response()->json(['message' => 'تم إرسال طلبات متعددة، يرجى الانتظار دقيقة ثم المحاولة مجدداً.'], 429)->header('Retry-After', RateLimiter::availableIn($key));
         }
         RateLimiter::hit($key, 600);
         $body = $request->validate([
@@ -352,17 +352,17 @@ class OrderController extends Controller
         $totals = [];
         foreach ($input as $raw) {
             if (! is_array($raw)) {
-                throw new HttpException(400, 'Invalid order line.');
+                throw new HttpException(400, 'بيانات أحد الأصناف في الطلب غير صحيحة.');
             }
             $id = trim((string) ($raw['productId'] ?? ''));
             $qty = filter_var($raw['quantity'] ?? null, FILTER_VALIDATE_INT);
             $option = $this->clean($raw['options'] ?? '', 100) ?: null;
             if ($id === '' || strlen($id) > 191 || ! $qty || $qty < 1 || $qty > self::MAX_PACKAGES) {
-                throw new HttpException(400, 'Each product needs a valid positive package quantity.');
+                throw new HttpException(400, 'يرجى تحديد كمية صحيحة لكل منتج في السلة.');
             }
             $totals[$id] = ($totals[$id] ?? 0) + $qty;
             if ($totals[$id] > self::MAX_PACKAGES) {
-                throw new HttpException(400, 'Too many packages requested for a product.');
+                throw new HttpException(400, 'الكمية المطلوبة تتجاوز الحد الأقصى المسموح به للطلب الواحد.');
             }
             $key = $id.'|'.($option ?? '');
             if (isset($merged[$key])) {
@@ -387,7 +387,7 @@ class OrderController extends Controller
     private function replay(Order $order, string $requestHash)
     {
         if (! hash_equals((string) $order->request_hash, $requestHash)) {
-            return response()->json(['message' => 'This request key belongs to a different order.'], 409);
+            return response()->json(['message' => 'مفتاح الطلب مستخدم مسبقاً لطلب مختلف. يرجى إعادة المحاولة.'], 409);
         }
 
         return $this->createdResponse($order, 200);
@@ -426,7 +426,7 @@ class OrderController extends Controller
     {
         $value = (string) $value;
         if (! preg_match('/^(\d+)(?:\.(\d{1,2}))?$/', $value, $match)) {
-            throw new HttpException(422, 'Invalid product price.');
+            throw new HttpException(422, 'سعر المنتج غير صالح.');
         }
 
         return ((int) $match[1] * 100) + (int) str_pad($match[2] ?? '', 2, '0');
