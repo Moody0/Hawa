@@ -365,7 +365,7 @@ const MobileSearchModal = ({ isOpen, onClose }: MobileSearchModalProps) => {
                                         <button
                                             key={idx}
                                             type="button"
-                                            onClick={() => handleSelectTag(term.query)}
+                                            onClick={() => handleSelectTag(term.label)}
                                             className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-zinc-800/80 hover:bg-[#8A6305]/10 hover:text-[#8A6305] dark:hover:bg-[#8A6305]/20 dark:hover:text-[#E5B54A] text-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-white/5 transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                                         >
                                             <Search className="w-3 h-3 text-slate-400 shrink-0" />
@@ -550,7 +550,7 @@ const MobileSearchModal = ({ isOpen, onClose }: MobileSearchModalProps) => {
                                     <button
                                         key={idx}
                                         type="button"
-                                        onClick={() => handleSelectTag(term.query)}
+                                        onClick={() => handleSelectTag(term.label)}
                                         className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-300 hover:bg-[#8A6305]/10 hover:text-[#8A6305] border border-slate-200/60 dark:border-white/5 transition-all cursor-pointer"
                                     >
                                         {term.label}

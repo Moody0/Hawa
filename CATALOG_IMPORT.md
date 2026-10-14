@@ -2,23 +2,25 @@
 
 Source: `منتجات شركة حوا.xlsx`, first worksheet, rows 2–143.
 
-The reviewed JSON is `backend/database/imports/hawa-products.json`. It contains 142 products, two main categories, seven trimmed brand names and 16 distinct subcategory names. Subcategory records are associated with their brands, so the number of records may exceed the number of distinct names.
+The reviewed JSON is `backend/database/imports/hawa-products.json`. It contains 142 products, two main categories, seven trimmed brand names and 16 distinct subcategory names. Product images have been converted to WebP (`/uploads/products/{barcode}.webp`) from high-resolution source images, achieving ~88.5% size optimization.
 
 All prices and stored stock quantities are zero. These products support quotation inquiries: they remain visible, can be added to an inquiry, and do not reserve inventory. Prices and availability are confirmed through WhatsApp. Guests see masked pricing; signed-in customers see “Price on Inquiry”. Changing a product to a positive visible price enables normal inventory checks.
 
-The original workbook is unchanged. Names, descriptions, category assignments and 136 image URLs are preserved. Six products without image URLs use `/placeholder.svg`. Their Excel row numbers are 19, 99, 100, 109, 135 and 143. Every imported field remains editable in the admin dashboard.
+The 136 available product images have been converted to WebP and mapped to product barcodes 1–142 in `public/uploads/products/` and `backend/storage/app/public/products/`. Six products without image URLs use `/placeholder.svg` (barcodes 18, 98, 99, 108, 134, and 142). Every imported field remains editable in the admin dashboard.
 
 ## VPS import
 
-First deploy the updated package using `VPS_DEPLOYMENT.md`. It includes the quote flow changes and migration. Do not import into the previous application release, whose stock filter hides products with zero quantity.
-
-Run this exact block as root on the VPS after updating:
+Run this exact block as root on the VPS after running `git pull origin main`:
 
 ```bash
-su - deploy -c 'cd /var/www/hawa/current/backend && php artisan migrate --force && php artisan hawa:import-catalog --dry-run && php artisan hawa:import-catalog'
+# 1. Update backend and import the new product catalog with local WebP images
+su - deploy -c 'cd /var/www/hawa/current/backend && php artisan migrate --force && php artisan hawa:import-catalog --force --dry-run && php artisan hawa:import-catalog --force'
+
+# 2. Rebuild Next.js frontend (to serve the new public/uploads/products WebP images) and restart PM2
+su - deploy -c 'cd /var/www/hawa/current && npm run build && pm2 reload all'
 ```
 
-The dry run validates every product and rolls back its changes. The actual import is transactional. Running this command again with the identical JSON file makes no changes. It refuses to import a new file if the catalog already contains products, protecting existing administrator edits. It requires an active super administrator, which must already have been created during deployment.
+The dry run validates every product and rolls back its changes. The `--force` flag updates existing products in place (matching by barcode/SKU or name) without breaking existing order histories. Running this command again makes no changes unless forced.
 
 ## Check the result
 

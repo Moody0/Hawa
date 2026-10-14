@@ -532,11 +532,28 @@ class HawaAdminController extends Controller
                     'brandId' => $brand->id, 'categoryId' => $category->id, 'mainCategoryId' => $resolvedMainCategory ?? $category->main_category_id,
                     'price' => $value(['Price', 'price', 'السعر'], '0'), 'stock' => $value(['Quantity', 'quantity', 'Stock', 'stock', 'الكمية', 'المخزون'], '0'),
                     'images' => $value(['Images', 'images', 'Image', 'image', 'الصور', 'رابط الصورة', 'رابط صورة المنتج'], '/placeholder.svg'),
-                    'sku' => $value(['SKU', 'sku', 'رمز المنتج']) ?: null, 'options' => $value(['Options', 'options', 'Variants', 'variants', 'الخيارات', 'الألوان والأحجام']) ?: null,
+                    'sku' => $value(['SKU', 'sku', 'رمز المنتج', 'الباركود', 'باركود', 'Barcode', 'barcode']) ?: null, 'options' => $value(['Options', 'options', 'Variants', 'variants', 'الخيارات', 'الألوان والأحجام']) ?: null,
                     'packaging' => $value(['Packaging', 'packaging'], 'طرد'), 'itemsPerPackage' => $value(['Items Per Package', 'itemsPerPackage']) ?: null,
                     'minOrder' => $value(['Min Order', 'minOrder'], '1'), 'isTrending' => in_array($value(['Is Trending', 'isTrending', 'مميز']), ['Yes', 'true', '1'])];
                 $payload['description'] = $payload['descriptionEn'] ?: $payload['descriptionAr'] ?: $payload['name'];
-                $this->saveProduct(Request::create('/', 'POST', $payload));
+                $sku = $payload['sku'];
+                $existing = null;
+                if ($sku) {
+                    $existing = Product::withoutGlobalScopes()->where('sku', $sku)->first();
+                }
+                if (! $existing && $nameAr) {
+                    $existing = Product::withoutGlobalScopes()->where('name_ar', $nameAr)->first();
+                }
+                if (! $existing && $nameEn) {
+                    $existing = Product::withoutGlobalScopes()->where('name_en', $nameEn)->first();
+                }
+                if ($existing) {
+                    $payload['id'] = $existing->id;
+                    $payload['slug'] = $existing->slug;
+                    $this->saveProduct(Request::create('/', 'PATCH', $payload));
+                } else {
+                    $this->saveProduct(Request::create('/', 'POST', $payload));
+                }
                 $count++;
             }
         });

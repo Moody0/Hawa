@@ -15,9 +15,9 @@ use Throwable;
 
 class ImportCatalog extends Command
 {
-    protected $signature = 'hawa:import-catalog {file? : Absolute path to an import JSON file} {--dry-run : Validate the complete import without saving changes}';
+    protected $signature = 'hawa:import-catalog {file? : Absolute path to an import JSON file} {--dry-run : Validate the complete import without saving changes} {--force : Replace or update existing products with the new catalog import}';
 
-    protected $description = 'Import the reviewed Hawa workbook into an empty product catalog, once per source file';
+    protected $description = 'Import or update the Hawa product catalog from import JSON';
 
     public function handle(): int
     {
@@ -44,14 +44,14 @@ class ImportCatalog extends Command
         try {
             // Serialize command runs and retain a durable marker for repeat uploads.
             DB::table('settings')->orderBy('id')->lockForUpdate()->first();
-            if (AdminAuditLog::where('entity_type', 'CatalogImport')->where('entity_id', $hash)->exists()) {
+            if (! $this->option('force') && AdminAuditLog::where('entity_type', 'CatalogImport')->where('entity_id', $hash)->exists()) {
                 DB::rollBack();
-                $this->info('This file was already imported. No products were changed.');
+                $this->info('This file was already imported. Use --force to re-import.');
                 return self::SUCCESS;
             }
-            if (Product::withoutGlobalScopes()->exists()) {
+            if (! $this->option('force') && Product::withoutGlobalScopes()->exists()) {
                 DB::rollBack();
-                $this->error('The catalog already contains products. Use the admin dashboard to review existing data before importing.');
+                $this->error('The catalog already contains products. Use --force to replace or update existing products.');
                 return self::FAILURE;
             }
             $result = app(HawaAdminController::class)->import(Request::create('/', 'POST', ['rows' => $data['rows']]))->getData(true);
