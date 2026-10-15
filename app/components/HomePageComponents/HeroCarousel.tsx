@@ -362,8 +362,8 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             }`}
                             aria-hidden={!isActive}
                         >
-                            {/* Full-bleed background image with natural unzoomed scale */}
-                            <div className="absolute inset-0 overflow-hidden">
+                            {/* Preserve the full artwork so product edges stay inside the banner. */}
+                            <div className="absolute inset-0 overflow-hidden bg-[#071522]">
                                 <Image
                                     src={slide.image}
                                     alt={isArabic ? (slide.titleAr || 'بنر الصفحة الرئيسية') : (slide.title || 'Hero banner')}
@@ -372,7 +372,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     loading={index === 0 ? "eager" : "lazy"}
                                     unoptimized={slide.image.startsWith('/uploads/')}
                                     sizes="100vw"
-                                    className={`object-cover object-center w-full h-full pointer-events-none ${slide.imageMobile ? 'hidden md:block' : ''}`}
+                                    className={`object-contain object-center w-full h-full pointer-events-none ${slide.imageMobile ? 'hidden md:block' : ''}`}
                                 />
                                 {slide.imageMobile && (
                                     <Image
@@ -383,7 +383,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                         loading={index === 0 ? "eager" : "lazy"}
                                         unoptimized={slide.imageMobile.startsWith('/uploads/')}
                                         sizes="100vw"
-                                        className="object-cover object-center w-full h-full pointer-events-none md:hidden"
+                                        className="object-contain object-top w-full h-full pointer-events-none md:hidden"
                                     />
                                 )}
                             </div>
@@ -399,7 +399,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             />
 
                             {/* Content Layer (Gordon Food Service / B2B style) */}
-                            <div className="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end sm:items-center pb-14 sm:pb-0">
+                            <div className="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end md:items-center pb-14 md:pb-0">
                                 {isActive && (
                                     <div
                                         key={`slide-content-${slide.id}-${animKey}`}
