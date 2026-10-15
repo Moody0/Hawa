@@ -362,7 +362,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                             }`}
                             aria-hidden={!isActive}
                         >
-                            {/* Preserve the full artwork so product edges stay inside the banner. */}
+                            {/* Fill the banner edge to edge, cropping to match the viewport. */}
                             <div className="absolute inset-0 overflow-hidden bg-[#071522]">
                                 <Image
                                     src={slide.image}
@@ -372,7 +372,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     loading={index === 0 ? "eager" : "lazy"}
                                     unoptimized={slide.image.startsWith('/uploads/')}
                                     sizes="100vw"
-                                    className={`object-contain object-center w-full h-full pointer-events-none ${slide.imageMobile ? 'hidden md:block' : ''}`}
+                                    className={`object-cover object-center w-full h-full pointer-events-none ${slide.imageMobile ? 'hidden md:block' : ''}`}
                                 />
                                 {slide.imageMobile && (
                                     <Image
@@ -383,7 +383,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                         loading={index === 0 ? "eager" : "lazy"}
                                         unoptimized={slide.imageMobile.startsWith('/uploads/')}
                                         sizes="100vw"
-                                        className="object-contain object-top w-full h-full pointer-events-none md:hidden"
+                                        className="object-cover object-top w-full h-full pointer-events-none md:hidden"
                                     />
                                 )}
                             </div>
