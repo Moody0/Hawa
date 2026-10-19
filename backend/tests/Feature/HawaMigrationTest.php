@@ -241,6 +241,46 @@ class HawaMigrationTest extends TestCase
         $this->deleteJson('/api/admin/categories/'.$category['id'])->assertOk();
     }
 
+    public function test_archived_category_names_can_be_reused_without_losing_history(): void
+    {
+        $this->actingAs($this->admin(), 'web');
+        foreach (['main-categories', 'categories'] as $resource) {
+            $payload = ['name' => 'Reusable name'];
+            if ($resource === 'categories') {
+                $main = MainCategory::create(['name' => 'Parent', 'slug' => 'parent']);
+                $payload['mainCategoryId'] = $main->id;
+            }
+            $original = $this->postJson('/api/admin/'.$resource, $payload)->assertCreated()->json('data');
+            $this->deleteJson('/api/admin/'.$resource.'/'.$original['id'])->assertOk();
+            $replacement = $this->postJson('/api/admin/'.$resource, $payload)->assertCreated()->json('data');
+            $this->assertNotSame($original['id'], $replacement['id']);
+            $this->assertNotSame($original['slug'], $replacement['slug']);
+            $this->assertArrayNotHasKey('activeName', $replacement);
+            $this->postJson('/api/admin/'.$resource, $payload)->assertUnprocessable()->assertJsonValidationErrors('name');
+            $this->patchJson('/api/admin/'.$resource.'/'.$replacement['id'], $payload)->assertOk();
+            $this->postJson('/api/admin/'.$resource.'/'.$original['id'].'/restore')->assertUnprocessable()->assertJsonValidationErrors('name');
+            $table = $resource === 'main-categories' ? 'main_categories' : 'categories';
+            $this->assertDatabaseHas($table, ['id' => $original['id'], 'name' => 'Reusable name']);
+            $this->assertNotNull(\Illuminate\Support\Facades\DB::table($table)->where('id', $original['id'])->value('archived_at'));
+            $this->deleteJson('/api/admin/'.$resource.'/'.$replacement['id'])->assertOk();
+            $this->postJson('/api/admin/'.$resource.'/'.$original['id'].'/restore')->assertOk();
+        }
+    }
+
+    public function test_reused_subcategory_names_still_respect_the_department(): void
+    {
+        $this->actingAs($this->admin(), 'web');
+        $first = MainCategory::create(['name' => 'First', 'slug' => 'first']);
+        $second = MainCategory::create(['name' => 'Second', 'slug' => 'second']);
+        foreach ([$first->id, $second->id, null] as $mainId) {
+            $payload = ['name' => 'Rice', 'mainCategoryId' => $mainId];
+            $old = $this->postJson('/api/admin/categories', $payload)->assertCreated()->json('data');
+            $this->deleteJson('/api/admin/categories/'.$old['id'])->assertOk();
+            $this->postJson('/api/admin/categories', $payload)->assertCreated();
+            $this->postJson('/api/admin/categories', $payload)->assertUnprocessable();
+        }
+    }
+
     public function test_prices_are_hidden_for_guests_and_for_hidden_products(): void
     {
         $p = $this->product();

@@ -193,12 +193,16 @@ class HawaAdminController extends Controller
         if (isset($rules['name'])) {
             $rules['name'][] = 'max:191';
         }
-        if (in_array($resource, ['brands', 'main-categories'], true)) {
+        if ($resource === 'brands') {
             $rules['name'][] = Rule::unique((new $class)->getTable(), 'name')->ignore($id);
+        }
+        if ($resource === 'main-categories') {
+            $rules['name'][] = Rule::unique('main_categories', 'name')->whereNull('archived_at')->ignore($id);
         }
         if ($resource === 'categories') {
             $mainCategoryId = $request->input('mainCategoryId', $record->main_category_id);
             $rules['name'][] = Rule::unique('categories', 'name')
+                ->whereNull('archived_at')
                 ->where(fn ($query) => $mainCategoryId ? $query->where('main_category_id', $mainCategoryId) : $query->whereNull('main_category_id'))
                 ->ignore($id);
         }
@@ -310,6 +314,15 @@ class HawaAdminController extends Controller
         AdminAccess::check($permission.'_ARCHIVE');
         $id = $id ?: $request->input('id');
         $record = $class::withoutGlobalScopes()->whereKey($id)->firstOrFail();
+        if (in_array($resource, ['main-categories', 'categories'], true)) {
+            $rule = Rule::unique($record->getTable(), 'name')->whereNull('archived_at')->ignore($record->id);
+            if ($resource === 'categories') {
+                $rule->where(fn ($query) => $record->main_category_id
+                    ? $query->where('main_category_id', $record->main_category_id)
+                    : $query->whereNull('main_category_id'));
+            }
+            validator(['name' => $record->name], ['name' => [$rule]])->validate();
+        }
         DB::transaction(function () use ($record) {
             $record->update(['archived_at' => null]);
             AdminAccess::audit('RESTORE', get_class($record), $record->id);

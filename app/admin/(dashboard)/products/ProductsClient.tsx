@@ -14,6 +14,7 @@ import { getSafeImageUrl } from '@/lib/image-utils';
 import { ChevronRight, ChevronLeft, Upload, Download, Plus, Search, ChevronDown, Flame, Tag, Trash2, Pencil, RefreshCw, ArrowUp, ArrowDown, Share2, Copy, TrendingDown, CircleSlash, X, ToggleLeft, ToggleRight } from 'lucide-react';
 import { FaFacebook, FaWhatsapp } from 'react-icons/fa';
 import { hasAdminPermission } from '@/lib/admin-permissions';
+import { getPaginationPages } from '@/lib/pagination';
 
 const ALL_FILTER_VALUE = "__all__";
 
@@ -279,11 +280,14 @@ export default function ProductsClient({
 
     // Pagination logic
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
+    const activePage = Math.max(1, Math.min(currentPage, totalPages));
+    const pageNumbers = getPaginationPages(activePage, totalPages);
+    const lastVisiblePage = pageNumbers.at(-1) ?? 0;
+    const startIndex = (activePage - 1) * itemsPerPage;
     const currentItems = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
 
     const handlePageChange = (page: number) => {
-        setCurrentPage(page);
+        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
         // Find the main scroll container
         const container = document.querySelector('.overflow-y-auto');
         if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1284,41 +1288,36 @@ export default function ProductsClient({
                         <div className="p-3 sm:p-5 border-t border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-4">
                             <span className="text-xs sm:text-sm text-text-sub dark:text-gray-400 order-2 sm:order-1">
                                 {t('admin.showingProducts')
-                                    .replace('{start}', (startIndex + 1).toString())
+                                    .replace('{start}', (filteredProducts.length ? startIndex + 1 : 0).toString())
                                     .replace('{end}', Math.min(startIndex + itemsPerPage, filteredProducts.length).toString())
                                     .replace('{total}', filteredProducts.length.toString())}
                             </span>
                             <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2">
                                 <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
+                                    onClick={() => handlePageChange(activePage - 1)}
+                                    disabled={activePage === 1}
                                     className="p-1.5 sm:p-2 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-lg text-text-sub dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <ChevronLeft className={`text-[18px] sm:text-[20px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                                 </button>
 
                                 <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                                        let pageNum = currentPage <= 2 ? i + 1 : currentPage - 1 + i;
-                                        if (pageNum > totalPages) pageNum = totalPages - (Math.min(3, totalPages) - 1 - i);
-                                        if (pageNum <= 0) return null;
-
-                                        return (
+                                    {pageNumbers.map(pageNum => (
                                             <button
                                                 key={pageNum}
                                                 onClick={() => handlePageChange(pageNum)}
-                                                className={`size-8 sm:size-9 flex items-center justify-center rounded-lg text-xs sm:text-sm font-bold transition-all ${currentPage === pageNum
+                                                aria-current={activePage === pageNum ? 'page' : undefined}
+                                                className={`size-8 sm:size-9 flex items-center justify-center rounded-lg text-xs sm:text-sm font-bold transition-all ${activePage === pageNum
                                                     ? 'bg-primary text-white'
                                                     : 'border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] text-text-sub dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-white/[0.02]'
                                                     }`}
                                             >
                                                 {pageNum}
                                             </button>
-                                        );
-                                    })}
-                                    {totalPages > 3 && currentPage < totalPages - 1 && (
+                                    ))}
+                                    {lastVisiblePage < totalPages && (
                                         <>
-                                            <span className="text-text-sub dark:text-slate-400 px-0.5 sm:px-1">...</span>
+                                            {lastVisiblePage < totalPages - 1 && <span className="text-text-sub dark:text-slate-400 px-0.5 sm:px-1">...</span>}
                                             <button
                                                 onClick={() => handlePageChange(totalPages)}
                                                 className={`size-8 sm:size-9 flex items-center justify-center rounded-lg border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] text-text-sub dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] text-xs sm:text-sm font-bold`}
@@ -1330,8 +1329,8 @@ export default function ProductsClient({
                                 </div>
 
                                 <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    onClick={() => handlePageChange(activePage + 1)}
+                                    disabled={activePage >= totalPages}
                                     className="p-1.5 sm:p-2 border border-black/[0.04] dark:border-white/[0.04] dark:border-white/[0.04] rounded-lg text-text-sub dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <ChevronRight className={`text-[18px] sm:text-[20px] ${dir === 'rtl' ? 'rotate-180' : ''}`} />

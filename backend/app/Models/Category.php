@@ -13,6 +13,8 @@ class Category extends Model
 
     protected $guarded = [];
 
+    protected $hidden = ['active_name'];
+
     protected $attributes = ['is_featured' => false, 'is_active' => true];
 
     public $incrementing = false;

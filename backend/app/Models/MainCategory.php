@@ -13,6 +13,8 @@ class MainCategory extends Model
 
     protected $guarded = [];
 
+    protected $hidden = ['active_name'];
+
     protected $attributes = ['is_active' => true, 'show_in_nav' => true, 'nav_order' => 0, 'is_featured' => false];
 
     public $incrementing = false;
