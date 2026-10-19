@@ -113,6 +113,23 @@ const Main = async ({
                 <Link href="/contact" className="inline-flex mt-6 rounded-lg bg-heading hover:bg-[#16304d] px-6 py-3 text-white font-semibold">{ar ? 'تواصل معنا' : 'Contact us'}</Link>
             </header>}
 
+            {/* Partner distributor callout */}
+            {content.homePrideEnabled !== false && (
+                <ScrollReveal
+                    className="bg-[#FAF7F0] dark:bg-[#101E32]"
+                    variant="subtle"
+                >
+                    <PartnerPrideBanner
+                        language={language}
+                        dir={dir}
+                        content={content}
+                        salesPhone={siteContacts.phone}
+                        managementPhone={siteContacts.managementPhone}
+                        whatsappUrl={siteContacts.whatsappUrl}
+                    />
+                </ScrollReveal>
+            )}
+
             {/* 2. Compact agency trust rail */}
             <ScrollReveal
                 className="bg-[#FAF7F0] dark:bg-[#101E32]"
@@ -169,22 +186,6 @@ const Main = async ({
                 </ScrollReveal>
             )}
 
-            {/* 10. Partner callout at the end of the home page */}
-            {content.homePrideEnabled !== false && (
-                <ScrollReveal
-                    className="bg-[#FAF7F0] dark:bg-[#101E32]"
-                    variant="subtle"
-                >
-                    <PartnerPrideBanner
-                        language={language}
-                        dir={dir}
-                        content={content}
-                        salesPhone={siteContacts.phone}
-                        managementPhone={siteContacts.managementPhone}
-                        whatsappUrl={siteContacts.whatsappUrl}
-                    />
-                </ScrollReveal>
-            )}
         </div>
     );
 };
