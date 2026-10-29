@@ -223,7 +223,7 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl',
     if (!categories.length && !statsList.length) return null;
 
     return (
-        <section ref={sectionRef} className="container-custom py-12 md:py-16">
+        <section ref={sectionRef} className="container-custom py-7 md:py-10">
             {/* 1. Editorial, start-aligned section heading & View All button */}
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 md:mb-8">
                 <div className="text-start">

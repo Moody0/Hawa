@@ -49,7 +49,7 @@ export default function PartnerPrideBanner({
     const contactLink = 'inline-flex items-center gap-1.5 rounded-sm text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A] focus-visible:outline-2 focus-visible:outline-offset-2';
 
     return (
-        <section aria-label={title} className="w-full py-4 sm:py-6">
+        <section aria-label={title} className="w-full pt-3 pb-4 sm:pt-4 sm:pb-6">
             <div className="container-custom">
                 <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#EADFC8] bg-[#F3ECDA] p-4 dark:border-white/10 dark:bg-[#0f172a] sm:p-6">
                     <Image

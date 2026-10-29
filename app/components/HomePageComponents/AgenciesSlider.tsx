@@ -69,10 +69,10 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
             : 'We are proud to represent and distribute a curated portfolio of top local and international brands');
 
     return (
-        <section className="w-full py-8 md:py-11 bg-transparent">
+        <section className="w-full py-4 md:py-7 bg-transparent">
             <div className="container-custom">
                 {/* Section Header with Centered Gold Flanking Lines matching screenshot */}
-                <div className="text-center mb-5 sm:mb-7">
+                <div className="text-center mb-3 sm:mb-5">
                     <div className="flex items-center justify-center gap-3.5 mb-2">
                         <span className="w-10 sm:w-16 h-[1.5px] bg-[#C28E2B] rounded-full shrink-0" aria-hidden="true" />
                         <h2 className="text-2xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight" data-reveal-heading>

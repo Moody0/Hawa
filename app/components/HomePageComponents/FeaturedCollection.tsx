@@ -98,7 +98,7 @@ const FeaturedCollection = ({ newArrivals = [], bundles: _bundles = [], bestSell
     if (!tabs.length) return null;
 
     return (
-        <section className="container-custom py-12 md:py-16">
+        <section className="container-custom py-7 md:py-10">
             {/* Editorial heading, tabs, and action button */}
             <div className="mb-6 sm:mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-3">

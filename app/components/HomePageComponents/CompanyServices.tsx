@@ -118,7 +118,7 @@ export default function CompanyServices({ settings }: CompanyServicesProps) {
     const FeaturedIcon = SERVICE_ICONS[featuredService.icon] || Truck;
 
     return (
-        <section className="w-full py-12 md:py-16">
+        <section className="w-full py-7 md:py-10">
             <div className="container-custom">
                 <div className="text-center mb-7 md:mb-10">
                     <div className="flex items-center justify-center gap-3 mb-1.5">

@@ -77,7 +77,7 @@ const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
     };
 
     return (
-        <section className="container-custom py-12 md:py-16">
+        <section className="container-custom py-7 md:py-10">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-9">
                 <div className="text-start">
                     <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">

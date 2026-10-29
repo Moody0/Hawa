@@ -94,7 +94,7 @@ const TestimonialsMasonry = ({ reviews = [], settings }: TestimonialsMasonryProp
         : (settings?.homeTestimonialsDesc || settings?.homeTestimonialsDescAr || 'Endorsements from verified retail merchants and grocery partners');
 
     return (
-        <section className="w-full py-12 md:py-16 border-t border-slate-200 dark:border-white/10">
+        <section className="w-full py-7 md:py-10 border-t border-slate-200 dark:border-white/10">
             <div className="container-custom">
                 {/* Centered Section Header with Decorative Flanking Lines */}
                 <div className="text-center mb-7 sm:mb-9">
