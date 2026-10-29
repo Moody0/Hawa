@@ -10,7 +10,6 @@ import { getI18n } from '@/lib/i18n';
 import HeroCarousel from './HeroCarousel';
 import CompanyServices from './CompanyServices';
 import PartnerPrideBanner from './PartnerPrideBanner';
-import CategoryQuickStrip from './CategoryQuickStrip';
 import { getSiteContacts } from '@/lib/website-content';
 
 const AgenciesSlider = dynamic(() => import('./AgenciesSlider'), {
@@ -115,8 +114,7 @@ const Main = async ({
             </header>}
 
             {/* Curved sheet overlapping the hero: category quick strip + partner distributor callout */}
-            <div className="relative z-10 -mt-6 rounded-t-[1.75rem] bg-[#FAF7F0] pb-2 dark:bg-[#101E32] md:-mt-8 md:rounded-t-[2.5rem]">
-                <CategoryQuickStrip categories={featuredCategories} isArabic={ar} />
+            <div className="relative z-10 -mt-6 rounded-t-[1.75rem] bg-[#FAF7F0] pt-3 pb-2 dark:bg-[#101E32] md:-mt-8 md:rounded-t-[2.5rem]">
                 {content.homePrideEnabled !== false && (
                     <PartnerPrideBanner
                         language={language}
