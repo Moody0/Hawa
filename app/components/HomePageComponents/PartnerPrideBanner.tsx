@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
-import { FaWhatsapp } from 'react-icons/fa';
-import { DEFAULT_MANAGEMENT_PHONE, DEFAULT_SALES_PHONE, PARTNER_PRIDE_TITLE_AR, contactPhoneDigits, formatContactPhone, type WebsiteContent } from '@/lib/website-content';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { PARTNER_PRIDE_TITLE_AR, type WebsiteContent } from '@/lib/website-content';
 
 interface PartnerPrideBannerProps {
     language: string;
@@ -17,9 +16,6 @@ export default function PartnerPrideBanner({
     language,
     dir,
     content,
-    salesPhone = DEFAULT_SALES_PHONE,
-    managementPhone = DEFAULT_MANAGEMENT_PHONE,
-    whatsappUrl,
 }: PartnerPrideBannerProps) {
     const isArabic = language === 'ar' || dir === 'rtl';
 
@@ -40,13 +36,6 @@ export default function PartnerPrideBanner({
         : (content?.homePrideButton || 'Browse products');
 
     const buttonLink = content?.homePrideLink || '/products';
-    const fallbackWhatsappUrl = `https://wa.me/${contactPhoneDigits(salesPhone)}?text=${encodeURIComponent(
-        isArabic
-            ? 'مرحباً، أود الاستفسار عن أصناف شركة بيتنجانة إخوان وأسعار الجملة.'
-            : 'Hello, I would like to ask about Bitinjana Brothers products and wholesale prices.',
-    )}`;
-
-    const contactLink = 'inline-flex items-center gap-1.5 rounded-sm text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A] focus-visible:outline-2 focus-visible:outline-offset-2';
 
     return (
         <section aria-label={title} className="w-full pt-3 pb-4 sm:pt-4 sm:pb-6">
@@ -97,28 +86,6 @@ export default function PartnerPrideBanner({
                         />
                     </div>
 
-                    <div className="relative z-10 mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-[#E3D6B8] pt-3 text-[11px] dark:border-white/10 sm:text-xs">
-                        <a href={`tel:+${contactPhoneDigits(salesPhone)}`} className={contactLink}>
-                            <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                            <span>{isArabic ? 'مدير المبيعات:' : 'Sales Manager:'}</span>
-                            <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
-                        </a>
-                        <a href={`tel:+${contactPhoneDigits(managementPhone)}`} className={contactLink}>
-                            <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                            <span>{isArabic ? 'مدير الشركة:' : 'Company Manager:'}</span>
-                            <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(managementPhone)}</span>
-                        </a>
-                        <a
-                            href={whatsappUrl || fallbackWhatsappUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 font-medium text-emerald-700 transition-colors hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 focus-visible:outline-2 focus-visible:outline-offset-2"
-                        >
-                            <FaWhatsapp className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-                            <span>{isArabic ? 'واتساب المبيعات:' : 'Sales WhatsApp:'}</span>
-                            <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
-                        </a>
-                    </div>
                 </div>
             </div>
         </section>
