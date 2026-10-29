@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -48,8 +49,17 @@ export default function PartnerPrideBanner({
     return (
         <section aria-label={title} className="w-full py-8 sm:py-12">
             <div className="container-custom">
-                <div className="mx-auto flex max-w-6xl flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#0f172a] sm:p-7 md:flex-row md:items-center md:justify-between">
-                    <div className="max-w-2xl space-y-2.5">
+                <div className="relative mx-auto flex max-w-6xl flex-col gap-5 overflow-hidden rounded-2xl border border-[#EADFC8] bg-[#F7F1E3] p-5 shadow-sm dark:border-white/10 dark:bg-[#0f172a] sm:p-7 md:flex-row md:items-center md:justify-between md:gap-8">
+                    <Image
+                        src="/images/betengana/botanical-decoration-generated.webp"
+                        alt=""
+                        aria-hidden="true"
+                        width={900}
+                        height={600}
+                        sizes="(min-width: 768px) 420px, 280px"
+                        className="pointer-events-none absolute -bottom-6 start-[-3rem] w-72 select-none opacity-40 md:w-[26rem] dark:opacity-10"
+                    />
+                    <div className="relative z-10 max-w-2xl space-y-2.5">
                         <p className="flex items-center gap-2 text-xs font-semibold text-[#8A6305] dark:text-[#E5B54A]">
                             <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
                             {badge}
@@ -67,7 +77,7 @@ export default function PartnerPrideBanner({
                         </p>
                     </div>
 
-                    <div className="flex shrink-0 flex-col items-start gap-3.5">
+                    <div className="relative z-10 flex shrink-0 flex-col items-start gap-3.5">
                         <Link
                             href={buttonLink}
                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B192C] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#16304d] dark:bg-[#E5B54A] dark:text-[#0B192C] dark:hover:bg-[#f0c35d]"
@@ -104,6 +114,17 @@ export default function PartnerPrideBanner({
                                 <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
                             </a>
                         </div>
+                    </div>
+
+                    <div className="relative z-10 order-first flex shrink-0 justify-center md:order-last md:px-4">
+                        <Image
+                            src="/images/betengana/brand-logo-clean.webp"
+                            alt={isArabic ? 'شعار بيتنجانة إخوان' : 'Bitinjana Brothers logo'}
+                            width={400}
+                            height={400}
+                            sizes="(min-width: 768px) 224px, 144px"
+                            className="h-auto w-36 md:w-56"
+                        />
                     </div>
                 </div>
             </div>
