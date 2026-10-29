@@ -10,6 +10,7 @@ import { getI18n } from '@/lib/i18n';
 import HeroCarousel from './HeroCarousel';
 import CompanyServices from './CompanyServices';
 import PartnerPrideBanner from './PartnerPrideBanner';
+import CategoryQuickStrip from './CategoryQuickStrip';
 import { getSiteContacts } from '@/lib/website-content';
 
 const AgenciesSlider = dynamic(() => import('./AgenciesSlider'), {
@@ -113,12 +114,10 @@ const Main = async ({
                 <Link href="/contact" className="inline-flex mt-6 rounded-lg bg-heading hover:bg-[#16304d] px-6 py-3 text-white font-semibold">{ar ? 'تواصل معنا' : 'Contact us'}</Link>
             </header>}
 
-            {/* Partner distributor callout */}
-            {content.homePrideEnabled !== false && (
-                <ScrollReveal
-                    className="bg-[#FAF7F0] dark:bg-[#101E32]"
-                    variant="subtle"
-                >
+            {/* Curved sheet overlapping the hero: category quick strip + partner distributor callout */}
+            <div className="relative z-10 -mt-6 rounded-t-[1.75rem] bg-[#FAF7F0] pb-2 dark:bg-[#101E32] md:-mt-8 md:rounded-t-[2.5rem]">
+                <CategoryQuickStrip categories={featuredCategories} isArabic={ar} />
+                {content.homePrideEnabled !== false && (
                     <PartnerPrideBanner
                         language={language}
                         dir={dir}
@@ -127,8 +126,8 @@ const Main = async ({
                         managementPhone={siteContacts.managementPhone}
                         whatsappUrl={siteContacts.whatsappUrl}
                     />
-                </ScrollReveal>
-            )}
+                )}
+            </div>
 
             {/* 2. Compact agency trust rail */}
             <ScrollReveal

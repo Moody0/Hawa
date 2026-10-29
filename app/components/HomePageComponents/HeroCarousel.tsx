@@ -502,7 +502,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             {/* Bottom Pagination & Progress Indicators */}
             {slides.length > 1 && (
                 <div
-                    className="absolute bottom-5 sm:bottom-6 inset-x-0 z-30 flex items-center justify-center gap-2"
+                    className="absolute bottom-9 sm:bottom-10 inset-x-0 z-30 flex items-center justify-center gap-2"
                     aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}
                 >
                     <div

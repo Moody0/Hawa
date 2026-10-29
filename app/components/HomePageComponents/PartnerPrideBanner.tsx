@@ -46,85 +46,78 @@ export default function PartnerPrideBanner({
             : 'Hello, I would like to ask about Bitinjana Brothers products and wholesale prices.',
     )}`;
 
+    const contactLink = 'inline-flex items-center gap-1.5 rounded-sm text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A] focus-visible:outline-2 focus-visible:outline-offset-2';
+
     return (
-        <section aria-label={title} className="w-full py-8 sm:py-12">
+        <section aria-label={title} className="w-full py-4 sm:py-6">
             <div className="container-custom">
-                <div className="relative mx-auto flex max-w-6xl flex-col gap-5 overflow-hidden rounded-2xl border border-[#EADFC8] bg-[#F7F1E3] p-5 shadow-sm dark:border-white/10 dark:bg-[#0f172a] sm:p-7 md:flex-row md:items-center md:justify-between md:gap-8">
+                <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#EADFC8] bg-[#F3ECDA] p-4 dark:border-white/10 dark:bg-[#0f172a] sm:p-6">
                     <Image
                         src="/images/betengana/botanical-decoration-generated.webp"
                         alt=""
                         aria-hidden="true"
                         width={900}
                         height={600}
-                        sizes="(min-width: 768px) 420px, 280px"
-                        className="pointer-events-none absolute -bottom-6 start-[-3rem] w-72 select-none opacity-40 md:w-[26rem] dark:opacity-10"
+                        sizes="(min-width: 768px) 420px, 260px"
+                        className="pointer-events-none absolute -bottom-4 start-[-2.5rem] w-64 select-none opacity-45 md:w-[26rem] dark:opacity-10"
                     />
-                    <div className="relative z-10 max-w-2xl space-y-2.5">
-                        <p className="flex items-center gap-2 text-xs font-semibold text-[#8A6305] dark:text-[#E5B54A]">
-                            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
-                            {badge}
-                        </p>
-                        <h2 className="text-xl font-bold leading-snug tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-                            {isArabic && title === PARTNER_PRIDE_TITLE_AR ? (
-                                <>
-                                    <span className="text-[#8A6305] dark:text-[#E5B54A]">نَفخر</span>
-                                    {title.slice('نَفخر'.length)}
-                                </>
-                            ) : title}
-                        </h2>
-                        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                            {description}
-                        </p>
-                    </div>
-
-                    <div className="relative z-10 flex shrink-0 flex-col items-start gap-3.5">
-                        <Link
-                            href={buttonLink}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B192C] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#16304d] dark:bg-[#E5B54A] dark:text-[#0B192C] dark:hover:bg-[#f0c35d]"
-                        >
-                            <span>{buttonText}</span>
-                            {isArabic ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-                        </Link>
-
-                        <div className="flex flex-col items-start gap-1.5 text-xs">
-                            <a
-                                href={`tel:+${contactPhoneDigits(salesPhone)}`}
-                                className="inline-flex items-center gap-1.5 rounded-sm text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A] focus-visible:outline-2 focus-visible:outline-offset-2"
+                    <div className="relative z-10 flex items-center justify-between gap-3 sm:gap-8">
+                        <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
+                            <p className="flex items-center gap-2 text-[11px] font-semibold text-[#8A6305] dark:text-[#E5B54A] sm:text-xs">
+                                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
+                                {badge}
+                            </p>
+                            <h2 className="text-lg font-extrabold leading-snug tracking-tight text-[#0B192C] dark:text-white sm:text-3xl">
+                                {isArabic && title === PARTNER_PRIDE_TITLE_AR ? (
+                                    <>
+                                        <span className="text-[#8A6305] dark:text-[#E5B54A]">نَفخر</span>
+                                        {title.slice('نَفخر'.length)}
+                                    </>
+                                ) : title}
+                            </h2>
+                            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
+                                {description}
+                            </p>
+                            <Link
+                                href={buttonLink}
+                                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0B192C] px-5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#16304d] dark:bg-[#E5B54A] dark:text-[#0B192C] dark:hover:bg-[#f0c35d] sm:text-sm"
                             >
-                                <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                                <span>{isArabic ? 'مدير المبيعات:' : 'Sales Manager:'}</span>
-                                <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
-                            </a>
-                            <a
-                                href={`tel:+${contactPhoneDigits(managementPhone)}`}
-                                className="inline-flex items-center gap-1.5 rounded-sm text-slate-600 transition-colors hover:text-[#8A6305] dark:text-slate-300 dark:hover:text-[#E5B54A] focus-visible:outline-2 focus-visible:outline-offset-2"
-                            >
-                                <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                                <span>{isArabic ? 'مدير الشركة:' : 'Company Manager:'}</span>
-                                <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(managementPhone)}</span>
-                            </a>
-                            <a
-                                href={whatsappUrl || fallbackWhatsappUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 font-medium text-emerald-700 transition-colors hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 focus-visible:outline-2 focus-visible:outline-offset-2"
-                            >
-                                <FaWhatsapp className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-                                <span>{isArabic ? 'واتساب المبيعات:' : 'Sales WhatsApp:'}</span>
-                                <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
-                            </a>
+                                <span>{buttonText}</span>
+                                {isArabic ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+                            </Link>
                         </div>
-                    </div>
 
-                    <div className="relative z-10 order-first flex shrink-0 justify-center md:order-last md:px-4">
                         <Image
                             src="/images/betengana/brand-logo-clean.webp"
                             alt={isArabic ? 'شعار بيتنجانة إخوان' : 'Bitinjana Brothers logo'}
                             width={400}
                             height={400}
-                            sizes="(min-width: 768px) 224px, 144px"
-                            className="h-auto w-36 md:w-56"
+                            sizes="(min-width: 768px) 224px, 112px"
+                            className="h-auto w-28 shrink-0 sm:w-44 md:w-56"
                         />
+                    </div>
+
+                    <div className="relative z-10 mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-[#E3D6B8] pt-3 text-[11px] dark:border-white/10 sm:text-xs">
+                        <a href={`tel:+${contactPhoneDigits(salesPhone)}`} className={contactLink}>
+                            <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                            <span>{isArabic ? 'مدير المبيعات:' : 'Sales Manager:'}</span>
+                            <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
+                        </a>
+                        <a href={`tel:+${contactPhoneDigits(managementPhone)}`} className={contactLink}>
+                            <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                            <span>{isArabic ? 'مدير الشركة:' : 'Company Manager:'}</span>
+                            <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(managementPhone)}</span>
+                        </a>
+                        <a
+                            href={whatsappUrl || fallbackWhatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 font-medium text-emerald-700 transition-colors hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 focus-visible:outline-2 focus-visible:outline-offset-2"
+                        >
+                            <FaWhatsapp className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                            <span>{isArabic ? 'واتساب المبيعات:' : 'Sales WhatsApp:'}</span>
+                            <span dir="ltr" className="font-semibold tabular-nums">{formatContactPhone(salesPhone)}</span>
+                        </a>
                     </div>
                 </div>
             </div>
