@@ -76,14 +76,25 @@ export default function PartnerPrideBanner({
                             </Link>
                         </div>
 
-                        <Image
-                            src="/images/betengana/brand-logo-clean.webp"
-                            alt={isArabic ? 'شعار بيتنجانة إخوان' : 'Bitinjana Brothers logo'}
-                            width={400}
-                            height={400}
-                            sizes="(min-width: 768px) 224px, 112px"
-                            className="h-auto w-28 shrink-0 sm:w-44 md:w-56"
-                        />
+                        <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
+                            <Image
+                                src="/images/betengana/brand-logo-clean.webp"
+                                alt={isArabic ? 'شعار بيتنجانة إخوان' : 'Bitinjana Brothers logo'}
+                                width={400}
+                                height={400}
+                                sizes="(min-width: 768px) 224px, 112px"
+                                className="h-auto w-20 shrink-0 sm:w-40 md:w-52"
+                            />
+                            <span aria-hidden="true" className="h-14 w-px bg-[#D9C99F] sm:h-24 dark:bg-white/20" />
+                            <Image
+                                src="/images/betengana/hb-shield-logo.webp"
+                                alt={isArabic ? 'شعار HB بيتنجانة' : 'Betinjaneh HB emblem'}
+                                width={480}
+                                height={600}
+                                sizes="(min-width: 768px) 112px, 56px"
+                                className="h-auto w-10 shrink-0 sm:w-20 md:w-28"
+                            />
+                        </div>
                     </div>
 
                 </div>
