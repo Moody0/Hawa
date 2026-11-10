@@ -49,11 +49,6 @@ export default function PrivacyPageContent({ content }: PrivacyPageContentProps)
                 
                 {/* Hero Header */}
                 <div className="text-center mb-12 md:mb-16">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-bold uppercase tracking-wider mb-4">
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>{pageContent.heroBadge}</span>
-                    </div>
-
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight mb-4">
                         {pageContent.heroTitle}
                     </h1>
@@ -80,9 +75,6 @@ export default function PrivacyPageContent({ content }: PrivacyPageContentProps)
                                 <Database className="w-5 h-5" />
                             </div>
                             <div>
-                                <span className="text-[11px] font-bold tracking-wider text-[#8A6305] dark:text-[#E5B54A] uppercase block">
-                                    {pageContent.section1Badge}
-                                </span>
                                 <h2 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white">
                                     {pageContent.section1Title}
                                 </h2>
@@ -141,9 +133,6 @@ export default function PrivacyPageContent({ content }: PrivacyPageContentProps)
                                 <Truck className="w-5 h-5" />
                             </div>
                             <div>
-                                <span className="text-[11px] font-bold tracking-wider text-[#8A6305] dark:text-[#E5B54A] uppercase block">
-                                    {pageContent.section2Badge}
-                                </span>
                                 <h2 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white">
                                     {pageContent.section2Title}
                                 </h2>
@@ -205,9 +194,6 @@ export default function PrivacyPageContent({ content }: PrivacyPageContentProps)
                                 <Lock className="w-5 h-5" />
                             </div>
                             <div>
-                                <span className="text-[11px] font-bold tracking-wider text-[#8A6305] dark:text-[#E5B54A] uppercase block">
-                                    {pageContent.section3Badge}
-                                </span>
                                 <h2 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white">
                                     {pageContent.section3Title}
                                 </h2>
@@ -251,9 +237,6 @@ export default function PrivacyPageContent({ content }: PrivacyPageContentProps)
                                 <Users className="w-5 h-5" />
                             </div>
                             <div>
-                                <span className="text-[11px] font-bold tracking-wider text-[#8A6305] dark:text-[#E5B54A] uppercase block">
-                                    {pageContent.section4Badge}
-                                </span>
                                 <h2 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white">
                                     {pageContent.section4Title}
                                 </h2>

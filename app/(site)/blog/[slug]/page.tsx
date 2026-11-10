@@ -94,11 +94,6 @@ export default async function BlogPostPage(
 
                 {/* Article Header */}
                 <header className="mb-8 pb-8 border-b border-slate-200/80 dark:border-white/10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-black uppercase tracking-wider mb-4">
-                        <FileText className="text-sm" />
-                        <span>{post.category || 'أخبار الوكالات'}</span>
-                    </div>
-
                     <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight mb-5">
                         {post.title}
                     </h1>
@@ -173,9 +168,6 @@ export default async function BlogPostPage(
                 <div className="mt-14 pt-8 border-t border-slate-200/80 dark:border-white/10">
                     <div className="bg-[#FAF6EC] dark:bg-white/[0.03] rounded-3xl p-6 sm:p-8 border border-[#8A6305]/20 flex flex-col sm:flex-row items-center justify-between gap-6">
                         <div>
-                            <span className="text-[11px] font-black uppercase tracking-wider text-[#8A6305] dark:text-[#E5B54A] block mb-1">
-                                خدمة مبيعات وتوريد الجملة
-                            </span>
                             <h4 className="font-black text-base sm:text-lg text-[#0B192C] dark:text-white">
                                 هل لديك استفسار تجاري حول هذا الصنف أو جداول التوصيل؟
                             </h4>
@@ -209,10 +201,9 @@ export default async function BlogPostPage(
                 {/* Related Articles Strip */}
                 {relatedArticles.length > 0 && (
                     <div className="mt-14 pt-8 border-t border-slate-200/80 dark:border-white/10">
-                        <div className="text-xs font-black uppercase tracking-widest text-[#8A6305] dark:text-[#E5B54A] mb-6 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
-                            <span>تقارير ومقالات ذات صلة</span>
-                        </div>
+                        <h3 className="text-base sm:text-lg font-black text-[#0B192C] dark:text-white mb-6">
+                            تقارير ومقالات ذات صلة
+                        </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {relatedArticles.map((item) => (

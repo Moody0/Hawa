@@ -181,7 +181,6 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                 {...extraProps}
                 className="group flex items-center gap-2 text-xs sm:text-[13px] text-slate-300 hover:text-[#E5B54A] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#E5B54A] rounded-xs"
             >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8A6305] group-hover:bg-[#E5B54A] group-hover:scale-125 transition-all shrink-0" />
                 <span className="group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">{label}</span>
             </Component>
         );
@@ -202,13 +201,13 @@ const Footer = async ({ t: _t, language }: FooterProps) => {
                             href="/"
                             className="inline-flex items-center gap-3 group focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8A6305] rounded-xl w-fit"
                         >
-                            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-white/5 border border-[#8A6305]/40 shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-105">
+                            <div className="relative w-[56px] h-[50px] overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
                                 <Image
-                                    src="/logo-bg.webp"
+                                    src="/images/logo-header.webp"
                                     alt={brandTitle}
-                                    fill
-                                    sizes="48px"
-                                    className="object-cover"
+                                    width={114}
+                                    height={58}
+                                    className="w-[96px] h-[50px] max-w-none object-contain"
                                 />
                             </div>
                             <div className="flex flex-col">

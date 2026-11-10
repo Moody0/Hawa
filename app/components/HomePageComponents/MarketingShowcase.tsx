@@ -64,11 +64,6 @@ export default function MarketingShowcase() {
             <div className="container-custom relative z-10">
                 {/* Section Header */}
                 <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[#8A6305] text-xs font-bold uppercase tracking-wider mb-4">
-                        <span className="w-2 h-2 rounded-full bg-[#8A6305] animate-ping" />
-                        <span>{isArabic ? 'قسم التسويق التجاري الحصري' : 'Commercial Marketing Division'}</span>
-                    </div>
-
                     <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight leading-tight mb-4 text-white">
                         {isArabic ? (
                             <>

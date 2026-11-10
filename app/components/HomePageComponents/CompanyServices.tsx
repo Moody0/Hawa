@@ -28,7 +28,7 @@ import {
 import type { CompanyServiceItem } from '@/lib/public-defaults';
 import { DEFAULT_COMPANY_SERVICES } from '@/lib/public-defaults';
 
-const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
     Truck,
     Headphones,
     ShieldCheck,
@@ -51,24 +51,6 @@ const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>>
     Building2,
 };
 
-const getAccentClass = (accent?: string) => {
-    switch (accent) {
-        case 'blue':
-            return 'border-blue-500/20 text-[#0B192C] dark:text-sky-400';
-        case 'purple':
-            return 'border-purple-500/20 text-purple-700 dark:text-purple-400';
-        case 'amber':
-            return 'border-amber-500/20 text-[#8A6305] dark:text-[#8A6305]';
-        case 'emerald':
-            return 'border-emerald-500/20 text-emerald-600 dark:text-emerald-400';
-        case 'rose':
-            return 'border-rose-500/20 text-rose-600 dark:text-rose-400';
-        case 'gold':
-        default:
-            return 'border-[#8A6305]/25 text-[#8A6305] dark:text-[#E5B54A]';
-    }
-};
-
 interface CompanyServicesProps {
     settings?: {
         homeServicesEnabled?: boolean | null;
@@ -89,13 +71,12 @@ export default function CompanyServices({ settings }: CompanyServicesProps) {
         if (!settings?.homeServicesItems) return DEFAULT_COMPANY_SERVICES;
         try {
             const parsed = JSON.parse(settings.homeServicesItems);
-            return Array.isArray(parsed) ? parsed : [];
+            return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_COMPANY_SERVICES;
         } catch {
             return DEFAULT_COMPANY_SERVICES;
         }
     }, [settings?.homeServicesItems]);
 
-    // If section disabled by admin, return null
     if (settings?.homeServicesEnabled === false) {
         return null;
     }
@@ -104,137 +85,162 @@ export default function CompanyServices({ settings }: CompanyServicesProps) {
         ? (settings?.homeServicesTitleAr || 'خدمات التوزيع والتجارة المتكاملة')
         : (settings?.homeServicesTitle || 'Our Comprehensive Distribution Services');
 
-    const desc = isArabic
-        ? (settings?.homeServicesDescAr || 'نقدم للشركات المنتجة وأصحاب المحلات منظومة متكاملة تشمل التخزين والتسويق والتوصيل')
-        : (settings?.homeServicesDesc || 'Delivering end-to-end supply chain, marketing, and distribution solutions for FMCG brands');
-
     const activeServices = services.filter((s) => s.isActive !== false);
     if (activeServices.length === 0) {
         return null;
     }
 
-    const featuredService = activeServices.find((s) => s.isFeatured) || activeServices[0];
-    const supportingServices = activeServices.filter((s) => s.id !== featuredService.id);
-    const FeaturedIcon = SERVICE_ICONS[featuredService.icon] || Truck;
+    // Select the flagship service (Distribution / Featured) and the remaining companion pillars
+    const flagshipService =
+        activeServices.find(
+            (s) =>
+                s.isFeatured ||
+                s.id === 'srv-distribution' ||
+                s.icon === 'Truck' ||
+                (s.titleAr && s.titleAr.includes('توزيع'))
+        ) || activeServices[0];
 
-    return (
-        <section className="w-full py-7 md:py-10">
-            <div className="container-custom">
-                <div className="text-center mb-7 md:mb-10">
-                    <div className="flex items-center justify-center gap-3 mb-1.5">
-                        <span className="w-8 sm:w-12 h-0.5 bg-[#8A6305]/60 dark:bg-[#E5B54A]/60 rounded-full" />
-                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight" data-reveal-heading>
-                            {title}
-                        </h2>
-                        <span className="w-8 sm:w-12 h-0.5 bg-[#8A6305]/60 dark:bg-[#E5B54A]/60 rounded-full" />
-                    </div>
-                    {desc && (
-                        <p className="text-xs sm:text-sm text-[#475569] dark:text-slate-400 max-w-xl mx-auto" data-reveal-copy>
-                            {desc}
-                        </p>
-                    )}
+    const companionServices = activeServices.filter((s) => s.id !== flagshipService.id);
+
+    const FlagshipIcon = SERVICE_ICONS[flagshipService.icon] || Truck;
+    const flagshipRawTitle = (
+        isArabic
+            ? flagshipService.titleAr || flagshipService.title
+            : flagshipService.title || flagshipService.titleAr
+    ).trim();
+    const flagshipWords = flagshipRawTitle.split(/\s+/);
+    const flagshipLead = flagshipWords.length > 1 ? flagshipWords.slice(0, -1).join(' ') : flagshipRawTitle;
+    const flagshipAccent = flagshipWords.length > 1 ? flagshipWords[flagshipWords.length - 1] : '';
+
+    const flagshipDesc = isArabic
+        ? flagshipService.descAr || flagshipService.desc
+        : flagshipService.desc || flagshipService.descAr;
+
+    const totalFormatted = String(activeServices.length).padStart(2, '0');
+
+    const renderFlagshipCard = () => {
+        const inner = (
+            <article className="group relative h-full overflow-hidden rounded-[18px] sm:rounded-[22px] border border-[#E5B54A]/25 bg-gradient-to-br from-[#0F2138] to-[#0B192C] p-5 sm:p-8 text-white flex flex-col justify-between transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5">
+                {/* Subtle Architectural Watermark */}
+                <FlagshipIcon
+                    strokeWidth={1}
+                    className="pointer-events-none absolute -bottom-5 -end-5 h-44 w-44 sm:h-52 sm:w-52 text-white opacity-[0.05] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                    aria-hidden="true"
+                />
+
+                {/* Top Row: Icon & Tabular Index */}
+                <div className="relative z-10 flex items-center justify-between gap-4">
+                    <FlagshipIcon
+                        strokeWidth={1.8}
+                        className="h-6 w-6 sm:h-8 sm:w-8 text-[#E5B54A] shrink-0"
+                        aria-hidden="true"
+                    />
+                    <span className="text-[11px] sm:text-xs font-extrabold tracking-[0.08em] text-[#E5B54A]/75 tabular-nums">
+                        01 / {totalFormatted}
+                    </span>
                 </div>
 
-                <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1.05fr_1.95fr]">
-                    {/* Featured Hero Card */}
-                    <div
-                        data-reveal-item
-                        className="group relative min-h-[260px] overflow-hidden rounded-2xl border border-[#8A6305]/35 bg-[#0B192C] p-5 sm:p-7 text-white shadow-[0_20px_55px_-38px_rgba(11,25,44,0.8)]"
-                    >
-                        <div className="absolute -top-14 -end-14 h-44 w-44 rounded-full bg-[#8A6305]/20 blur-3xl" aria-hidden="true" />
-                        <div className="relative flex h-full flex-col justify-between">
-                            <div>
-                                <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E5B54A]/20 bg-[#E5B54A]/10 text-[#E5B54A]">
-                                    <FeaturedIcon className="h-6 w-6" aria-hidden="true" />
-                                </span>
-                                {(featuredService.tagAr || featuredService.tag) && (
-                                    <span className="mt-5 inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold text-[#E5B54A]">
-                                        {isArabic ? featuredService.tagAr || featuredService.tag : featuredService.tag || featuredService.tagAr}
-                                    </span>
-                                )}
-                                <h3 className="mt-3 text-xl sm:text-2xl font-black text-white">
-                                    {isArabic ? featuredService.titleAr || featuredService.title : featuredService.title || featuredService.titleAr}
-                                </h3>
-                                <p className="mt-2 max-w-md text-xs sm:text-sm leading-relaxed text-slate-300">
-                                    {isArabic ? featuredService.descAr || featuredService.desc : featuredService.desc || featuredService.descAr}
-                                </p>
-                            </div>
+                {/* Main Copy & Bottom Architectural Line */}
+                <div className="relative z-10 mt-5 sm:mt-8">
+                    <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight mb-2 sm:mb-3">
+                        <span className="relative inline-block">
+                            {flagshipLead}{' '}
+                            {flagshipAccent && <span className="text-[#E5B54A]">{flagshipAccent}</span>}
+                            <span
+                                className="pointer-events-none absolute -bottom-1 inset-x-0 h-[2px] bg-[#E5B54A] origin-left scale-x-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:origin-right group-hover:scale-x-100"
+                                aria-hidden="true"
+                            />
+                        </span>
+                    </h3>
 
-                            {featuredService.link ? (
-                                <Link
-                                    href={featuredService.link}
-                                    className="mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-xs font-bold text-[#E5B54A] hover:text-white transition-colors"
-                                >
-                                    <span>
-                                        {isArabic
-                                            ? featuredService.footerTextAr || featuredService.footerText || 'خدمة توزيع معتمدة'
-                                            : featuredService.footerText || featuredService.footerTextAr || 'Verified distribution service'}
-                                    </span>
-                                    <span className={isArabic ? 'rotate-180' : ''}>→</span>
-                                </Link>
-                            ) : (
-                                <div className="mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-xs font-bold text-[#E5B54A]">
-                                    <span>
-                                        {isArabic
-                                            ? featuredService.footerTextAr || featuredService.footerText || 'خدمة توزيع معتمدة'
-                                            : featuredService.footerText || featuredService.footerTextAr || 'Verified distribution service'}
-                                    </span>
-                                    <span className={isArabic ? 'rotate-180' : ''}>→</span>
-                                </div>
-                            )}
-                        </div>
+                    <p className="text-xs sm:text-[14.5px] leading-[1.65] sm:leading-[1.7] text-white/80 max-w-[40ch]">
+                        {flagshipDesc}
+                    </p>
+
+                    <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex items-center justify-between gap-3 text-[11.5px] sm:text-[12.5px] font-bold text-white/85">
+                        <span>
+                            {isArabic
+                                ? 'تغطية ميدانية مجدولة لمختلف المحافظات'
+                                : 'Scheduled field coverage across regions'}
+                        </span>
+                        <span
+                            className={`text-[#E5B54A] transition-transform duration-300 ${
+                                isArabic ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'
+                            }`}
+                            aria-hidden="true"
+                        >
+                            {isArabic ? '←' : '→'}
+                        </span>
                     </div>
+                </div>
+            </article>
+        );
 
-                    {/* Supporting Cards Grid */}
-                    <div className="grid grid-cols-2 gap-3 sm:gap-5">
-                        {supportingServices.map((item) => {
-                            const Icon = SERVICE_ICONS[item.icon] || Headphones;
-                            const cardContent = (
-                                <div
-                                    data-reveal-item
-                                    className="group relative bg-white/85 dark:bg-[#132035] rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-200/70 dark:border-white/10 hover:border-[#8A6305] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full"
-                                >
+        return flagshipService.link ? (
+            <Link href={flagshipService.link} className="block h-full">
+                {inner}
+            </Link>
+        ) : (
+            <div className="h-full">{inner}</div>
+        );
+    };
+
+    return (
+        <section className="w-full py-7 md:py-11">
+            <div className="container-custom">
+                {/* Editorial Section Header */}
+                <div className="pb-4 mb-5 sm:mb-6 border-b border-[#0B192C]/[0.09] dark:border-white/10">
+                    <h2 className="text-[20px] sm:text-[28px] font-black text-[#0B192C] dark:text-white leading-[1.2] tracking-[-0.01em]">
+                        {title}
+                    </h2>
+                </div>
+
+                {/* Apple Bento Asymmetric Layout: Flagship Royal Navy Stage + 2x2 Companion Matrix */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1.85fr] gap-2.5 sm:gap-4 items-stretch">
+                    {/* Start Column: Flagship Royal Navy Stage */}
+                    {renderFlagshipCard()}
+
+                    {/* End Column: 2x2 Companion Matrix */}
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+                        {companionServices.map((item) => {
+                            const Icon = SERVICE_ICONS[item.icon] || ShieldCheck;
+                            const itemTitle = isArabic ? item.titleAr || item.title : item.title || item.titleAr;
+                            const itemDesc = isArabic ? item.descAr || item.desc : item.desc || item.descAr;
+
+                            const cardInner = (
+                                <article className="group h-full rounded-[14px] sm:rounded-[20px] bg-white dark:bg-[#0F2138] p-3.5 sm:p-6 border border-[#0B192C]/[0.085] dark:border-white/10 flex flex-col justify-between transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:border-[#C59329]/45">
                                     <div>
-                                        <div className="flex items-center justify-between mb-2.5 sm:mb-4 gap-1">
-                                            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white dark:bg-white/10 shadow-xs flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
-                                                <Icon className={`text-xl sm:text-2xl ${getAccentClass(item.accent)}`} />
-                                            </div>
-                                            {(item.tagAr || item.tag) && (
-                                                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-white dark:bg-white/10 text-slate-700 dark:text-gray-300 border border-gray-100 dark:border-white/5 truncate">
-                                                    {isArabic ? item.tagAr || item.tag : item.tag || item.tagAr}
+                                        <div className="flex items-center justify-between gap-2 mb-2 sm:mb-4">
+                                            <h3 className="text-[13.5px] sm:text-[17.5px] font-black text-[#0B192C] dark:text-white leading-snug">
+                                                <span className="relative inline-block">
+                                                    {itemTitle}
+                                                    <span
+                                                        className="pointer-events-none absolute -bottom-1 inset-x-0 h-[2px] bg-[#C59329] origin-left scale-x-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:origin-right group-hover:scale-x-100"
+                                                        aria-hidden="true"
+                                                    />
                                                 </span>
-                                            )}
+                                            </h3>
+                                            <Icon
+                                                strokeWidth={1.8}
+                                                className="w-4 h-4 sm:w-[22px] sm:h-[22px] text-[#8A6305] dark:text-[#E5B54A] shrink-0 transition-transform duration-300 group-hover:-translate-y-0.5"
+                                                aria-hidden="true"
+                                            />
                                         </div>
 
-                                        <h3 className="text-[13px] sm:text-base font-bold text-[#0B192C] dark:text-white mb-1 sm:mb-2 group-hover:text-[#8A6305] transition-colors">
-                                            {isArabic ? item.titleAr || item.title : item.title || item.titleAr}
-                                        </h3>
-
-                                        <p className="text-[11px] sm:text-xs text-[#475569] dark:text-gray-300 leading-relaxed font-medium">
-                                            {isArabic ? item.descAr || item.desc : item.desc || item.descAr}
+                                        <p className="text-[11px] sm:text-[13.5px] text-[#475569] dark:text-slate-300 leading-[1.5] sm:leading-[1.65]">
+                                            {itemDesc}
                                         </p>
                                     </div>
-
-                                    <div className="mt-3 pt-2 sm:mt-4 sm:pt-3 border-t border-gray-200/50 dark:border-white/5 flex items-center text-[10px] sm:text-[11px] font-bold text-[#8A6305] dark:text-[#8A6305]">
-                                        <span>
-                                            {isArabic
-                                                ? item.footerTextAr || item.footerText || 'خدمة معتمدة'
-                                                : item.footerText || item.footerTextAr || 'Verified Service'}
-                                        </span>
-                                        <span className={`ms-1 inline-block transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 ${isArabic ? 'rotate-180' : ''}`}>
-                                            →
-                                        </span>
-                                    </div>
-                                </div>
+                                </article>
                             );
 
                             return item.link ? (
                                 <Link key={item.id} href={item.link} className="block h-full">
-                                    {cardContent}
+                                    {cardInner}
                                 </Link>
                             ) : (
                                 <div key={item.id} className="h-full">
-                                    {cardContent}
+                                    {cardInner}
                                 </div>
                             );
                         })}

@@ -5,16 +5,7 @@ import { useSiteContacts } from '@/app/context/SiteContactsContext';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-    LayoutGrid,
-    FolderTree,
-    Sparkles,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    Truck
-} from 'lucide-react';
-import { FaWhatsapp } from 'react-icons/fa';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { NavMainCategory } from '@/lib/navigation';
 import { getBrandDisplayName } from '@/lib/brand-display';
 import ResilientImage from '@/app/components/ResilientImage';
@@ -26,33 +17,21 @@ interface DesktopCategoriesBarProps {
     isVisible?: boolean;
 }
 
+const EASE_APPLE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
 export default function DesktopCategoriesBar({
     navData = [],
-    isScrolled,
     isArabic,
     isVisible = true,
 }: DesktopCategoriesBarProps) {
     const pathname = usePathname();
     const siteContacts = useSiteContacts();
     const [activeSlug, setActiveSlug] = useState<string | null>(null);
-    const [renderedSlug, setRenderedSlug] = useState<string | null>(null);
     const [isPinned, setIsPinned] = useState(false);
     const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const openTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Keep renderedSlug during the 250ms close transition so content does not vanish mid-fade
-    useEffect(() => {
-        if (activeSlug) {
-            setRenderedSlug(activeSlug);
-        } else {
-            const timer = setTimeout(() => {
-                setRenderedSlug(null);
-            }, 260);
-            return () => clearTimeout(timer);
-        }
-    }, [activeSlug]);
-
-    const closeMenu = useCallback(() => {
+    const clearTimeouts = useCallback(() => {
         if (closeTimeoutRef.current) {
             clearTimeout(closeTimeoutRef.current);
             closeTimeoutRef.current = null;
@@ -61,9 +40,13 @@ export default function DesktopCategoriesBar({
             clearTimeout(openTimeoutRef.current);
             openTimeoutRef.current = null;
         }
+    }, []);
+
+    const closeMenu = useCallback(() => {
+        clearTimeouts();
         setActiveSlug(null);
         setIsPinned(false);
-    }, []);
+    }, [clearTimeouts]);
 
     // Automatically close when the navbar disappears on scroll
     useEffect(() => {
@@ -71,46 +54,6 @@ export default function DesktopCategoriesBar({
             closeMenu();
         }
     }, [isVisible, closeMenu]);
-
-    const whatsappNumber = (siteContacts.whatsappDigits).replace(/[^0-9]/g, '');
-
-    const clearTimeouts = () => {
-        if (closeTimeoutRef.current) {
-            clearTimeout(closeTimeoutRef.current);
-            closeTimeoutRef.current = null;
-        }
-        if (openTimeoutRef.current) {
-            clearTimeout(openTimeoutRef.current);
-            openTimeoutRef.current = null;
-        }
-    };
-
-    const handleMouseEnter = (slug: string) => {
-        clearTimeouts();
-        // Gentle debounce to avoid accidental flickering when hovering across items
-        openTimeoutRef.current = setTimeout(() => {
-            setActiveSlug(slug);
-        }, 75);
-    };
-
-    const handleMouseLeave = () => {
-        clearTimeouts();
-        if (isPinned) return;
-        closeTimeoutRef.current = setTimeout(() => {
-            setActiveSlug(null);
-        }, 220);
-    };
-
-    const handleClick = (slug: string) => {
-        clearTimeouts();
-        if (activeSlug === slug) {
-            setActiveSlug(null);
-            setIsPinned(false);
-        } else {
-            setActiveSlug(slug);
-            setIsPinned(true);
-        }
-    };
 
     // Close on escape key
     useEffect(() => {
@@ -128,7 +71,67 @@ export default function DesktopCategoriesBar({
         closeMenu();
     }, [pathname, closeMenu]);
 
-    const activeDepartment = navData.find((d) => d.slug === renderedSlug);
+    const handleMouseEnter = (slug: string) => {
+        clearTimeouts();
+        openTimeoutRef.current = setTimeout(() => {
+            setActiveSlug(slug);
+        }, 55);
+    };
+
+    const handleMouseLeave = () => {
+        clearTimeouts();
+        if (isPinned) return;
+        closeTimeoutRef.current = setTimeout(() => {
+            setActiveSlug(null);
+        }, 190);
+    };
+
+    const handleClick = (slug: string) => {
+        clearTimeouts();
+        if (activeSlug === slug) {
+            setActiveSlug(null);
+            setIsPinned(false);
+        } else {
+            setActiveSlug(slug);
+            setIsPinned(true);
+        }
+    };
+
+    const activeDepartment = navData.find((d) => d.slug === activeSlug);
+
+    // Quick-jump categories for Concept 02 sub-navbar track (top 5 featured/popular categories across departments)
+    const quickCategories = useMemo(() => {
+        const allCats: { id: string; name: string; slug: string; isFeatured?: boolean }[] = [];
+        const seen = new Set<string>();
+        for (const dept of navData) {
+            for (const cat of dept.categories || []) {
+                if (!cat.name || cat.name.trim() === '0') continue;
+                const key = cat.slug || cat.name.trim().toLowerCase();
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    allCats.push(cat);
+                }
+            }
+        }
+        return [...allCats]
+            .sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0))
+            .slice(0, 5);
+    }, [navData]);
+
+    // Deduplicate all brands across all departments for the 'all' directory view
+    const allUniqueBrands = useMemo(() => {
+        const seen = new Set<string>();
+        const list = [];
+        for (const dept of navData) {
+            for (const brand of dept.brands || []) {
+                const key = brand.slug?.trim().toLowerCase();
+                if (!key || seen.has(key)) continue;
+                seen.add(key);
+                list.push(brand);
+            }
+        }
+        return list;
+    }, [navData]);
 
     // Deduplicate and filter categories for active department
     const uniqueCategories = useMemo(() => {
@@ -171,313 +174,491 @@ export default function DesktopCategoriesBar({
 
     return (
         <div
-            className="relative w-full bg-[#071322] border-t border-white/10 text-white select-none transition-colors duration-200"
+            className="relative w-full bg-transparent text-white select-none"
             onMouseLeave={handleMouseLeave}
             onMouseEnter={clearTimeouts}
         >
-            <div className="container-custom h-[42px] flex items-center justify-between">
-                {/* Start Side: Category Tabs */}
+            {/* Concept 02 Sub-Navbar Row (38px on laptops, 46px on 2xl big screens) */}
+            <div className="container-custom h-[38px] 2xl:h-[46px] flex items-center justify-between">
+                {/* Start Side: Department Triggers (no chevrons) + Quick-Jump Category Links */}
                 <nav
-                    className="flex items-center gap-1.5 sm:gap-2 h-full"
+                    className="flex items-center gap-4 2xl:gap-6 h-full"
                     aria-label={isArabic ? 'أقسام المنتجات' : 'Product Categories'}
                 >
-                    {/* All Categories Button */}
-                    <button
-                        type="button"
-                        onClick={() => handleClick('all')}
-                        onMouseEnter={() => handleMouseEnter('all')}
-                        className={`h-[34px] px-3 rounded-lg text-[13px] font-extrabold flex items-center gap-2 transition-all cursor-pointer ${
-                            activeSlug === 'all'
-                                ? 'bg-[#8A6305] text-white shadow-xs'
-                                : 'bg-white/5 hover:bg-white/10 text-white/90 hover:text-white border border-white/10'
-                        }`}
-                        aria-expanded={activeSlug === 'all'}
-                    >
-                        <LayoutGrid className="w-4 h-4 text-[#E5B54A]" />
-                        <span>{isArabic ? 'جميع الأقسام' : 'All Departments'}</span>
-                        <ChevronDown
-                            className={`w-3.5 h-3.5 text-white/70 transition-transform duration-250 ${
-                                activeSlug === 'all' ? 'rotate-180 text-white' : ''
-                            }`}
-                        />
-                    </button>
+                    {/* Main Department Triggers */}
+                    <div className="flex items-center gap-5 2xl:gap-7 h-full">
+                        {navData.map((dept) => {
+                            const isOpen = activeSlug === dept.slug;
+                            const isCurrentRoute = pathname === `/department/${dept.slug}`;
+                            const isSelected = isOpen || isCurrentRoute;
 
-                    {/* Vertical Divider */}
-                    <div className="h-4 w-px bg-white/15 mx-1" aria-hidden="true" />
-
-                    {/* Department Tabs */}
-                    {navData.map((dept) => {
-                        const isOpen = activeSlug === dept.slug;
-                        const isCurrentRoute = pathname === `/department/${dept.slug}`;
-
-                        return (
-                            <button
-                                key={dept.id}
-                                type="button"
-                                onClick={() => handleClick(dept.slug)}
-                                onMouseEnter={() => handleMouseEnter(dept.slug)}
-                                className={`h-[34px] px-3 rounded-lg text-[13px] font-bold flex items-center gap-1.5 transition-all cursor-pointer relative ${
-                                    isOpen
-                                        ? 'bg-[#8A6305]/25 text-[#E5B54A] border border-[#8A6305]/40 shadow-2xs'
-                                        : isCurrentRoute
-                                            ? 'text-[#E5B54A] bg-white/5'
-                                            : 'text-white/85 hover:text-white hover:bg-white/5'
-                                }`}
-                                aria-expanded={isOpen}
-                            >
-                                <span className={`w-1.5 h-1.5 rounded-full transition-colors ${isOpen || isCurrentRoute ? 'bg-[#E5B54A]' : 'bg-white/40'}`} />
-                                <span>{dept.name}</span>
-                                <ChevronDown
-                                    className={`w-3.5 h-3.5 text-white/60 transition-transform duration-250 ${
-                                        isOpen ? 'rotate-180 text-[#E5B54A]' : ''
+                            return (
+                                <button
+                                    key={dept.id}
+                                    type="button"
+                                    onClick={() => handleClick(dept.slug)}
+                                    onMouseEnter={() => handleMouseEnter(dept.slug)}
+                                    className={`group/dept relative py-1 2xl:py-1.5 text-[12.5px] 2xl:text-[13.5px] whitespace-nowrap transition-colors duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer focus-visible:outline-none ${
+                                        isSelected
+                                            ? 'text-white font-bold'
+                                            : 'text-white/80 hover:text-white font-semibold'
                                     }`}
-                                />
-                            </button>
-                        );
-                    })}
+                                    aria-expanded={isOpen}
+                                >
+                                    <span>{dept.name}</span>
+                                    <span
+                                        className={`pointer-events-none absolute bottom-0 inset-x-0 h-[1.5px] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                                            isSelected
+                                                ? 'scale-x-100 origin-right'
+                                                : 'scale-x-0 origin-left group-hover/dept:origin-right group-hover/dept:scale-x-100'
+                                        }`}
+                                        aria-hidden="true"
+                                    />
+                                </button>
+                            );
+                        })}
+
+                        {/* All Departments Trigger */}
+                        <button
+                            type="button"
+                            onClick={() => handleClick('all')}
+                            onMouseEnter={() => handleMouseEnter('all')}
+                            className={`group/dept relative py-1 2xl:py-1.5 text-[12.5px] 2xl:text-[13.5px] whitespace-nowrap transition-colors duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer focus-visible:outline-none ${
+                                activeSlug === 'all'
+                                    ? 'text-white font-bold'
+                                    : 'text-white/80 hover:text-white font-semibold'
+                            }`}
+                            aria-expanded={activeSlug === 'all'}
+                        >
+                            <span>{isArabic ? 'دليل كافة الأقسام' : 'All Departments'}</span>
+                            <span
+                                className={`pointer-events-none absolute bottom-0 inset-x-0 h-[1.5px] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                                    activeSlug === 'all'
+                                        ? 'scale-x-100 origin-right'
+                                        : 'scale-x-0 origin-left group-hover/dept:origin-right group-hover/dept:scale-x-100'
+                                }`}
+                                aria-hidden="true"
+                            />
+                        </button>
+                    </div>
+
+                    {/* Subtle Gold Hairline Separator + Quick-Jump Category Shortcuts */}
+                    {quickCategories.length > 0 && (
+                        <>
+                            <span className="w-px h-3.5 bg-[#E5B54A]/35" aria-hidden="true" />
+                            <div className="flex items-center gap-3.5 2xl:gap-5">
+                                {quickCategories.map((cat) => {
+                                    const isCatActive = pathname === `/category/${cat.slug}`;
+                                    return (
+                                        <Link
+                                            key={cat.id}
+                                            href={`/category/${cat.slug}`}
+                                            onMouseEnter={closeMenu}
+                                            className={`group/quick relative py-1 2xl:py-1.5 text-[11.5px] 2xl:text-[12.5px] whitespace-nowrap transition-colors duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                                                isCatActive
+                                                    ? 'text-white font-bold'
+                                                    : 'text-white/60 hover:text-white font-medium'
+                                            }`}
+                                        >
+                                            <span>{cat.name}</span>
+                                            <span
+                                                className={`pointer-events-none absolute bottom-0 inset-x-0 h-[1.5px] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                                                    isCatActive
+                                                        ? 'scale-x-100 origin-right'
+                                                        : 'scale-x-0 origin-left group-hover/quick:origin-right group-hover/quick:scale-x-100'
+                                                }`}
+                                                aria-hidden="true"
+                                            />
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    )}
                 </nav>
 
-                {/* End Side: Logistics & Wholesale Quick Info */}
-                <div className="flex items-center gap-4 text-xs font-semibold text-white/75" dir={isArabic ? 'rtl' : 'ltr'}>
-                    <Link
-                        href="/shipping-returns"
-                        className="inline-flex items-center gap-1.5 hover:text-[#E5B54A] transition-colors py-1 group"
-                    >
-                        <Truck className="w-3.5 h-3.5 text-[#E5B54A] group-hover:scale-110 transition-transform" />
-                        <span>{isArabic ? 'خدمات التوزيع والشحن' : 'Wholesale Distribution'}</span>
-                    </Link>
+                {/* End Side: Logistics Metadata & Gold-Accented Wholesale Quote Link */}
+                <div className="flex items-center gap-3.5 text-[12.5px] text-white/60" dir={isArabic ? 'rtl' : 'ltr'}>
+                    <span className="font-medium">
+                        {isArabic ? 'توريد خلال 48 ساعة' : '48h Wholesale Delivery'}
+                    </span>
 
-                    <span className="text-white/20">|</span>
+                    <span className="text-[#E5B54A]/60" aria-hidden="true">·</span>
 
                     <a
-                        href={whatsappHref(siteContacts,
-                            isArabic ? 'مرحباً شركة حوا، أرغب بالاستفسار عن طلبيات وتوزيع الجملة.' : 'Hello, I want to inquire about wholesale distribution.'
+                        href={whatsappHref(
+                            siteContacts,
+                            isArabic
+                                ? 'مرحباً شركة حوا، أرغب بالاستفسار عن طلبيات وتوزيع الجملة.'
+                                : 'Hello, I want to inquire about wholesale distribution.'
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors py-1 font-bold"
+                        className="group/wa relative py-1 text-[#E5B54A] hover:text-[#F3CB6E] font-bold transition-colors duration-200"
                     >
-                        <FaWhatsapp className="text-sm" />
-                        <span>{isArabic ? 'طلب مباشر عبر واتساب' : 'Direct WhatsApp Sales'}</span>
+                        <span>{isArabic ? 'طلب تسعيرة جملة ↗' : 'Wholesale Quote ↗'}</span>
+                        <span
+                            className="pointer-events-none absolute bottom-0 inset-x-0 h-[1.5px] rounded-full bg-white scale-x-0 origin-left group-hover/wa:origin-right group-hover/wa:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                            aria-hidden="true"
+                        />
                     </a>
                 </div>
             </div>
 
-            {/* Backdrop Overlay with smooth fade */}
-            <div
-                className={`fixed inset-0 top-[114px] bg-black/45 backdrop-blur-xs z-30 transition-opacity duration-250 ease-out ${
-                    activeSlug
-                        ? 'opacity-100 visible pointer-events-auto'
-                        : 'opacity-0 invisible pointer-events-none'
-                }`}
-                onClick={closeMenu}
-                aria-hidden="true"
-            />
+            {/* Backdrop Blur Scrim */}
+            <AnimatePresence>
+                {activeSlug && (
+                    <motion.div
+                        key="header-curtain-scrim"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.28, ease: EASE_APPLE }}
+                        className="fixed inset-0 top-[118px] bg-[#0B192C]/35 backdrop-blur-[6px] z-30"
+                        onClick={closeMenu}
+                        aria-hidden="true"
+                    />
+                )}
+            </AnimatePresence>
 
-            {/* Minimalist Mega Menu Flyout Panel */}
-            <div
-                className={`absolute top-full inset-x-0 bg-white dark:bg-[#101c2d] border-t-2 border-t-[#C28E2B] border-b border-slate-200 dark:border-white/10 shadow-[0_24px_60px_-24px_rgba(7,19,34,0.45)] z-40 transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    activeSlug
-                        ? 'opacity-100 translate-y-0 visible pointer-events-auto'
-                        : 'opacity-0 -translate-y-2 invisible pointer-events-none'
-                }`}
-                onMouseEnter={clearTimeouts}
-                onMouseLeave={handleMouseLeave}
-            >
-                <div className="container-custom py-6 lg:py-7">
-                    {/* CASE A: Specific Department Categories */}
-                    {activeDepartment && (
-                        <div className="flex flex-col">
-                            {/* Department Header Bar */}
-                            <div className="flex items-center justify-between gap-4 pb-4 mb-5 border-b border-slate-200 dark:border-white/10">
-                                <div className="flex items-center gap-2.5">
-                                    <FolderTree className="w-4 h-4 text-[#E5B54A]" />
-                                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
-                                        {isArabic ? `أقسام وتصنيفات ${activeDepartment.name}` : `${activeDepartment.name} Categories`}
-                                    </h3>
-                                    {uniqueCategories.length > 0 && (
-                                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 px-2 py-1 rounded-md bg-slate-100 dark:bg-white/5">
-                                            {uniqueCategories.length} {isArabic ? 'تصنيف' : 'categories'}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <Link
-                                    href={`/department/${activeDepartment.slug}`}
-                                    onClick={closeMenu}
-                                    className="inline-flex shrink-0 items-center gap-1.5 text-xs sm:text-[13px] font-bold text-[#8A6305] dark:text-[#E5B54A] hover:text-[#654900] dark:hover:text-[#f5d482] transition-colors group"
-                                >
-                                    <span>
-                                        {isArabic ? `عرض جميع منتجات ${activeDepartment.name}` : `View all in ${activeDepartment.name}`}
-                                    </span>
-                                    {isArabic ? (
-                                        <ChevronLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-                                    ) : (
-                                        <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                                    )}
-                                </Link>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-7 md:grid-cols-3 md:gap-0">
-                                {/* Categories */}
-                                <section aria-label={isArabic ? 'التصنيفات' : 'Categories'} className="md:border-e md:border-slate-200 md:pe-6 dark:md:border-white/10">
-                                    <h4 className="mb-3 flex items-center gap-2 text-[13px] font-extrabold text-slate-900 dark:text-white">
-                                        <FolderTree className="h-4 w-4 text-[#A8760B] dark:text-[#E5B54A]" />
-                                        {isArabic ? 'التصنيفات' : 'Categories'}
-                                    </h4>
-                                    {uniqueCategories.length > 0 ? (
-                                        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                                            {uniqueCategories.slice(0, 8).map((cat) => (
-                                                <Link
-                                                    key={cat.id}
-                                                    href={`/categories/${encodeURIComponent(cat.slug)}`}
-                                                    onClick={closeMenu}
-                                                    className="group/item flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium text-slate-700 transition-colors hover:bg-amber-50 hover:text-[#795500] dark:text-slate-200 dark:hover:bg-white/5 dark:hover:text-[#E5B54A]"
-                                                >
-                                                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#C28E2B]/70 group-hover/item:bg-[#A8760B] dark:group-hover/item:bg-[#E5B54A]" />
-                                                    <span className="truncate">{cat.name}</span>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    ) : <p className="text-xs text-slate-500 dark:text-slate-400">{isArabic ? 'لا توجد تصنيفات' : 'No categories available'}</p>}
-                                </section>
-
-                                {/* Brands */}
-                                <section aria-label={isArabic ? 'العلامات التجارية' : 'Brands'} className="md:border-e md:border-slate-200 md:px-6 dark:md:border-white/10">
-                                    <h4 className="mb-3 flex items-center gap-2 text-[13px] font-extrabold text-slate-900 dark:text-white">
-                                        <span className="h-4 w-4 text-center text-[#A8760B] dark:text-[#E5B54A]" aria-hidden="true">✦</span>
-                                        {isArabic ? 'العلامات التجارية' : 'Brands'}
-                                    </h4>
-                                    {uniqueBrands.length > 0 ? (
-                                        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                                            {uniqueBrands.slice(0, 8).map((brand) => (
-                                                <Link
-                                                    key={brand.id}
-                                                    href={`/brands/${encodeURIComponent(brand.slug)}`}
-                                                    onClick={closeMenu}
-                                                    className="truncate rounded-lg px-2 py-2 text-[13px] font-medium text-slate-700 transition-colors hover:bg-amber-50 hover:text-[#795500] dark:text-slate-200 dark:hover:bg-white/5 dark:hover:text-[#E5B54A]"
-                                                >
-                                                    {getBrandDisplayName(brand, isArabic ? 'ar' : 'en')}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    ) : <p className="text-xs text-slate-500 dark:text-slate-400">{isArabic ? 'لا توجد علامات تجارية' : 'No brands available'}</p>}
-                                </section>
-
-                                {/* Three featured products */}
-                                <section aria-label={isArabic ? 'منتجات مميزة' : 'Featured products'} className="md:ps-6">
-                                    <h4 className="mb-3 flex items-center gap-2 text-[13px] font-extrabold text-slate-900 dark:text-white">
-                                        <Sparkles className="h-4 w-4 text-[#A8760B] dark:text-[#E5B54A]" />
-                                        {isArabic ? 'منتجات مميزة' : 'Featured products'}
-                                    </h4>
-                                    {featuredProducts.length > 0 ? (
-                                        <div className="flex flex-col gap-2">
-                                            {featuredProducts.map((product) => (
-                                                <Link
-                                                    key={product.id}
-                                                    href={`/products/${encodeURIComponent(product.slug)}`}
-                                                    onClick={closeMenu}
-                                                    className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2.5 transition-colors hover:border-[#C28E2B]/45 hover:bg-amber-50 dark:border-white/10 dark:bg-white/5 dark:hover:border-[#E5B54A]/40 dark:hover:bg-white/10"
-                                                >
-                                                    <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-slate-100 bg-white dark:border-white/10">
-                                                        <ResilientImage src={getProductImage(product.images)} alt="" className="object-contain p-1" showSkeleton={false} />
-                                                    </span>
-                                                    <span className="line-clamp-2 text-[12px] font-semibold leading-5 text-slate-800 dark:text-slate-100">
-                                                        {(isArabic ? product.nameAr : product.nameEn) || product.name}
-                                                    </span>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    ) : <p className="text-xs text-slate-500 dark:text-slate-400">{isArabic ? 'لا توجد منتجات مميزة حالياً' : 'No featured products yet'}</p>}
-                                </section>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* CASE B: All Departments Overview */}
-                    {renderedSlug === 'all' && (
-                        <div className="flex flex-col">
-                            {/* Directory Header */}
-                            <div className="flex items-center justify-between pb-3.5 mb-5 border-b border-slate-200 dark:border-white/10">
-                                <div className="flex items-center gap-2.5">
-                                    <LayoutGrid className="w-4 h-4 text-[#E5B54A]" />
-                                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
-                                        {isArabic ? 'دليل الأقسام والتصنيفات' : 'Departments & Categories Directory'}
-                                    </h3>
-                                </div>
-
-                                <Link
-                                    href="/categories"
-                                    onClick={closeMenu}
-                                    className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-[#8A6305] dark:text-[#E5B54A] hover:text-[#654900] dark:hover:text-[#f5d482] transition-colors group"
-                                >
-                                    <span>{isArabic ? 'عرض صفحة الأقسام الكاملة' : 'View Full Categories Page'}</span>
-                                    {isArabic ? (
-                                        <ChevronLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-                                    ) : (
-                                        <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                                    )}
-                                </Link>
-                            </div>
-
-                            {/* Clean Side-by-Side Department Columns (No nested boxes) */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                                {navData.map((dept) => {
-                                    const seen = new Set<string>();
-                                    const deptCats = (dept.categories || []).filter((c) => {
-                                        if (!c.name || c.name.trim() === '0') return false;
-                                        const norm = c.name.trim().toLowerCase();
-                                        if (seen.has(norm)) return false;
-                                        seen.add(norm);
-                                        return true;
-                                    });
-
-                                    return (
-                                        <div key={dept.id} className="flex flex-col">
-                                            {/* Department Header */}
-                                            <Link
-                                                href={`/department/${dept.slug}`}
-                                                onClick={closeMenu}
-                                                className="group flex items-center justify-between pb-2 mb-2 border-b border-slate-200 hover:border-[#8A6305]/50 transition-colors dark:border-white/10"
-                                            >
-                                                    <span className="text-sm font-black text-slate-900 group-hover:text-[#8A6305] transition-colors dark:text-white dark:group-hover:text-[#E5B54A]">
-                                                    {dept.name}
+            {/* Apple-Style Curtain Flyout Panel — Zero Nested Containers, Architectural Hairline Grid */}
+            <AnimatePresence>
+                {activeSlug && (
+                    <motion.div
+                        key="header-curtain-panel"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.28, ease: EASE_APPLE }}
+                        className="absolute top-full left-0 right-0 w-full bg-white/98 backdrop-blur-2xl text-[#0B192C] border-b border-[#0B192C]/[0.08] shadow-[0_24px_48px_-16px_rgba(11,25,44,0.14)] z-40 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="container-custom py-8">
+                            <AnimatePresence mode="wait">
+                                {activeSlug === 'all' ? (
+                                    <motion.div
+                                        key="curtain-all"
+                                        initial={{ opacity: 0, y: 5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -4 }}
+                                        transition={{ duration: 0.2, ease: EASE_APPLE }}
+                                    >
+                                        {/* Top Header Bar */}
+                                        <div className="flex items-baseline justify-between border-b border-[#0B192C]/[0.08] pb-4 mb-7">
+                                            <div className="flex items-baseline gap-3">
+                                                <h3 className="text-[18px] font-extrabold text-[#0B192C] tracking-tight">
+                                                    {isArabic ? 'دليل الأقسام والتصنيفات' : 'Departments & Categories Directory'}
+                                                </h3>
+                                                <span className="text-[12.5px] font-medium text-slate-400">
+                                                    {navData.length} {isArabic ? 'أقسام رئيسية' : 'Main Departments'} · {allUniqueBrands.length} {isArabic ? 'وكالات حصرية' : 'Agencies'}
                                                 </span>
-                                                {isArabic ? (
-                                                    <ChevronLeft className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#8A6305] group-hover:-translate-x-0.5 transition-all dark:text-white/40 dark:group-hover:text-[#E5B54A]" />
-                                                ) : (
-                                                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#8A6305] group-hover:translate-x-0.5 transition-all dark:text-white/40 dark:group-hover:text-[#E5B54A]" />
-                                                )}
+                                            </div>
+                                            <Link
+                                                href="/products"
+                                                onClick={closeMenu}
+                                                className="group/all relative py-0.5 text-[13px] font-bold text-[#8A6305] hover:text-[#735204] inline-flex items-center gap-1.5 transition-colors"
+                                            >
+                                                <span>{isArabic ? 'تصفح كتالوج المنتجات الكامل' : 'Browse Full Product Catalog'}</span>
+                                                <span className="transition-transform duration-200 group-hover/all:-translate-x-1" aria-hidden="true">
+                                                    {isArabic ? '←' : '→'}
+                                                </span>
                                             </Link>
-
-                                            {/* Subcategories list */}
-                                            {deptCats.length > 0 ? (
-                                                <ul className="flex flex-col gap-1">
-                                                    {deptCats.slice(0, 8).map((cat) => (
-                                                        <li key={cat.id}>
-                                                            <Link
-                                                                href={`/categories/${encodeURIComponent(cat.slug)}`}
-                                                                onClick={closeMenu}
-                                                                className="text-[13px] font-medium text-slate-600 hover:text-[#795500] transition-colors block py-1 px-1.5 rounded hover:bg-amber-50 dark:text-slate-300 dark:hover:text-[#E5B54A] dark:hover:bg-white/5"
-                                                            >
-                                                                {cat.name}
-                                                            </Link>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 py-1.5">
-                                                    {isArabic ? 'منتجات مباشرة ضمن هذا القسم' : 'Direct products under this department'}
-                                                </p>
-                                            )}
                                         </div>
-                                    );
-                                })}
-                            </div>
+
+                                        {/* Open 12-Column Architectural Index (Zero Card-in-Card Boxes) */}
+                                        <div className="grid grid-cols-12 gap-10">
+                                            {navData.map((dept, idx) => {
+                                                const deptCats = (dept.categories || []).filter(
+                                                    (c) => c.name && c.name.trim() !== '0'
+                                                );
+
+                                                return (
+                                                    <div
+                                                        key={dept.id}
+                                                        className={`col-span-4 ${
+                                                            idx > 0 ? 'border-s border-[#0B192C]/[0.08] ps-9' : ''
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-baseline justify-between mb-4">
+                                                            <div className="flex items-baseline gap-2.5">
+                                                                <Link
+                                                                    href={`/department/${dept.slug}`}
+                                                                    onClick={closeMenu}
+                                                                    className="text-[16px] font-extrabold text-[#0B192C] hover:text-[#8A6305] transition-colors"
+                                                                >
+                                                                    {dept.name}
+                                                                </Link>
+                                                                <span className="text-[11.5px] font-semibold text-slate-400">
+                                                                    ({deptCats.length})
+                                                                </span>
+                                                            </div>
+                                                            <Link
+                                                                href={`/department/${dept.slug}`}
+                                                                onClick={closeMenu}
+                                                                className="group/v text-[12px] font-bold text-[#8A6305] hover:text-[#735204] transition-colors inline-flex items-center gap-1"
+                                                            >
+                                                                <span>{isArabic ? 'عرض القسم' : 'View All'}</span>
+                                                                <span className="transition-transform duration-200 group-hover/v:-translate-x-0.5" aria-hidden="true">
+                                                                    {isArabic ? '←' : '→'}
+                                                                </span>
+                                                            </Link>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                                                            {deptCats.map((cat) => (
+                                                                <Link
+                                                                    key={cat.id}
+                                                                    href={`/category/${cat.slug}`}
+                                                                    onClick={closeMenu}
+                                                                    className="group/cat relative py-1 flex items-center justify-between text-[14px] font-semibold text-slate-600 hover:text-[#0B192C] transition-colors"
+                                                                >
+                                                                    <span className="relative">
+                                                                        {cat.name}
+                                                                        <span
+                                                                            className="pointer-events-none absolute -bottom-0.5 inset-x-0 h-[1.5px] bg-[#0B192C] scale-x-0 origin-left group-hover/cat:origin-right group-hover/cat:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                                                            aria-hidden="true"
+                                                                        />
+                                                                    </span>
+                                                                    <span
+                                                                        className="text-[12px] text-[#B68012] opacity-0 translate-x-1 group-hover/cat:opacity-100 group-hover/cat:translate-x-0 transition-all duration-200"
+                                                                        aria-hidden="true"
+                                                                    >
+                                                                        {isArabic ? '←' : '→'}
+                                                                    </span>
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+
+                                            {/* Column 3: Official Agencies Directory (4 cols, no nested pill boxes) */}
+                                            <div className="col-span-4 border-s border-[#0B192C]/[0.08] ps-9">
+                                                <div className="flex items-baseline justify-between mb-4">
+                                                    <h4 className="text-[15px] font-extrabold text-[#0B192C]">
+                                                        {isArabic ? 'الوكالات التجارية المعتمدة' : 'Official Agencies'}
+                                                    </h4>
+                                                    <Link
+                                                        href="/brands"
+                                                        onClick={closeMenu}
+                                                        className="text-[12px] font-bold text-[#8A6305] hover:text-[#735204] transition-colors inline-flex items-center gap-1"
+                                                    >
+                                                        <span>{isArabic ? 'كل الوكالات' : 'All Brands'}</span>
+                                                        <span aria-hidden="true">{isArabic ? '←' : '→'}</span>
+                                                    </Link>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-x-6 gap-y-3.5">
+                                                    {allUniqueBrands.map((brand) => {
+                                                        const brandLabel = getBrandDisplayName(brand, isArabic ? 'ar' : 'en');
+                                                        return (
+                                                            <Link
+                                                                key={brand.id}
+                                                                href={`/brand/${brand.slug}`}
+                                                                onClick={closeMenu}
+                                                                className="group/brand flex items-center gap-3 py-1 text-slate-700 hover:text-[#0B192C] transition-colors"
+                                                            >
+                                                                {brand.image ? (
+                                                                    <div className="relative w-11 h-7 shrink-0">
+                                                                        <ResilientImage
+                                                                            src={brand.image}
+                                                                            alt={brandLabel}
+                                                                            fill
+                                                                            sizes="44px"
+                                                                            className="object-contain group-hover/brand:scale-105 transition-transform duration-200"
+                                                                        />
+                                                                    </div>
+                                                                ) : null}
+                                                                <span className="relative text-[13.5px] font-bold truncate">
+                                                                    {brandLabel}
+                                                                    <span
+                                                                        className="pointer-events-none absolute -bottom-0.5 inset-x-0 h-[1.5px] bg-[#0B192C] scale-x-0 origin-left group-hover/brand:origin-right group-hover/brand:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                </span>
+                                                            </Link>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ) : activeDepartment ? (
+                                    <motion.div
+                                        key={`curtain-dept-${activeDepartment.slug}`}
+                                        initial={{ opacity: 0, y: 5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -4 }}
+                                        transition={{ duration: 0.2, ease: EASE_APPLE }}
+                                    >
+                                        {/* Curtain Header */}
+                                        <div className="flex items-baseline justify-between border-b border-[#0B192C]/[0.08] pb-4 mb-7">
+                                            <div className="flex items-baseline gap-3">
+                                                <h3 className="text-[18px] font-extrabold text-[#0B192C] tracking-tight">
+                                                    {isArabic ? `أقسام وتصنيفات ${activeDepartment.name}` : `${activeDepartment.name} Directory`}
+                                                </h3>
+                                                <span className="text-[12.5px] font-medium text-slate-400">
+                                                    {uniqueCategories.length} {isArabic ? 'تصنيف فرعي' : 'Categories'} · {uniqueBrands.length} {isArabic ? 'وكالات تجارية' : 'Agencies'}
+                                                </span>
+                                            </div>
+                                            <Link
+                                                href={`/department/${activeDepartment.slug}`}
+                                                onClick={closeMenu}
+                                                className="group/all relative py-0.5 text-[13px] font-bold text-[#8A6305] hover:text-[#735204] inline-flex items-center gap-1.5 transition-colors"
+                                            >
+                                                <span>
+                                                    {isArabic
+                                                        ? `عرض جميع منتجات ${activeDepartment.name}`
+                                                        : `View All ${activeDepartment.name}`}
+                                                </span>
+                                                <span className="transition-transform duration-200 group-hover/all:-translate-x-1" aria-hidden="true">
+                                                    {isArabic ? '←' : '→'}
+                                                </span>
+                                            </Link>
+                                        </div>
+
+                                        {/* 12-Column Open Architectural Layout — Zero Nested Card Boxes */}
+                                        <div className="grid grid-cols-12 gap-10">
+                                            {/* Column 1: Subcategories (4 cols) */}
+                                            <div className="col-span-4">
+                                                <h4 className="text-[11.5px] font-bold text-slate-400 mb-4">
+                                                    {isArabic ? 'التصنيفات الفرعية' : 'Subcategories'}
+                                                </h4>
+                                                {uniqueCategories.length > 0 ? (
+                                                    <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                                                        {uniqueCategories.map((cat) => (
+                                                            <Link
+                                                                key={cat.id}
+                                                                href={`/category/${cat.slug}`}
+                                                                onClick={closeMenu}
+                                                                className="group/cat flex items-center justify-between py-1 text-[14px] font-semibold text-slate-600 hover:text-[#0B192C] transition-colors duration-150"
+                                                            >
+                                                                <span className="relative truncate">
+                                                                    {cat.name}
+                                                                    <span
+                                                                        className="pointer-events-none absolute -bottom-0.5 inset-x-0 h-[1.5px] bg-[#0B192C] scale-x-0 origin-left group-hover/cat:origin-right group-hover/cat:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                </span>
+                                                                <span
+                                                                    className="text-[12px] text-[#B68012] opacity-0 translate-x-1 group-hover/cat:opacity-100 group-hover/cat:translate-x-0 transition-all duration-150"
+                                                                    aria-hidden="true"
+                                                                >
+                                                                    {isArabic ? '←' : '→'}
+                                                                </span>
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-slate-400">
+                                                        {isArabic ? 'لا توجد تصنيفات متاحة' : 'No categories available'}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Column 2: Agencies / Brands (3 cols, unboxed logos directly on surface) */}
+                                            <div className="col-span-3 border-s border-[#0B192C]/[0.08] ps-9">
+                                                <h4 className="text-[11.5px] font-bold text-slate-400 mb-4">
+                                                    {isArabic ? 'الوكالات والعلامات التجارية' : 'Agencies & Brands'}
+                                                </h4>
+                                                {uniqueBrands.length > 0 ? (
+                                                    <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+                                                        {uniqueBrands.map((brand) => {
+                                                            const brandLabel = getBrandDisplayName(brand, isArabic ? 'ar' : 'en');
+                                                            return (
+                                                                <Link
+                                                                    key={brand.id}
+                                                                    href={`/brand/${brand.slug}`}
+                                                                    onClick={closeMenu}
+                                                                    className="group/brand flex items-center gap-3 py-0.5 text-slate-700 hover:text-[#0B192C] transition-colors"
+                                                                >
+                                                                    {brand.image ? (
+                                                                        <div className="relative w-12 h-8 shrink-0">
+                                                                            <ResilientImage
+                                                                                src={brand.image}
+                                                                                alt={brandLabel}
+                                                                                fill
+                                                                                sizes="48px"
+                                                                                className="object-contain group-hover/brand:scale-105 transition-transform duration-200"
+                                                                            />
+                                                                        </div>
+                                                                    ) : null}
+                                                                    <span className="relative text-[13.5px] font-bold truncate">
+                                                                        {brandLabel}
+                                                                        <span
+                                                                            className="pointer-events-none absolute -bottom-0.5 inset-x-0 h-[1.5px] bg-[#0B192C] scale-x-0 origin-left group-hover/brand:origin-right group-hover/brand:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                                                            aria-hidden="true"
+                                                                        />
+                                                                    </span>
+                                                                </Link>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-slate-400">
+                                                        {isArabic ? 'لا توجد علامات تجارية' : 'No brands available'}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Column 3: Selected Products (5 cols, 3-column horizontal showcase without nested boxes) */}
+                                            <div className="col-span-5 border-s border-[#0B192C]/[0.08] ps-9">
+                                                <h4 className="text-[11.5px] font-bold text-slate-400 mb-4">
+                                                    {isArabic ? 'منتجات مختارة من القسم' : 'Selected Products'}
+                                                </h4>
+                                                {featuredProducts.length > 0 ? (
+                                                    <div className="grid grid-cols-3 gap-6">
+                                                        {featuredProducts.map((prod) => {
+                                                            const imgUrl = getProductImage(prod.images);
+                                                            const prodName = isArabic ? (prod.nameAr || prod.name) : (prod.nameEn || prod.name);
+                                                            const brandLabel = prod.brand
+                                                                ? getBrandDisplayName(prod.brand, isArabic ? 'ar' : 'en')
+                                                                : '';
+
+                                                            return (
+                                                                <Link
+                                                                    key={prod.id}
+                                                                    href={`/product/${prod.slug}`}
+                                                                    onClick={closeMenu}
+                                                                    className="group/prod flex flex-col gap-2.5"
+                                                                >
+                                                                    <div className="relative w-full h-24">
+                                                                        <ResilientImage
+                                                                            src={imgUrl}
+                                                                            alt={prodName}
+                                                                            fill
+                                                                            sizes="140px"
+                                                                            className="object-contain object-right rtl:object-right ltr:object-left group-hover/prod:scale-105 transition-transform duration-300"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="min-w-0">
+                                                                        {brandLabel ? (
+                                                                            <span className="block text-[11px] font-bold text-[#8A6305] mb-0.5">
+                                                                                {brandLabel}
+                                                                            </span>
+                                                                        ) : null}
+                                                                        <h5 className="text-[13px] font-bold text-slate-800 group-hover/prod:text-[#0B192C] line-clamp-2 leading-snug transition-colors">
+                                                                            {prodName}
+                                                                        </h5>
+                                                                    </div>
+                                                                </Link>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-slate-400">
+                                                        {isArabic ? 'لا توجد منتجات مميزة حالياً' : 'No featured products'}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ) : null}
+                            </AnimatePresence>
                         </div>
-                    )}
-                </div>
-            </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

@@ -1,80 +1,96 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
-import { ChevronDown } from 'lucide-react';
-
-const AccordionItem = ({ title, content, isOpen, onClick, panelId }: { title: string, content: React.ReactNode, isOpen: boolean, onClick: () => void, panelId: string }) => {
-    return (
-        <div className="border-b border-slate-200 dark:border-white/10">
-            <button
-                type="button"
-                onClick={onClick}
-                aria-expanded={isOpen}
-                aria-controls={panelId}
-                className="w-full flex items-center justify-between py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6305]/50 focus-visible:ring-offset-2 rounded-sm group cursor-pointer"
-            >
-                <span className="text-sm text-[#0B192C] dark:text-white font-bold group-hover:text-[#8A6305] transition-colors">
-                    {title}
-                </span>
-                <span className={`w-6 h-6 flex items-center justify-center text-slate-500 group-hover:text-[#8A6305] transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#8A6305]' : ''}`}>
-                    <ChevronDown size={18} />
-                </span>
-            </button>
-            <div
-                id={panelId}
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[1000px] pb-4 opacity-100' : 'max-h-0 opacity-0'}`}
-            >
-                <div className="text-xs sm:text-sm text-slate-600 dark:text-gray-300 leading-relaxed px-0.5">
-                    {content}
-                </div>
-            </div>
-        </div>
-    );
-};
+import { formatPackaging } from "@/lib/packaging";
 
 interface ProductAccordionsProps {
     description?: string | null;
     descriptionAr?: string | null;
     descriptionEn?: string | null;
     options?: string | null;
+    productName?: string | null;
+    brandName?: string | null;
+    categoryName?: string | null;
+    packaging?: string | null;
+    itemsPerPackage?: string | number | null;
 }
 
-const ProductAccordions = ({ description, descriptionAr, descriptionEn, options }: ProductAccordionsProps) => {
+const ProductAccordions = ({
+    description,
+    descriptionAr,
+    descriptionEn,
+    options,
+    productName,
+    brandName,
+    categoryName,
+    packaging,
+    itemsPerPackage,
+}: ProductAccordionsProps) => {
     const { language } = useLanguage();
-    const isRTL = language === 'ar';
-    const [openIndex, setOpenIndex] = useState<number>(0);
+    const isRTL = language === "ar";
 
-    const toggleAccordion = (index: number) => {
-        setOpenIndex(openIndex === index ? -1 : index);
-    };
+    const activeDescription = (
+        isRTL
+            ? descriptionAr || description
+            : descriptionEn || description || descriptionAr
+    )?.trim();
 
-    const activeDescription = isRTL
-        ? (descriptionAr || description)
-        : (descriptionEn || description || descriptionAr);
+    // Extract size/volume from product title or options if present (e.g., 400 مل, 800 غ, 1 كغ)
+    const sizeMatch = (productName || activeDescription || "").match(
+        /(\d+(?:[.,]\d+)?\s*(?:مل|لتر|كغ|غ|غرام|جم|ml|L|kg|g|oz))/i
+    );
+    const extractedSize = sizeMatch ? sizeMatch[1] : options || null;
+
+    const packagingLabel = formatPackaging(packaging, language);
+    const itemsLabel = itemsPerPackage
+        ? isRTL
+            ? `${itemsPerPackage} عبوة داخل الـ${packagingLabel}`
+            : `${itemsPerPackage} units per ${packagingLabel}`
+        : isRTL
+          ? `${packagingLabel} تجاري معتمد`
+          : `Official wholesale ${packagingLabel}`;
 
     return (
-        <div className="flex flex-col w-full mt-2 border-t border-slate-200 dark:border-white/10">
-            <AccordionItem
-                title={isRTL ? 'تفاصيل ومواصفات المنتج' : 'Product Details & Specs'}
-                content={
-                    <div className="whitespace-pre-line leading-relaxed text-slate-600 dark:text-gray-300">
-                        {activeDescription || (isRTL ? 'منتج أصلي عالي الجودة متوفر للتوزيع التجاري لدى شركة حوا للتوزيع والتجارة.' : 'Authentic high quality product available for commercial distribution by Hawa Distribution & Trading.')}
-                    </div>
-                }
-                isOpen={openIndex === 0}
-                onClick={() => toggleAccordion(0)}
-                panelId="product-description-panel"
-            />
-            {options && (
-                <AccordionItem
-                    title={isRTL ? 'الأحجام والخيارات المتوفرة' : 'Available Sizes & Options'}
-                    content={<p className="font-semibold text-[#0B192C] dark:text-zinc-200">{options}</p>}
-                    isOpen={openIndex === 1}
-                    onClick={() => toggleAccordion(1)}
-                    panelId="product-options-panel"
-                />
-            )}
+        <div className="w-full">
+            {/* Concept 01: 2x2 Architectural Specification Ledger */}
+            <div className="grid grid-cols-2 border-b border-[#0B192C]/[0.09] dark:border-white/10">
+                <div className="py-3.5 pe-4 border-b border-[#0B192C]/[0.09] dark:border-white/10 flex flex-col gap-1">
+                    <span className="text-[11.5px] text-slate-500 dark:text-slate-400">
+                        {isRTL ? "العلامة التجارية" : "Brand / Agency"}
+                    </span>
+                    <span className="text-[13.5px] font-bold text-[#0B192C] dark:text-white">
+                        {brandName || (isRTL ? "وكالة حوا المعتمدة" : "Official Hawa Agency")}
+                    </span>
+                </div>
+
+                <div className="py-3.5 ps-4 border-b border-s border-[#0B192C]/[0.09] dark:border-white/10 flex flex-col gap-1">
+                    <span className="text-[11.5px] text-slate-500 dark:text-slate-400">
+                        {isRTL ? "القسم التجاري" : "Department"}
+                    </span>
+                    <span className="text-[13.5px] font-bold text-[#0B192C] dark:text-white">
+                        {categoryName || (isRTL ? "توريد الجملة" : "Wholesale Catalog")}
+                    </span>
+                </div>
+
+                <div className="py-3.5 pe-4 flex flex-col gap-1">
+                    <span className="text-[11.5px] text-slate-500 dark:text-slate-400">
+                        {isRTL ? "الحجم / الخيار" : "Net Size / Option"}
+                    </span>
+                    <span className="text-[13.5px] font-bold text-[#0B192C] dark:text-white">
+                        {extractedSize || (isRTL ? "عبوة قياسية أصلية" : "Standard Original Pack")}
+                    </span>
+                </div>
+
+                <div className="py-3.5 ps-4 border-s border-[#0B192C]/[0.09] dark:border-white/10 flex flex-col gap-1">
+                    <span className="text-[11.5px] text-slate-500 dark:text-slate-400">
+                        {isRTL ? "وحدة التوريد بالجملة" : "Wholesale Supply Unit"}
+                    </span>
+                    <span className="text-[13.5px] font-bold text-[#0B192C] dark:text-white">
+                        {itemsLabel}
+                    </span>
+                </div>
+            </div>
         </div>
     );
 };

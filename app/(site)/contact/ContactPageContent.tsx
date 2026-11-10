@@ -148,11 +148,6 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
                                 <FaWhatsapp />
                             </div>
                             <div className="flex-1 min-w-0">
-                                {pageContent.salesTag && (
-                                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[11px] font-extrabold mb-1">
-                                        {pageContent.salesTag}
-                                    </span>
-                                )}
                                 <h3 className="text-base sm:text-lg font-black text-[#0B192C] dark:text-white leading-tight">
                                     {pageContent.salesTitle}
                                 </h3>
@@ -195,11 +190,6 @@ export default function ContactPageContent({ siteSettings, content }: ContactPag
                                 <Store className="text-3xl" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                {pageContent.gmTag && (
-                                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#8A6305]/10 text-[#8A6305] dark:text-[#8A6305] text-[11px] font-extrabold mb-1">
-                                        {pageContent.gmTag}
-                                    </span>
-                                )}
                                 <h3 className="text-base sm:text-lg font-black text-[#0B192C] dark:text-white leading-tight">
                                     {pageContent.gmTitle}
                                 </h3>

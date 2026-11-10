@@ -66,10 +66,6 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl',
         return [];
     }, [settings?.homeCategoriesStats]);
 
-    const badgeText = isArabic
-        ? (settings?.homeCategoriesBadgeAr || 'تسوق حسب القسم')
-        : (settings?.homeCategoriesBadge || 'Shop by category');
-
     const titleText = isArabic
         ? (settings?.homeCategoriesTitleAr || 'تصفح تشكيلة واسعة من الأصناف والمجموعات')
         : (settings?.homeCategoriesTitle || 'Browse Key Wholesale Categories');
@@ -227,10 +223,6 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl',
             {/* 1. Editorial, start-aligned section heading & View All button */}
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 md:mb-8">
                 <div className="text-start">
-                    <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                        {badgeText}
-                    </span>
                     <div>
                         <h2 className="text-2xl sm:text-3xl md:text-[2rem] font-black text-[#0B192C] dark:text-white tracking-tight max-w-5xl" data-reveal-heading>
                             {titleText}
@@ -313,7 +305,7 @@ const FeaturedCategoriesGrid = ({ categories = [], language = 'ar', dir = 'rtl',
                                 href={catHref}
                                 prefetch={false}
                                 data-reveal-item
-                                className="group flex-none w-[calc((100vw-3.5rem)/2)] min-w-[145px] max-w-[210px] md:w-[210px] snap-start flex flex-col rounded-xl bg-[#F1F2F4] dark:bg-zinc-800/70 border border-transparent hover:border-slate-300 dark:hover:border-zinc-600 overflow-hidden transition-colors duration-200"
+                                className="group flex-none w-[calc((100vw-3.5rem)/2)] min-w-[140px] max-w-[210px] md:w-[165px] lg:w-[calc((100%-6*1rem)/7)] 2xl:w-[210px] snap-start flex flex-col rounded-xl bg-[#F1F2F4] dark:bg-zinc-800/70 border border-transparent hover:border-slate-300 dark:hover:border-zinc-600 overflow-hidden transition-colors duration-200"
                             >
                                 {/* الصورة داخل حاوية متناسقة مع احتواء كامل ونظيف وبدون زووم */}
                                 <div className="relative w-full aspect-square bg-[#F1F2F4] dark:bg-zinc-800/70 overflow-hidden flex items-center justify-center p-3 sm:p-4">

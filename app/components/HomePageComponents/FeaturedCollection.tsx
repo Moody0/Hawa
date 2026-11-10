@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../ProductsPageComponents/ProductCard';
 
@@ -98,125 +97,101 @@ const FeaturedCollection = ({ newArrivals = [], bundles: _bundles = [], bestSell
     if (!tabs.length) return null;
 
     return (
-        <section className="container-custom py-7 md:py-10">
-            {/* Editorial heading, tabs, and action button */}
-            <div className="mb-6 sm:mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-3">
-                    <div className="text-start">
-                        <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
-                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                            {badgeText}
-                        </span>
-                        <div>
-                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight max-w-3xl" data-reveal-heading>
-                                {titleText}
-                            </h2>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mt-2" data-reveal-copy>
-                            {descText}
-                        </p>
-                    </div>
-
-                    <Link
-                        href="/products"
-                        prefetch={false}
-                        className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-zinc-800 text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#E5B54A] shadow-xs transition-all active:scale-95 shrink-0 group"
-                    >
-                        <span>{isArabic ? 'عرض كافة المنتجات' : 'View All Products'}</span>
-                        {isArabic ? (
-                            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-                        ) : (
-                            <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                        )}
-                    </Link>
+        <section className="container-custom py-8 md:py-12">
+            {/* Start-aligned section header, segmented tabs, and rail controls */}
+            <div className="mb-5 sm:mb-6">
+                <div className="text-start mb-4">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0B192C] dark:text-white tracking-tight max-w-3xl">
+                        {titleText}
+                    </h2>
+                    <p className="text-xs sm:text-base text-slate-600 dark:text-slate-400 max-w-[65ch] mt-1">
+                        {descText}
+                    </p>
                 </div>
 
-                {/* Segmented tabs */}
-                <div
-                    role="tablist" aria-label={isArabic ? "تشكيلات المنتجات" : "Product collections"}
-                    className="inline-flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/60 dark:border-white/10 shadow-2xs relative mt-1"
-                >
-                    {tabs.map((tab, index) => {
-                        const isActive = Math.min(activeTab, tabs.length - 1) === index;
-                        return (
+                {/* Single Unified Row: Segmented Tabs on Start, View All + Arrows on End */}
+                <div className="flex flex-wrap items-center justify-between gap-2.5">
+                    <div
+                        role="tablist"
+                        aria-label={isArabic ? "تشكيلات المنتجات" : "Product collections"}
+                        className="inline-flex items-center bg-white dark:bg-slate-800/80 p-1 rounded-[10px] border border-[#0B192C]/[0.09] dark:border-white/10"
+                    >
+                        {tabs.map((tab, index) => {
+                            const isActive = Math.min(activeTab, tabs.length - 1) === index;
+                            return (
+                                <button
+                                    key={tab.key}
+                                    role="tab"
+                                    type="button"
+                                    aria-selected={isActive}
+                                    id={`featured-tab-${tab.key}`}
+                                    aria-controls="featured-products-panel"
+                                    tabIndex={isActive ? 0 : -1}
+                                    onKeyDown={(event) => {
+                                        const step = event.key === "ArrowRight" ? (isArabic ? -1 : 1) : event.key === "ArrowLeft" ? (isArabic ? 1 : -1) : 0;
+                                        const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : step ? (index + step + tabs.length) % tabs.length : null;
+                                        if (next !== null) { event.preventDefault(); setActiveTab(next); document.getElementById(`featured-tab-${tabs[next].key}`)?.focus(); }
+                                    }}
+                                    onClick={() => setActiveTab(index)}
+                                    className={`px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-bold rounded-[7px] transition-colors duration-150 cursor-pointer select-none ${
+                                        isActive
+                                            ? 'bg-[#0F2138] text-white dark:bg-white dark:text-[#0B192C]'
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-[#0B192C] dark:hover:text-white'
+                                    }`}
+                                >
+                                    <span>{t(tab.labelKey)}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                        <div className="hidden md:flex items-center gap-1.5 me-1">
                             <button
-                                key={tab.key}
-                                role="tab"
                                 type="button"
-                                aria-selected={isActive}
-                                id={`featured-tab-${tab.key}`}
-                                aria-controls="featured-products-panel"
-                                tabIndex={isActive ? 0 : -1}
-                                onKeyDown={(event) => {
-                                    const step = event.key === "ArrowRight" ? (isArabic ? -1 : 1) : event.key === "ArrowLeft" ? (isArabic ? 1 : -1) : 0;
-                                    const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : step ? (index + step + tabs.length) % tabs.length : null;
-                                    if (next !== null) { event.preventDefault(); setActiveTab(next); document.getElementById(`featured-tab-${tabs[next].key}`)?.focus(); }
-                                }}
-                                onClick={() => setActiveTab(index)}
-                                className={`relative px-4 sm:px-5 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-colors duration-150 cursor-pointer z-10 select-none ${
-                                    isActive
-                                        ? 'text-[#0B192C] dark:text-white font-black'
-                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                                }`}
+                                onClick={scrollBackward}
+                                disabled={!canScrollBackward}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#0B192C]/[0.09] dark:border-white/15 bg-white dark:bg-zinc-900 text-slate-700 dark:text-slate-200 hover:border-[#C59329]/50 hover:text-[#8A6305] disabled:opacity-40 disabled:pointer-events-none active:translate-y-px transition-colors cursor-pointer"
+                                aria-label={isArabic ? 'المنتجات السابقة' : 'Previous products'}
                             >
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="featuredActivePill"
-                                        transition={{ type: 'spring', stiffness: 600, damping: 40 }}
-                                        className="absolute inset-0 bg-white dark:bg-[#0B192C] rounded-lg shadow-xs -z-10"
-                                    />
-                                )}
-                                <span className="relative z-10">{t(tab.labelKey)}</span>
+                                {isArabic ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
                             </button>
-                        );
-                    })}
+                            <button
+                                type="button"
+                                onClick={scrollForward}
+                                disabled={!canScrollForward}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#0B192C]/[0.09] dark:border-white/15 bg-white dark:bg-zinc-900 text-slate-700 dark:text-slate-200 hover:border-[#C59329]/50 hover:text-[#8A6305] disabled:opacity-40 disabled:pointer-events-none active:translate-y-px transition-colors cursor-pointer"
+                                aria-label={isArabic ? 'المنتجات التالية' : 'Next products'}
+                            >
+                                {isArabic ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                            </button>
+                        </div>
+
+                        <Link
+                            href="/products"
+                            prefetch={false}
+                            className="inline-flex h-9 items-center gap-1.5 px-3.5 rounded-[10px] border border-[#0B192C]/[0.09] dark:border-white/15 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white hover:border-[#C59329]/50 hover:text-[#8A6305] active:translate-y-px transition-colors shrink-0"
+                        >
+                            <span>{isArabic ? 'عرض كافة المنتجات' : 'View All Products'}</span>
+                            {isArabic ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                        </Link>
+                    </div>
                 </div>
             </div>
 
-            {/* Product Rail with Left & Right Side Navigation Buttons */}
-            <div id="featured-products-panel" role="tabpanel" aria-labelledby={`featured-tab-${tabs[Math.min(activeTab, tabs.length - 1)].key}`} className="relative group/rail">
-                {/* Previous Button (Left/Right depending on RTL) */}
-                <button
-                    type="button"
-                    onClick={scrollBackward}
-                    disabled={!canScrollBackward}
-                    className="absolute -start-3 sm:-start-4 md:-start-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/15 shadow-md flex items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:border-[#8A6305] dark:hover:text-[#8A6305] hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
-                    aria-label={isArabic ? 'المنتجات السابقة' : 'Previous products'}
-                >
-                    <svg className={`w-4 h-4 sm:w-5 sm:h-5 ${isArabic ? '-scale-x-100' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12.5 16.25L6.25 10L12.5 3.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
-
-                {/* Next Button (Left/Right depending on RTL) */}
-                <button
-                    type="button"
-                    onClick={scrollForward}
-                    disabled={!canScrollForward}
-                    className="absolute -end-3 sm:-end-4 md:-end-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/15 shadow-md flex items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:border-[#8A6305] dark:hover:text-[#8A6305] hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
-                    aria-label={isArabic ? 'المنتجات التالية' : 'Next products'}
-                >
-                    <svg className={`w-4 h-4 sm:w-5 sm:h-5 ${isArabic ? '-scale-x-100' : ''}`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7.5 3.75L13.75 10L7.5 16.25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
-
-                {/* Scrollable Rail */}
+            {/* Product Rail */}
+            <div id="featured-products-panel" role="tabpanel" aria-labelledby={`featured-tab-${tabs[Math.min(activeTab, tabs.length - 1)].key}`} className="relative">
                 <div
                     ref={railRef}
                     className="-mx-4 overflow-x-auto px-4 scrollbar-hide sm:mx-0 sm:px-0 scroll-smooth"
                 >
-                    <motion.div
+                    <div
                         key={tabs[Math.min(activeTab, Math.max(0, tabs.length - 1))]?.key}
-                        initial={{ opacity: 0.35 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.15, ease: 'easeOut' }}
                         className="flex snap-x snap-mandatory gap-3 sm:gap-4 pb-2"
                     >
                         {activeProducts.map((product) => (
                             <div
                                 key={product.id}
-                                data-reveal-item
                                 className="w-[195px] sm:w-[220px] md:w-[calc((100%-32px)/3)] lg:w-[calc((100%-48px)/4)] xl:w-[calc((100%-64px)/5)] flex-none snap-start"
                             >
                                 <ProductCard
@@ -228,11 +203,11 @@ const FeaturedCollection = ({ newArrivals = [], bundles: _bundles = [], bestSell
                             </div>
                         ))}
                         <div className="w-[1px] shrink-0 sm:hidden" />
-                    </motion.div>
+                    </div>
                 </div>
 
                 {/* Minimal Progress Line */}
-                <div hidden={activeProducts.length <= 4} className="mt-2 h-0.5 bg-slate-100 dark:bg-white/5 relative overflow-hidden rounded-full w-full">
+                <div hidden={activeProducts.length <= 4} className="mt-2 h-0.5 bg-slate-200/70 dark:bg-white/5 relative overflow-hidden rounded-full w-full">
                     <div
                         ref={progressBarRef}
                         className="absolute top-0 bottom-0 bg-[#8A6305] dark:bg-[#E5B54A] rounded-full transition-transform duration-150"

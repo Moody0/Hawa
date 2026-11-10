@@ -3,14 +3,15 @@ import { laravelClientFetch } from '@/lib/laravel-client';
 
 
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProductsBreadcrumbs from "@/app/components/ProductsPageComponents/ProductsBreadcrumbs";
-import ProductsHeader from "@/app/components/ProductsPageComponents/ProductsHeader";
 import EditorialProductCard from "@/app/components/ProductsPageComponents/EditorialProductCard";
 import WholesaleProductRow from "@/app/components/ProductsPageComponents/WholesaleProductRow";
 import CustomSortDropdown from "@/app/components/ProductsPageComponents/CustomSortDropdown";
 import ProductsSidebarFilter, { FilterState, reconcileCategoriesWithBrands } from "@/app/components/ProductsPageComponents/ProductsSidebarFilter";
 import { useLanguage } from "@/app/context/LanguageContext";
+import { useCustomer } from "@/app/context/CustomerContext";
 import { getBrandDisplayName } from "@/lib/brand-display";
 import { buildCatalogUrl, parseCatalogUrlParams, normalizeCatalogSort, CatalogSort } from "@/lib/catalog-url";
 import { SearchX, Search, X, Grid, List, SlidersHorizontal, RotateCw } from 'lucide-react';
@@ -120,6 +121,7 @@ const ProductsClient = ({
     initialCategorySlugs = EMPTY_TOKENS,
 }: ProductsClientProps) => {
     const { t, language } = useLanguage();
+    const { customer } = useCustomer();
     const isArabic = language === "ar";
     const pathname = usePathname();
     const router = useRouter();
@@ -629,232 +631,277 @@ const ProductsClient = ({
         });
     }, [categories, filters.categoryIds]);
 
+    const isDefaultCatalogHeading =
+        selectedCategoryObjects.length === 0 &&
+        !activeMainCategory &&
+        filters.brandIds.length === 0;
+
     return (
-        <div className="flex-1 bg-[#F6F7F9] dark:bg-[#09090b]">
-            <div className="container-custom py-4 md:py-6">
-            {/* Breadcrumbs */}
-            <ProductsBreadcrumbs
-                activeCategory={selectedCategoryObjects.length === 1 && selectedCategoryObjects[0].type !== 'main-category' ? selectedCategoryObjects[0] : null}
-                activeBrand={singleSelectedBrand}
-                activeMainCategory={activeMainCategory || (selectedCategoryObjects.length === 1 && selectedCategoryObjects[0].type === 'main-category' ? selectedCategoryObjects[0] : null)}
-            />
-
-            {/* Products Page Header */}
-            <ProductsHeader />
-
-            {/* Main Faceted 2-Column Catalog Layout */}
-            <div className="flex items-start gap-6 mt-2">
-                {/* Faceted Filter Sidebar (Desktop & Mobile Drawer) */}
-                <ProductsSidebarFilter
-                    brands={displayBrands}
-                    categories={categories}
-                    filters={filters}
-                    onFiltersChange={setFilters}
-                    onResetFilters={handleResetAllFilters}
-                    resetKey={filterResetKey}
-                    totalResults={totalProducts}
-                    isMobileDrawerOpen={isMobileDrawerOpen}
-                    onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
+        <div className="flex-1 bg-white dark:bg-[#0B192C]">
+            <div className="container-custom py-5 md:py-8">
+                {/* Breadcrumbs */}
+                <ProductsBreadcrumbs
+                    activeCategory={selectedCategoryObjects.length === 1 && selectedCategoryObjects[0].type !== 'main-category' ? selectedCategoryObjects[0] : null}
+                    activeBrand={singleSelectedBrand}
+                    activeMainCategory={activeMainCategory || (selectedCategoryObjects.length === 1 && selectedCategoryObjects[0].type === 'main-category' ? selectedCategoryObjects[0] : null)}
                 />
 
-                {/* Main Content Area */}
-                <div className="flex-1 min-w-0" aria-busy={loading}>
-                    {/* Brand Specific Quick Category Tabs */}
-                    {singleSelectedBrand && categories.length > 0 && (
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-3 scrollbar-hide">
-                             <button
-                                 type="button"
-                                 onClick={() => setFilters((prev) => ({ ...prev, categoryIds: [] }))}
-                                 aria-pressed={filters.categoryIds.length === 0}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
-                                    filters.categoryIds.length === 0
-                                        ? "bg-[#0B192C] text-white dark:bg-white dark:text-slate-900"
-                                        : "bg-white dark:bg-zinc-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:border-[#8A6305]"
-                                }`}
-                            >
-                                <span>{isArabic ? "كافة أصناف الوكالة" : "All Products"}</span>
-                                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                                    filters.categoryIds.length === 0
-                                        ? "bg-[#8A6305] text-white"
-                                        : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400"
-                                }`}>
-                                    {brandTotalCount}
-                                </span>
-                            </button>
-
-                            {categories.map((cat) => {
-                                const isSelected = filters.categoryIds.includes(cat.id);
-                                const displayName = isArabic ? cat.name : (cat.description || cat.nameEn || cat.name);
-                                const count = cat._count?.products;
-
-                                return (
-                                     <button
-                                         key={cat.id}
-                                         type="button"
-                                         onClick={() => handleToggleCategory(cat.id)}
-                                         aria-pressed={isSelected}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
-                                            isSelected
-                                                ? "bg-[#0B192C] text-white dark:bg-white dark:text-slate-900"
-                                                : "bg-white dark:bg-zinc-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:border-[#8A6305]"
-                                        }`}
-                                    >
-                                        <span>{displayName}</span>
-                                        {count !== undefined && (
-                                            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                                                isSelected
-                                                    ? "bg-[#8A6305] text-white"
-                                                    : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400"
-                                            }`}>
-                                                {count}
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
+                {/* Unified Architectural Header & Command Bar */}
+                <div className="mt-1 pb-5 2xl:pb-6 mb-6 2xl:mb-7 border-b border-[#0B192C]/[0.09] dark:border-white/10 flex flex-col xl:flex-row xl:items-end justify-between gap-4 2xl:gap-5">
+                    <div>
+                        <h1 className="text-2xl sm:text-[26px] 2xl:text-[32px] font-bold text-[#0B192C] dark:text-white leading-[1.2]">
+                            {isDefaultCatalogHeading ? (
+                                isArabic ? (
+                                    <>
+                                        كتالوج المنتجات{" "}
+                                        <span className="text-[#8A6305] dark:text-[#E5B54A]">
+                                            وتوريد الجملة
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        Product Catalog &{" "}
+                                        <span className="text-[#8A6305] dark:text-[#E5B54A]">
+                                            Wholesale Supply
+                                        </span>
+                                    </>
+                                )
+                            ) : (
+                                getHeadingTitle()
+                            )}
+                        </h1>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-3">
+                            <p className="text-xs sm:text-[13.5px] font-medium text-[#0B192C]/60 dark:text-slate-300">
+                                {isArabic
+                                    ? `استعرض ${totalProducts} صنفاً معتمداً من وكالاتنا التجارية متاحة للطلب المباشر بالطرود.`
+                                    : `Browse ${totalProducts} authorized agency products available for direct wholesale carton ordering.`}
+                            </p>
+                            {loading && (
+                                <div role="status" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8A6305] dark:text-[#E5B54A]">
+                                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#8A6305] dark:border-[#E5B54A] border-t-transparent" />
+                                    <span>{isArabic ? "جاري التحديث..." : "Updating..."}</span>
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
 
-                    {/* Control Bar: Search, View Density, Mobile Filter, and Sort */}
-                    <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-zinc-900 sm:p-4">
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                            {/* In-Catalog Live Search */}
-                            <div className="relative flex-1 max-w-md">
-                                <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    aria-label={isArabic ? "البحث في كتالوج المنتجات" : "Search the product catalog"}
-                                    placeholder={
-                                        isArabic
-                                            ? "ابحث في الكتالوج بالاسم، الماركة، أو الباركود..."
-                                            : "Search catalog by name, brand, or SKU..."
-                                    }
-                                    className="min-h-11 w-full rounded-lg border border-slate-300 bg-white py-2 ps-9 pe-8 text-xs text-[#0B192C] placeholder:text-slate-400 transition-colors focus:border-[#8A6305] focus:outline-none focus:ring-0 dark:border-white/15 dark:bg-zinc-800 dark:text-white sm:text-sm"
-                                />
-                                {searchQuery && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setSearchQuery("")}
-                                        className="absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
-                                        aria-label="Clear search"
-                                    >
-                                        <X className="text-sm" />
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Right Controls: View Switcher, Mobile Filter Button, Sort Dropdown */}
-                            <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
-                                {/* Mobile Filter Trigger Button */}
+                    {/* Unified Command Controls: Capsule Search + 4Cols/1Col Swapper + Sort */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+                        {/* Capsule Search Input */}
+                        <div className="relative flex-1 sm:w-72 md:w-80">
+                            <Search className="absolute start-3.5 top-1/2 -translate-y-1/2 text-[#0B192C]/45 dark:text-slate-400 w-4 h-4 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                aria-label={isArabic ? "البحث في كتالوج المنتجات" : "Search the product catalog"}
+                                placeholder={
+                                    isArabic
+                                        ? "ابحث بالاسم، الوكالة، أو الباركود..."
+                                        : "Search by name, agency, or SKU..."
+                                }
+                                className="h-11 w-full rounded-full border border-[#0B192C]/15 dark:border-white/15 bg-[#FAF7F0] dark:bg-zinc-900 py-2 ps-10 pe-9 text-xs sm:text-[13px] font-medium text-[#0B192C] dark:text-white placeholder:text-[#0B192C]/45 dark:placeholder:text-slate-400 transition-colors focus:bg-white dark:focus:bg-zinc-800 focus:border-[#0B192C] dark:focus:border-[#C59329] focus:outline-none"
+                            />
+                            {searchQuery && (
                                 <button
                                     type="button"
-                                    onClick={() => setIsMobileDrawerOpen(true)}
-                                    aria-expanded={isMobileDrawerOpen}
-                                    aria-controls="mobile-catalog-filters"
-                                    className="lg:hidden flex items-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-zinc-800 text-[#0B192C] dark:text-white rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 hover:border-[#8A6305] transition-colors cursor-pointer active:scale-95"
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute end-3 top-1/2 -translate-y-1/2 text-[#0B192C]/45 hover:text-[#0B192C] dark:text-slate-400 dark:hover:text-white cursor-pointer"
+                                    aria-label="Clear search"
                                 >
-                                    <SlidersHorizontal className="text-sm text-[#8A6305]" />
-                                    <span>{isArabic ? "تصفية" : "Filters"}</span>
-                                    {activeFiltersCount > 0 && (
-                                        <span className="bg-[#8A6305] text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono">
-                                            {activeFiltersCount}
-                                        </span>
-                                    )}
+                                    <X className="w-3.5 h-3.5" />
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+                            {/* Mobile Filter Trigger Button */}
+                            <button
+                                type="button"
+                                onClick={() => setIsMobileDrawerOpen(true)}
+                                aria-expanded={isMobileDrawerOpen}
+                                aria-controls="mobile-catalog-filters"
+                                className="lg:hidden inline-flex items-center gap-1.5 h-11 px-4 bg-[#FAF7F0] dark:bg-zinc-800 text-[#0B192C] dark:text-white rounded-full text-xs font-bold border border-[#0B192C]/15 dark:border-white/15 hover:border-[#0B192C] transition-colors cursor-pointer"
+                            >
+                                <SlidersHorizontal className="w-3.5 h-3.5 text-[#8A6305] dark:text-[#E5B54A]" />
+                                <span>{isArabic ? "تصفية" : "Filters"}</span>
+                                {activeFiltersCount > 0 && (
+                                    <span className="bg-[#0B192C] dark:bg-[#C59329] text-white dark:text-[#0B192C] text-[10px] px-1.5 py-0.5 rounded-full font-mono tabular-nums">
+                                        {activeFiltersCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* 4-Cols / 1-Col View Mode Swapper */}
+                            <div
+                                role="group"
+                                aria-label={isArabic ? "طريقة عرض الكتالوج" : "Catalog view mode"}
+                                className="inline-flex items-center h-11 p-1 rounded-full bg-[#FAF7F0] dark:bg-zinc-800 border border-[#0B192C]/15 dark:border-white/15 shrink-0"
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => setViewMode("grid")}
+                                    aria-pressed={viewMode === "grid"}
+                                    title={isArabic ? "عرض شبكي 4 أعمدة" : "4-Column Grid View"}
+                                    className={`h-full px-3 rounded-full text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                                        viewMode === "grid"
+                                            ? "bg-[#0B192C] text-white dark:bg-[#C59329] dark:text-[#0B192C]"
+                                            : "text-[#0B192C]/65 dark:text-slate-300 hover:text-[#0B192C] dark:hover:text-white"
+                                    }`}
+                                >
+                                    <Grid className="w-3.5 h-3.5" />
+                                    <span className="hidden xs:inline">{isArabic ? "4 أعمدة" : "4 Cols"}</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setViewMode("list")}
+                                    aria-pressed={viewMode === "list"}
+                                    title={isArabic ? "عرض قائمة جملة (عمود واحد)" : "1-Column Wholesale List"}
+                                    className={`h-full px-3 rounded-full text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                                        viewMode === "list"
+                                            ? "bg-[#0B192C] text-white dark:bg-[#C59329] dark:text-[#0B192C]"
+                                            : "text-[#0B192C]/65 dark:text-slate-300 hover:text-[#0B192C] dark:hover:text-white"
+                                    }`}
+                                >
+                                    <List className="w-3.5 h-3.5" />
+                                    <span className="hidden xs:inline">{isArabic ? "عمود واحد" : "1 Col"}</span>
+                                </button>
+                            </div>
+
+                            {/* Custom Sort Dropdown */}
+                            <CustomSortDropdown
+                                sort={sort}
+                                setSort={(val) => setSort(normalizeCatalogSort(val))}
+                                options={sortOptions}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Faceted 2-Column Catalog Layout */}
+                <div className="flex items-start gap-7">
+                    {/* Faceted Filter Sidebar (Desktop & Mobile Drawer) */}
+                    <ProductsSidebarFilter
+                        brands={displayBrands}
+                        categories={categories}
+                        filters={filters}
+                        onFiltersChange={setFilters}
+                        onResetFilters={handleResetAllFilters}
+                        resetKey={filterResetKey}
+                        totalResults={totalProducts}
+                        isMobileDrawerOpen={isMobileDrawerOpen}
+                        onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
+                    />
+
+                    {/* Main Content Area */}
+                    <div className="flex-1 min-w-0" aria-busy={loading}>
+                        {/* Brand Specific Quick Category Tabs */}
+                        {singleSelectedBrand && categories.length > 0 && (
+                            <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
+                                <button
+                                    type="button"
+                                    onClick={() => setFilters((prev) => ({ ...prev, categoryIds: [] }))}
+                                    aria-pressed={filters.categoryIds.length === 0}
+                                    className={`px-3.5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
+                                        filters.categoryIds.length === 0
+                                            ? "bg-[#0B192C] text-white dark:bg-[#C59329] dark:text-[#0B192C]"
+                                            : "bg-[#FAF7F0] dark:bg-zinc-900 text-[#0B192C]/75 dark:text-slate-300 border border-[#0B192C]/10 dark:border-white/10 hover:border-[#0B192C]"
+                                    }`}
+                                >
+                                    <span>{isArabic ? "كافة أصناف الوكالة" : "All Products"}</span>
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono tabular-nums ${
+                                        filters.categoryIds.length === 0
+                                            ? "bg-white/20 text-white dark:bg-[#0B192C]/20 dark:text-[#0B192C]"
+                                            : "bg-[#0B192C]/[0.07] dark:bg-zinc-800 text-[#0B192C]/70 dark:text-zinc-400"
+                                    }`}>
+                                        {brandTotalCount}
+                                    </span>
                                 </button>
 
-                                {/* View Mode Toggle (Grid ⊞ vs Wholesale List ☰) */}
-                                <div className="hidden sm:flex items-center bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-xl border border-slate-200 dark:border-white/10">
-                                    <button
-                                        type="button"
-                                        onClick={() => setViewMode("grid")}
-                                        title={isArabic ? "عرض الشبكة" : "Grid View"}
-                                        className={`p-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
-                                            viewMode === "grid"
-                                                ? "bg-white dark:bg-zinc-900 text-[#0B192C] dark:text-white"
-                                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                                        }`}
-                                    >
-                                        <Grid className="text-base" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setViewMode("list")}
-                                        title={isArabic ? "عرض الجملة المضغوط" : "Wholesale List View"}
-                                        className={`p-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
-                                            viewMode === "list"
-                                                ? "bg-white dark:bg-zinc-900 text-[#0B192C] dark:text-white"
-                                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                                        }`}
-                                    >
-                                        <List className="text-base" />
-                                    </button>
-                                </div>
+                                {categories.map((cat) => {
+                                    const isSelected = filters.categoryIds.includes(cat.id);
+                                    const displayName = isArabic ? cat.name : (cat.description || cat.nameEn || cat.name);
+                                    const count = cat._count?.products;
 
-                                {/* Custom Sort Dropdown */}
-                                <CustomSortDropdown
-                                    sort={sort}
-                                    setSort={(val) => setSort(normalizeCatalogSort(val))}
-                                    options={sortOptions}
-                                />
+                                    return (
+                                        <button
+                                            key={cat.id}
+                                            type="button"
+                                            onClick={() => handleToggleCategory(cat.id)}
+                                            aria-pressed={isSelected}
+                                            className={`px-3.5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
+                                                isSelected
+                                                    ? "bg-[#0B192C] text-white dark:bg-[#C59329] dark:text-[#0B192C]"
+                                                    : "bg-[#FAF7F0] dark:bg-zinc-900 text-[#0B192C]/75 dark:text-slate-300 border border-[#0B192C]/10 dark:border-white/10 hover:border-[#0B192C]"
+                                            }`}
+                                        >
+                                            <span>{displayName}</span>
+                                            {count !== undefined && (
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono tabular-nums ${
+                                                    isSelected
+                                                        ? "bg-white/20 text-white dark:bg-[#0B192C]/20 dark:text-[#0B192C]"
+                                                        : "bg-[#0B192C]/[0.07] dark:bg-zinc-800 text-[#0B192C]/70 dark:text-zinc-400"
+                                                }`}>
+                                                    {count}
+                                                </span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
-                        </div>
+                        )}
 
                         {/* Active Filter Chips Bar */}
                         {activeFiltersCount > 0 && (
-                            <div className="flex flex-wrap items-center gap-1.5 pt-3 mt-3 border-t border-slate-100 dark:border-white/5">
-                                <span className="text-[11px] font-bold text-slate-400 me-1">
+                            <div className="flex flex-wrap items-center gap-1.5 mb-4 pb-3.5 border-b border-[#0B192C]/[0.08] dark:border-white/10">
+                                <span className="text-[11px] font-bold text-[#0B192C]/55 dark:text-slate-400 me-1">
                                     {isArabic ? "الفلاتر النشطة:" : "Active:"}
                                 </span>
 
-                                {/* Search Query Chip */}
                                 {debouncedSearch && (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#FAF6EC] dark:bg-[#8A6305]/20 text-[#0B192C] dark:text-white border border-[#8A6305]/30">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#FAF7F0] dark:bg-zinc-800 text-[#0B192C] dark:text-white border border-[#0B192C]/15 dark:border-white/15">
                                         <span>"{debouncedSearch}"</span>
                                         <button
                                             type="button"
                                             onClick={() => { setSearchQuery(''); setDebouncedSearch(''); }}
-                                            className="hover:text-red-500"
+                                            className="hover:text-red-500 cursor-pointer"
                                         >
-                                            <X className="text-xs" />
+                                            <X className="w-3 h-3" />
                                         </button>
                                     </span>
                                 )}
 
-                                {/* Selected Brand Chips */}
                                 {activeMainCategory && (
-                                    <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-[#0B192C] dark:border-white/10 dark:bg-zinc-800 dark:text-white">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#0B192C]/15 bg-[#FAF7F0] px-3 py-1 text-[11px] font-semibold text-[#0B192C] dark:border-white/15 dark:bg-zinc-800 dark:text-white">
                                         <span>{activeMainCategory.name}</span>
                                         <button type="button" onClick={() => {
                                             setActiveMainCategory(null);
                                             if (pathname !== '/products') router.push('/products', { scroll: false });
-                                        }} aria-label={isArabic ? 'إزالة فلتر القسم' : 'Remove department filter'} className="hover:text-red-500">
-                                            <X className="text-xs" />
+                                        }} aria-label={isArabic ? 'إزالة فلتر القسم' : 'Remove department filter'} className="hover:text-red-500 cursor-pointer">
+                                            <X className="w-3 h-3" />
                                         </button>
                                     </span>
                                 )}
                                 {selectedBrandObjects.map((b) => (
                                     <span
                                         key={b.id}
-                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100 dark:bg-zinc-800 text-[#0B192C] dark:text-white border border-slate-200 dark:border-white/10"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#FAF7F0] dark:bg-zinc-800 text-[#0B192C] dark:text-white border border-[#0B192C]/15 dark:border-white/15"
                                     >
                                         <span>{b.name}</span>
                                         <button
                                             type="button"
                                             onClick={() => handleQuickToggleBrand(b.id)}
-                                            className="hover:text-red-500"
+                                            className="hover:text-red-500 cursor-pointer"
                                         >
-                                            <X className="text-xs" />
+                                            <X className="w-3 h-3" />
                                         </button>
                                     </span>
                                 ))}
 
-                                {/* Selected Category Chips */}
                                 {selectedCategoryObjects.map((c) => (
                                     <span
                                         key={c.id}
-                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100 dark:bg-zinc-800 text-[#0B192C] dark:text-white border border-slate-200 dark:border-white/10"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#FAF7F0] dark:bg-zinc-800 text-[#0B192C] dark:text-white border border-[#0B192C]/15 dark:border-white/15"
                                     >
                                         <span>{isArabic ? c.name : c.description || c.name}</span>
                                         <button
@@ -865,167 +912,175 @@ const ProductsClient = ({
                                                     categoryIds: prev.categoryIds.filter((id) => id !== c.id),
                                                 }))
                                             }
-                                            className="hover:text-red-500"
+                                            className="hover:text-red-500 cursor-pointer"
                                         >
-                                            <X className="text-xs" />
+                                            <X className="w-3 h-3" />
                                         </button>
                                     </span>
                                 ))}
 
-                                {/* In Stock Chip */}
                                 {filters.inStock && (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#FAF7F0] dark:bg-zinc-800 text-[#0B192C] dark:text-white border border-[#0B192C]/15 dark:border-white/15">
                                         <span>{isArabic ? "متوفر فقط" : "In Stock"}</span>
                                         <button
                                             type="button"
                                             onClick={() => setFilters((prev) => ({ ...prev, inStock: false }))}
-                                            className="hover:text-red-500"
+                                            className="hover:text-red-500 cursor-pointer"
                                         >
-                                            <X className="text-xs" />
+                                            <X className="w-3 h-3" />
                                         </button>
                                     </span>
                                 )}
 
-                                {/* On Sale Chip */}
                                 {filters.onSale && (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#FAF7F0] dark:bg-zinc-800 text-[#0B192C] dark:text-white border border-[#0B192C]/15 dark:border-white/15">
                                         <span>{isArabic ? "عروض خاصة" : "On Sale"}</span>
                                         <button
                                             type="button"
                                             onClick={() => setFilters((prev) => ({ ...prev, onSale: false }))}
-                                            className="hover:text-red-500"
+                                            className="hover:text-red-500 cursor-pointer"
                                         >
-                                            <X className="text-xs" />
+                                            <X className="w-3 h-3" />
                                         </button>
                                     </span>
                                 )}
 
-                                {/* Trending Chip */}
                                 {filters.isTrending && (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#FAF7F0] dark:bg-zinc-800 text-[#0B192C] dark:text-white border border-[#0B192C]/15 dark:border-white/15">
                                         <span>{isArabic ? "الأكثر طلباً" : "Trending"}</span>
                                         <button
                                             type="button"
                                             onClick={() => setFilters((prev) => ({ ...prev, isTrending: false }))}
-                                            className="hover:text-red-500"
+                                            className="hover:text-red-500 cursor-pointer"
                                         >
-                                            <X className="text-xs" />
+                                            <X className="w-3 h-3" />
                                         </button>
                                     </span>
                                 )}
 
-                                {/* Clear All Button */}
                                 <button
                                     type="button"
                                     onClick={handleResetAllFilters}
-                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 px-2.5 py-1 rounded-lg border border-red-200/80 dark:border-red-900/40 transition-colors cursor-pointer"
+                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#8A6305] dark:text-[#E5B54A] hover:text-[#0B192C] dark:hover:text-white px-2.5 py-1 transition-colors cursor-pointer"
                                 >
-                                    <RotateCw className="text-xs" />
-                                    <span>{isArabic ? "مسح كافة الفلاتر" : "Clear All"}</span>
+                                    <RotateCw className="w-3 h-3" />
+                                    <span>{isArabic ? "مسح الكل" : "Clear All"}</span>
                                 </button>
                             </div>
                         )}
-                    </div>
 
-                    {/* Results Counter & Section Title */}
-                    <div className="flex items-center justify-between gap-3 mb-4">
-                        <div>
-                            {!(singleSelectedBrand && selectedCategoryObjects.length === 0 && !activeMainCategory) && (
-                                <h1 className="text-lg md:text-xl font-bold text-[#0B192C] dark:text-white tracking-tight">
-                                    {getHeadingTitle()}
-                                </h1>
-                            )}
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                                {isArabic
-                                    ? `عرض ${products.length} من أصل ${totalProducts} صنف بالجملة`
-                                    : `Showing ${products.length} of ${totalProducts} wholesale products`}
-                            </p>
-                        </div>
-                        {loading && (
-                            <div role="status" className="flex shrink-0 items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#8A6305] border-t-transparent" />
-                                <span className="hidden sm:inline">{isArabic ? "جاري تحديث النتائج" : "Updating results"}</span>
-                                <span className="sr-only">{isArabic ? "جاري تحميل المنتجات" : "Loading products"}</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {fetchError && !loading && (
-                        <div role="alert" className="my-4 rounded-2xl border border-red-200 bg-white p-6 text-center dark:border-red-900 dark:bg-zinc-900">
-                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                {isArabic ? 'تعذر تحميل المنتجات. يرجى المحاولة مجدداً.' : 'Products could not be loaded. Please try again.'}
-                            </p>
-                            <button type="button" onClick={() => fetchProducts(fetchError.reset, fetchError.page)} className="mt-3 rounded-xl bg-[#0B192C] px-4 py-2 text-xs font-bold text-white dark:bg-white dark:text-slate-900">
-                                {isArabic ? 'إعادة المحاولة' : 'Retry'}
-                            </button>
-                        </div>
-                    )}
-                    {products.length === 0 && loading && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3" aria-hidden="true">
-                            {Array.from({ length: 6 }, (_, index) => <div key={index} className="aspect-[3/4] animate-pulse rounded-2xl bg-slate-200/70 dark:bg-zinc-800" />)}
-                        </div>
-                    )}
-                    {/* Empty State */}
-                    {products.length === 0 && !loading && !fetchError && (
-                        <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 my-4">
-                            <SearchX className="text-5xl text-slate-300 dark:text-zinc-600 mb-3" />
-                            <h3 className="text-base font-bold text-[#0B192C] dark:text-white mb-1">
-                                {isArabic ? "لم يتم العثور على أي منتجات مطابقة" : "No products found matching filters"}
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mb-4">
-                                {isArabic
-                                    ? "جرب إزالة بعض الفلاتر المحددة أو تغيير كلمة البحث للعثور على الأصناف المطلوبة."
-                                    : "Try clearing some applied filters or adjusting your search term."}
-                            </p>
-                            {activeFiltersCount > 0 && (
-                                <button
-                                    type="button"
-                                    onClick={handleResetAllFilters}
-                                    className="px-4 py-2 rounded-xl bg-[#0B192C] dark:bg-white dark:text-slate-900 text-white text-xs font-bold hover:bg-[#162740] transition-colors cursor-pointer"
-                                >
-                                    {isArabic ? "إعادة ضبط كافة الفلاتر" : "Reset All Filters"}
-                                </button>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Products Display (Grid vs Wholesale List) */}
-                    <h2 className="sr-only">
-                        {isArabic ? "قائمة المنتجات وتوريد الطرود" : "Wholesale Products List"}
-                    </h2>
-                    {viewMode === "grid" ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
-                            {products.map((product, index) => (
-                                <EditorialProductCard
-                                    key={product.id}
-                                    product={product}
-                                    imagePriority={index < 4}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-2.5">
-                            {products.map((product) => (
-                                <WholesaleProductRow key={product.id} product={product} />
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Automatic Infinite Scroll Trigger & Spinner */}
-                    {hasMore && !fetchError && (
-                        <div ref={observerRef} className="mt-8 py-6 flex items-center justify-center">
-                            <div className="flex items-center gap-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-white dark:bg-zinc-900 px-4 py-2 rounded-full border border-gray-200 dark:border-white/10">
-                                <div className="w-4 h-4 border-2 border-[#8A6305] border-t-transparent rounded-full animate-spin" />
-                                <span>
+                        {/* Single Unified Wholesale Merchant Pricing Strip (Replaces 36 repetitive lock banners) */}
+                        {!customer && (
+                            <div className="mb-5 px-4 sm:px-5 py-3.5 rounded-[14px] bg-[#FAF7F0] dark:bg-white/[0.04] border border-[#0B192C]/[0.09] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="text-xs sm:text-[13px] font-medium text-[#0B192C]/75 dark:text-slate-200 leading-relaxed">
+                                    <strong className="font-bold text-[#0B192C] dark:text-white me-1">
+                                        {isArabic ? "تسعير الجملة المعتمد للتجار:" : "Authorized Wholesale Pricing:"}
+                                    </strong>
                                     {isArabic
-                                        ? "جاري تحميل المزيد من الأصناف..."
-                                        : "Loading more products..."}
-                                </span>
+                                        ? "تظهر أسعار الطرود والخصومات التجارية تلقائياً على كافة الأصناف بعد تسجيل دخول التاجر."
+                                        : "Carton prices and trade discounts appear automatically across all products once signed in."}
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                    <Link
+                                        href="/account/register"
+                                        className="text-xs font-bold text-[#8A6305] dark:text-[#E5B54A] hover:underline whitespace-nowrap"
+                                    >
+                                        {isArabic ? "فتح حساب تاجر" : "Register Trade Account"}
+                                    </Link>
+                                    <Link
+                                        href="/account/login"
+                                        className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-[#0B192C] dark:bg-[#C59329] text-white dark:text-[#0B192C] text-xs font-bold hover:bg-[#162942] dark:hover:bg-[#d4a338] transition-colors whitespace-nowrap"
+                                    >
+                                        <span>{isArabic ? "تسجيل دخول التاجر" : "Merchant Login"}</span>
+                                        <span aria-hidden="true">{isArabic ? "←" : "→"}</span>
+                                    </Link>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+
+                        {fetchError && !loading && (
+                            <div role="alert" className="my-4 rounded-2xl border border-red-200 bg-white p-6 text-center dark:border-red-900 dark:bg-zinc-900">
+                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                    {isArabic ? 'تعذر تحميل المنتجات. يرجى المحاولة مجدداً.' : 'Products could not be loaded. Please try again.'}
+                                </p>
+                                <button type="button" onClick={() => fetchProducts(fetchError.reset, fetchError.page)} className="mt-3 rounded-full bg-[#0B192C] px-5 py-2 text-xs font-bold text-white dark:bg-white dark:text-slate-900">
+                                    {isArabic ? 'إعادة المحاولة' : 'Retry'}
+                                </button>
+                            </div>
+                        )}
+
+                        {products.length === 0 && loading && (
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 border-t border-s border-[#0B192C]/[0.08] rounded-[18px] overflow-hidden" aria-hidden="true">
+                                {Array.from({ length: 8 }, (_, index) => (
+                                    <div key={index} className="aspect-[3/4] animate-pulse bg-[#FAF7F0] dark:bg-zinc-800 border-e border-b border-[#0B192C]/[0.08]" />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Empty State */}
+                        {products.length === 0 && !loading && !fetchError && (
+                            <div className="flex flex-col items-center justify-center py-16 text-center rounded-[18px] bg-[#FAF7F0]/60 dark:bg-zinc-900 border border-[#0B192C]/[0.09] dark:border-white/10 my-4">
+                                <SearchX className="w-12 h-12 text-[#0B192C]/25 dark:text-zinc-600 mb-3" />
+                                <h3 className="text-base font-bold text-[#0B192C] dark:text-white mb-1">
+                                    {isArabic ? "لم يتم العثور على أي منتجات مطابقة" : "No products found matching filters"}
+                                </h3>
+                                <p className="text-xs text-[#0B192C]/55 dark:text-slate-400 max-w-sm mb-4">
+                                    {isArabic
+                                        ? "جرب إزالة بعض الفلاتر المحددة أو تغيير كلمة البحث للعثور على الأصناف المطلوبة."
+                                        : "Try clearing some applied filters or adjusting your search term."}
+                                </p>
+                                {activeFiltersCount > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={handleResetAllFilters}
+                                        className="px-5 py-2.5 rounded-full bg-[#0B192C] dark:bg-[#C59329] dark:text-[#0B192C] text-white text-xs font-bold hover:bg-[#162740] transition-colors cursor-pointer"
+                                    >
+                                        {isArabic ? "إعادة ضبط كافة الفلاتر" : "Reset All Filters"}
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Products Display (Connected 4-Column Grid vs Connected 1-Column Wholesale List) */}
+                        <h2 className="sr-only">
+                            {isArabic ? "قائمة المنتجات وتوريد الطرود" : "Wholesale Products List"}
+                        </h2>
+                        {products.length > 0 && (
+                            viewMode === "grid" ? (
+                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 border-t border-s border-[#0B192C]/[0.08] dark:border-white/10 rounded-[18px] overflow-hidden border border-[#0B192C]/[0.09] bg-white dark:bg-zinc-900">
+                                    {products.map((product, index) => (
+                                        <EditorialProductCard
+                                            key={product.id}
+                                            product={product}
+                                            imagePriority={index < 4}
+                                            inConnectedGrid={true}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col border border-[#0B192C]/[0.09] dark:border-white/10 rounded-[18px] overflow-hidden bg-white dark:bg-zinc-900">
+                                    {products.map((product) => (
+                                        <WholesaleProductRow key={product.id} product={product} />
+                                    ))}
+                                </div>
+                            )
+                        )}
+
+                        {/* Automatic Infinite Scroll Trigger & Spinner */}
+                        {hasMore && !fetchError && (
+                            <div ref={observerRef} className="mt-8 py-6 flex items-center justify-center">
+                                <div className="flex items-center gap-2.5 text-xs font-semibold text-[#0B192C]/65 dark:text-gray-400 bg-[#FAF7F0] dark:bg-zinc-900 px-4 py-2 rounded-full border border-[#0B192C]/10 dark:border-white/10">
+                                    <div className="w-4 h-4 border-2 border-[#8A6305] border-t-transparent rounded-full animate-spin" />
+                                    <span>
+                                        {isArabic
+                                            ? "جاري تحميل المزيد من الأصناف..."
+                                            : "Loading more products..."}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     );

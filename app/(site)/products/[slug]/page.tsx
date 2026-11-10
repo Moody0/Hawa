@@ -206,8 +206,8 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                     categorySlug={product.category?.slug}
                 />
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 xl:gap-10 w-full mt-3 sm:mt-5 items-start">
-                    {/* Product Gallery (Left) */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-14 w-full mt-4 sm:mt-6 items-start">
+                    {/* Product Gallery (Start Side) */}
                     <div className="w-full lg:col-span-6 relative">
                         <ProductGallery
                             images={product.images}
@@ -215,8 +215,8 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                         />
                     </div>
 
-                    {/* Product Details (Right) */}
-                    <div className="w-full lg:col-span-6 lg:sticky lg:top-24 self-start flex flex-col gap-1 lg:rounded-2xl lg:border lg:border-slate-200/80 lg:bg-white lg:p-6 xl:p-8 lg:shadow-[0_18px_50px_-36px_rgba(11,25,44,0.45)] dark:lg:border-white/10 dark:lg:bg-zinc-900/70">
+                    {/* Product Details (End Side — Concept 01 Unboxed Editorial Column) */}
+                    <div className="w-full lg:col-span-6 lg:sticky lg:top-24 self-start flex flex-col pt-1">
                         <ProductHeader
                             name={product.name}
                             nameAr={product.nameAr}
@@ -235,6 +235,11 @@ const ProductPage = async (props: { params: Promise<{ slug: string }> }) => {
                             descriptionAr={safeProduct.descriptionAr}
                             descriptionEn={safeProduct.descriptionEn}
                             options={safeProduct.options}
+                            productName={displayName}
+                            brandName={product.brand ? (language === 'ar' ? product.brand.name : (product.brand.nameEn || product.brand.name)) : null}
+                            categoryName={product.category?.name}
+                            packaging={safeProduct.packaging}
+                            itemsPerPackage={safeProduct.itemsPerPackage}
                         />
 
                         {/* Social Share & Link Sharing */}

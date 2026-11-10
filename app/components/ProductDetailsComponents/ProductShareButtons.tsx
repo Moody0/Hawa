@@ -48,57 +48,59 @@ export default function ProductShareButtons({
     const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(productName)}`;
 
     return (
-        <div className="flex items-center justify-start mt-6 pt-6 border-t border-gray-200 dark:border-white/10 gap-2.5">
-            <span className="text-xs font-bold tracking-widest uppercase text-[#475569] dark:text-gray-400 mr-1">
+        <div className="flex items-center justify-between mt-4 pt-3 gap-3">
+            <span className="text-[12.5px] font-bold text-slate-600 dark:text-slate-400">
                 {isArabic ? 'مشاركة المنتج:' : 'Share Product:'}
             </span>
 
-            {/* WhatsApp */}
-            <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 hover:bg-[#25D366] hover:text-white dark:hover:bg-[#25D366] dark:hover:text-white transition-colors"
-                title={isArabic ? 'مشاركة عبر واتساب' : 'Share via WhatsApp'}
-                aria-label="Share on WhatsApp"
-            >
-                <FaWhatsapp className="text-base" />
-            </a>
+            <div className="flex items-center gap-2">
+                {/* WhatsApp */}
+                <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B192C]/12 dark:border-white/15 bg-white dark:bg-zinc-900 text-[#0B192C] dark:text-white hover:bg-[#0B192C] hover:text-[#E5B54A] hover:border-[#0B192C] dark:hover:bg-[#E5B54A] dark:hover:text-[#0B192C] transition-colors"
+                    title={isArabic ? 'مشاركة عبر واتساب' : 'Share via WhatsApp'}
+                    aria-label="Share on WhatsApp"
+                >
+                    <FaWhatsapp className="text-[15px]" />
+                </a>
 
-            {/* Telegram */}
-            <a
-                href={telegramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400 hover:bg-[#0088cc] hover:text-white dark:hover:bg-[#0088cc] dark:hover:text-white transition-colors"
-                title={isArabic ? 'مشاركة عبر تيلغرام' : 'Share via Telegram'}
-                aria-label="Share on Telegram"
-            >
-                <FaTelegram className="text-base" />
-            </a>
+                {/* Telegram */}
+                <a
+                    href={telegramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B192C]/12 dark:border-white/15 bg-white dark:bg-zinc-900 text-[#0B192C] dark:text-white hover:bg-[#0B192C] hover:text-[#E5B54A] hover:border-[#0B192C] dark:hover:bg-[#E5B54A] dark:hover:text-[#0B192C] transition-colors"
+                    title={isArabic ? 'مشاركة عبر تيلغرام' : 'Share via Telegram'}
+                    aria-label="Share on Telegram"
+                >
+                    <FaTelegram className="text-[15px]" />
+                </a>
 
-            {/* Facebook */}
-            <a
-                href={facebookUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 hover:bg-[#1877F2] hover:text-white dark:hover:bg-[#1877F2] dark:hover:text-white transition-colors"
-                title={isArabic ? 'مشاركة عبر فيسبوك' : 'Share via Facebook'}
-                aria-label="Share on Facebook"
-            >
-                <FaFacebook className="text-base" />
-            </a>
+                {/* Facebook */}
+                <a
+                    href={facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B192C]/12 dark:border-white/15 bg-white dark:bg-zinc-900 text-[#0B192C] dark:text-white hover:bg-[#0B192C] hover:text-[#E5B54A] hover:border-[#0B192C] dark:hover:bg-[#E5B54A] dark:hover:text-[#0B192C] transition-colors"
+                    title={isArabic ? 'مشاركة عبر فيسبوك' : 'Share via Facebook'}
+                    aria-label="Share on Facebook"
+                >
+                    <FaFacebook className="text-[15px]" />
+                </a>
 
-            {/* Copy Link Button */}
-            <button
-                type="button"
-                onClick={handleCopy}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-gray-300 hover:bg-[#8A6305] hover:text-white dark:hover:bg-[#8A6305] dark:hover:text-white transition-colors cursor-pointer"
-                title={isArabic ? 'نسخ الرابط' : 'Copy link'}
-                aria-label="Copy Link"
-            >
-                {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Link2 className="w-4 h-4" />}
-            </button>
+                {/* Copy Link Button */}
+                <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-[#0B192C]/12 dark:border-white/15 bg-white dark:bg-zinc-900 text-[#0B192C] dark:text-white hover:bg-[#0B192C] hover:text-[#E5B54A] hover:border-[#0B192C] dark:hover:bg-[#E5B54A] dark:hover:text-[#0B192C] transition-colors cursor-pointer"
+                    title={isArabic ? 'نسخ الرابط' : 'Copy link'}
+                    aria-label="Copy Link"
+                >
+                    {copied ? <Check className="w-4 h-4 text-[#8A6305] dark:text-[#E5B54A]" /> : <Link2 className="w-4 h-4" />}
+                </button>
+            </div>
         </div>
     );
 }

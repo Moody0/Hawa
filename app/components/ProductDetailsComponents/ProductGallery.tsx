@@ -171,10 +171,10 @@ const ProductGallery = ({ images, isTrending }: ProductGalleryProps) => {
 
     return (
         <div className="flex flex-col gap-3 self-start h-fit w-full">
-            {/* Main Image Slider */}
-            <div className="relative w-full aspect-square lg:aspect-[6/5] max-w-[882px] mx-auto overflow-hidden rounded-xl lg:rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 shadow-[0_18px_50px_-42px_rgba(11,25,44,0.45)]">
+            {/* Main Image Slider — Full-Width Square Studio Stage */}
+            <div className="relative w-full aspect-square max-w-[882px] mx-auto overflow-hidden rounded-[20px] bg-white dark:bg-zinc-900 border border-[#0B192C]/[0.09] dark:border-white/10">
                 <Swiper
-                    spaceBetween={10}
+                    spaceBetween={0}
                     thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
                     modules={[FreeMode, Thumbs, Autoplay]}
                     onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
@@ -201,12 +201,12 @@ const ProductGallery = ({ images, isTrending }: ProductGalleryProps) => {
                                 type="button"
                                 onClick={(e) => openLightbox(img, e.currentTarget)}
                                 aria-label={isArabic ? `تكبير صورة المنتج ${index + 1}` : `Expand product image ${index + 1}`}
-                                className="relative w-full h-full flex items-center justify-center bg-white dark:bg-zinc-900 p-5 sm:p-8 lg:p-10 cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8A6305]"
+                                className="group/stage relative w-full h-full flex items-center justify-center bg-white dark:bg-zinc-900 p-0 cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8A6305]"
                             >
                                 <ResilientImage
                                     src={img}
                                     alt={`Product image ${index + 1}`}
-                                    className="w-full h-full object-contain transition-opacity duration-500"
+                                    className="w-full h-full object-cover transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/stage:scale-[1.03]"
                                     priority={index === 0}
                                     sizes="(max-width: 640px) 92vw, (max-width: 1024px) 88vw, 48vw"
                                 />
@@ -214,15 +214,6 @@ const ProductGallery = ({ images, isTrending }: ProductGalleryProps) => {
                         </SwiperSlide>
                     ))}
                 </Swiper>
-
-                {/* Trending Badge */}
-                {isTrending && (
-                    <div className="absolute top-3 right-3 z-20 pointer-events-none">
-                        <span className="inline-block bg-[#0B192C] text-[#E5B54A] border border-[#8A6305]/40 px-2.5 py-1 rounded-[6px] text-[10px] font-bold tracking-wider uppercase leading-tight">
-                            Trending
-                        </span>
-                    </div>
-                )}
             </div>
 
             {/* Thumbnails */}

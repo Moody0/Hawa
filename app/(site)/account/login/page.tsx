@@ -185,7 +185,6 @@ export default function MerchantLoginPage() {
                             {pendingAccount && (
                                 <div role="status" aria-live="polite" className="mb-5 space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-4 text-start dark:border-amber-800/60 dark:bg-amber-950/40">
                                     <div className="flex items-center gap-2 text-[#8A6305] dark:text-[#E5B54A] font-bold text-xs sm:text-sm">
-                                        <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
                                         <span>{isArabic ? 'حسابك التجاري قيد المراجعة والتدقيق' : 'Account Under Review'}</span>
                                     </div>
                                     <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">

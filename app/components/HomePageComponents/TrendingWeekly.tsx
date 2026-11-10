@@ -3,12 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { useCurrency } from '@/app/context/CurrencyContext';
-import { useCustomer } from '@/app/context/CustomerContext';
-import ResilientImage from '@/app/components/ResilientImage';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getBrandDisplayName } from '@/lib/brand-display';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import ProductCard from '../ProductsPageComponents/ProductCard';
 
 interface Product {
     id: string;
@@ -17,6 +13,9 @@ interface Product {
     nameAr?: string | null;
     nameEn?: string | null;
     description: string | null;
+    descriptionAr?: string | null;
+    descriptionEn?: string | null;
+    options?: string | null;
     price: number | null;
     hidePrice?: boolean;
     discountPrice?: number | null;
@@ -24,6 +23,9 @@ interface Product {
     categoryId: string;
     stock: number;
     isTrending: boolean;
+    packaging?: string | null;
+    itemsPerPackage?: string | number | null;
+    minOrder?: number | null;
     brand?: {
         id: string;
         name: string;
@@ -38,22 +40,14 @@ interface TrendingWeeklyProps {
     settings?: any;
 }
 
-
 const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
     const { dir } = useLanguage();
     const isArabic = dir === 'rtl';
     const [showAll, setShowAll] = useState(false);
-    const { formatPrice } = useCurrency();
-    const { customer } = useCustomer();
-    const isLockedForGuest = !customer;
 
     if (settings?.homeTrendingWeeklyEnabled === false || !products.length) {
         return null;
     }
-
-    const badgeText = isArabic
-        ? (settings?.homeTrendingWeeklyBadgeAr || settings?.homeTrendingWeeklyBadge || 'طلب السوق')
-        : (settings?.homeTrendingWeeklyBadge || settings?.homeTrendingWeeklyBadgeAr || 'Market demand');
 
     const titleText = isArabic
         ? (settings?.homeTrendingWeeklyTitleAr || settings?.homeTrendingWeeklyTitle || 'المنتجات الأكثر طلباً هذا الأسبوع')
@@ -67,29 +61,14 @@ const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
     const initialCount = 8;
     const visibleProducts = showAll ? displayProducts : displayProducts.slice(0, initialCount);
 
-    const getFirstImage = (images: string) => {
-        try {
-            const parsed = JSON.parse(images);
-            return Array.isArray(parsed) ? parsed[0] : images;
-        } catch {
-            return images.split(',')[0]?.trim() || images;
-        }
-    };
-
     return (
-        <section className="container-custom py-7 md:py-10">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-9">
+        <section className="container-custom py-8 md:py-12">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
                 <div className="text-start">
-                    <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-[#8A6305] dark:text-[#E5B54A] mb-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                        {badgeText}
-                    </span>
-                    <div>
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight max-w-3xl" data-reveal-heading>
-                            {titleText}
-                        </h2>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mt-2 font-normal" data-reveal-copy>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0B192C] dark:text-white tracking-tight max-w-3xl">
+                        {titleText}
+                    </h2>
+                    <p className="text-xs sm:text-base text-slate-600 dark:text-slate-400 max-w-[65ch] mt-1">
                         {descText}
                     </p>
                 </div>
@@ -97,135 +76,38 @@ const TrendingWeekly = ({ products = [], settings }: TrendingWeeklyProps) => {
                 <Link
                     href="/products"
                     prefetch={false}
-                    className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-zinc-800 text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:text-[#E5B54A] shadow-xs transition-all active:scale-95 shrink-0 group"
+                    className="inline-flex h-9 items-center gap-1.5 self-start sm:self-auto px-3.5 rounded-[10px] border border-[#0B192C]/[0.09] dark:border-white/15 bg-white dark:bg-zinc-900 text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white hover:border-[#C59329]/50 hover:text-[#8A6305] active:translate-y-px transition-colors shrink-0"
                 >
                     <span>{isArabic ? 'عرض جميع المنتجات' : 'View All Products'}</span>
-                    {isArabic ? (
-                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-                    ) : (
-                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                    )}
+                    {isArabic ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                 </Link>
             </div>
 
-            {/* Clean Product Grid: 2 cols on mobile, 3 cols on tablet, 4 cols on desktop */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-                <AnimatePresence initial={false}>
-                    {visibleProducts.map((product, index) => (
-                        <motion.div
-                            key={product.id}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 8 }}
-                            transition={{ duration: 0.2 }}
-                            className="h-full"
-                        >
-                            <Link
-                                href={`/products/${product.slug}`}
-                                className="group relative h-full flex flex-col justify-between p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-white/10 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:border-[#C28E2B]/60 transition-all duration-300"
-                            >
-                                {/* Top Header: Ranking Badge */}
-                                <div className="w-full flex items-center justify-between gap-2">
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#FAF6EC] dark:bg-[#C28E2B]/15 text-[#8A6305] dark:text-[#E5B54A] border border-[#C28E2B]/30">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#C28E2B]" />
-                                        <span>{isArabic ? `#${index + 1} الأكثر طلباً` : `#${index + 1} Top Demand`}</span>
-                                    </span>
-                                </div>
-
-                                {/* Hero Product Image: Floating directly on card canvas (Zero nested grey box) */}
-                                <div className="relative w-full h-36 sm:h-44 md:h-48 flex items-center justify-center p-2 my-2 shrink-0">
-                                    <ResilientImage
-                                        src={getFirstImage(product.images)}
-                                        alt={product.name}
-                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                        className="object-contain filter group-hover:scale-108 transition-transform duration-300"
-                                        loading="lazy"
-                                        showSkeleton={false}
-                                    />
-                                </div>
-
-                                {/* Product Info */}
-                                <div className={`w-full flex flex-col ${isArabic ? 'text-right' : 'text-left'} mt-1`}>
-                                    {product.brand && (
-                                        <span className="text-[10px] sm:text-[11px] font-bold text-[#C28E2B] dark:text-[#E5B54A] uppercase tracking-wider block truncate mb-0.5">
-                                            {getBrandDisplayName(product.brand, isArabic ? 'ar' : 'en')}
-                                        </span>
-                                    )}
-                                    <h3 className="text-xs sm:text-sm md:text-[15px] font-bold text-[#0B192C] dark:text-white line-clamp-2 leading-snug group-hover:text-[#C28E2B] transition-colors min-h-[2.4rem] sm:min-h-[2.6rem]">
-                                        {isArabic ? (product.nameAr || product.name) : (product.nameEn || product.name)}
-                                    </h3>
-                                    
-                                    {/* Pricing / Wholesale Lock (Matching ProductCard blurry price style) */}
-                                    <div className="mt-2 flex items-center gap-2">
-                                        {isLockedForGuest || product.hidePrice ? (
-                                            <div className="flex items-baseline gap-1.5 group/lock">
-                                                <Lock className="w-3.5 h-3.5 text-[#8A6305] dark:text-[#E5B54A] shrink-0 opacity-80" />
-                                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">{isArabic ? "السعر متاح للحسابات المعتمدة" : "Price available to approved accounts"}</span>
-                                            </div>
-                                        ) : product.discountPrice ? (
-                                            <div className="flex items-baseline gap-1.5">
-                                                <span className="text-sm sm:text-base font-black text-[#16A34A] dark:text-[#4ade80]">
-                                                    {formatPrice(Number(product.discountPrice))}
-                                                </span>
-                                                <span className="text-xs text-slate-400 line-through">
-                                                    {formatPrice(Number(product.price || 0))}
-                                                </span>
-                                            </div>
-                                        ) : Boolean(product.price && Number(product.price) > 0) ? (
-                                            <span className="text-sm sm:text-base font-black text-[#0B192C] dark:text-white">
-                                                {formatPrice(Number(product.price))}
-                                            </span>
-                                        ) : (
-                                            <span className="text-[11px] sm:text-xs font-bold text-[#8A6305] dark:text-[#E5B54A]">
-                                                {isArabic ? 'سعر الجملة عند الطلب' : 'Wholesale on Inquiry'}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Subtle Action Footer */}
-                                <div className="w-full border-t border-slate-100 dark:border-white/5 pt-2.5 mt-3 flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-[#C28E2B] transition-colors">
-                                    <span>{isArabic ? 'عرض المنتج' : 'View Product'}</span>
-                                    <span className={isArabic ? 'text-sm group-hover:-translate-x-1 transition-transform' : 'text-sm group-hover:translate-x-1 transition-transform'}>
-                                        {isArabic ? '←' : '→'}
-                                    </span>
-                                </div>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
+            {/* Unified Product Grid: 2 cols on mobile, 3 cols on tablet, 4 cols on desktop */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                {visibleProducts.map((product) => (
+                    <ProductCard
+                        key={product.id}
+                        product={product}
+                        showBadge={false}
+                    />
+                ))}
             </div>
 
-            {/* Show More / Less Toggle & View All Products */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 sm:mt-10">
-                {displayProducts.length > initialCount && (
+            {/* Show More / Less Toggle */}
+            {displayProducts.length > initialCount && (
+                <div className="flex items-center justify-center mt-8">
                     <button
+                        type="button"
                         onClick={() => setShowAll(!showAll)}
-                        className="w-full sm:w-auto px-6 py-2.5 bg-white hover:bg-[#FAF6EC] dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[#0B192C] dark:text-white border border-slate-200/90 dark:border-white/10 hover:border-[#C28E2B] rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                        className="px-5 py-2.5 bg-white hover:bg-[#FAF7F0] dark:bg-zinc-900 dark:hover:bg-zinc-800 text-[#0B192C] dark:text-white border border-[#0B192C]/[0.09] dark:border-white/15 hover:border-[#C59329]/50 rounded-[10px] font-bold text-xs sm:text-sm transition-colors active:translate-y-px cursor-pointer"
                     >
-                        <span>
-                            {showAll
-                                ? (isArabic ? 'عرض أقل' : 'Show Less')
-                                : (isArabic ? `عرض المزيد (${displayProducts.length - initialCount}+)` : `Show More (${displayProducts.length - initialCount}+)`)
-                            }
-                        </span>
-                        <span className="text-xs">{showAll ? '▲' : '▼'}</span>
+                        {showAll
+                            ? (isArabic ? 'عرض أقل' : 'Show Less')
+                            : (isArabic ? `عرض المزيد (${displayProducts.length - initialCount}+)` : `Show More (${displayProducts.length - initialCount}+)`)}
                     </button>
-                )}
-
-                <Link
-                    href="/products"
-                    prefetch={false}
-                    className="w-full sm:w-auto px-6 py-2.5 bg-[#0B192C] hover:bg-[#132845] text-white dark:bg-[#C28E2B] dark:hover:bg-[#a97920] rounded-xl font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 group"
-                >
-                    <span>{isArabic ? 'تصفح كافة منتجات الجملة' : 'Browse All Wholesale Products'}</span>
-                    {isArabic ? (
-                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-                    ) : (
-                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                    )}
-                </Link>
-            </div>
+                </div>
+            )}
         </section>
     );
 };

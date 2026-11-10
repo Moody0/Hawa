@@ -37,10 +37,6 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0B192C] via-[#0B192C]/85 to-[#0B192C]/65" />
                         <div className="relative z-10 max-w-2xl mx-auto">
-                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#8A6305]/20 border border-[#8A6305]/40 text-[#E5B54A] text-xs font-bold uppercase tracking-wider mb-4 shadow-xs">
-                                <Truck className="text-sm" />
-                                <span>{pageContent.heroBadge}</span>
-                            </div>
                             <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-4">
                                 {pageContent.heroTitle}
                             </h1>
@@ -51,10 +47,6 @@ export default function ShippingReturnsContent({ siteSettings, content }: Shippi
                     </div>
                 ) : (
                     <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-bold uppercase tracking-wider mb-3">
-                            <Truck className="text-sm" />
-                            <span>{pageContent.heroBadge}</span>
-                        </div>
                         <h1 className="text-3xl sm:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight mb-3">
                             {pageContent.heroTitle}
                         </h1>

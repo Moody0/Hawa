@@ -5,7 +5,6 @@ import type { RailBrand } from '@/lib/public-queries';
 import FeaturedCollection from './FeaturedCollection';
 import TrendingWeekly from './TrendingWeekly';
 import FeaturedCategoriesGrid from './FeaturedCategoriesGrid';
-import ScrollReveal from '../ScrollReveal';
 import { getI18n } from '@/lib/i18n';
 import HeroCarousel from './HeroCarousel';
 import CompanyServices from './CompanyServices';
@@ -113,8 +112,8 @@ const Main = async ({
                 <Link href="/contact" className="inline-flex mt-6 rounded-lg bg-heading hover:bg-[#16304d] px-6 py-3 text-white font-semibold">{ar ? 'تواصل معنا' : 'Contact us'}</Link>
             </header>}
 
-            {/* Curved sheet overlapping the hero: category quick strip + partner distributor callout */}
-            <div className="relative z-10 -mt-6 rounded-t-[1.75rem] bg-[#FAF7F0] pt-3 pb-2 dark:bg-[#101E32] md:-mt-8 md:rounded-t-[2.5rem]">
+            {/* 2. Partner distributor callout + agency trust rail */}
+            <div className="relative z-20 max-md:-mt-6 max-md:rounded-t-[26px] max-md:pt-1 bg-[#FAF7F0] dark:bg-[#101E32] border-b border-slate-200/80 dark:border-white/10">
                 {content.homePrideEnabled !== false && (
                     <PartnerPrideBanner
                         language={language}
@@ -125,62 +124,55 @@ const Main = async ({
                         whatsappUrl={siteContacts.whatsappUrl}
                     />
                 )}
+                {content.homeBrandsEnabled && (
+                    <AgenciesSlider
+                        brands={railBrands}
+                        title={ar ? content.homeBrandsTitleAr : content.homeBrandsTitle}
+                        subtitle={ar ? content.homeBrandsDescriptionAr : content.homeBrandsDescription}
+                    />
+                )}
             </div>
 
-            {/* 2. Compact agency trust rail */}
-            <ScrollReveal
-                className="bg-[#FAF7F0] dark:bg-[#101E32]"
-                variant="subtle"
-            >
-                {content.homeBrandsEnabled && <AgenciesSlider brands={railBrands} title={ar ? content.homeBrandsTitleAr : content.homeBrandsTitle} subtitle={ar ? content.homeBrandsDescriptionAr : content.homeBrandsDescription} />}
-            </ScrollReveal>
-
-            {/* 3–4. Category discovery followed by commercial proof */}
-            <ScrollReveal
-                className="bg-white dark:bg-[#0B192C]"
-            >
-                {content.homeCategoriesEnabled && <FeaturedCategoriesGrid
-                    categories={featuredCategories}
-                    language={language}
-                    dir={dir}
-                    settings={siteSettings}
-                />}
-            </ScrollReveal>
-
-            {/* 5. Best sellers and new arrivals; product cards remain unchanged */}
-            <ScrollReveal
-                className="bg-slate-50/70 dark:bg-[#0E1B2E]"
-            >
-                {content.homeFeaturedEnabled && <FeaturedCollection
-                    newArrivals={featuredNewArrivals}
-                    bestSellers={featuredBestSellers}
-                    settings={siteSettings}
-                />}
-            </ScrollReveal>
-
-            {/* 6. Weekly demand; product card design remains unchanged */}
-            {siteSettings?.homeTrendingWeeklyEnabled !== false && (
-                <ScrollReveal
-                    className="bg-white dark:bg-[#0B192C]"
-                >
-                    <TrendingWeekly products={trendingWeekly} settings={siteSettings} />
-                </ScrollReveal>
+            {/* 3. Category discovery */}
+            {content.homeCategoriesEnabled && (
+                <div className="bg-white dark:bg-[#0B192C] border-b border-slate-200/80 dark:border-white/10">
+                    <FeaturedCategoriesGrid
+                        categories={featuredCategories}
+                        language={language}
+                        dir={dir}
+                        settings={siteSettings}
+                    />
+                </div>
             )}
 
-            {/* 8. Corporate capabilities */}
-            <ScrollReveal
-                className="bg-[#FAF7F0] dark:bg-[#101E32]"
-            >
-                <CompanyServices settings={siteSettings} />
-            </ScrollReveal>
+            {/* 4. Best sellers and new arrivals */}
+            {content.homeFeaturedEnabled && (
+                <div className="bg-[#FAF7F0] dark:bg-[#0E1B2E] border-b border-slate-200/80 dark:border-white/10">
+                    <FeaturedCollection
+                        newArrivals={featuredNewArrivals}
+                        bestSellers={featuredBestSellers}
+                        settings={siteSettings}
+                    />
+                </div>
+            )}
 
-            {/* 9. Merchant endorsements */}
+            {/* 5. Weekly demand */}
+            {siteSettings?.homeTrendingWeeklyEnabled !== false && (
+                <div className="bg-white dark:bg-[#0B192C] border-b border-slate-200/80 dark:border-white/10">
+                    <TrendingWeekly products={trendingWeekly} settings={siteSettings} />
+                </div>
+            )}
+
+            {/* 6. Corporate capabilities */}
+            <div className="bg-[#FAF7F0] dark:bg-[#101E32] border-b border-slate-200/80 dark:border-white/10">
+                <CompanyServices settings={siteSettings} />
+            </div>
+
+            {/* 7. Merchant endorsements */}
             {siteSettings?.homeTestimonialsEnabled !== false && (
-                <ScrollReveal
-                    className="bg-slate-50 dark:bg-[#0E1B2E]"
-                >
+                <div className="bg-white dark:bg-[#0E1B2E]">
                     <TestimonialsMasonry reviews={reviews} products={featuredBestSellers} settings={siteSettings} />
-                </ScrollReveal>
+                </div>
             )}
 
         </div>

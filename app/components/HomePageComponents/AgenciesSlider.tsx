@@ -7,7 +7,7 @@ import ResilientImage from '@/app/components/ResilientImage';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import { Autoplay, Navigation } from 'swiper/modules';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getBrandDisplayName } from '@/lib/brand-display';
 
 import 'swiper/css';
@@ -57,76 +57,93 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
     const activeBrands = brands;
     if (!activeBrands.length) return null;
 
-    const getBrandLatinName = (brand: AgencyBrand) => {
-        return getBrandDisplayName(brand, 'en');
-    };
+    const isDefaultPartnerTitle =
+        !title ||
+        title.trim() === 'شركاؤنا' ||
+        title.trim() === 'علامات تجارية تثق بنا' ||
+        title.trim() === 'Our partners';
 
-    const sectionTitle = title || (isArabic ? 'علامات تجارية تثق بنا' : 'Brands That Trust Us');
-    const sectionSubtitle =
-        subtitle ||
-        (isArabic
-            ? 'نفخر بتمثيل وتوزيع مجموعة من أفضل العلامات التجارية المحلية والعالمية'
-            : 'We are proud to represent and distribute a curated portfolio of top local and international brands');
+    const isDefaultPartnerSubtitle =
+        !subtitle ||
+        subtitle.trim() === 'تصفح المنتجات حسب الشركة.' ||
+        subtitle.trim() === 'Explore products by brand.';
+
+    const sectionSubtitle = !isDefaultPartnerSubtitle
+        ? subtitle
+        : isArabic
+          ? 'وكالات وعلامات تجارية رائدة نعتز بتمثيلها وتوزيع منتجاتها في الأسواق.'
+          : 'Leading brands and official agencies we proudly represent and distribute.';
 
     return (
-        <section className="w-full py-4 md:py-7 bg-transparent">
+        <section className="w-full pt-4 pb-8 md:pt-7 md:pb-12 bg-transparent">
             <div className="container-custom">
-                {/* Section Header with Centered Gold Flanking Lines matching screenshot */}
-                <div className="text-center mb-3 sm:mb-5">
-                    <div className="flex items-center justify-center gap-3.5 mb-2">
-                        <span className="w-10 sm:w-16 h-[1.5px] bg-[#C28E2B] rounded-full shrink-0" aria-hidden="true" />
-                        <h2 className="text-2xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight" data-reveal-heading>
-                            {sectionTitle}
+                {/* Centered Proud Partner Header */}
+                <div className="relative flex flex-col items-center text-center mb-5 sm:mb-7">
+                    <div className="max-w-2xl mx-auto px-2">
+                        <h2 className="text-[22px] sm:text-[26px] 2xl:text-[34px] font-black text-[#0B192C] dark:text-white leading-[1.2] tracking-[-0.015em]">
+                            {isArabic ? (
+                                isDefaultPartnerTitle ? (
+                                    <>
+                                        نعتز بشركائنا{' '}
+                                        <span className="text-[#8A6305] dark:text-[#E5B54A]">بالنجاح والتوزيع</span>
+                                    </>
+                                ) : (
+                                    title
+                                )
+                            ) : isDefaultPartnerTitle ? (
+                                <>
+                                    Proud of Our Partners{' '}
+                                    <span className="text-[#8A6305] dark:text-[#E5B54A]">in Distribution</span>
+                                </>
+                            ) : (
+                                title
+                            )}
                         </h2>
-                        <span className="w-10 sm:w-16 h-[1.5px] bg-[#C28E2B] rounded-full shrink-0" aria-hidden="true" />
+                        <p className="mt-1.5 sm:mt-2 text-[13px] sm:text-[15px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
+                            {sectionSubtitle}
+                        </p>
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto font-normal" data-reveal-copy>
-                        {sectionSubtitle}
-                    </p>
+
+                    {/* Desktop Capsule Controller — Anchored to End without shifting centered title */}
+                    <div className="hidden sm:inline-flex lg:absolute lg:end-0 lg:bottom-0 mt-4 lg:mt-0 items-center gap-1 p-1 rounded-full bg-white dark:bg-zinc-900 border border-[#0B192C]/10 dark:border-white/15 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => swiperRef.current?.slidePrev()}
+                            className="w-[34px] h-[34px] rounded-full inline-flex items-center justify-center text-[#0B192C] dark:text-white hover:bg-[#0F2138] hover:text-white dark:hover:bg-[#E5B54A] dark:hover:text-[#0B192C] transition-colors duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer"
+                            aria-label={isArabic ? 'السابق' : 'Previous'}
+                        >
+                            {isArabic ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => swiperRef.current?.slideNext()}
+                            className="w-[34px] h-[34px] rounded-full inline-flex items-center justify-center text-[#0B192C] dark:text-white hover:bg-[#0F2138] hover:text-white dark:hover:bg-[#E5B54A] dark:hover:text-[#0B192C] transition-colors duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer"
+                            aria-label={isArabic ? 'التالي' : 'Next'}
+                        >
+                            {isArabic ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                        </button>
+                        <Link
+                            href="/brands"
+                            className="px-3.5 py-1 text-[12.5px] font-extrabold text-[#0B192C] dark:text-white hover:text-[#8A6305] dark:hover:text-[#E5B54A] border-s border-[#0B192C]/[0.08] dark:border-white/10 transition-colors"
+                        >
+                            {isArabic ? 'كل الوكالات ←' : 'All Brands →'}
+                        </Link>
+                    </div>
                 </div>
 
-                {/* Swiper Slider with Left & Right Floating Circular Navigation Buttons */}
+                {/* Separate Cards on Mobile, Connected Architectural Track on Desktop (sm+) */}
                 <div
-                    className="relative w-full px-2 sm:px-4"
+                    className="relative w-full sm:bg-white sm:dark:bg-zinc-900 sm:border sm:border-[#0B192C]/[0.09] sm:dark:border-white/10 sm:rounded-[18px] sm:overflow-hidden"
                     onFocusCapture={() => swiperRef.current?.autoplay?.stop()}
                     onBlurCapture={(event) => {
-                        if (!event.currentTarget.contains(event.relatedTarget as Node | null) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                        if (
+                            !event.currentTarget.contains(event.relatedTarget as Node | null) &&
+                            !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                        ) {
                             swiperRef.current?.autoplay?.start();
                         }
                     }}
                 >
-                    {/* Left Flank Button (<) */}
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (isArabic) {
-                                swiperRef.current?.slideNext();
-                            } else {
-                                swiperRef.current?.slidePrev();
-                            }
-                        }}
-                        className="absolute -left-2 sm:-left-4 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-slate-200/90 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#C28E2B] hover:text-[#966b15] hover:bg-[#FAF6EC] dark:hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                        aria-label={isArabic ? 'السابق' : 'Previous'}
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </button>
-
-                    {/* Right Flank Button (>) */}
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (isArabic) {
-                                swiperRef.current?.slidePrev();
-                            } else {
-                                swiperRef.current?.slideNext();
-                            }
-                        }}
-                        className="absolute -right-2 sm:-right-4 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-slate-200/90 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#C28E2B] hover:text-[#966b15] hover:bg-[#FAF6EC] dark:hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                        aria-label={isArabic ? 'التالي' : 'Next'}
-                    >
-                        <ChevronRight className="w-5 h-5" />
-                    </button>
-
                     <Swiper
                         modules={[Autoplay, Navigation]}
                         onBeforeInit={(swiper) => {
@@ -136,7 +153,7 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                             swiperRef.current = swiper;
                         }}
                         autoplay={{
-                            delay: 4500,
+                            delay: 4200,
                             disableOnInteraction: false,
                             pauseOnMouseEnter: true,
                         }}
@@ -144,57 +161,72 @@ export default function AgenciesSlider({ brands = [], title, subtitle }: Agencie
                         observeParents={true}
                         watchOverflow={true}
                         loop={activeBrands.length > 5}
-                        spaceBetween={14}
-                        slidesPerView={2}
+                        spaceBetween={10}
+                        slidesPerView={2.15}
                         breakpoints={{
-                            480: { slidesPerView: 2, spaceBetween: 14 },
-                            640: { slidesPerView: 3, spaceBetween: 16 },
-                            768: { slidesPerView: 4, spaceBetween: 18 },
-                            1024: { slidesPerView: 4, spaceBetween: 20 },
-                            1280: { slidesPerView: 5, spaceBetween: 20 },
+                            480: { slidesPerView: 2.4, spaceBetween: 12 },
+                            640: { slidesPerView: 3.2, spaceBetween: 0 },
+                            768: { slidesPerView: 4, spaceBetween: 0 },
+                            1024: { slidesPerView: 5, spaceBetween: 0 },
+                            1280: { slidesPerView: 6, spaceBetween: 0 },
                         }}
-                        className="agencies-slider-swiper !py-2 !px-1"
+                        className="agencies-slider-swiper"
                     >
                         {activeBrands.map((brand) => {
-                            const latinName = getBrandLatinName(brand);
+                            const arName = getBrandDisplayName(brand, 'ar');
+                            const enName = getBrandDisplayName(brand, 'en');
+                            const primaryName = isArabic ? arName : enName;
+                            const secondaryName = isArabic
+                                ? (enName !== arName ? enName : '')
+                                : (arName !== enName ? arName : '');
 
                             return (
                                 <SwiperSlide key={brand.id || brand.slug} className="h-auto">
                                     <Link
                                         href={`/products?brand=${brand.slug}`}
                                         prefetch={false}
-                                        className="group h-[190px] sm:h-[210px] w-full flex flex-col items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-white/10 shadow-[0_8px_28px_-24px_rgba(11,25,44,0.45)] hover:border-[#C28E2B]/50 hover:-translate-y-1 transition-all duration-300 text-center"
+                                        className="group/slot relative h-[138px] sm:h-[152px] 2xl:h-[176px] w-full px-4 py-3.5 sm:px-5 sm:py-4 2xl:px-6 2xl:py-5 max-sm:rounded-[14px] max-sm:border max-sm:border-[#0B192C]/[0.09] max-sm:dark:border-white/10 max-sm:overflow-hidden sm:border-e sm:border-[#0B192C]/[0.08] sm:dark:border-white/10 flex flex-col justify-between bg-white dark:bg-zinc-900 hover:bg-[#FAF8F3] dark:hover:bg-zinc-800/70 transition-colors duration-250 ease-[cubic-bezier(0.22,1,0.36,1)]"
                                     >
-                                        {/* Brand Logo Container (Top - Hero Size) */}
-                                        <div className="relative w-full h-20 sm:h-24 md:h-28 flex items-center justify-center p-1.5 shrink-0">
+                                        {/* Subtle Top Hover Action */}
+                                        <div className="flex items-center justify-end h-4">
+                                            <span className="text-[11px] font-bold text-[#8A6305] dark:text-[#E5B54A] opacity-0 translate-x-1 group-hover/slot:opacity-100 group-hover/slot:translate-x-0 transition-all duration-220 ease-[cubic-bezier(0.22,1,0.36,1)]">
+                                                {isArabic ? 'تصفح ←' : 'Browse →'}
+                                            </span>
+                                        </div>
+
+                                        {/* Center Brand Logo Stage */}
+                                        <div className="relative mx-auto w-[110px] sm:w-[126px] 2xl:w-[148px] h-[56px] sm:h-[66px] 2xl:h-[78px] flex items-center justify-center shrink-0">
                                             {brand.image ? (
                                                 <ResilientImage
                                                     src={brand.image}
-                                                    alt={getBrandDisplayName(brand, isArabic ? 'ar' : 'en')}
+                                                    alt={primaryName}
                                                     showSkeleton={false}
-                                                    className="object-contain filter group-hover:scale-105 transition-transform duration-300"
+                                                    className="object-contain object-center transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/slot:scale-[1.06]"
                                                 />
                                             ) : (
-                                                <span className="text-xl font-black text-[#0B192C] dark:text-white">
-                                                    {getBrandDisplayName(brand, isArabic ? 'ar' : 'en')}
+                                                <span className="text-base sm:text-lg font-extrabold text-[#0B192C] dark:text-white text-center">
+                                                    {primaryName}
                                                 </span>
                                             )}
                                         </div>
 
-                                        {/* Brand Details (Middle: Latin Name & Category) */}
-                                        <div className="w-full flex flex-col items-center mt-1">
-                                            <h3 className="text-base sm:text-lg font-bold text-[#0B192C] dark:text-white group-hover:text-[#C28E2B] transition-colors truncate max-w-full">
-                                                {latinName}
-                                            </h3>
+                                        {/* Bottom Brand Identity Row */}
+                                        <div className="flex items-baseline justify-between gap-2 pt-1">
+                                            <span className="text-[13.5px] sm:text-[15px] font-extrabold text-[#0B192C] dark:text-white truncate">
+                                                {primaryName}
+                                            </span>
+                                            {secondaryName ? (
+                                                <span className="text-[10.5px] sm:text-[11.5px] font-semibold text-slate-400 group-hover/slot:text-[#8A6305] dark:group-hover/slot:text-[#E5B54A] transition-colors truncate">
+                                                    {secondaryName}
+                                                </span>
+                                            ) : null}
                                         </div>
 
-                                        {/* Call to Action Link (Bottom: Golden Link with Arrow) */}
-                                        <div className="flex items-center justify-center gap-1.5 text-xs sm:text-[13px] font-semibold text-[#C28E2B] group-hover:text-[#966b15] transition-colors mt-2 pb-0.5">
-                                            <span>{isArabic ? 'عرض المنتجات' : 'View Products'}</span>
-                                            <span className={isArabic ? 'text-sm group-hover:-translate-x-1 transition-transform' : 'text-sm group-hover:translate-x-1 transition-transform'}>
-                                                {isArabic ? '←' : '→'}
-                                            </span>
-                                        </div>
+                                        {/* Bottom Right-to-Left Sweep Underline */}
+                                        <span
+                                            aria-hidden="true"
+                                            className="pointer-events-none absolute inset-x-0 bottom-0 h-[2.5px] bg-[#0F2138] dark:bg-[#E5B54A] scale-x-0 origin-left group-hover/slot:origin-right group-hover/slot:scale-x-100 transition-transform duration-320 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                        />
                                     </Link>
                                 </SwiperSlide>
                             );

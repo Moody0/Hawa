@@ -42,8 +42,8 @@
   --color-text-body: var(--text-body);
   --color-text-sub: var(--text-sub);
 
-  --font-display: var(--font-figtree), var(--font-noto-sans-arabic), sans-serif;
-  --font-sans: var(--font-figtree), var(--font-noto-sans-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-arabic), var(--font-latin), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-arabic), var(--font-latin), ui-sans-serif, system-ui, sans-serif;
 
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
@@ -62,6 +62,14 @@
 @layer base {
   html {
     scroll-behavior: auto;
+  }
+
+  /* Proportional viewport calibration for small/standard laptops (1280px, 1366px, 1440px, 1536px)
+     so all rem-based typography, spacing, and cards match the visual density of a 1920px+ monitor */
+  @media (min-width: 1024px) and (max-width: 1720px) {
+    html {
+      font-size: clamp(13px, 0.9vw + 0.6px, 16px);
+    }
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -97,7 +105,7 @@
 
 @layer utilities {
   .container-custom {
-    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 max-w-[1600px];
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-0 lg:max-w-[min(86vw,1520px)];
   }
 
   .glass {
@@ -181,10 +189,22 @@
 
 @layer base {
   body {
-    @apply bg-background-light dark:bg-background-dark text-text-body-light dark:text-text-body-dark transition-colors duration-200 tracking-[-0.01em];
+    @apply bg-background-light dark:bg-background-dark text-text-body-light dark:text-text-body-dark transition-colors duration-200;
+    font-family: var(--font-sans);
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  }
+  [dir="rtl"] body,
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6 {
+    letter-spacing: 0 !important;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply text-heading dark:text-text-main-dark;
+    font-family: var(--font-display);
   }
 }
 

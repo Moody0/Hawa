@@ -70,15 +70,21 @@ const TestimonialsMasonry = ({ reviews = [], settings }: TestimonialsMasonryProp
     }, []);
 
     const allReviews = React.useMemo(() => {
+        let raw: ReviewItem[] = reviews;
         if (settings?.homeTestimonialsItems) {
             try {
                 const parsed = JSON.parse(settings.homeTestimonialsItems);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    return parsed as ReviewItem[];
+                    raw = parsed as ReviewItem[];
                 }
             } catch {}
         }
-        return reviews;
+        return (raw || []).filter((r) => {
+            const text = (r.feedback || '').trim().toLowerCase();
+            if (!text || text.length < 6) return false;
+            if (['تيست', 'تست', 'test', 'testing', 'تجربة'].includes(text)) return false;
+            return true;
+        });
     }, [reviews, settings?.homeTestimonialsItems]);
 
     if (settings?.homeTestimonialsEnabled === false || !allReviews || allReviews.length === 0) {
@@ -94,26 +100,41 @@ const TestimonialsMasonry = ({ reviews = [], settings }: TestimonialsMasonryProp
         : (settings?.homeTestimonialsDesc || settings?.homeTestimonialsDescAr || 'Endorsements from verified retail merchants and grocery partners');
 
     return (
-        <section className="w-full py-7 md:py-10 border-t border-slate-200 dark:border-white/10">
+        <section className="w-full py-8 md:py-12">
             <div className="container-custom">
-                {/* Centered Section Header with Decorative Flanking Lines */}
-                <div className="text-center mb-7 sm:mb-9">
-                    <div className="flex items-center justify-center gap-3 mb-1.5">
-                        <span className="w-8 sm:w-12 h-0.5 bg-[#8A6305]/60 dark:bg-[#E5B54A]/60 rounded-full" />
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0B192C] dark:text-white tracking-tight" data-reveal-heading>
+                {/* Start-aligned Section Header */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+                    <div className="text-start">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0B192C] dark:text-white tracking-tight">
                             {titleText}
                         </h2>
-                        <span className="w-8 sm:w-12 h-0.5 bg-[#8A6305]/60 dark:bg-[#E5B54A]/60 rounded-full" />
+                        <p className="mt-1 text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-[65ch]">
+                            {descText}
+                        </p>
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto" data-reveal-copy>
-                        {descText}
-                    </p>
+                    {allReviews.length > 3 && (
+                        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+                            <button
+                                type="button"
+                                className="review-nav-prev inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200/90 dark:border-white/15 bg-white dark:bg-zinc-900 text-slate-700 dark:text-slate-200 hover:border-slate-300 hover:bg-slate-50 active:translate-y-px transition-colors cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+                                aria-label={isArabic ? 'التقييمات السابقة' : 'Previous reviews'}
+                            >
+                                {isArabic ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+                            </button>
+                            <button
+                                type="button"
+                                className="review-nav-next inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200/90 dark:border-white/15 bg-white dark:bg-zinc-900 text-slate-700 dark:text-slate-200 hover:border-slate-300 hover:bg-slate-50 active:translate-y-px transition-colors cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+                                aria-label={isArabic ? 'التقييمات التالية' : 'Next reviews'}
+                            >
+                                {isArabic ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                {/* Swiper Auto-Scroll Slider with Left & Right Side Navigation Buttons */}
+                {/* Reviews Rail */}
                 <div
-                    className="relative w-full group/rail"
-                    data-reveal-item
+                    className="relative w-full"
                     onFocusCapture={() => swiperRef.current?.autoplay?.stop()}
                     onBlurCapture={(event) => {
                         if (!event.currentTarget.contains(event.relatedTarget as Node | null) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -121,24 +142,6 @@ const TestimonialsMasonry = ({ reviews = [], settings }: TestimonialsMasonryProp
                         }
                     }}
                 >
-                    {/* Previous Button on side flank - hidden on mobile screens */}
-                    <button
-                        type="button"
-                        className="review-nav-prev absolute -start-3 sm:-start-4 md:-start-5 top-1/2 -translate-y-1/2 z-20 hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:border-[#8A6305] dark:hover:text-[#8A6305] hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
-                        aria-label={isArabic ? 'التقييمات السابقة' : 'Previous reviews'}
-                    >
-                        {isArabic ? <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" /> : <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />}
-                    </button>
-
-                    {/* Next Button on side flank - hidden on mobile screens */}
-                    <button
-                        type="button"
-                        className="review-nav-next absolute -end-3 sm:-end-4 md:-end-5 top-1/2 -translate-y-1/2 z-20 hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 items-center justify-center text-[#0B192C] dark:text-white hover:border-[#8A6305] hover:text-[#8A6305] dark:hover:border-[#8A6305] dark:hover:text-[#8A6305] hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
-                        aria-label={isArabic ? 'التقييمات التالية' : 'Next reviews'}
-                    >
-                        {isArabic ? <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" /> : <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />}
-                    </button>
-
                     <Swiper
                         modules={[Autoplay, Navigation]}
                         onSwiper={(swiper) => {
@@ -158,14 +161,14 @@ const TestimonialsMasonry = ({ reviews = [], settings }: TestimonialsMasonryProp
                         observeParents={true}
                         watchOverflow={true}
                         loop={allReviews.length > 3}
-                        spaceBetween={14}
+                        spaceBetween={16}
                         slidesPerView={1.15}
                         breakpoints={{
                             640: { slidesPerView: 2, spaceBetween: 16 },
                             1024: { slidesPerView: 3, spaceBetween: 20 },
                             1280: { slidesPerView: 3, spaceBetween: 20 },
                         }}
-                        className="reviews-slider-swiper !py-2"
+                        className="reviews-slider-swiper"
                     >
                         {allReviews.map((review) => {
                             const productUrl = review.productSlug ? `/products/${review.productSlug}` : '/products';
@@ -176,48 +179,38 @@ const TestimonialsMasonry = ({ reviews = [], settings }: TestimonialsMasonryProp
 
                             return (
                                 <SwiperSlide key={review.id} className="h-auto">
-                                    <div 
-                                        className="h-full w-full bg-white dark:bg-[#132035] border border-slate-200/80 dark:border-white/10 rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-200 hover:border-[#C28E2B]/60 shadow-2xs"
-                                    >
+                                    <div className="h-full w-full bg-[#FAF7F0] dark:bg-[#132035] border border-slate-200/90 dark:border-white/10 rounded-xl p-5 sm:p-6 flex flex-col justify-between">
                                         <div>
-                                            <div className="flex items-start justify-between gap-3 mb-3">
-                                                <div>
-                                                    <h3 className="font-bold text-[#0B192C] dark:text-white text-sm sm:text-base line-clamp-1">
-                                                        {isArabic 
-                                                            ? review.name.split('-')[0].trim() 
-                                                            : (review.name.split('-')[1]?.trim() || review.name.split('-')[0].trim())}
-                                                    </h3>
-                                                    <span className="text-[11px] text-[#16A34A] dark:text-[#4ade80] font-semibold mt-1 flex items-center gap-1">
-                                                        <span>✓</span>
-                                                        <span>{isArabic ? 'عميل جملة معتمد' : 'Verified Buyer'}</span>
-                                                    </span>
-                                                </div>
+                                            <div className="flex items-center justify-between gap-3 mb-3">
+                                                <h3 className="font-bold text-[#0B192C] dark:text-white text-sm sm:text-base line-clamp-1">
+                                                    {isArabic
+                                                        ? review.name.split('-')[0].trim()
+                                                        : (review.name.split('-')[1]?.trim() || review.name.split('-')[0].trim())}
+                                                </h3>
                                                 <StarIcons count={review.rating || 5} />
                                             </div>
 
-                                            <p className="text-[#475569] dark:text-slate-300 text-xs sm:text-sm leading-relaxed mb-5 min-h-[56px] line-clamp-3">
-                                                "{review.feedback}"
+                                            <p className="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed mb-5 line-clamp-3">
+                                                {review.feedback}
                                             </p>
                                         </div>
 
-                                        <Link 
-                                            href={productUrl} 
-                                            className="pt-3.5 border-t border-slate-100 dark:border-white/10 group flex items-center gap-3 hover:text-[#C28E2B] transition-colors mt-auto"
+                                        <Link
+                                            href={productUrl}
+                                            className="pt-3.5 border-t border-slate-200/70 dark:border-white/10 group flex items-center gap-3 hover:text-[#8A6305] transition-colors mt-auto"
                                         >
-                                            {/* Product image container - fully filled by object-cover image */}
-                                            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200/80 dark:border-white/10 shadow-2xs">
+                                            <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-white dark:bg-slate-800 shrink-0 border border-slate-200/80 dark:border-white/10">
                                                 <ResilientImage
                                                     src={productImg}
                                                     alt={productName}
-                                                    sizes="56px"
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                                    sizes="44px"
+                                                    className="w-full h-full object-contain p-1"
                                                     loading="lazy"
                                                 />
                                             </div>
-                                            <span className="text-xs font-bold text-[#0B192C] dark:text-slate-200 line-clamp-1 flex-1 group-hover:text-[#C28E2B] transition-colors">
+                                            <span className="text-xs sm:text-sm font-semibold text-[#0B192C] dark:text-slate-200 line-clamp-1 flex-1 group-hover:text-[#8A6305] transition-colors">
                                                 {productName}
                                             </span>
-                                            <span className={`text-[#475569] group-hover:text-[#C28E2B] text-xs transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 ${isArabic ? 'rotate-180' : ''}`}>→</span>
                                         </Link>
                                     </div>
                                 </SwiperSlide>

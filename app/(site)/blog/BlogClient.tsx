@@ -83,10 +83,6 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
             <section className="container-custom pt-10 pb-8 md:pt-14 md:pb-10">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-200/80 dark:border-white/10">
                     <div className="max-w-2xl">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/20 text-[#8A6305] dark:text-[#E5B54A] text-xs font-black uppercase tracking-widest mb-3">
-                            <FileText className="text-sm" />
-                            <span>{isAr ? 'المدونة والتقارير الميدانية' : 'Editorial & Trade Bulletins'}</span>
-                        </div>
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0B192C] dark:text-white tracking-tight leading-tight">
                             {isAr ? contacts.content.blogTitleAr : contacts.content.blogTitle}
                         </h1>
@@ -170,11 +166,6 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
                         {/* 1. Lead Story Spotlight (Editorial Feature) */}
                         {leadPost && (
                             <section className="mb-12">
-                                <div className="text-xs font-black uppercase tracking-widest text-[#8A6305] dark:text-[#E5B54A] mb-3 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
-                                    <span>{isAr ? 'تقرير رئيسي مميز' : 'Lead Story Spotlight'}</span>
-                                </div>
-
                                 <Link 
                                     href={`/blog/${leadPost.slug}`}
                                     className="group block bg-white dark:bg-[#132035] rounded-3xl border border-slate-200/80 dark:border-white/10 overflow-hidden hover:border-[#8A6305]/40 hover:shadow-xl transition-all duration-300"
@@ -242,11 +233,6 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
                         {/* 2. Secondary Editorial Grid */}
                         {secondaryPosts.length > 0 && (
                             <section className="mb-14">
-                                <div className="text-xs font-black uppercase tracking-widest text-[#8A6305] dark:text-[#E5B54A] mb-6 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
-                                    <span>{isAr ? 'أحدث التقارير والمستجدات' : 'Latest Reports & Bulletins'}</span>
-                                </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                                     {secondaryPosts.map((post) => {
                                         return (
@@ -322,10 +308,6 @@ export default function BlogClient({ initialPosts }: BlogClientProps) {
                 <section className="bg-[#FAF6EC] dark:bg-white/[0.03] rounded-3xl p-6 sm:p-8 border border-[#8A6305]/20 mt-8 mb-12">
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                         <div className="max-w-2xl">
-                            <div className="inline-flex items-center gap-2 text-xs font-black text-[#8A6305] dark:text-[#E5B54A] uppercase tracking-wider mb-2">
-                                <ShieldCheck className="text-base" />
-                                <span>{isAr ? 'مكتب التنسيق ومبيعات الجملة' : 'Wholesale Sales Desk'}</span>
-                            </div>
                             <h3 className="text-lg sm:text-xl font-black text-[#0B192C] dark:text-white leading-snug">
                                 {isAr 
                                     ? 'هل تود توريد منتجات وكالتك أو الاستفسار عن لوائح أسعار الطرود؟'

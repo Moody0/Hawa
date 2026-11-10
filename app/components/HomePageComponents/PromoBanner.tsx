@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Award, Users, Truck, Store, Building2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Award, Users, Truck, Store, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface PromoBannerProps {
     settings?: {
@@ -45,11 +45,7 @@ const PromoBanner = ({ settings, dir = 'rtl', language = 'ar' }: PromoBannerProp
                     <div className="relative z-10 p-5 sm:p-7 lg:p-8 xl:p-10" dir={dir}>
                         <div className="grid gap-7 xl:grid-cols-[0.9fr_1.1fr] xl:items-center">
                             <div className="text-start">
-                                <span className="inline-flex items-center gap-2 rounded-full border border-[#E5B54A]/30 bg-[#E5B54A]/10 px-3 py-1 text-[10px] font-black tracking-wider text-[#E5B54A]">
-                                    <Building2 className="h-3.5 w-3.5" />
-                                    {isArabic ? 'بوابة شركاء حوا' : 'Hawa partner portal'}
-                                </span>
-                                <h2 className="mt-3 text-xl sm:text-2xl lg:text-3xl font-black leading-tight text-white" data-reveal-heading>
+                                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black leading-tight text-white" data-reveal-heading>
                                     {isArabic ? 'هل لديك متجر أو سوبرماركت؟' : 'Do you own a store or supermarket?'}
                                 </h2>
                                 <p className="mt-2 max-w-lg text-xs sm:text-sm leading-relaxed text-slate-300" data-reveal-copy>

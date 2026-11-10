@@ -157,12 +157,7 @@ export default function MerchantRegisterPage() {
                             <Hourglass />
                         </div>
 
-                        {/* Title & Badge */}
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-[#8A6305] dark:text-[#E5B54A] text-xs font-bold mb-3 border border-[#8A6305]/20">
-                            <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
-                            <span>{isArabic ? 'الطلب قيد المراجعة والتدقيق' : 'Request Pending Review'}</span>
-                        </div>
-
+                        {/* Title */}
                         <h1 className="text-xl sm:text-2xl font-black text-[#0B192C] dark:text-white tracking-tight mb-2">
                             {isArabic ? 'تم استلام طلب تسجيل محلك التجاري بنجاح!' : 'Merchant Registration Received!'}
                         </h1>

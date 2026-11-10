@@ -19,17 +19,13 @@ export default function PartnerPrideBanner({
 }: PartnerPrideBannerProps) {
     const isArabic = language === 'ar' || dir === 'rtl';
 
-    const badge = isArabic
-        ? (content?.homePrideBadgeAr || 'وكيل توزيع معتمد')
-        : (content?.homePrideBadge || 'Authorized distributor');
-
     const title = isArabic
         ? (content?.homePrideTitleAr || PARTNER_PRIDE_TITLE_AR)
-        : (content?.homePrideTitle || 'Proud to represent Bitinjana Brothers');
+        : (content?.homePrideTitle || 'Proud to represent and distribute Bitinjana Brothers products');
 
     const description = isArabic
-        ? (content?.homePrideDescriptionAr || 'منتجات بيتنجانة إخوان الأصلية، متوفرة بالجملة مع توصيل مباشر لمتجرك.')
-        : (content?.homePrideDescription || 'Authentic Bitinjana Brothers products, supplied wholesale and delivered to your store.');
+        ? (content?.homePrideDescriptionAr || 'أصناف أصلية تصل إلى متجرك مباشرة عبر شبكة توزيع حوا.')
+        : (content?.homePrideDescription || 'Authentic Bitinjana Brothers products delivered directly to your store through the Hawa distribution network.');
 
     const buttonText = isArabic
         ? (content?.homePrideButtonAr || 'تصفح الأصناف')
@@ -37,55 +33,85 @@ export default function PartnerPrideBanner({
 
     const buttonLink = content?.homePrideLink || '/products';
 
+    const highlightTargetAr = 'شركة بيتنجانة إخوان';
+    const highlightTargetEn = 'Bitinjana Brothers';
+    const targetPhrase = isArabic ? highlightTargetAr : highlightTargetEn;
+    const highlightIndex = title.indexOf(targetPhrase);
+
     return (
-        <section aria-label={title} className="w-full pt-3 pb-4 sm:pt-4 sm:pb-6">
+        <section aria-label={title} className="w-full pt-5 pb-4 sm:pt-8 sm:pb-6 2xl:pt-10 2xl:pb-7">
             <div className="container-custom">
-                <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#EADFC8] bg-[#F3ECDA] p-4 dark:border-white/10 dark:bg-[#0f172a] sm:p-6">
+                <div className="group/pride relative w-full overflow-hidden rounded-[18px] sm:rounded-[20px] border border-[#E5B54A]/30 bg-[#0F2138] p-5 text-white transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:border-[#E5B54A]/55 hover:shadow-[0_24px_50px_-18px_rgba(11,25,44,0.35)] sm:px-10 sm:py-7 2xl:px-14 2xl:py-9">
+                    {/* Top Subtle Gold Hairline */}
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#E5B54A] to-transparent opacity-65"
+                    />
+
+                    {/* Ambient HB Shield Watermark on the End Side */}
                     <Image
-                        src="/images/betengana/botanical-decoration-generated.webp"
+                        src="/images/betengana/hb-shield-logo.webp"
                         alt=""
                         aria-hidden="true"
-                        width={900}
+                        width={480}
                         height={600}
-                        sizes="(min-width: 768px) 420px, 260px"
-                        className="pointer-events-none absolute -bottom-4 start-[-2.5rem] w-64 select-none opacity-45 md:w-[26rem] dark:opacity-10"
+                        sizes="260px"
+                        className="pointer-events-none absolute -end-4 top-1/2 w-[180px] sm:w-[250px] -translate-y-1/2 select-none opacity-[0.04] transition-all duration-600 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/pride:scale-105 group-hover/pride:opacity-[0.075]"
                     />
-                    <div className="relative z-10 flex items-center justify-between gap-3 sm:gap-8">
-                        <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
-                            <p className="flex items-center gap-2 text-[11px] font-semibold text-[#8A6305] dark:text-[#E5B54A] sm:text-xs">
-                                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
-                                {badge}
-                            </p>
-                            <h2 className="text-lg font-extrabold leading-snug tracking-tight text-[#0B192C] dark:text-white sm:text-3xl">
-                                {isArabic && title === PARTNER_PRIDE_TITLE_AR ? (
-                                    <>
-                                        <span className="text-[#8A6305] dark:text-[#E5B54A]">نَفخر</span>
-                                        {title.slice('نَفخر'.length)}
-                                    </>
-                                ) : title}
-                            </h2>
-                            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
-                                {description}
-                            </p>
-                            <Link
-                                href={buttonLink}
-                                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0B192C] px-5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#16304d] dark:bg-[#E5B54A] dark:text-[#0B192C] dark:hover:bg-[#f0c35d] sm:text-sm"
-                            >
-                                <span>{buttonText}</span>
-                                {isArabic ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-                            </Link>
+
+                    <div className="relative z-10 flex flex-col items-stretch justify-between gap-4 sm:gap-6 md:flex-row md:items-center md:gap-8 2xl:gap-10">
+                        {/* Start Side: Shield Crest + Pride Statement */}
+                        <div className="flex min-w-0 flex-1 items-center gap-3.5 sm:gap-8 2xl:gap-11">
+                            <div className="shrink-0 border-e border-[#E5B54A]/22 pe-3.5 sm:pe-8 2xl:pe-11">
+                                <Image
+                                    src="/images/betengana/hb-shield-logo.webp"
+                                    alt={isArabic ? 'شعار شركة بيتنجانة إخوان HB' : 'Betinjaneh HB emblem'}
+                                    width={480}
+                                    height={600}
+                                    sizes="(min-width: 640px) 120px, 60px"
+                                    className="h-auto w-[58px] object-contain transition-transform duration-450 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/pride:-translate-y-[3px] group-hover/pride:scale-[1.04] sm:w-[96px] 2xl:w-[118px]"
+                                />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                                <h2 className="mb-1.5 sm:mb-2 text-[16.5px] font-extrabold leading-[1.35] tracking-tight text-white sm:text-[23px] xl:text-[25px] 2xl:text-[30px]">
+                                    {highlightIndex !== -1 ? (
+                                        <>
+                                            {title.slice(0, highlightIndex)}
+                                            <span className="relative inline-block text-[#E5B54A]">
+                                                {targetPhrase}
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 bg-white transition-transform duration-380 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/pride:origin-right group-hover/pride:scale-x-100"
+                                                />
+                                            </span>
+                                            {title.slice(highlightIndex + targetPhrase.length)}
+                                        </>
+                                    ) : (
+                                        title
+                                    )}
+                                </h2>
+                                <p className="max-w-[62ch] text-[12px] leading-[1.55] text-white/75 sm:text-[14.5px] sm:leading-[1.65] 2xl:text-[16px]">
+                                    {description}
+                                </p>
+                            </div>
                         </div>
 
-                        <Image
-                            src="/images/betengana/hb-shield-logo.webp"
-                            alt={isArabic ? 'شعار HB بيتنجانة' : 'Betinjaneh HB emblem'}
-                            width={480}
-                            height={600}
-                            sizes="(min-width: 768px) 176px, 96px"
-                            className="h-auto w-20 shrink-0 sm:w-32 md:w-44"
-                        />
+                        {/* End Side: Full-width capsule on mobile, compact capsule on desktop */}
+                        <div className="shrink-0 pt-1 sm:pt-0">
+                            <Link
+                                href={buttonLink}
+                                className="inline-flex w-full md:w-auto h-10 sm:h-[42px] 2xl:h-[48px] items-center justify-center gap-2 rounded-full bg-[#D89E28] px-6 2xl:px-7 text-[13px] sm:text-[13.5px] 2xl:text-[14.5px] font-extrabold text-[#0B192C] transition-colors duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[#E5B54A]"
+                            >
+                                <span>{buttonText}</span>
+                                {isArabic ? (
+                                    <ArrowLeft className="h-4 w-4 transition-transform duration-280 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/pride:-translate-x-1" />
+                                ) : (
+                                    <ArrowRight className="h-4 w-4 transition-transform duration-280 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/pride:translate-x-1" />
+                                )}
+                            </Link>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </section>

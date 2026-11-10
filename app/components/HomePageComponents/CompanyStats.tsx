@@ -53,10 +53,6 @@ export default function CompanyStats({ stats }: CompanyStatsProps) {
             <div className="container-custom">
                 {/* Header title */}
                 <div className="text-center max-w-2xl mx-auto mb-8 md:mb-12">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#8A6305]/10 border border-[#8A6305]/25 text-[#8A6305] dark:text-[#8A6305] text-xs font-bold uppercase tracking-wider mb-3">
-                        <span className="w-2 h-2 rounded-full bg-[#8A6305] animate-pulse" />
-                        <span>{isArabic ? 'أرقام تتحدث عن ثقة السوق' : 'Numbers Behind Market Trust'}</span>
-                    </div>
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0B192C] dark:text-white tracking-tight">
                         {isArabic ? 'قوة شبكتنا وخبرتنا في التوزيع' : 'The Strength of Our Distribution Network'}
                     </h2>

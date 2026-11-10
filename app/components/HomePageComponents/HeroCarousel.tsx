@@ -4,8 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { ShoppingCart, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
-import { FaWhatsapp } from 'react-icons/fa';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface Banner {
     id: string;
@@ -47,64 +46,6 @@ interface HeroCarouselProps {
 }
 
 const SLIDE_DURATION = 6000; // 6 seconds per slide
-
-function parseHeadline(title: string, isArabic: boolean): { part1: string; part2: string } {
-    if (!title) {
-        return {
-            part1: isArabic ? "شريكك الموثوق" : "Your Trusted Partner",
-            part2: isArabic ? "في التوزيع والتجارة" : "In Distribution & Trading",
-        };
-    }
-
-    if (title.includes('\n')) {
-        const [p1, ...rest] = title.split('\n');
-        return { part1: p1.trim(), part2: rest.join(' ').trim() };
-    }
-
-    if (title.includes('…')) {
-        const [p1, ...rest] = title.split('…');
-        return { part1: p1.trim(), part2: rest.join(' ').trim() };
-    }
-
-    if (title.includes('...')) {
-        const [p1, ...rest] = title.split('...');
-        return { part1: p1.trim(), part2: rest.join(' ').trim() };
-    }
-
-    if (title.includes(' - ')) {
-        const [p1, ...rest] = title.split(' - ');
-        return { part1: p1.trim(), part2: rest.join(' ').trim() };
-    }
-
-    const words = title.trim().split(/\s+/);
-    if (isArabic) {
-        if (words.length >= 4) {
-            const splitWordIdx = words.findIndex((w, i) => i > 0 && ['في', 'بطلب', 'لباب', 'مع', 'لكبرى', 'للمحلات'].includes(w));
-            if (splitWordIdx > 0 && splitWordIdx < words.length) {
-                return {
-                    part1: words.slice(0, splitWordIdx).join(' '),
-                    part2: words.slice(splitWordIdx).join(' '),
-                };
-            }
-            const mid = Math.ceil(words.length / 2);
-            return {
-                part1: words.slice(0, mid).join(' '),
-                part2: words.slice(mid).join(' '),
-            };
-        }
-        return { part1: title, part2: '' };
-    }
-
-    if (words.length >= 4) {
-        const mid = Math.ceil(words.length / 2);
-        return {
-            part1: words.slice(0, mid).join(' '),
-            part2: words.slice(mid).join(' '),
-        };
-    }
-
-    return { part1: title, part2: '' };
-}
 
 const HeroCarousel = ({ banners }: HeroCarouselProps) => {
     const { dir } = useLanguage();
@@ -278,7 +219,7 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
-            className="group/hero relative w-full h-[460px] sm:h-[500px] md:h-[520px] lg:h-[540px] xl:h-[580px] overflow-hidden bg-slate-950 focus:outline-hidden touch-pan-y select-none"
+            className="group/hero relative w-full h-[420px] sm:h-[450px] md:h-[460px] lg:h-[clamp(330px,28vw,560px)] overflow-hidden bg-slate-950 focus:outline-hidden touch-pan-y select-none"
         >
             <style jsx>{`
                 @keyframes heroProgress {
@@ -341,10 +282,10 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
             <div className="relative w-full h-full">
                 {slides.map((slide, index) => {
                     const isActive = index === currentIndex;
-                    const headline = parseHeadline(isArabic ? slide.titleAr : slide.title, isArabic);
+                    const isGeneratedBanner = slide.image.startsWith('/images/hero-banner-collection/');
+                    const headlineText = (isArabic ? slide.titleAr : slide.title) || (isArabic ? 'شريكك الموثوق في التوزيع والتجارة' : 'Your Trusted Partner in Distribution & Trading');
                     const subtitleText = isArabic ? slide.subtitleAr : slide.subtitle;
                     const primaryButtonText = isArabic ? slide.buttonTextAr : slide.buttonText;
-                    const badgeText = isArabic ? (slide.badgeAr || 'توزيع جملة معتمد') : (slide.badge || 'Certified Wholesale');
 
                     const secondaryBtnText = isArabic
                         ? (slide.secondaryButtonTextAr || 'طلب جملة عبر واتساب')
@@ -355,15 +296,23 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                     return (
                         <div
                             key={slide.id}
-                            className={`absolute inset-0 transition-opacity duration-700 ease-in-out motion-reduce:transition-none ${
+                            className={`absolute inset-0 transition-opacity duration-500 ease-out motion-reduce:transition-none ${
                                 isActive
                                     ? 'opacity-100 z-10 pointer-events-auto'
                                     : 'opacity-0 z-0 pointer-events-none'
                             }`}
                             aria-hidden={!isActive}
                         >
-                            {/* Fill the banner edge to edge, cropping to match the viewport. */}
+                            {/* Preserve the full product artwork on wide screens. */}
                             <div className="absolute inset-0 overflow-hidden bg-[#071522]">
+                                {isGeneratedBanner && (
+                                    <div
+                                        aria-hidden="true"
+                                        className="absolute inset-0 hidden scale-110 bg-cover bg-center blur-2xl md:block"
+                                        style={{ backgroundImage: `url('${slide.image}')` }}
+                                    />
+                                )}
+                                <div className={isGeneratedBanner ? 'absolute inset-0 md:inset-auto md:left-0 md:top-0 md:h-full md:aspect-[2/1] md:max-w-full md:[mask-image:linear-gradient(to_right,black_70%,transparent_100%)]' : 'absolute inset-0'}>
                                 <Image
                                     src={slide.image}
                                     alt={isArabic ? (slide.titleAr || 'بنر الصفحة الرئيسية') : (slide.title || 'Hero banner')}
@@ -372,8 +321,9 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     loading={index === 0 ? "eager" : "lazy"}
                                     unoptimized={slide.image.startsWith('/uploads/')}
                                     sizes="100vw"
-                                    className={`object-cover object-center w-full h-full pointer-events-none ${slide.imageMobile ? 'hidden md:block' : ''}`}
+                                    className={`${isGeneratedBanner ? 'object-cover md:object-contain md:object-left' : 'object-cover object-center'} w-full h-full pointer-events-none ${slide.imageMobile ? 'hidden md:block' : ''}`}
                                 />
+                                </div>
                                 {slide.imageMobile && (
                                     <Image
                                         src={slide.imageMobile}
@@ -388,68 +338,54 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                 )}
                             </div>
 
-                            {/* Soft directional gradient overlay: vertical on mobile, horizontal on desktop */}
+                            {/* Directional scrim for legible typography */}
                             <div
                                 className={`absolute inset-0 pointer-events-none ${
                                     isArabic
-                                        ? 'bg-gradient-to-t from-black/85 via-black/45 via-45% to-transparent sm:bg-gradient-to-l sm:from-black/60 sm:via-black/25 sm:to-transparent'
-                                        : 'bg-gradient-to-t from-black/85 via-black/45 via-45% to-transparent sm:bg-gradient-to-r sm:from-black/60 sm:via-black/25 sm:to-transparent'
+                                        ? 'bg-gradient-to-t from-[#081220]/90 via-[#081220]/45 to-transparent sm:bg-gradient-to-l sm:from-[#081220]/80 sm:via-[#081220]/35 sm:to-transparent'
+                                        : 'bg-gradient-to-t from-[#081220]/90 via-[#081220]/45 to-transparent sm:bg-gradient-to-r sm:from-[#081220]/80 sm:via-[#081220]/35 sm:to-transparent'
                                 }`}
                                 aria-hidden="true"
                             />
 
-                            {/* Content Layer (Gordon Food Service / B2B style) */}
-                            <div className="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end md:items-center pb-14 md:pb-0">
+                            {/* Content Layer */}
+                            <div className="relative z-20 h-full container-custom flex items-end md:items-center pb-16 md:pb-0">
                                 {isActive && (
                                     <div
                                         key={`slide-content-${slide.id}-${animKey}`}
-                                        className="w-full max-w-2xl lg:max-w-3xl flex flex-col items-start text-start py-6 sm:py-8 md:py-12"
+                                        className="w-full max-w-[540px] 2xl:max-w-[640px] flex flex-col items-start text-start py-5 sm:py-7 2xl:py-12"
                                     >
-                                        {/* 1. Eyebrow Badge */}
-                                        <div
-                                            style={reduceMotion ? undefined : { animationDuration: '700ms', animationDelay: '80ms' }}
-                                            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold backdrop-blur-md mb-3 sm:mb-5 shadow-xs ${animClass}`}
-                                        >
-                                            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" aria-hidden="true" />
-                                            <span>{badgeText}</span>
-                                        </div>
-
-                                        {/* 2. Main Headline */}
-                                        <h1
-                                            style={reduceMotion ? undefined : { animationDuration: '800ms', animationDelay: '200ms' }}
-                                            className={`text-2xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-black tracking-tight text-white leading-[1.2] sm:leading-[1.15] drop-shadow-md [text-shadow:0_2px_12px_rgba(0,0,0,0.8)] ${animClass}`}
-                                        >
-                                            <span className="block">{headline.part1}</span>
-                                            {headline.part2 && (
-                                                <span className="mt-1 sm:mt-1.5 block text-[#E5B54A]">
-                                                    {headline.part2}
-                                                </span>
-                                            )}
+                                        {/* Main Headline */}
+                                        <h1 className="text-2xl sm:text-3xl lg:text-[38px] xl:text-[44px] 2xl:text-[54px] font-black tracking-[-0.02em] text-white leading-[1.16] sm:leading-[1.12] text-balance">
+                                            {headlineText}
                                         </h1>
 
-                                        {/* 3. Subtitle / Description */}
+                                        {/* Subtitle / Description */}
                                         {subtitleText && (
-                                            <p
-                                                style={reduceMotion ? undefined : { animationDuration: '800ms', animationDelay: '320ms' }}
-                                                className={`mt-3 sm:mt-5 text-xs sm:text-base md:text-lg text-slate-200 font-normal leading-relaxed max-w-2xl line-clamp-2 sm:line-clamp-none text-pretty drop-shadow-xs [text-shadow:0_1px_6px_rgba(0,0,0,0.8)] ${animClass}`}
-                                            >
+                                            <p className="mt-2.5 sm:mt-3.5 text-sm sm:text-[15px] 2xl:text-[18.5px] text-white/86 font-medium leading-[1.65] max-w-[48ch] line-clamp-2 sm:line-clamp-none text-pretty">
                                                 {subtitleText}
                                             </p>
                                         )}
 
-                                        {/* 4. Action Buttons */}
-                                        <div
-                                            style={reduceMotion ? undefined : { animationDuration: '850ms', animationDelay: '440ms' }}
-                                            className={`mt-5 sm:mt-8 flex flex-wrap items-center gap-3 sm:gap-4 ${animClass}`}
-                                        >
+                                        {/* Action Buttons — Concept 01: Signature Gold Capsule + Editorial Underline Link */}
+                                        <div className="mt-4 sm:mt-6 2xl:mt-7 flex flex-wrap items-center gap-4 sm:gap-[22px] 2xl:gap-[26px]">
                                             <Link
                                                 href={slide.link}
                                                 prefetch={false}
                                                 tabIndex={isActive ? 0 : -1}
-                                                className="group/btn inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-2.5 rounded-xl border border-[#B68012] bg-[#B68012] px-6 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-base font-bold text-white shadow-lg shadow-black/40 transition-all duration-200 hover:bg-[#9E6F0C] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                                className="group/cta inline-flex h-10 sm:h-11 2xl:h-12 items-center justify-center gap-2.5 rounded-full bg-[#C59329] px-5 sm:px-6 2xl:px-7 text-[13px] sm:text-[13.5px] 2xl:text-[14.5px] font-black text-[#0B192C] transition-colors duration-200 hover:bg-[#D4A134] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                                             >
                                                 <span>{primaryButtonText}</span>
-                                                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover/btn:-translate-x-1 rtl:group-hover/btn:translate-x-1" aria-hidden="true" />
+                                                <span
+                                                    className={`inline-block transition-transform duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                                                        isArabic
+                                                            ? 'group-hover/cta:-translate-x-1'
+                                                            : 'group-hover/cta:translate-x-1'
+                                                    }`}
+                                                    aria-hidden="true"
+                                                >
+                                                    {isArabic ? '←' : '→'}
+                                                </span>
                                             </Link>
 
                                             <Link
@@ -458,14 +394,19 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                                 tabIndex={isActive ? 0 : -1}
                                                 target={isSecExternal ? '_blank' : undefined}
                                                 rel={isSecExternal ? 'noopener noreferrer' : undefined}
-                                                className="hidden sm:inline-flex min-h-12 items-center justify-center gap-2.5 rounded-xl border border-white/30 bg-white/10 px-5 sm:px-6 py-3.5 text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-200 hover:bg-white/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                                className="group/sec hidden sm:inline-flex items-center gap-2 py-1.5 text-[15px] font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] rounded-sm"
                                             >
-                                                {slide.secondaryIcon === 'agencies' ? (
-                                                    <Building2 className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
-                                                ) : (
-                                                    <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" aria-hidden="true" />
-                                                )}
-                                                <span>{secondaryBtnText}</span>
+                                                <span className="relative pb-1">
+                                                    {secondaryBtnText}
+                                                    <span
+                                                        className={`pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-[#E5B54A] scale-x-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/sec:scale-x-100 ${
+                                                            isArabic
+                                                                ? 'origin-left group-hover/sec:origin-right'
+                                                                : 'origin-right group-hover/sec:origin-left'
+                                                        }`}
+                                                    />
+                                                </span>
+                                                <span className="text-[13px] text-[#E5B54A]" aria-hidden="true">↗</span>
                                             </Link>
                                         </div>
                                     </div>
@@ -499,14 +440,14 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                 </>
             )}
 
-            {/* Bottom Pagination & Progress Indicators */}
+            {/* Bottom Pagination Indicators — Sleek Horizontal Dash Bars */}
             {slides.length > 1 && (
                 <div
-                    className="absolute bottom-9 sm:bottom-10 inset-x-0 z-30 flex items-center justify-center gap-2"
+                    className="absolute bottom-9 md:bottom-6 inset-x-0 z-30 flex items-center justify-center"
                     aria-label={isArabic ? 'التحكم في البنرات' : 'Banner controls'}
                 >
                     <div
-                        className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15"
+                        className="flex items-center justify-center gap-2"
                         role="tablist"
                         aria-label={isArabic ? 'التنقل بين البنرات' : 'Banner navigation'}
                     >
@@ -520,21 +461,12 @@ const HeroCarousel = ({ banners }: HeroCarouselProps) => {
                                     aria-selected={isActive}
                                     aria-label={isArabic ? `الانتقال إلى البنر ${idx + 1}` : `Go to banner ${idx + 1}`}
                                     onClick={() => goToSlide(idx)}
-                                    className={`relative transition-all duration-300 rounded-full cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] ${
+                                    className={`h-[3.5px] w-7 sm:w-8 rounded-full transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5B54A] ${
                                         isActive
-                                            ? 'w-8 sm:w-10 h-2 bg-white/25'
-                                            : 'w-2 h-2 bg-white/40 hover:bg-white/70'
+                                            ? 'bg-[#E5B54A]'
+                                            : 'bg-white/35 hover:bg-white/60'
                                     }`}
-                                >
-                                    {isActive && (
-                                        <span
-                                            key={`prog-${animKey}`}
-                                            className={`absolute inset-y-0 start-0 bg-[#E5B54A] rounded-full ${
-                                                isPaused ? 'hero-progress-fill-paused' : 'hero-progress-fill'
-                                            }`}
-                                        />
-                                    )}
-                                </button>
+                                />
                             );
                         })}
                     </div>

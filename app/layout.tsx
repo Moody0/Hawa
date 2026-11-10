@@ -1,19 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree, Noto_Sans_Arabic } from "next/font/google";
+import { Plus_Jakarta_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getI18n } from "@/lib/i18n";
 import { getSiteSettings } from "@/lib/public-queries";
 
-const figtree = Figtree({
-  variable: "--font-figtree",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-latin",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const noto_sans_arabic = Noto_Sans_Arabic({
-  variable: "--font-noto-sans-arabic",
-  subsets: ["arabic"],
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  variable: "--font-arabic",
+  subsets: ["arabic", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -151,7 +153,7 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang={language} dir={dir} suppressHydrationWarning className={`${figtree.variable} ${noto_sans_arabic.variable}`}>
+    <html lang={language} dir={dir} suppressHydrationWarning className={`${plusJakartaSans.variable} ${ibmPlexSansArabic.variable}`}>
       <head>
         <script
           type="application/ld+json"
@@ -159,7 +161,7 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${figtree.className} ${noto_sans_arabic.className} antialiased`}
+        className="font-sans antialiased"
         suppressHydrationWarning
       >
         <a

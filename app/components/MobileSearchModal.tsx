@@ -284,7 +284,6 @@ const MobileSearchModal = ({ isOpen, onClose }: MobileSearchModalProps) => {
                 <div className="p-4 sm:p-6 border-b border-slate-200/70 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-900/40">
                     <div className="flex items-center justify-between gap-3 mb-3">
                         <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-[#8A6305]" />
                             <h2 className="text-sm font-black text-[#0B192C] dark:text-white uppercase tracking-wider">
                                 {isArabic ? 'البحث في كتالوج الجملة' : 'Wholesale Catalog Search'}
                             </h2>

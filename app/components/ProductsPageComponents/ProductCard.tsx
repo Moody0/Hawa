@@ -8,10 +8,10 @@ import { useCurrency } from '@/app/context/CurrencyContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useCart } from '@/app/context/CartContext';
 import { useCustomer } from '@/app/context/CustomerContext';
-import { Plus, Minus, Eye, Lock } from 'lucide-react';
+import { Plus, Minus, Eye } from 'lucide-react';
 import { formatPackaging } from '@/lib/packaging';
 import RollingNumber from '@/app/components/RollingNumber';
-import { motion, AnimatePresence } from 'framer-motion';
+import { getBrandDisplayName } from '@/lib/brand-display';
 
 const QuickViewModal = dynamic(() => import('./QuickViewModal'), { ssr: false });
 
@@ -51,9 +51,16 @@ export interface ProductCardProps {
     showBadge?: boolean;
     isFeaturedSpan?: boolean;
     imagePriority?: boolean;
+    inConnectedGrid?: boolean;
 }
 
-const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }: ProductCardProps) => {
+const ProductCard = ({
+    product,
+    badge,
+    showBadge = true,
+    imagePriority = false,
+    inConnectedGrid = false,
+}: ProductCardProps) => {
     const { language, dir } = useLanguage();
     const isArabic = language === 'ar';
     const { formatPrice } = useCurrency();
@@ -66,7 +73,7 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
     const isPriceOnInquiry = Boolean(product.hidePrice || Number(product.price) <= 0);
 
     const displayName = (language === 'ar' ? product.nameAr : product.nameEn) || product.name || product.nameAr || '';
-    const brandName = product.brand?.name || '';
+    const brandName = product.brand ? getBrandDisplayName(product.brand, isArabic ? 'ar' : 'en') : '';
 
     const cleanDisplayName = useMemo(() => {
         if (!brandName || !displayName) return displayName;
@@ -92,6 +99,7 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
     const secondaryImage = images.length > 1 && images[1] !== images[0] ? images[1] : null;
 
     const minQuantity = Math.max(1, Number(product.minOrder) || 1);
+    const shortUnit = formatPackaging(product.packaging, language, { short: true });
 
     const handleInitialAdd = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -132,196 +140,179 @@ const ProductCard = ({ product, badge, showBadge = true, imagePriority = false }
             <div
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                className="group relative flex flex-col w-full transition-all duration-200"
+                className={`group relative flex flex-col justify-between w-full bg-white dark:bg-zinc-900 hover:bg-[#FAF7F0]/60 dark:hover:bg-zinc-800/70 transition-colors duration-220 ${
+                    inConnectedGrid
+                        ? 'p-3.5 sm:p-5 border-e border-b border-[#0B192C]/[0.08] dark:border-white/10'
+                        : 'p-3 sm:p-4 rounded-[14px] border border-[#0B192C]/[0.09] dark:border-white/10 overflow-hidden'
+                }`}
                 data-testid="product-card"
             >
-                {/* 1. The Media Tile with Seamless Container */}
-                <div className="relative aspect-square w-full bg-white dark:bg-zinc-800/80 border border-slate-200/80 dark:border-white/10 rounded-[10px] overflow-hidden flex items-center justify-center transition-colors group-hover:border-[#8A6305]/40">
-                    
-                    {/* Badge */}
-                    {showBadge && (product.isTrending || badge) && (
-                        <div className="absolute top-2.5 right-2.5 z-20 pointer-events-none">
-                            <span className={`${product.isTrending ? 'bg-[#8A6305]' : 'bg-emerald-600'} text-white text-[10px] font-bold px-2 py-0.5 rounded-md`}>
-                                {displayBadge}
-                            </span>
-                        </div>
-                    )}
-
-                    {/* Quick View Button */}
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setIsQuickViewOpen(true);
-                        }}
-                        className="absolute z-20 top-2.5 left-2.5 w-8 h-8 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 hover:bg-[#0B192C] hover:text-white dark:hover:bg-white dark:hover:text-slate-900 cursor-pointer"
-                        aria-label="Quick View"
-                    >
-                        <Eye className="w-4 h-4" />
-                    </button>
-
-                    {/* Product Image (object-contain with clean padding to prevent any clipping) */}
-                    <Link href={`/products/${product.slug}`} className="relative w-full h-full p-3 flex items-center justify-center">
-                        <div className={`relative w-full h-full transition-opacity duration-200 ${isHovered && secondaryImage ? 'opacity-0' : 'opacity-100'}`}>
-                            <ResilientImage
-                                src={primaryImage}
-                                alt={product.name}
-                                fill
-                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                className="w-full h-full object-contain"
-                                loading={imagePriority ? 'eager' : 'lazy'}
-                                priority={imagePriority}
-                            />
-                        </div>
-                        {secondaryImage && isHovered && (
-                            <div className="absolute inset-0 p-3 transition-opacity duration-200">
-                                <ResilientImage
-                                    src={secondaryImage}
-                                    alt={`${product.name} - alternate view`}
-                                    fill
-                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                    className="w-full h-full object-contain"
-                                    loading="lazy"
-                                />
+                <div>
+                    {/* 1. Seamless Product Image Stage (No nested inner border box) */}
+                    <div className="relative aspect-square w-full bg-white dark:bg-zinc-800/80 rounded-[10px] overflow-hidden flex items-center justify-center mb-3">
+                        {/* Badge */}
+                        {showBadge && (product.isTrending || badge) && (
+                            <div className="absolute top-2 right-2 z-20 pointer-events-none">
+                                <span className="bg-[#0B192C] text-[#E5B54A] text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                                    {displayBadge}
+                                </span>
                             </div>
                         )}
-                    </Link>
 
-                    {/* Quick Add Floating Button & Stepper */}
-                    <div className="absolute bottom-2.5 left-2.5 z-20">
-                        <motion.div
-                            layout
-                            initial={false}
-                            transition={{
-                                layout: { type: "spring", stiffness: 420, damping: 34, mass: 0.7 },
+                        {/* Quick View Button */}
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIsQuickViewOpen(true);
                             }}
-                            className={`h-8 sm:h-9 rounded-full flex items-center justify-center border overflow-hidden select-none transition-colors duration-200 ${
-                                quantityInCart === 0
-                                    ? 'w-8 sm:w-9 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-[#0B192C] dark:text-white hover:border-[#8A6305]'
-                                    : 'w-[5.5rem] sm:w-[6.75rem] bg-[#0B192C] dark:bg-zinc-900 border-slate-700/80 dark:border-zinc-700 text-white'
-                            }`}
+                            className="absolute z-20 top-2 left-2 w-8 h-8 bg-white/90 dark:bg-zinc-900/90 border border-[#0B192C]/10 dark:border-white/10 text-[#0B192C] dark:text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 hover:bg-[#0B192C] hover:text-[#E5B54A] cursor-pointer"
+                            aria-label="Quick View"
                         >
-                            <AnimatePresence mode="sync" initial={false}>
-                                {quantityInCart === 0 ? (
-                                    <motion.button
-                                        key="quick-add-btn"
-                                        initial={{ opacity: 0, scale: 0.85 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.85 }}
-                                        transition={{ duration: 0.14, ease: "easeOut" }}
-                                        onClick={handleInitialAdd}
-                                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full cursor-pointer transition-colors sm:h-9 sm:w-9"
-                                        title={isArabic ? "إضافة للطلب" : "Add to Order"}
-                                        aria-label={isArabic ? "إضافة للطلب" : "Add to Order"}
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                    </motion.button>
-                                ) : (
-                                    <motion.div
-                                        key="quick-stepper-ctrls"
-                                        initial={{ opacity: 0, scale: 0.92 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.92 }}
-                                        transition={{ duration: 0.14, ease: "easeOut" }}
-                                        dir="ltr"
-                                        className="flex h-full w-full items-center justify-between px-0.5"
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={handleDecrease}
-                                            className="flex h-7 w-7 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-white/10 hover:text-white active:scale-90 sm:h-8 sm:w-8"
-                                            aria-label={quantityInCart <= minQuantity ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart') : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')}
-                                            title={quantityInCart <= minQuantity ? (language === 'ar' ? 'حذف من السلة' : 'Remove from cart') : (language === 'ar' ? 'تقليل الكمية' : 'Decrease quantity')}
-                                        >
-                                            <Minus className="w-3.5 h-3.5" />
-                                        </button>
-                                        <RollingNumber
-                                            value={quantityInCart}
-                                            className="text-xs font-black px-1.5 text-center min-w-[1.2rem]"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={handleIncrease}
-                                            className="flex h-7 w-7 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-white/10 hover:text-white active:scale-90 sm:h-8 sm:w-8"
-                                            aria-label={language === 'ar' ? 'زيادة الكمية' : 'Increase quantity'}
-                                            title={language === 'ar' ? 'زيادة الكمية' : 'Increase quantity'}
-                                        >
-                                            <Plus className="w-3.5 h-3.5" />
-                                        </button>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </motion.div>
+                            <Eye className="w-4 h-4" />
+                        </button>
+
+                        {/* Full-Size Product Image */}
+                        <Link href={`/products/${product.slug}`} className="relative w-full h-full p-0 flex items-center justify-center">
+                            <div className={`relative w-full h-full transition-opacity duration-200 ${isHovered && secondaryImage ? 'opacity-0' : 'opacity-100'}`}>
+                                <ResilientImage
+                                    src={primaryImage}
+                                    alt={product.name}
+                                    fill
+                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                    className="w-full h-full object-cover transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+                                    loading={imagePriority ? 'eager' : 'lazy'}
+                                    priority={imagePriority}
+                                />
+                            </div>
+                            {secondaryImage && isHovered && (
+                                <div className="absolute inset-0 p-0 transition-opacity duration-200">
+                                    <ResilientImage
+                                        src={secondaryImage}
+                                        alt={`${product.name} - alternate view`}
+                                        fill
+                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            )}
+                        </Link>
+                    </div>
+
+                    {/* 2. Brand + Mobile Min-Order Meta & Product Title */}
+                    <div className={dir === 'rtl' ? 'text-right' : 'text-left'}>
+                        <div className="flex items-center justify-between gap-1.5 mb-1">
+                            <span className="text-[11px] sm:text-[11.5px] font-bold text-[#8A6305] dark:text-[#E5B54A] truncate">
+                                {brandName || (isArabic ? 'شركة حوا' : 'Hawa Distribution')}
+                            </span>
+
+                            {/* On mobile (< sm), show min order cleanly opposite the brand so it never truncates next to the CTA */}
+                            <span className="sm:hidden text-[10px] font-medium text-slate-400 dark:text-slate-500 shrink-0">
+                                {isArabic ? `أدنى طلب: ${minQuantity} ${shortUnit}` : `Min: ${minQuantity} ${shortUnit}`}
+                            </span>
+                        </div>
+
+                        <h3 className="text-[13px] sm:text-[14px] font-bold text-[#0B192C] dark:text-white line-clamp-2 leading-[1.4] h-[37px] sm:h-[39px] mb-2.5 sm:mb-3">
+                            <Link href={`/products/${product.slug}`} className="hover:text-[#8A6305] dark:hover:text-[#E5B54A] transition-colors">
+                                {cleanDisplayName}
+                            </Link>
+                        </h3>
                     </div>
                 </div>
 
-                {/* 2. Structured Typography & B2B Commercial Metadata */}
-                <div className={`flex flex-col pt-2.5 px-0.5 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
-                    
-                    {/* Packaging & Unit Tag Row */}
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                        <span className="text-[11px] font-bold text-[#8A6305] dark:text-[#E5B54A]">
-                            {product.brand?.name || (isArabic ? 'شركة حوا' : 'Hawa Distribution')}
-                        </span>
-                        <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-white/5">
-                            {formatPackaging(product.packaging, language)}
-                        </span>
-                    </div>
-
-                    {/* Product Title Container */}
-                    <h3 className="text-xs sm:text-sm font-bold text-[#0B192C] dark:text-white line-clamp-2 leading-snug h-10 flex items-start">
-                        <Link href={`/products/${product.slug}`} className="hover:text-[#8A6305] transition-colors">
-                            {cleanDisplayName}
-                        </Link>
-                    </h3>
-
-                    {/* Price & minimum-order details */}
-                    {isLockedForGuest ? (
-                        <div className="mt-1.5 space-y-1 border-t border-slate-100 pt-1.5 dark:border-white/5">
-                            <Link
-                                href="/account/login"
-                                className="group/lock flex min-w-0 items-center gap-2 rounded-lg px-1 py-1 transition-colors hover:bg-[#FAF6EC]/70 dark:hover:bg-[#8A6305]/10"
-                                title={isArabic ? "سجّل دخول التاجر لعرض سعر الجملة" : "Login to view wholesale price"}
-                            >
-                                <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-[#8A6305]/25 bg-[#FAF6EC] transition-colors group-hover/lock:border-[#8A6305] group-hover/lock:bg-[#8A6305] dark:bg-[#8A6305]/20">
-                                    <Lock className="size-3 text-[#8A6305] transition-colors group-hover/lock:text-white" />
-                                </span>
-                                <span className="min-w-0 flex-1 truncate text-[11px] font-bold leading-5 text-slate-700 transition-colors group-hover/lock:text-[#8A6305] dark:text-slate-200 sm:text-xs">
-                                    {isArabic ? "سجّل الدخول لعرض سعر الجملة" : "Sign in to view wholesale price"}
-                                </span>
-                                <span aria-hidden="true" className="shrink-0 select-none rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-black tracking-widest text-slate-400 blur-[1.5px] dark:bg-white/5 dark:text-slate-500">••••</span>
-                            </Link>
-                            <div className="flex items-center justify-between gap-2 px-1 text-[10px] leading-4 text-slate-400 dark:text-slate-500">
-                                <span>{isArabic ? "الحد الأدنى للطلب" : "Minimum order"}</span>
-                                <span className="shrink-0 font-semibold text-slate-500 dark:text-slate-400">
-                                    {isArabic ? `${product.minOrder || 1} طرد` : `${product.minOrder || 1} pkg`}
-                                </span>
-                            </div>
-                        </div>
-                    ) : (
-                    <div className="flex items-baseline justify-between gap-2 mt-1.5 pt-1 border-t border-slate-100 dark:border-white/5">
-                        {!isPriceOnInquiry ? (
+                {/* 3. Bottom Action & Meta Row — Full-Width CTA on Mobile, Balanced Row on Desktop */}
+                <div className="pt-2.5 sm:pt-3 border-t border-[#0B192C]/[0.07] dark:border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    {/* Desktop Meta / Merchant Price */}
+                    <div className={`${!isLockedForGuest && !isPriceOnInquiry ? 'block' : 'hidden sm:block'} min-w-0`}>
+                        {!isLockedForGuest && !isPriceOnInquiry ? (
                             <div className="flex items-baseline gap-1.5">
-                                <span className="text-sm sm:text-base font-extrabold text-[#0B192C] dark:text-white">
+                                <span className="text-[13.5px] sm:text-[15px] font-bold text-[#0B192C] dark:text-white" dir="ltr">
                                     {formatPrice(Number(product.discountPrice || product.price))}
                                 </span>
                                 {product.discountPrice && (
-                                    <span className="text-[10px] text-slate-400 line-through">
+                                    <span className="text-[10px] text-slate-400 line-through" dir="ltr">
                                         {formatPrice(Number(product.price))}
                                     </span>
                                 )}
                             </div>
                         ) : (
-                            <span className="text-xs font-bold text-[#8A6305]">
-                                {isArabic ? "سعر وكالة" : "Inquire"}
+                            <span className="text-[11.5px] font-medium text-slate-500 dark:text-slate-400 truncate block">
+                                {isArabic ? `أدنى طلب: ${minQuantity} ${shortUnit}` : `Min: ${minQuantity} ${shortUnit}`}
                             </span>
                         )}
-                        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-400 shrink-0">
-                            {isArabic ? `أدنى طلب: ${product.minOrder || 1} طرد` : `Min: ${product.minOrder || 1} pkg`}
-                        </span>
                     </div>
-                    )}
+
+                    {/* Single Persistent Morphing Pill (Zero Unmount Blink or Width Jump) */}
+                    <div
+                        className={`relative w-full sm:w-[112px] h-8 rounded-full overflow-hidden border transition-[background-color,border-color] duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] shrink-0 ${
+                            quantityInCart === 0
+                                ? 'border-[#0B192C]/15 dark:border-white/15 bg-[#FAF7F0]/75 sm:bg-white dark:bg-zinc-800 hover:bg-[#C59329] hover:border-[#C59329]'
+                                : 'border-[#0F2138] dark:border-[#C59329] bg-[#0F2138] dark:bg-[#C59329]'
+                        }`}
+                    >
+                        {/* Layer 1: Add to Order Button */}
+                        <button
+                            type="button"
+                            onClick={handleInitialAdd}
+                            tabIndex={quantityInCart === 0 ? 0 : -1}
+                            aria-hidden={quantityInCart > 0}
+                            className={`group/add absolute inset-0 w-full h-full px-3 rounded-full text-[#0B192C] dark:text-white hover:text-[#0B192C] text-[11.5px] sm:text-[12px] font-bold inline-flex items-center justify-center gap-1.5 cursor-pointer transition-[opacity,transform] duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.95] ${
+                                quantityInCart === 0
+                                    ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
+                                    : 'opacity-0 -translate-y-full scale-95 pointer-events-none'
+                            }`}
+                            aria-label={isArabic ? "أضف للطلبية" : "Add to Order"}
+                        >
+                            <Plus
+                                className="w-3.5 h-3.5 text-[#8A6305] group-hover/add:text-[#0B192C] transition-transform duration-250 ease-out group-hover/add:rotate-90"
+                                strokeWidth={2.4}
+                            />
+                            <span>{isArabic ? "أضف للطلبية" : "Add"}</span>
+                        </button>
+
+                        {/* Layer 2: Quantity Stepper */}
+                        <div
+                            dir="ltr"
+                            aria-hidden={quantityInCart === 0}
+                            className={`absolute inset-0 w-full h-full px-1 text-white dark:text-[#0B192C] inline-flex items-center justify-between transition-[opacity,transform] duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                                quantityInCart > 0
+                                    ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
+                                    : 'opacity-0 translate-y-full scale-95 pointer-events-none'
+                            }`}
+                        >
+                            <button
+                                type="button"
+                                tabIndex={quantityInCart > 0 ? 0 : -1}
+                                onClick={handleDecrease}
+                                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/15 dark:hover:bg-black/10 active:scale-85 transition-[background-color,transform] duration-150 cursor-pointer"
+                                aria-label={quantityInCart <= minQuantity ? (isArabic ? 'حذف من السلة' : 'Remove from cart') : (isArabic ? 'تقليل الكمية' : 'Decrease quantity')}
+                            >
+                                <Minus className="w-3.5 h-3.5 text-[#E5B54A] dark:text-[#0B192C]" strokeWidth={2.2} />
+                            </button>
+                            <RollingNumber
+                                value={Math.max(minQuantity, quantityInCart)}
+                                className="text-xs font-bold px-1 text-center min-w-[1.4rem] tabular-nums"
+                            />
+                            <button
+                                type="button"
+                                tabIndex={quantityInCart > 0 ? 0 : -1}
+                                onClick={handleIncrease}
+                                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/15 dark:hover:bg-black/10 active:scale-85 transition-[background-color,transform] duration-150 cursor-pointer"
+                                aria-label={isArabic ? 'زيادة الكمية' : 'Increase quantity'}
+                            >
+                                <Plus className="w-3.5 h-3.5 text-[#E5B54A] dark:text-[#0B192C]" strokeWidth={2.2} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Bottom Right-to-Left Sweep Underline */}
+                <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-[2.5px] bg-[#0F2138] dark:bg-[#E5B54A] scale-x-0 origin-left group-hover:origin-right group-hover:scale-x-100 transition-transform duration-320 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                />
             </div>
 
             {isQuickViewOpen && (
